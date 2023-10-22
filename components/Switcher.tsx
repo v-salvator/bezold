@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import { Tabs } from "antd";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 const mockData = [
   {
@@ -32,13 +32,15 @@ const mockData = [
 
 const Switcher = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const categoryKey = searchParams.get("category") ?? "all";
   return (
     <div className="p-[16px]">
       <Tabs
-        defaultActiveKey="1"
+        defaultActiveKey={categoryKey}
         items={mockData}
         onChange={(activeKey) => {
-          router.push(`/${activeKey}`);
+          router.push(`/store-list?category=${activeKey}`);
         }}
       />
     </div>

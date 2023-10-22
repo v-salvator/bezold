@@ -1,10 +1,12 @@
 import * as React from "react";
 import { Store } from "@/types";
+import Link from "next/link";
 
 const StoreCard = ({ store }: { store: Store }) => {
-  const { storeName, location, description, tags, updateTime, price } = store;
+  const { storeName, location, description, tags, updateTime, price, id } =
+    store;
   return (
-    <div className="border-test inline-block w-[240px]">
+    <Link className="border-test inline-block w-[240px]" href={`/store/${id}`}>
       <div className="border-test w-[240px] h-[240px] rounded-[24px]">
         image
       </div>
@@ -14,7 +16,7 @@ const StoreCard = ({ store }: { store: Store }) => {
       <div className="py-[8px]">{tags}</div>
       <div className="text-slate-500">{updateTime}</div>
       <div className="font-bold">{`Price: ${price}`}</div>
-    </div>
+    </Link>
   );
 };
 
