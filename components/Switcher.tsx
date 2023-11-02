@@ -30,17 +30,31 @@ const mockData = [
   },
 ];
 
+const useCategoryKey = () => {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const fallBackKey = pathname === "/about" ? "about" : "all";
+  const categoryKey = searchParams.get("category") ?? fallBackKey;
+
+  return categoryKey;
+};
+
 const Switcher = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const categoryKey = searchParams.get("category") ?? "all";
+  const categoryKey = useCategoryKey();
+
   return (
     <div className="p-[16px]">
       <Tabs
         defaultActiveKey={categoryKey}
         items={mockData}
         onChange={(activeKey) => {
-          router.push(`/store-list?category=${activeKey}`);
+          if (activeKey !== "about") {
+            router.push(`/store-list?category=${activeKey}`);
+          } else {
+            router.push(`/about`);
+          }
         }}
       />
     </div>
