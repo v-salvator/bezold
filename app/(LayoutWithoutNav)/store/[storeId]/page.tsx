@@ -1,3 +1,5 @@
+import { Tag } from "antd";
+import { curencyFormatter } from "@/utils";
 interface StoreProps {
   params: { storeId: string };
 }
@@ -23,14 +25,26 @@ export default async function Store({ params }: StoreProps) {
     updateTime,
   } = store;
   return (
-    <div>
-      <div>{storeName}</div>
-      <div>{location}</div>
-      <div>{description}</div>
-      <div>{tags}</div>
-      <div>{price}</div>
-      <div>{createTime}</div>
-      <div>{updateTime}</div>
+    <div
+      className="max-w-[1024px] m-auto"
+      style={{ border: "1px solid green" }}
+    >
+      <h1 className="py-[24px] font-bold text-[36px]">{storeName}</h1>
+      <div className="h-[320px]" style={{ border: "1px solid red" }}>
+        image container
+      </div>
+      <div className="p-[12px]">
+        <div className="my-[12px]">owner info</div>
+        <h2 className="my-[12px] font-bold text-[24px]">{location}</h2>
+        <div className="my-[12px]">{description}</div>
+        <div className="my-[12px]">
+          <Tag key={tags}>{tags}</Tag>
+        </div>
+        <div className="my-[12px] font-bold text-[24px]">{`頂讓金: ${curencyFormatter(
+          price
+        )}`}</div>
+        <div className="my-[12px] text-[12px]">{`最近更新時間: ${updateTime}`}</div>
+      </div>
     </div>
   );
 }
