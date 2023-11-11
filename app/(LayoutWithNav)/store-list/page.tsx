@@ -22,7 +22,7 @@ export default async function Home({ params }: StorePageProps) {
   return (
     <main>
       <div // * turn this into grid layout
-        className="flex flex-wrap justify-evenly py-[16px] gap-y-[24px] gap-x-[8px] bg-[white]"
+        className="flex flex-wrap justify-evenly py-[16px] gap-y-[24px] gap-x-[8px] bg-[white] mx-[48px]"
         style={{ border: "1px solid green" }}
       >
         {stores.map((store: Store) => (
