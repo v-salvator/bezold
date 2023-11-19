@@ -1,8 +1,7 @@
-import "../globals.css";
+import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import StyledComponentsRegistry from "../../lib/AntdRegistry";
-import { Switcher } from "@/components";
+import StyledComponentsRegistry from "../lib/AntdRegistry";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +20,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <StyledComponentsRegistry>
           <div className="border-test h-16 px-4 flex items-center">
-            <div className="border-test w-36 h-8">logo</div>
+            <div className="border-test w-36 h-8">logogg</div>
           </div>
           {children}
         </StyledComponentsRegistry>
