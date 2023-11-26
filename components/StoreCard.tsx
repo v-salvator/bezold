@@ -21,7 +21,9 @@ const StoreCard = ({ store }: { store: Store }) => {
         <div>{location}</div>
         <div className="text-slate-500 line-clamp-2">{description}</div>
         <div className="py-[8px]">
-          <Tag>{tags}</Tag>
+          {tags.map((tag) => (
+            <Tag key={tag}>{tag}</Tag>
+          ))}
         </div>
         <div className="font-bold">{`頂讓金: ${curencyFormatter(price)}`}</div>
       </div>

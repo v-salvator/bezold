@@ -10,7 +10,7 @@ import { getFirestore } from "firebase/firestore";
 import { clientConfig } from "./configs";
 
 // Initialize Firebase
-const app = initializeApp(clientConfig);
+const app = initializeApp(clientConfig, "bezold client");
 
 // export const analytics = getAnalytics(app);
 export const db = getFirestore(app);

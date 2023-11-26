@@ -1,4 +1,5 @@
 import { mockStores } from "@/mocks";
+import { getStores } from "@/firebase/serverUtils";
 
 export async function GET() {
   // const res = await fetch('https://data.mongodb-api.com/...', {
@@ -9,12 +10,7 @@ export async function GET() {
   // })
 
   // * query data from firebase
+  const mockStoresByDB = await getStores();
 
-  const stores = Object.entries(mockStores).map(([key, value]) => {
-    return {
-      id: key,
-      ...value,
-    };
-  });
-  return Response.json({ data: stores });
+  return Response.json({ data: mockStoresByDB });
 }

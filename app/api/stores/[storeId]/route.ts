@@ -1,4 +1,5 @@
 import { mockStores } from "@/mocks";
+import { getStoreById } from "@/firebase/serverUtils";
 
 interface StoreProps {
   params: { storeId: string };
@@ -9,7 +10,8 @@ export async function GET(request: Request, { params }: StoreProps) {
 
   // * query data from firebase
 
-  const storeInfo = mockStores[storeId as keyof typeof mockStores];
+  // const storeInfo = mockStores.find((store) => store.id === storeId);
+  const storeInfo = await getStoreById(storeId);
 
   if (!storeInfo) {
     return Response.json(
@@ -18,10 +20,5 @@ export async function GET(request: Request, { params }: StoreProps) {
     );
   }
 
-  const store = {
-    id: storeId,
-    ...storeInfo,
-  };
-
-  return Response.json({ data: store });
+  return Response.json({ data: storeInfo });
 }

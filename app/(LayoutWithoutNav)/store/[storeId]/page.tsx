@@ -1,5 +1,6 @@
 import { Tag } from "antd";
 import { curencyFormatter } from "@/utils";
+import { Store } from "@/types";
 interface StoreProps {
   params: { storeId: string };
 }
@@ -14,7 +15,7 @@ async function getStoreById(storeId: StoreProps["params"]["storeId"]) {
 
 export default async function Store({ params }: StoreProps) {
   const { storeId } = params;
-  const { data: store } = await getStoreById(storeId);
+  const { data: store }: { data: Store } = await getStoreById(storeId);
   const {
     storeName,
     location,
@@ -38,7 +39,9 @@ export default async function Store({ params }: StoreProps) {
         <h2 className="my-[12px] font-bold text-[24px]">{location}</h2>
         <div className="my-[12px]">{description}</div>
         <div className="my-[12px]">
-          <Tag key={tags}>{tags}</Tag>
+          {tags.map((tag) => (
+            <Tag key={tag}>{tag}</Tag>
+          ))}
         </div>
         <div className="my-[12px] font-bold text-[24px]">{`頂讓金: ${curencyFormatter(
           price
