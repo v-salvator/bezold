@@ -8,4 +8,5 @@ export interface Store {
   currency: string; // * TODO: maybe list all type of currency
   createTime: Date;
   updateTime: Date;
+  images: string[];
 }

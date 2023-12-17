@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Tag } from "antd";
 import { curencyFormatter } from "@/utils";
 import { Store } from "@/types";
@@ -24,6 +25,7 @@ export default async function Store({ params }: StoreProps) {
     price,
     createTime,
     updateTime,
+    images,
   } = store;
   return (
     <div
@@ -31,8 +33,8 @@ export default async function Store({ params }: StoreProps) {
       style={{ border: "1px solid green" }}
     >
       <h1 className="py-[24px] font-bold text-[36px]">{storeName}</h1>
-      <div className="h-[320px]" style={{ border: "1px solid red" }}>
-        image container
+      <div className="h-[320px] relative" style={{ border: "1px solid red" }}>
+        <Image src={images[0]} fill alt="Picture of the store" />
       </div>
       <div className="p-[12px]">
         <div className="my-[12px]">owner info</div>
