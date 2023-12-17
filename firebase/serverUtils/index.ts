@@ -11,7 +11,7 @@ export const getStores = async () => {
   const storesRef = db.collection(COLLECTION);
   const snapshot = await storesRef.get();
 
-  const stores: Store[] = []; // * TODO: modify the type here
+  const stores: Store[] = []; // TODO: modify the type here
   snapshot.forEach((doc) => {
     const storeData = doc.data();
     const store = {
@@ -44,7 +44,7 @@ export const getStoreById = async (storeId: string) => {
     return null;
   } else {
     const storeData = doc.data();
-    // * TODO: might not get all images, only get the first one
+    // TODO: might not get all images, only get the first one
     const images = await getImagesByPath(storeData!.images);
 
     const store = {
@@ -69,7 +69,7 @@ export const uploadImageFromLocal = async ({
   storeId: string;
   fileName: string;
 }) => {
-  // * todo: might need a dynamic file name
+  // TODO: might need a dynamic file name
   const destination = `mockStore/${storeId}/${fileName}`;
   const options = {
     destination,

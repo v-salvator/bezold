@@ -25,7 +25,7 @@ export const createStoreDoc = async (store: Store) => {
 
 export const getStores = async () => {
   const querySnapshot = await getDocs(collection(db, COLLECTION));
-  const stores: Store[] = []; // * TODO: modify the type here
+  const stores: Store[] = []; // TODO: modify the type here
   querySnapshot.forEach((doc) => {
     const storeData = doc.data();
     const store = {
