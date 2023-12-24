@@ -1,3 +1,4 @@
+import { User } from "./User";
 export interface Store {
   id: string;
   storeName: string;
@@ -9,4 +10,6 @@ export interface Store {
   createTime: Date;
   updateTime: Date;
   images: string[];
+  user?: string; // TODO: should not be optional
+  userInfo?: User;
 }

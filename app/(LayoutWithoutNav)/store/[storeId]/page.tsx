@@ -26,6 +26,7 @@ export default async function Store({ params }: StoreProps) {
     createTime,
     updateTime,
     images,
+    userInfo,
   } = store;
   return (
     <div
@@ -37,7 +38,9 @@ export default async function Store({ params }: StoreProps) {
         <Image src={images[0]} fill alt="Picture of the store" />
       </div>
       <div className="p-[12px]">
-        <div className="my-[12px]">owner info</div>
+        <div className="my-[12px]">
+          {userInfo?.userName} {userInfo?.phone}
+        </div>
         <h2 className="my-[12px] font-bold text-[24px]">{location}</h2>
         <div className="my-[12px]">{description}</div>
         <div className="my-[12px]">
