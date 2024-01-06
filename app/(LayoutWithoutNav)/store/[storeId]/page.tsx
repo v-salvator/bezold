@@ -1,7 +1,7 @@
-import Image from "next/image";
 import { Tag } from "antd";
 import { curencyFormatter } from "@/utils";
 import { Store } from "@/types";
+import { AnimatedImage } from "@/components/animated";
 interface StoreProps {
   params: { storeId: string };
 }
@@ -34,8 +34,8 @@ export default async function Store({ params }: StoreProps) {
       style={{ border: "1px solid green" }}
     >
       <h1 className="py-[24px] font-bold text-[36px]">{storeName}</h1>
-      <div className="h-[320px] relative" style={{ border: "1px solid red" }}>
-        <Image src={images[0]} fill alt="Picture of the store" />
+      <div className="h-[320px]">
+        <AnimatedImage src={images[0]} alt="Picture of the store" />
       </div>
       <div className="p-[12px]">
         <h2 className="my-[12px] font-bold text-[24px]">{location}</h2>
