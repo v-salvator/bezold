@@ -38,9 +38,6 @@ export default async function Store({ params }: StoreProps) {
         <Image src={images[0]} fill alt="Picture of the store" />
       </div>
       <div className="p-[12px]">
-        <div className="my-[12px]">
-          {userInfo?.userName} {userInfo?.phone}
-        </div>
         <h2 className="my-[12px] font-bold text-[24px]">{location}</h2>
         <div className="my-[12px]">{description}</div>
         <div className="my-[12px]">
@@ -51,6 +48,8 @@ export default async function Store({ params }: StoreProps) {
         <div className="my-[12px] font-bold text-[24px]">{`頂讓金: ${curencyFormatter(
           price
         )}`}</div>
+        <div className="my-[12px]">聯絡人: {userInfo?.userName}</div>
+        <div className="my-[12px]">聯絡手機: {userInfo?.phone}</div>
         <div className="my-[12px] text-[12px]">{`最近更新時間: ${updateTime}`}</div>
       </div>
     </div>
