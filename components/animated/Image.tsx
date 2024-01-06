@@ -1,16 +1,28 @@
 "use client";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { cn } from "@/utils";
 
 interface AnimatedImageProps {
   src: string;
   alt: string;
+  isRounded?: boolean;
+  className?: string;
 }
 
-const AnimatedImage = ({ src, alt }: AnimatedImageProps) => {
+const AnimatedImage = ({
+  src,
+  alt,
+  className,
+  isRounded = true,
+}: AnimatedImageProps) => {
   return (
     <motion.div
-      className="rounded-[24px] relative w-full h-full bg-gray-200"
+      className={cn(
+        "relative w-full h-full bg-gray-200 cursor-pointer",
+        isRounded && "rounded-[24px]",
+        className
+      )}
       // * animation
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -20,7 +32,12 @@ const AnimatedImage = ({ src, alt }: AnimatedImageProps) => {
       whileTap={{ scale: 0.98 }}
     >
       {src ? (
-        <Image className="rounded-[24px]" src={src} fill alt={alt} />
+        <Image
+          className={cn(isRounded && "rounded-[24px]")}
+          src={src}
+          fill
+          alt={alt}
+        />
       ) : null}
     </motion.div>
   );

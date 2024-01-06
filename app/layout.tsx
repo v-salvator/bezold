@@ -1,6 +1,8 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Inter } from "next/font/google";
+import { AnimatedImage } from "@/components/animated";
 import StyledComponentsRegistry from "../lib/AntdRegistry";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -19,8 +21,15 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <StyledComponentsRegistry>
-          <div className="border-test h-16 px-4 flex items-center">
-            <div className="border-test w-36 h-8">logogg</div>
+          <div className="h-16 px-4 flex items-center border-b-[1px] border-b-gray-200">
+            <Link href="/" className="w-[144px] h-[32px] relative">
+              <AnimatedImage
+                className="bg-transparent"
+                isRounded={false}
+                src="/bezold-removebg-rect.png"
+                alt="bezold logo"
+              />
+            </Link>
           </div>
           {children}
         </StyledComponentsRegistry>
