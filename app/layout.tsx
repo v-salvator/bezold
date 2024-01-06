@@ -22,7 +22,10 @@ export default function RootLayout({
       <body className={inter.className}>
         <StyledComponentsRegistry>
           <div className="h-16 px-4 flex items-center border-b-[1px] border-b-gray-200">
-            <Link href="/" className="w-[144px] h-[32px] relative">
+            <Link
+              href="/store-list?category=all"
+              className="w-[144px] h-[32px] relative"
+            >
               <AnimatedImage
                 className="bg-transparent"
                 isRounded={false}

@@ -2,7 +2,9 @@
 import * as React from "react";
 import { Tabs } from "antd";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useCategoryKey } from "@/hooks";
 
+// TODO: moves these mock data to contants folder
 const mockData = [
   {
     label: "所有",
@@ -29,16 +31,6 @@ const mockData = [
     key: "about",
   },
 ];
-
-const useCategoryKey = () => {
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  const fallBackKey = pathname === "/about" ? "about" : "all";
-  const categoryKey = searchParams.get("category") ?? fallBackKey;
-
-  return categoryKey;
-};
 
 const Switcher = () => {
   const router = useRouter();
