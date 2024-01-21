@@ -20,15 +20,13 @@ export default async function Home({ params }: StorePageProps) {
   const { data: stores } = await getStores(storeCategory);
 
   return (
-    <main>
-      <div // TODO: turn this into grid layout
-        className="flex flex-wrap justify-evenly py-[16px] gap-y-[24px] gap-x-[8px] bg-[white] mx-[48px]"
-        style={{ border: "1px solid green" }}
-      >
-        {stores.map((store: Store) => (
-          <StoreCard key={store.id} store={store}></StoreCard>
-        ))}
-      </div>
-    </main>
+    <div // TODO: turn this into grid layout
+      className="flex flex-wrap justify-evenly py-[16px] gap-y-[24px] gap-x-[8px] bg-[white] mx-[48px]"
+      style={{ border: "1px solid green" }}
+    >
+      {stores.map((store: Store) => (
+        <StoreCard key={store.id} store={store}></StoreCard>
+      ))}
+    </div>
   );
 }

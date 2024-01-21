@@ -2,7 +2,10 @@ import "./globals.css";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Inter } from "next/font/google";
+
 import { AnimatedImage } from "@/components/animated";
+import { cn } from "@/utils";
+
 import StyledComponentsRegistry from "../lib/AntdRegistry";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -21,7 +24,14 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <StyledComponentsRegistry>
-          <div className="h-16 px-4 flex items-center border-b-[1px] border-b-gray-200">
+          <div
+            className={cn(
+              "h-header px-[16px] w-[100%] bg-primary",
+              "border-b-[1px] border-b-gray-200",
+              "flex items-center",
+              "fixed top-0 z-10"
+            )}
+          >
             <Link
               href="/store-list?category=all"
               className="w-[144px] h-[32px] relative"
