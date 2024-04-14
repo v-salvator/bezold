@@ -30,7 +30,7 @@ export default async function Store({ params }: StoreProps) {
   } = store;
   return (
     <div
-      className="max-w-[1024px] m-auto"
+      className="max-w-[1024px] m-auto mt-header"
       style={{ border: "1px solid green" }}
     >
       <h1 className="py-[24px] font-bold text-[36px]">{storeName}</h1>
