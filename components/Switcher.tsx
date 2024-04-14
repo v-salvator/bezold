@@ -4,6 +4,7 @@ import { Tabs } from "antd";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useCategoryKey } from "@/hooks";
 import { cn } from "@/utils";
+import { STORE_TYPES } from "@/constant/storeType";
 
 // TODO: moves these mock data to contants folder
 const mockData = [
@@ -11,22 +12,7 @@ const mockData = [
     label: "所有",
     key: "all",
   },
-  {
-    label: "餐飲",
-    key: "restaurant",
-  },
-  {
-    label: "服飾",
-    key: "clothing",
-  },
-  {
-    label: "工廠",
-    key: "factory",
-  },
-  {
-    label: "百貨",
-    key: "department",
-  },
+  ...STORE_TYPES,
   {
     label: "關於",
     key: "about",

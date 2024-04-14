@@ -3,13 +3,7 @@ import { useState, ReactNode, CSSProperties } from "react";
 import { Dropdown, MenuProps } from "antd";
 import { cn } from "@/utils";
 
-import {
-  cityItems,
-  items,
-  districtItems,
-  typeItems,
-  amountItems,
-} from "./DropDowns";
+import { cityItems, districtItems, typeItems, amountItems } from "./DropDowns";
 
 interface FilterProps {
   label: ReactNode;
