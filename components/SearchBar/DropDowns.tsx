@@ -2,6 +2,12 @@
 import { getTwCities, getTwDistricts } from "@/utils";
 import { STORE_TYPES } from "@/constant/storeType";
 
+export type DropDownItem<T = undefined> = {
+  label: string;
+  key: string;
+  value?: T;
+};
+
 export const cityItems = getTwCities().map((cityName) => {
   return {
     label: cityName,
@@ -15,7 +21,7 @@ export const districtItems = (city?: string) => {
     return {
       label: district.name,
       key: district.name,
-      zip: district.zip,
+      value: district.zip,
     };
   });
 };

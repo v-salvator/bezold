@@ -4,7 +4,13 @@ import { Dropdown, MenuProps, Button } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { cn } from "@/utils";
 
-import { cityItems, districtItems, typeItems, amountItems } from "./DropDowns";
+import {
+  cityItems,
+  districtItems,
+  typeItems,
+  amountItems,
+  DropDownItem,
+} from "./DropDowns";
 
 interface FilterProps {
   label: ReactNode;
@@ -41,28 +47,34 @@ interface SearchBarProps {
 }
 
 const SearchBar = ({ className }: SearchBarProps) => {
-  const [city, setCity] = useState<string | undefined>(undefined);
-  const [district, setDistrict] = useState<string | undefined>(undefined);
-  const [type, setType] = useState<string | undefined>(undefined);
-  const [amountFilter, setAmountFilter] = useState<string | undefined>(
+  const [city, setCity] = useState<DropDownItem | undefined>(undefined);
+  const [district, setDistrict] = useState<DropDownItem<string> | undefined>(
     undefined
   );
+  const [type, setType] = useState<DropDownItem | undefined>(undefined);
+  const [amountFilter, setAmountFilter] = useState<
+    DropDownItem<number[]> | undefined
+  >(undefined);
 
   const handleCityMenuClick: MenuProps["onClick"] = (e) => {
     const selectedCity = e.key;
-    setCity(selectedCity);
+    const cityItem = cityItems.find((el) => el.key === selectedCity);
+    setCity(cityItem);
     setDistrict(undefined);
   };
 
   const handleDistrictMenuClick: MenuProps["onClick"] = (e) => {
     const selectedDistrict = e.key;
-    setDistrict(selectedDistrict);
+    const districtItem = districtItems(city?.label).find(
+      (el) => el.key === selectedDistrict
+    );
+    setDistrict(districtItem);
   };
 
   const handleTypeMenuClick: MenuProps["onClick"] = (e) => {
     const selectedTypeFilter = e.key;
     const typeItem = typeItems.find((el) => el.key === selectedTypeFilter);
-    setType(typeItem?.label);
+    setType(typeItem);
   };
 
   const handleAmountMenuClick: MenuProps["onClick"] = (e) => {
@@ -70,7 +82,11 @@ const SearchBar = ({ className }: SearchBarProps) => {
     const amountFilter = amountItems.find(
       (el) => el.key === selectedAmountFilter
     );
-    setAmountFilter(amountFilter?.label);
+    setAmountFilter(amountFilter);
+  };
+
+  const handleSearchClick = () => {
+    console.log(city, district, type, amountFilter);
   };
 
   return (
@@ -91,11 +107,11 @@ const SearchBar = ({ className }: SearchBarProps) => {
           }}
           trigger={["click"]}
         >
-          <Filter label="City" placeholder="Select City" value={city} />
+          <Filter label="City" placeholder="Select City" value={city?.label} />
         </Dropdown>
         <Dropdown
           menu={{
-            items: districtItems(city),
+            items: districtItems(city?.label),
             onClick: handleDistrictMenuClick,
           }}
           trigger={["click"]}
@@ -104,14 +120,14 @@ const SearchBar = ({ className }: SearchBarProps) => {
           <Filter
             label="District"
             placeholder="Select District"
-            value={district}
+            value={district?.label}
           />
         </Dropdown>
         <Dropdown
           menu={{ items: typeItems, onClick: handleTypeMenuClick }}
           trigger={["click"]}
         >
-          <Filter label="Type" placeholder="Select Type" value={type} />
+          <Filter label="Type" placeholder="Select Type" value={type?.label} />
         </Dropdown>
         <Dropdown
           menu={{ items: amountItems, onClick: handleAmountMenuClick }}
@@ -120,7 +136,7 @@ const SearchBar = ({ className }: SearchBarProps) => {
           <Filter
             label="Amount"
             placeholder="Select Amount"
-            value={amountFilter}
+            value={amountFilter?.label}
           />
         </Dropdown>
         <Button
@@ -130,6 +146,7 @@ const SearchBar = ({ className }: SearchBarProps) => {
           size="large"
           loading={false}
           icon={<SearchOutlined />}
+          onClick={handleSearchClick}
         ></Button>
       </div>
     </div>
