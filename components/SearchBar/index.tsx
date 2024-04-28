@@ -1,7 +1,6 @@
 "use client";
 import { useState, ReactNode, CSSProperties } from "react";
-import { Dropdown, MenuProps, Button } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { Dropdown, MenuProps } from "antd";
 import { cn } from "@/utils";
 
 import {
@@ -11,6 +10,7 @@ import {
   amountItems,
   DropDownItem,
 } from "./DropDowns";
+import SearchButton from "./SearchButton";
 
 interface FilterProps {
   label: ReactNode;
@@ -85,10 +85,6 @@ const SearchBar = ({ className }: SearchBarProps) => {
     setAmountFilter(amountFilter);
   };
 
-  const handleSearchClick = () => {
-    console.log(city, district, type, amountFilter);
-  };
-
   return (
     <div className={className}>
       <div
@@ -139,15 +135,14 @@ const SearchBar = ({ className }: SearchBarProps) => {
             value={amountFilter?.label}
           />
         </Dropdown>
-        <Button
-          className="mr-[-7px]"
-          shape="circle"
-          type="primary"
-          size="large"
-          loading={false}
-          icon={<SearchOutlined />}
-          onClick={handleSearchClick}
-        ></Button>
+        <SearchButton
+          filterInfo={{
+            city,
+            district,
+            type,
+            amountFilter,
+          }}
+        />
       </div>
     </div>
   );

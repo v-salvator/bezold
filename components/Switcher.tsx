@@ -32,7 +32,7 @@ const Switcher = ({ className, style }: SwitcherProps) => {
   return (
     <div className={cn("px-[16px]", className)} style={style}>
       <Tabs
-        defaultActiveKey={categoryKey}
+        activeKey={categoryKey}
         style={{ border: "1px solid red" }}
         items={mockData}
         onChange={(activeKey) => {
