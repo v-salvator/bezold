@@ -1,6 +1,7 @@
 "use client";
 import { useState, ReactNode, CSSProperties } from "react";
-import { Dropdown, MenuProps } from "antd";
+import { Dropdown, MenuProps, Button } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
 import { cn } from "@/utils";
 
 import { cityItems, districtItems, typeItems, amountItems } from "./DropDowns";
@@ -16,7 +17,7 @@ const Filter = ({ label, placeholder, onClick, value }: FilterProps) => {
   return (
     <div
       className={cn(
-        "p-[12px] w-[120px] relative cursor-pointer",
+        "py-[6px] px-[8px] w-[120px] relative cursor-pointer",
         "before:content-[''] before:absolute before:left-0 before:inline-block before:h-[36px] before:w-[1px] [&+div::before]:bg-slate-200"
       )}
       onClick={onClick}
@@ -74,7 +75,14 @@ const SearchBar = ({ className }: SearchBarProps) => {
 
   return (
     <div className={className}>
-      <div className="flex rounded-[32px] border-slate-200 border-[1px] px-[12px]">
+      <div
+        className={cn(
+          "flex items-center",
+          "rounded-[24px] border-slate-200 border-[1px]",
+          "px-[12px]",
+          "shadow"
+        )}
+      >
         <Dropdown
           menu={{
             items: cityItems,
@@ -115,6 +123,14 @@ const SearchBar = ({ className }: SearchBarProps) => {
             value={amountFilter}
           />
         </Dropdown>
+        <Button
+          className="mr-[-7px]"
+          shape="circle"
+          type="primary"
+          size="large"
+          loading={false}
+          icon={<SearchOutlined />}
+        ></Button>
       </div>
     </div>
   );
