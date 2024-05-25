@@ -20,7 +20,11 @@ const StoreCard = ({ store }: { store: Store }) => {
   } = store;
   console.log("🚀 ~ StoreCard ~ images:", images);
   return (
-    <Link className="inline-block w-[240px]" href={`/store/${id}`}>
+    <Link
+      className="inline-block w-[240px]"
+      href={`/store/${id}`}
+      target="_blank"
+    >
       <div className="w-[240px] h-[240px]">
         <AnimatedImage src={images?.[0]} alt="Picture of the store" />
       </div>
