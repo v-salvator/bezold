@@ -14,7 +14,7 @@ export default function AdminLayout({
   return (
     <>
       <Header withSearchBar={false} />
-      <div className="mt-header">{children}</div>
+      <div className="pt-header h-screen">{children}</div>
     </>
   );
 }

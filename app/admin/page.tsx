@@ -1,5 +1,3 @@
-import * as React from "react";
-
-export default function Admin() {
-  return <div>Admin</div>;
+export default function AdminLogin() {
+  return <div className="flex h-full">????? maybe a login page?????</div>;
 }
