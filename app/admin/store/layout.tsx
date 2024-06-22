@@ -2,6 +2,7 @@
 import type { MenuProps } from "antd";
 import { Menu } from "antd";
 import { useRouter } from "next/navigation";
+import { useAdminMenuKey } from "@/hooks";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -24,6 +25,7 @@ export default function AdminStoreLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const menuKey = useAdminMenuKey();
 
   const handleMenuClick: MenuProps["onClick"] = (e) => {
     switch (e.key) {
@@ -44,12 +46,11 @@ export default function AdminStoreLayout({
       <Menu
         onClick={handleMenuClick}
         style={{ width: 256 }}
-        defaultSelectedKeys={["1"]}
-        defaultOpenKeys={["sub1"]}
+        defaultSelectedKeys={[menuKey]}
         mode="inline"
         items={items}
       />
-      <div> {children}</div>
+      <div className="flex-1"> {children}</div>
     </div>
   );
 }

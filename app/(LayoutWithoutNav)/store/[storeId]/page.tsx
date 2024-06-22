@@ -1,7 +1,8 @@
 import { Tag } from "antd";
 import { curencyFormatter } from "@/utils";
-import { Store } from "@/types";
 import { AnimatedImage } from "@/components/animated";
+
+import type { Store } from "@/types";
 interface StoreProps {
   params: { storeId: string };
 }
