@@ -4,7 +4,7 @@ import { Inter } from "next/font/google";
 import { cn } from "@/utils";
 
 import { Header, Switcher } from "@/components";
-import StyledComponentsRegistry from "@/lib/AntdRegistry";
+import { AntdRegistry } from "@ant-design/nextjs-registry";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,13 +21,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <StyledComponentsRegistry>
+        <AntdRegistry>
           <Header withSearchBar />
           <Switcher
             className={cn("bg-primary w-[100%]", "fixed top-header z-10")}
           ></Switcher>
           <div className="pt-header-and-switcher">{children}</div>
-        </StyledComponentsRegistry>
+        </AntdRegistry>
       </body>
     </html>
   );
