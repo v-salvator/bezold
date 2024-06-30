@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { getStoreById, editStoreById } from "@/firebase/clientUtils";
 import { Input, Tag, Skeleton, Typography, Button, notification } from "antd";
+import { useRouter } from "next/navigation";
 
 import type { Store } from "@/types";
 
@@ -13,6 +14,7 @@ export default function EditStore({ params }: EditStoreProps) {
   const [store, setStore] = useState<Store | undefined>(undefined);
   const [storeCloned, setStoreCloned] = useState<Store | undefined>(undefined);
   const [api, contextHolder] = notification.useNotification();
+  const router = useRouter();
 
   const fetchStore = useCallback(async () => {
     const fetchedStore = await getStoreById(params.storeId);
@@ -91,7 +93,7 @@ export default function EditStore({ params }: EditStoreProps) {
         <Button type="primary" onClick={handleUpdateStore}>
           Save
         </Button>
-        <Button>Cancel</Button>
+        <Button onClick={() => router.push("/admin/store/list")}>Cancel</Button>
       </div>
       {contextHolder}
     </div>

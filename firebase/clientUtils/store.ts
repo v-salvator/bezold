@@ -14,16 +14,6 @@ import type { Store, StoreDoc } from "@/types";
 
 const COLLECTION = "mockStore";
 
-// const storeDecorator = (storeSnaphot: any) => {
-//   const storeData = storeSnaphot.data() as StoreDoc;
-//   return {
-//     id: storeSnaphot.id,
-//     ...storeData,
-//     createTime: storeData?.createTime.toDate(),
-//     updateTime: storeData?.updateTime.toDate(),
-//   } as Store;
-// };
-
 const storeConverter = {
   // * try to figure out how to use toFirestore, dosn't seem to work maybe seems only work on setDoc not upateDoc
   // * doc link: https://firebase.google.com/docs/reference/js/firestore_.firestoredataconverter
