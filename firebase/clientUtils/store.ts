@@ -4,7 +4,9 @@ import {
   serverTimestamp,
   getDocs,
   getDoc,
+  updateDoc,
   doc,
+  Timestamp,
 } from "firebase/firestore";
 import { db } from "@/firebase/client";
 
@@ -20,6 +22,28 @@ const storeDecorator = (storeSnaphot: any) => {
     createTime: storeData?.createTime.toDate(),
     updateTime: storeData?.updateTime.toDate(),
   } as Store;
+};
+
+// * try to figure out how to use it Firestore data converter
+const storeConverter = {
+  toFirestore: (store: Store) => {
+    return {
+      ...store,
+      updateTime: serverTimestamp(),
+      createTime: Timestamp.fromDate(store.createTime),
+    };
+  },
+  fromFirestore: (storeSnaphot: any) => {
+    const storeData = storeSnaphot.data() as StoreDoc;
+    console.log("🚀 ~ storeData:", storeData);
+    return {
+      ...storeData,
+      // * addons
+      id: storeSnaphot.id,
+      createTime: storeData?.createTime.toDate(),
+      updateTime: storeData?.updateTime.toDate(),
+    } as Store;
+  },
 };
 
 export const createStoreDoc = async (store: Store) => {
@@ -59,4 +83,15 @@ export const getStoreById = async (storeId: Store["id"]) => {
     console.log("No such document!");
     return undefined;
   }
+};
+
+export const editStoreById = async (
+  storeId: Store["id"],
+  editedStore: Partial<Store>
+) => {
+  const docRef = doc(db, COLLECTION, storeId);
+  const docSnap = await updateDoc(docRef, {
+    ...editedStore,
+    updateTime: serverTimestamp(),
+  });
 };
