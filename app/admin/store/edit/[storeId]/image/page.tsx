@@ -12,7 +12,7 @@ import Image from "next/image";
 
 import type { Store } from "@/types";
 
-interface EditStoreProps {
+interface EditStoreImageProps {
   params: { storeId: Store["id"] };
 }
 
@@ -56,7 +56,7 @@ const UploadFileAndPreview = ({
   );
 };
 
-export default function EditStore({ params }: EditStoreProps) {
+export default function EditStoreImage({ params }: EditStoreImageProps) {
   const [store, setStore] = useState<Store | undefined>(undefined);
   const [images, setImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);

@@ -97,6 +97,9 @@ export default function EditStore({ params }: EditStoreProps) {
         <Button type="primary" onClick={() => router.push(`${pathName}/image`)}>
           Upload Image
         </Button>
+        <Button type="primary" onClick={() => router.push(`${pathName}/boss`)}>
+          Edit Boss
+        </Button>
         <Button onClick={() => router.push("/admin/store/list")}>Cancel</Button>
       </div>
       {contextHolder}
