@@ -1,4 +1,4 @@
-import { Tag, Carousel } from "antd";
+import { Tag, Carousel, Divider } from "antd";
 import { curencyFormatter } from "@/utils";
 import { AnimatedImage } from "@/components/animated";
 
@@ -30,26 +30,21 @@ export default async function Store({ params }: StoreProps) {
     userInfo,
   } = store;
   return (
-    <div
-      className="max-w-[1024px] m-auto"
-      style={{ border: "1px solid green" }}
-    >
+    <div className="max-w-[1024px] m-auto">
       <h1 className="py-[24px] font-bold text-[36px]">{storeName}</h1>
-      <div className="h-[320px]">
-        <Carousel dotPosition="bottom" effect="fade" arrows infinite autoplay>
-          {images.map((image, i) => (
-            <div key={i}>
-              <div className="h-[320px]">
-                <AnimatedImage
-                  src={image}
-                  isRounded={false}
-                  alt="Picture of the store"
-                />
-              </div>
+      <Carousel dotPosition="bottom" effect="fade" arrows infinite autoplay>
+        {images.map((image, i) => (
+          <div key={i}>
+            <div className="h-[360px]">
+              <AnimatedImage
+                src={image}
+                isRounded={false}
+                alt="Picture of the store"
+              />
             </div>
-          ))}
-        </Carousel>
-      </div>
+          </div>
+        ))}
+      </Carousel>
       <div className="p-[12px]">
         <h2 className="my-[12px] font-bold text-[24px]">{location}</h2>
         <div className="my-[12px]">{description}</div>
@@ -58,9 +53,12 @@ export default async function Store({ params }: StoreProps) {
             <Tag key={tag}>{tag}</Tag>
           ))}
         </div>
-        <div className="my-[12px] font-bold text-[24px]">{`頂讓金: ${curencyFormatter(
+        <div className="my-[12px] font-bold text-[24px] text-right">{`頂讓金: ${curencyFormatter(
           price
         )}`}</div>
+        <Divider orientation="left" orientationMargin="0">
+          聯絡資訊
+        </Divider>
         <div className="my-[12px]">聯絡人: {userInfo?.userName}</div>
         <div className="my-[12px]">聯絡手機: {userInfo?.phone}</div>
         <div className="my-[12px] text-[12px]">{`最近更新時間: ${updateTime}`}</div>
