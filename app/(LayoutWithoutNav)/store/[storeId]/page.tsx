@@ -1,4 +1,4 @@
-import { Tag } from "antd";
+import { Tag, Carousel } from "antd";
 import { curencyFormatter } from "@/utils";
 import { AnimatedImage } from "@/components/animated";
 
@@ -36,7 +36,19 @@ export default async function Store({ params }: StoreProps) {
     >
       <h1 className="py-[24px] font-bold text-[36px]">{storeName}</h1>
       <div className="h-[320px]">
-        <AnimatedImage src={images[0]} alt="Picture of the store" />
+        <Carousel dotPosition="bottom" effect="fade" arrows infinite autoplay>
+          {images.map((image, i) => (
+            <div key={i}>
+              <div className="h-[320px]">
+                <AnimatedImage
+                  src={image}
+                  isRounded={false}
+                  alt="Picture of the store"
+                />
+              </div>
+            </div>
+          ))}
+        </Carousel>
       </div>
       <div className="p-[12px]">
         <h2 className="my-[12px] font-bold text-[24px]">{location}</h2>
