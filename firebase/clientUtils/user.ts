@@ -61,3 +61,9 @@ export const editUserById = async (
     updateTime: serverTimestamp(),
   });
 };
+
+export const createUserDoc = async (user: User) => {
+  const docRef = collection(db, COLLECTION).withConverter(userConverter);
+  const userRef = await addDoc(docRef, user);
+  return userRef;
+};

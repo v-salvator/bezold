@@ -75,22 +75,22 @@ export default function EditStoreBoss({ params }: EditStoreBossProps) {
         defaultValue={userCloned?.userName}
         onChange={(e) => handleUserFieldChange("userName", e.target.value)}
       ></Input>
-      <Typography.Title level={5}>email</Typography.Title>
-      <Input
-        defaultValue={userCloned?.email}
-        onChange={(e) => handleUserFieldChange("email", e.target.value)}
-      ></Input>
-      <Typography.Title level={5}>Line Id</Typography.Title>
-      <Input
-        defaultValue={userCloned?.lineId}
-        onChange={(e) => handleUserFieldChange("lineId", e.target.value)}
-      ></Input>
       <Typography.Title level={5}>Phone</Typography.Title>
       <Input
         defaultValue={userCloned?.phone}
         onChange={(e) => handleUserFieldChange("phone", e.target.value)}
       ></Input>
-      <Typography.Title level={5}>Remark</Typography.Title>
+      <Typography.Title level={5}>email (optional)</Typography.Title>
+      <Input
+        defaultValue={userCloned?.email}
+        onChange={(e) => handleUserFieldChange("email", e.target.value)}
+      ></Input>
+      <Typography.Title level={5}>Line Id (optional)</Typography.Title>
+      <Input
+        defaultValue={userCloned?.lineId}
+        onChange={(e) => handleUserFieldChange("lineId", e.target.value)}
+      ></Input>
+      <Typography.Title level={5}>Remark (optional)</Typography.Title>
       <Input
         defaultValue={userCloned?.remark}
         onChange={(e) => handleUserFieldChange("remark", e.target.value)}

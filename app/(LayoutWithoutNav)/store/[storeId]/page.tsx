@@ -49,7 +49,7 @@ export default async function Store({ params }: StoreProps) {
         <h2 className="my-[12px] font-bold text-[24px]">{location}</h2>
         <div className="my-[12px]">{description}</div>
         <div className="my-[12px]">
-          {tags.map((tag) => (
+          {tags?.map((tag) => (
             <Tag key={tag}>{tag}</Tag>
           ))}
         </div>

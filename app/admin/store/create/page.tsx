@@ -1,3 +1,5 @@
+import StoreBaseForm from "./StoreBaseForm";
+
 export default function StoreCreate() {
-  return <div>store create add upload store interface here</div>;
+  return <StoreBaseForm></StoreBaseForm>;
 }

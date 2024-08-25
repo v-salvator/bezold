@@ -7,6 +7,8 @@ import {
   updateDoc,
   doc,
   Timestamp,
+  query,
+  orderBy,
 } from "firebase/firestore";
 import { db } from "@/firebase/client";
 
@@ -39,23 +41,19 @@ const storeConverter = {
 };
 
 export const createStoreDoc = async (store: Store) => {
-  const storeRef = await addDoc(collection(db, "mockStore"), {
-    storeName: store.storeName,
-    description: store.description,
-    location: store.location,
-    createTime: serverTimestamp(),
-    updateTime: serverTimestamp(),
-    tags: [store.tags],
-    price: store.price,
-    currency: "TWD",
-    // * might need  to add user name etc.....
-  });
+  const collectionRef = collection(db, COLLECTION).withConverter(
+    storeConverter
+  );
+  const storeRef = await addDoc(collectionRef, store);
+  return storeRef;
 };
 
 export const getStores = async () => {
-  const querySnapshot = await getDocs(
-    collection(db, COLLECTION).withConverter(storeConverter)
+  const collectionRef = collection(db, COLLECTION).withConverter(
+    storeConverter
   );
+  const collectionQuery = query(collectionRef, orderBy("createTime", "desc"));
+  const querySnapshot = await getDocs(collectionQuery);
   const stores: Store[] = []; // TODO: modify the type here
 
   querySnapshot.forEach((docSnap) => {
