@@ -23,9 +23,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <AntdRegistry>
           <Header withSearchBar />
-          <Switcher
-            className={cn("bg-primary w-[100%]", "fixed top-header z-10")}
-          ></Switcher>
+          <div className="fixed top-header z-10 w-[100%] bg-primary">
+            <Switcher className={cn("mx-auto text-center")}></Switcher>
+          </div>
           <div className="pt-header-and-switcher">{children}</div>
         </AntdRegistry>
       </body>

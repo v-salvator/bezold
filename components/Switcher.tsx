@@ -1,7 +1,8 @@
 "use client";
 import * as React from "react";
-import { Tabs } from "antd";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useWindowScroll } from "react-use";
+import { Segmented } from "antd";
+import { useRouter } from "next/navigation";
 import { useCategoryKey } from "@/hooks";
 import { cn } from "@/utils";
 import { STORE_TYPES } from "@/constant/storeType";
@@ -27,17 +28,28 @@ interface SwitcherProps {
 const Switcher = ({ className, style }: SwitcherProps) => {
   const router = useRouter();
   const categoryKey = useCategoryKey();
+  const categories = mockData.map((item) => {
+    return { ...item, value: item.key };
+  });
 
-  // TODO: add dynamic border when scroll down
+  const { y } = useWindowScroll();
+
   return (
-    <div className={cn("px-[16px]", className)} style={style}>
-      <Tabs
-        activeKey={categoryKey}
-        style={{ border: "1px solid red" }}
-        items={mockData}
-        onChange={(activeKey) => {
-          if (activeKey !== "about") {
-            router.push(`/store-list?category=${activeKey}`);
+    <div
+      className={cn(
+        "px-[16px] py-[12px]",
+        y > 0 && "shadow-lg shadow-slate-200",
+        className
+      )}
+      style={style}
+    >
+      <Segmented
+        options={categories}
+        value={categoryKey}
+        size="large"
+        onChange={(selectedKey) => {
+          if (selectedKey !== "about") {
+            router.push(`/store-list?category=${selectedKey}`);
           } else {
             router.push(`/about`);
           }
