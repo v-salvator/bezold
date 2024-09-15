@@ -33,7 +33,7 @@ const StoreCard = ({ store }: { store: Store }) => {
         <div>{location}</div>
         <div className="text-slate-500 line-clamp-2">{description}</div>
         <div className="py-[8px]">
-          {tags.map((tag) => (
+          {tags?.map((tag) => (
             <Tag key={tag}>{tag}</Tag>
           ))}
         </div>

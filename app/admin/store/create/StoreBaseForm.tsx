@@ -22,6 +22,12 @@ export default function StoreBaseForm() {
   const isValidateUser = () => {
     const requiredFields = ["userName", "phone"] as (keyof User)[];
     const allFilled = requiredFields.every((userField) => !!user[userField]);
+    if (!allFilled) {
+      api.error({
+        message: "Some field is missing",
+        description: `Make sure to fill all required field`,
+      });
+    }
     return allFilled;
   };
 
@@ -33,11 +39,19 @@ export default function StoreBaseForm() {
         ...store,
         user: userId,
       } as Store);
-      console.log("storeRef", storeRef);
-      // api.success({
-      //   message: "Successfuly update store",
-      //   description: `Successfuly update store ${store?.storeName}`,
-      // });
+      const storeId = storeRef.id;
+      api.success({
+        message: "Successfuly create store",
+        description: `Successfuly create store ${store?.storeName}, Now can go to upload image`,
+        onClick: () => {
+          // * edit image
+          router.push(`/admin/store/edit/${storeId}/image`);
+        },
+        onClose: () => {
+          // * edit image
+          router.push(`/admin/store/edit/${storeId}/image`);
+        },
+      });
     }
   };
 
@@ -119,12 +133,6 @@ export default function StoreBaseForm() {
       <div className="flex justify-end gap-[8px] mt-[16px]">
         <Button type="primary" onClick={handleCreateStore}>
           Create
-        </Button>
-        <Button type="primary" onClick={() => router.push(`${pathName}/image`)}>
-          Upload Image
-        </Button>
-        <Button type="primary" onClick={() => router.push(`${pathName}/boss`)}>
-          Add Boss
         </Button>
         <Button onClick={() => router.push("/admin/store/list")}>Cancel</Button>
       </div>
