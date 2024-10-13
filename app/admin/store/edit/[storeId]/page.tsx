@@ -1,10 +1,18 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { getStoreById, editStoreById } from "@/firebase/clientUtils";
-import { Input, Tag, Skeleton, Typography, Button, notification } from "antd";
+import {
+  Input,
+  Skeleton,
+  Typography,
+  Button,
+  notification,
+  Checkbox,
+} from "antd";
 import { useRouter, usePathname } from "next/navigation";
 
 import type { Store } from "@/types";
+import { STORE_TAGS } from "@/constant/storeTags";
 
 interface EditStoreProps {
   params: { storeId: Store["id"] };
@@ -37,6 +45,7 @@ export default function EditStore({ params }: EditStoreProps) {
         location: storeCloned.location,
         description: storeCloned.description,
         price: storeCloned.price,
+        tags: storeCloned.tags,
       });
       api.success({
         message: "Successfuly update store",
@@ -49,12 +58,11 @@ export default function EditStore({ params }: EditStoreProps) {
     key: keyof Store,
     value: Store[keyof Store]
   ) => {
-    if (storeCloned) {
-      setStoreCloned({
-        ...storeCloned,
-        [key]: value,
-      });
-    }
+    if (!storeCloned) return;
+    setStoreCloned({
+      ...storeCloned,
+      [key]: value,
+    });
   };
 
   if (!storeCloned) {
@@ -89,6 +97,22 @@ export default function EditStore({ params }: EditStoreProps) {
       ></Input>
       <Typography.Title level={5}>Currency</Typography.Title>
       <Input defaultValue={storeCloned?.currency} disabled></Input>
+      <Typography.Title level={5}>Tags</Typography.Title>
+      <Checkbox.Group
+        style={{ width: "100%" }}
+        defaultValue={storeCloned?.tags}
+        onChange={(e) => {
+          handleStoreFieldChange("tags", e as string[]);
+        }}
+      >
+        {STORE_TAGS.map((tag) => {
+          return (
+            <Checkbox key={tag.key} value={tag.key}>
+              {tag.label}
+            </Checkbox>
+          );
+        })}
+      </Checkbox.Group>
 
       <div className="flex justify-end gap-[8px] mt-[16px]">
         <Button type="primary" onClick={handleUpdateStore}>

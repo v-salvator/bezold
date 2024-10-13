@@ -1,5 +1,6 @@
 import { User } from "./User";
 import type { Timestamp } from "firebase/firestore";
+import { StoreTag } from "@/types/StoreTags";
 
 // * types in client
 export interface Store {
@@ -7,7 +8,8 @@ export interface Store {
   storeName: string;
   location: string;
   description: string;
-  tags: string[]; // TODO: maybe list all type of tags
+  tags?: StoreTag[];
+  category?: string; // TODO: maybe list type of category
   price: number;
   currency: string; // TODO: maybe list all type of currency
   createTime: Date;
@@ -22,7 +24,8 @@ export interface StoreDoc {
   storeName: string;
   location: string;
   description: string;
-  tags: string[]; // TODO: maybe list all type of tags
+  tags?: StoreTag[];
+  category?: string; // TODO: maybe list type of category
   price: number;
   currency: string; // TODO: maybe list all type of currency
   createTime: Timestamp;
