@@ -8,11 +8,13 @@ import {
   Button,
   notification,
   Checkbox,
+  Select,
 } from "antd";
 import { useRouter, usePathname } from "next/navigation";
 
 import type { Store } from "@/types";
 import { STORE_TAGS } from "@/constant/storeTags";
+import { STORE_CATEGORIES } from "@/constant/storeType";
 
 interface EditStoreProps {
   params: { storeId: Store["id"] };
@@ -46,6 +48,7 @@ export default function EditStore({ params }: EditStoreProps) {
         description: storeCloned.description,
         price: storeCloned.price,
         tags: storeCloned.tags,
+        category: storeCloned.category,
       });
       api.success({
         message: "Successfuly update store",
@@ -113,6 +116,18 @@ export default function EditStore({ params }: EditStoreProps) {
           );
         })}
       </Checkbox.Group>
+      <Typography.Title level={5}>Category</Typography.Title>
+      <Select
+        defaultValue={storeCloned?.category}
+        style={{ width: "100%" }}
+        onChange={(val) => handleStoreFieldChange("category", val)}
+        options={STORE_CATEGORIES.map((category) => {
+          return {
+            label: category.label,
+            value: category.key,
+          };
+        })}
+      />
 
       <div className="flex justify-end gap-[8px] mt-[16px]">
         <Button type="primary" onClick={handleUpdateStore}>
