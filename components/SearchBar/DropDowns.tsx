@@ -1,6 +1,6 @@
 "use client";
 import { getTwCities, getTwDistricts } from "@/utils";
-import { STORE_TYPES } from "@/constant/storeType";
+import { STORE_CATEGORIES } from "@/constant/storeType";
 
 export type DropDownItem<T = undefined> = {
   label: string;
@@ -31,11 +31,7 @@ export const typeItems = [
     label: "所有",
     key: "all",
   },
-  ...STORE_TYPES,
-  {
-    label: "其他",
-    key: "others",
-  },
+  ...STORE_CATEGORIES,
 ];
 
 export const amountItems = [

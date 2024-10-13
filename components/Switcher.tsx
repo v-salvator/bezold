@@ -5,7 +5,7 @@ import { Segmented } from "antd";
 import { useRouter } from "next/navigation";
 import { useCategoryKey } from "@/hooks";
 import { cn } from "@/utils";
-import { STORE_TYPES } from "@/constant/storeType";
+import { STORE_CATEGORIES } from "@/constant/storeType";
 
 // TODO: moves these mock data to contants folder
 const mockData = [
@@ -13,7 +13,7 @@ const mockData = [
     label: "所有",
     key: "all",
   },
-  ...STORE_TYPES,
+  ...STORE_CATEGORIES,
   {
     label: "關於",
     key: "about",
