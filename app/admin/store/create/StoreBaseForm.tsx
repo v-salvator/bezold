@@ -1,12 +1,20 @@
 "use client";
 import { useState } from "react";
 import { createStoreDoc, createUserDoc } from "@/firebase/clientUtils";
-import { Input, Divider, Typography, Button, notification } from "antd";
+import {
+  Input,
+  Divider,
+  Typography,
+  Button,
+  notification,
+  Checkbox,
+} from "antd";
 import { useRouter, usePathname } from "next/navigation";
 import { genDefaultStore } from "@/utils/store";
 import { genDefaultUser } from "@/utils/user";
 
 import type { Store, User } from "@/types";
+import { STORE_TAGS } from "@/constant/storeTags";
 
 export default function StoreBaseForm() {
   const [store, setStore] = useState<Partial<Store>>(genDefaultStore());
@@ -99,6 +107,22 @@ export default function StoreBaseForm() {
       ></Input>
       <Typography.Title level={5}>Currency</Typography.Title>
       <Input defaultValue={store?.currency} disabled></Input>
+      <Typography.Title level={5}>Tags</Typography.Title>
+      <Checkbox.Group
+        style={{ width: "100%" }}
+        defaultValue={store?.tags}
+        onChange={(e) => {
+          handleStoreFieldChange("tags", e as string[]);
+        }}
+      >
+        {STORE_TAGS.map((tag) => {
+          return (
+            <Checkbox key={tag.key} value={tag.key}>
+              {tag.label}
+            </Checkbox>
+          );
+        })}
+      </Checkbox.Group>
 
       <Divider orientation="left" orientationMargin="0">
         Boss
