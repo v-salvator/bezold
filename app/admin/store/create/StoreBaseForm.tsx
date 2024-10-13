@@ -8,6 +8,7 @@ import {
   Button,
   notification,
   Checkbox,
+  Select,
 } from "antd";
 import { useRouter, usePathname } from "next/navigation";
 import { genDefaultStore } from "@/utils/store";
@@ -15,6 +16,7 @@ import { genDefaultUser } from "@/utils/user";
 
 import type { Store, User } from "@/types";
 import { STORE_TAGS } from "@/constant/storeTags";
+import { STORE_CATEGORIES } from "@/constant/storeType";
 
 export default function StoreBaseForm() {
   const [store, setStore] = useState<Partial<Store>>(genDefaultStore());
@@ -123,6 +125,18 @@ export default function StoreBaseForm() {
           );
         })}
       </Checkbox.Group>
+      <Typography.Title level={5}>Category</Typography.Title>
+      <Select
+        defaultValue={store?.category}
+        style={{ width: "100%" }}
+        onChange={(val) => handleStoreFieldChange("category", val)}
+        options={STORE_CATEGORIES.map((category) => {
+          return {
+            label: category.label,
+            value: category.key,
+          };
+        })}
+      />
 
       <Divider orientation="left" orientationMargin="0">
         Boss
