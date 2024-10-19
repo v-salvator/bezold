@@ -24,6 +24,17 @@ const columns: TableProps<Store>["columns"] = [
     title: "Location",
     dataIndex: "location",
     key: "location",
+    render: (_, record) => {
+      return (
+        <div>
+          <span>{`${record.city ?? "NoCity"}`}</span>
+          <br />
+          <span>{`${record.district ?? "NoDistrict"}`}</span>
+          <br />
+          <span>{`${record.location}`}</span>
+        </div>
+      );
+    },
   },
   {
     title: "Tags",
@@ -33,9 +44,6 @@ const columns: TableProps<Store>["columns"] = [
       <>
         {tags?.map((tag) => {
           let color = tag.length > 5 ? "geekblue" : "green";
-          if (tag === "loser") {
-            color = "volcano";
-          }
           return (
             <Tag color={color} key={tag}>
               {tag.toUpperCase()}

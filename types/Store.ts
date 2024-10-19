@@ -9,7 +9,7 @@ export interface Store {
   location: string;
   description: string;
   tags?: StoreTag[];
-  category?: string; // TODO: maybe list type of category
+  category?: string; // TODO: maybe list type of category, will not be option in the future
   price: number;
   currency: string; // TODO: maybe list all type of currency
   createTime: Date;
@@ -17,6 +17,8 @@ export interface Store {
   images: string[];
   user?: string; // TODO: should not be optional
   userInfo?: User;
+  city?: string; // TODO: will not be option in the future
+  district?: string; // TODO: will not be option in the future
 }
 
 // * types in firestore doc
@@ -33,4 +35,6 @@ export interface StoreDoc {
   images: string[];
   user?: string; // TODO: should not be optional
   userInfo?: User;
+  city?: string; // TODO: will not be option in the future
+  district?: string; // TODO: will not be option in the future
 }

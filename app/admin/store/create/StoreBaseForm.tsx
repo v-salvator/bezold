@@ -17,6 +17,10 @@ import { genDefaultUser } from "@/utils/user";
 import type { Store, User } from "@/types";
 import { STORE_TAGS } from "@/constant/storeTags";
 import { STORE_CATEGORIES } from "@/constant/storeType";
+import {
+  getStoreCities,
+  getStoreDistrictByCity,
+} from "@/constant/StoreLocation";
 
 export default function StoreBaseForm() {
   const [store, setStore] = useState<Partial<Store>>(genDefaultStore());
@@ -92,6 +96,20 @@ export default function StoreBaseForm() {
         defaultValue={store?.storeName}
         onChange={(e) => handleStoreFieldChange("storeName", e.target.value)}
       ></Input>
+      <Typography.Title level={5}>City</Typography.Title>
+      <Select
+        defaultValue={store?.city}
+        style={{ width: "100%" }}
+        onChange={(val) => handleStoreFieldChange("city", val)}
+        options={getStoreCities()}
+      />
+      <Typography.Title level={5}>District</Typography.Title>
+      <Select
+        defaultValue={store?.district}
+        style={{ width: "100%" }}
+        onChange={(val) => handleStoreFieldChange("district", val)}
+        options={getStoreDistrictByCity(store?.city)}
+      />
       <Typography.Title level={5}>Location</Typography.Title>
       <Input
         defaultValue={store?.location}

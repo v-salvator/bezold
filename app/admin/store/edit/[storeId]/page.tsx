@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { getStoreById, editStoreById } from "@/firebase/clientUtils";
 import {
   Input,
@@ -15,6 +15,10 @@ import { useRouter, usePathname } from "next/navigation";
 import type { Store } from "@/types";
 import { STORE_TAGS } from "@/constant/storeTags";
 import { STORE_CATEGORIES } from "@/constant/storeType";
+import {
+  getStoreCities,
+  getStoreDistrictByCity,
+} from "@/constant/StoreLocation";
 
 interface EditStoreProps {
   params: { storeId: Store["id"] };
@@ -49,6 +53,8 @@ export default function EditStore({ params }: EditStoreProps) {
         price: storeCloned.price,
         tags: storeCloned.tags,
         category: storeCloned.category,
+        city: storeCloned.city,
+        district: storeCloned.district,
       });
       api.success({
         message: "Successfuly update store",
@@ -83,6 +89,20 @@ export default function EditStore({ params }: EditStoreProps) {
         defaultValue={storeCloned?.storeName}
         onChange={(e) => handleStoreFieldChange("storeName", e.target.value)}
       ></Input>
+      <Typography.Title level={5}>City</Typography.Title>
+      <Select
+        defaultValue={storeCloned?.city}
+        style={{ width: "100%" }}
+        onChange={(val) => handleStoreFieldChange("city", val)}
+        options={getStoreCities()}
+      />
+      <Typography.Title level={5}>District</Typography.Title>
+      <Select
+        defaultValue={storeCloned?.district}
+        style={{ width: "100%" }}
+        onChange={(val) => handleStoreFieldChange("district", val)}
+        options={getStoreDistrictByCity(storeCloned?.city)}
+      />
       <Typography.Title level={5}>Location</Typography.Title>
       <Input
         defaultValue={storeCloned?.location}
