@@ -31,14 +31,12 @@ const AnimatedImage = ({
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
     >
-      {src ? (
-        <Image
-          className={cn(isRounded && "rounded-[24px]")}
-          src={src}
-          fill
-          alt={alt}
-        />
-      ) : null}
+      <Image
+        className={cn(isRounded && "rounded-[24px]")}
+        src={src ? src : "/assets/bezold.png"}
+        fill
+        alt={alt}
+      />
     </motion.div>
   );
 };

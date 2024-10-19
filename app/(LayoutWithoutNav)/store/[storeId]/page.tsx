@@ -29,11 +29,13 @@ export default async function Store({ params }: StoreProps) {
     images,
     userInfo,
   } = store;
+  const defaultImage = ["/assets/bezold.png"];
+  const carouselImage = images.length ? images : defaultImage;
   return (
     <div className="max-w-[1024px] m-auto">
       <h1 className="py-[24px] font-bold text-[36px]">{storeName}</h1>
       <Carousel dotPosition="bottom" effect="fade" arrows infinite autoplay>
-        {images.map((image, i) => (
+        {carouselImage.map((image, i) => (
           <div key={i}>
             <div className="h-[360px]">
               <AnimatedImage
