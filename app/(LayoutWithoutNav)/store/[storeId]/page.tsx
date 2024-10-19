@@ -28,6 +28,8 @@ export default async function Store({ params }: StoreProps) {
     updateTime,
     images,
     userInfo,
+    city,
+    district,
   } = store;
   const defaultImage = ["/assets/bezold.png"];
   const carouselImage = images.length ? images : defaultImage;
@@ -48,7 +50,10 @@ export default async function Store({ params }: StoreProps) {
         ))}
       </Carousel>
       <div className="p-[12px]">
-        <h2 className="my-[12px] font-bold text-[24px]">{location}</h2>
+        <h2 className="mt-[12px] font-bold text-[20px]">{`${city} ${district}`}</h2>
+        <h2 className="ml-[12px] mb-[12px] font-bold text-[24px]">
+          {location}
+        </h2>
         <div className="my-[12px]">{description}</div>
         <div className="my-[12px]">
           {tags?.map((tag) => (

@@ -17,6 +17,8 @@ const StoreCard = ({ store }: { store: Store }) => {
     price,
     id,
     images,
+    city,
+    district,
   } = store;
   console.log("🚀 ~ StoreCard ~ images:", images);
   return (
@@ -25,18 +27,24 @@ const StoreCard = ({ store }: { store: Store }) => {
       href={`/store/${id}`}
       target="_blank"
     >
-      <div className="w-[240px] h-[240px]">
+      <div className="w-[240px] h-[240px] mb-[4px] relative">
         <AnimatedImage src={images?.[0]} alt="Picture of the store" />
-      </div>
-      <div className="font-bold px-[4px]">{storeName}</div>
-      <div className="px-[8px]">
-        <div>{location}</div>
-        <div className="text-slate-500 line-clamp-2">{description}</div>
-        <div className="py-[8px]">
+        <div className="absolute top-[12px] right-[4px]">
           {tags?.map((tag) => (
-            <Tag key={tag}>{tag}</Tag>
+            <div key={tag} className="text-right">
+              <Tag>{tag}</Tag>
+            </div>
           ))}
         </div>
+      </div>
+      <div className="font-bold px-[4px]">{storeName}</div>
+      <div className="px-[4px]">
+        <div className="text-[12px]">{`${city} ${district}`}</div>
+        <div className="ml-[8px] text-[14px]">{location}</div>
+        <div className="text-slate-500 line-clamp-2 text-[14px]">
+          {description}
+        </div>
+
         <div className="font-bold">{`頂讓金: ${curencyFormatter(price)}`}</div>
       </div>
     </Link>
