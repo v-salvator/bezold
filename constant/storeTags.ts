@@ -14,10 +14,6 @@ export const STORE_TAGS = [
     key: STORE_TAG.HOT,
   },
   {
-    label: "Most Popular",
-    key: STORE_TAG.MOST_POPULAR,
-  },
-  {
     label: "Recommended",
     key: STORE_TAG.RECOMMENDED,
   },
