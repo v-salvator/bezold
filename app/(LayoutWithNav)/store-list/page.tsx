@@ -2,22 +2,23 @@ import { StoreCard } from "@/components";
 import { Store } from "@/types";
 
 interface StorePageProps {
-  params: { storeCategory: string };
+  searchParams: URLSearchParams;
 }
 
-async function getStores(
-  storeCategory: StorePageProps["params"]["storeCategory"]
-) {
+async function getStores(searchParams: StorePageProps["searchParams"]) {
+  const storeSearchParams = new URLSearchParams(searchParams);
   // TODO: add get store by category
-  const res = await fetch(`http://localhost:3000/api/stores`, {
-    cache: "no-store",
-  });
+  const res = await fetch(
+    `http://localhost:3000/api/stores?${storeSearchParams.toString()}`,
+    {
+      cache: "no-store",
+    }
+  );
   return res.json();
 }
 
-export default async function Home({ params }: StorePageProps) {
-  const { storeCategory } = params;
-  const { data: stores } = await getStores(storeCategory);
+export default async function Home({ searchParams }: StorePageProps) {
+  const { data: stores } = await getStores(searchParams);
 
   return (
     <div // TODO: turn this into grid layout

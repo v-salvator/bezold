@@ -6,7 +6,7 @@ import { cn } from "@/utils";
 import {
   cityItems,
   districtItems,
-  typeItems,
+  tagItems,
   amountItems,
   DropDownItem,
 } from "./DropDowns";
@@ -51,7 +51,7 @@ const SearchBar = ({ className }: SearchBarProps) => {
   const [district, setDistrict] = useState<DropDownItem<string> | undefined>(
     undefined
   );
-  const [type, setType] = useState<DropDownItem | undefined>(undefined);
+  const [tag, setTag] = useState<DropDownItem | undefined>(undefined);
   const [amountFilter, setAmountFilter] = useState<
     DropDownItem<number[]> | undefined
   >(undefined);
@@ -63,18 +63,18 @@ const SearchBar = ({ className }: SearchBarProps) => {
     setDistrict(undefined);
   };
 
-  const handleDistrictMenuClick: MenuProps["onClick"] = (e) => {
-    const selectedDistrict = e.key;
-    const districtItem = districtItems(city?.label).find(
-      (el) => el.key === selectedDistrict
-    );
-    setDistrict(districtItem);
-  };
+  // const handleDistrictMenuClick: MenuProps["onClick"] = (e) => {
+  //   const selectedDistrict = e.key;
+  //   const districtItem = districtItems(city?.label).find(
+  //     (el) => el.key === selectedDistrict
+  //   );
+  //   setDistrict(districtItem);
+  // };
 
-  const handleTypeMenuClick: MenuProps["onClick"] = (e) => {
-    const selectedTypeFilter = e.key;
-    const typeItem = typeItems.find((el) => el.key === selectedTypeFilter);
-    setType(typeItem);
+  const handleTagMenuClick: MenuProps["onClick"] = (e) => {
+    const selectedTagFilter = e.key;
+    const tagItem = tagItems.find((el) => el.key === selectedTagFilter);
+    setTag(tagItem);
   };
 
   const handleAmountMenuClick: MenuProps["onClick"] = (e) => {
@@ -105,7 +105,7 @@ const SearchBar = ({ className }: SearchBarProps) => {
         >
           <Filter label="City" placeholder="Select City" value={city?.label} />
         </Dropdown>
-        <Dropdown
+        {/* <Dropdown
           menu={{
             items: districtItems(city?.label),
             onClick: handleDistrictMenuClick,
@@ -118,12 +118,12 @@ const SearchBar = ({ className }: SearchBarProps) => {
             placeholder="Select District"
             value={district?.label}
           />
-        </Dropdown>
+        </Dropdown> */}
         <Dropdown
-          menu={{ items: typeItems, onClick: handleTypeMenuClick }}
+          menu={{ items: tagItems, onClick: handleTagMenuClick }}
           trigger={["click"]}
         >
-          <Filter label="Type" placeholder="Select Type" value={type?.label} />
+          <Filter label="Tag" placeholder="Select Tag" value={tag?.label} />
         </Dropdown>
         <Dropdown
           menu={{ items: amountItems, onClick: handleAmountMenuClick }}
@@ -139,7 +139,7 @@ const SearchBar = ({ className }: SearchBarProps) => {
           filterInfo={{
             city,
             district,
-            type,
+            tag,
             amountFilter,
           }}
         />

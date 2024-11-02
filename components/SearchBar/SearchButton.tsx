@@ -9,13 +9,13 @@ interface SearchButtonProps {
   filterInfo: {
     city?: DropDownItem;
     district?: DropDownItem<string>;
-    type?: DropDownItem;
+    tag?: DropDownItem;
     amountFilter?: DropDownItem<number[]>;
   };
 }
 
 const SearchButton = ({ filterInfo }: SearchButtonProps) => {
-  const { city, district, type, amountFilter } = filterInfo;
+  const { city, district, tag, amountFilter } = filterInfo;
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -23,13 +23,13 @@ const SearchButton = ({ filterInfo }: SearchButtonProps) => {
     startTransition(() => {
       const cityName = city?.key;
       const districtName = district?.key;
-      const category = type?.key || "all";
+      const tagName = tag?.key;
       const amountMinMax = amountFilter?.value;
 
       const searchParams = new URLSearchParams({
         ...(cityName && { city: cityName }),
         ...(districtName && { district: districtName }),
-        category,
+        ...(tagName && { tag: tagName }),
         ...(amountMinMax && {
           amountMin: amountMinMax[0].toString(),
           amountMax: amountMinMax[1].toString(),

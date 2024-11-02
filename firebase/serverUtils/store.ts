@@ -1,5 +1,5 @@
 import { db } from "@/firebase/server";
-import { Store } from "@/types";
+import { Store, STORE_CATEGORY } from "@/types";
 import { getImagesByPath } from "./image";
 import { getUserById } from "./user";
 import { COLLECTIONS } from "./constants";
@@ -8,9 +8,43 @@ const COLLECTION = COLLECTIONS.STORE;
 
 // Store related
 
-export const getStores = async () => {
+export const getStores = async (searchObj: Record<string, string>) => {
   const storesRef = db.collection(COLLECTION);
-  const snapshot = await storesRef.get();
+
+  // * default search object to reduce the firestore compound index
+  const defaultSearchObj = {
+    category: "all",
+    amountMin: "0",
+    amountMax: "99999",
+  };
+  const mergedSearchObj = { ...defaultSearchObj, ...searchObj };
+
+  const storesWithQueryRef = Object.entries(mergedSearchObj).reduce(
+    (ref, [searchObjKey, searchValue]) => {
+      switch (searchObjKey) {
+        case "city":
+          return ref.where("city", "==", searchValue);
+        // case "district":
+        //   if (searchValue === "all") return ref.where("district", "in", []);
+        //   return ref.where("district", "==", searchValue);
+        case "tag":
+          if (searchValue === "all") return ref;
+          return ref.where("tags", "array-contains", searchValue);
+        case "amountMin":
+          return ref.where("price", ">=", parseInt(searchValue) * 10000);
+        case "amountMax":
+          return ref.where("price", "<=", parseInt(searchValue) * 10000);
+        case "category":
+          if (searchValue === "all")
+            return ref.where("category", "in", Object.values(STORE_CATEGORY));
+          return ref.where("category", "==", searchValue);
+        default:
+          return ref;
+      }
+    },
+    storesRef as FirebaseFirestore.Query<FirebaseFirestore.DocumentData>
+  );
+  const snapshot = await storesWithQueryRef.orderBy("updateTime", "desc").get();
 
   const stores: Store[] = []; // TODO: modify the type here
   snapshot.forEach((doc) => {
@@ -34,7 +68,6 @@ export const getStores = async () => {
       storeData.images = images;
     }
   }
-
   return stores;
 };
 
