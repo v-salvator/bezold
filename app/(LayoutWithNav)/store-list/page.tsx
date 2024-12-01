@@ -1,5 +1,6 @@
 import { StoreCard } from "@/components";
 import { Store } from "@/types";
+import { cn } from "@/utils";
 
 interface StorePageProps {
   searchParams: URLSearchParams;
@@ -19,14 +20,24 @@ async function getStores(searchParams: StorePageProps["searchParams"]) {
 
 export default async function Home({ searchParams }: StorePageProps) {
   const { data: stores } = await getStores(searchParams);
+  if (stores.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-[80vh]">
+        <h1 className="text-3xl">No stores found</h1>
+      </div>
+    );
+  }
 
   return (
-    <div // TODO: turn this into grid layout
-      className="flex flex-wrap justify-evenly py-[16px] gap-y-[24px] gap-x-[8px] bg-[white] mx-[48px]"
-      style={{ border: "1px solid green" }}
+    <div
+      className={cn(
+        "grid grid-cols-[repeat(auto-fill,_minmax(240px,_1fr))] ",
+        "justify-items-center gap-y-[24px] gap-x-[8px]",
+        "py-[16px] mx-[48px]"
+      )}
     >
       {stores.map((store: Store) => (
-        <StoreCard key={store.id} store={store}></StoreCard>
+        <StoreCard key={store.id} store={store} />
       ))}
     </div>
   );

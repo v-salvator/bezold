@@ -14,8 +14,8 @@ export const getStores = async (searchObj: Record<string, string>) => {
   // * default search object to reduce the firestore compound index
   const defaultSearchObj = {
     category: "all",
-    amountMin: "0",
-    amountMax: "99999",
+    amountMin: 0,
+    amountMax: 1_000_000_000, // HACK: default to 1 billion (might need to extend in the future)
   };
   const mergedSearchObj = { ...defaultSearchObj, ...searchObj };
 
