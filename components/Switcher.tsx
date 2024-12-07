@@ -2,7 +2,7 @@
 import * as React from "react";
 import { useWindowScroll } from "react-use";
 import { Segmented } from "antd";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCategoryKey } from "@/hooks";
 import { cn } from "@/utils";
 import { STORE_CATEGORIES } from "@/constant/storeType";
@@ -31,6 +31,7 @@ const Switcher = ({ className, style }: SwitcherProps) => {
   const categories = mockData.map((item) => {
     return { ...item, value: item.key };
   });
+  const searchParams = useSearchParams();
 
   const { y } = useWindowScroll();
 
@@ -48,8 +49,11 @@ const Switcher = ({ className, style }: SwitcherProps) => {
         value={categoryKey}
         size="large"
         onChange={(selectedKey) => {
+          const newSearchParams = new URLSearchParams(searchParams.toString());
+          newSearchParams.set("category", selectedKey);
+
           if (selectedKey !== "about") {
-            router.push(`/store-list?category=${selectedKey}`);
+            router.push(`/store-list?${newSearchParams.toString()}`);
           } else {
             router.push(`/about`);
           }
