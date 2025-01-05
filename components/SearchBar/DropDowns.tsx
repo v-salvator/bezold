@@ -3,6 +3,8 @@ import { getTwCities, getTwDistricts } from "@/utils";
 import { STORE_CATEGORIES } from "@/constant/storeType";
 import { STORE_TAGS } from "@/constant/storeTags";
 
+import TagIcon from "../TagIcon";
+
 export type DropDownItem<T = undefined> = {
   label: string;
   key: string;
@@ -33,7 +35,19 @@ export const tagItems = [
     key: "all",
   },
   ...STORE_TAGS,
-];
+].map((tag) => {
+  if (tag.key === "all") return tag;
+  return {
+    ...tag,
+    label: (
+      <>
+        <TagIcon tag={tag.key}></TagIcon>
+        <span className="ml-[4px]">{tag.label}</span>
+      </>
+    ),
+    key: tag.key,
+  };
+});
 
 export const typeItems = [
   {
@@ -45,27 +59,27 @@ export const typeItems = [
 
 export const amountItems = [
   {
-    label: "below 50w",
+    label: "低於 50萬",
     key: "0-50",
     value: [0, 50],
   },
   {
-    label: "50w ~ 100w",
+    label: "50 ~ 100萬",
     key: "50-100",
     value: [50, 100],
   },
   {
-    label: "100w ~ 150w",
+    label: "100 ~ 150萬",
     key: "100-150",
     value: [100, 150],
   },
   {
-    label: "150w ~ 200w",
+    label: "150 ~ 200萬",
     key: "150-200",
     value: [150, 200],
   },
   {
-    label: "above 200w",
+    label: "高於 200萬",
     key: "200-",
     value: [200, Number.POSITIVE_INFINITY],
   },

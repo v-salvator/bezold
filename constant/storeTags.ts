@@ -2,19 +2,19 @@ import { STORE_TAG } from "@/types";
 
 export const STORE_TAGS = [
   {
-    label: "Cheap",
+    label: "划算",
     key: STORE_TAG.CHEAP,
   },
   {
-    label: "Emergency",
+    label: "緊急",
     key: STORE_TAG.EMERGENCY,
   },
   {
-    label: "Hot",
+    label: "熱門",
     key: STORE_TAG.HOT,
   },
   {
-    label: "Recommended",
+    label: "精選",
     key: STORE_TAG.RECOMMENDED,
   },
 ];

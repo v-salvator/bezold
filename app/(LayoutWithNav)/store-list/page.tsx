@@ -23,7 +23,7 @@ export default async function Home({ searchParams }: StorePageProps) {
   if (stores.length === 0) {
     return (
       <div className="flex items-center justify-center h-[80vh]">
-        <h1 className="text-3xl">No stores found</h1>
+        <h1 className="text-3xl">沒有找到商店</h1>
       </div>
     );
   }

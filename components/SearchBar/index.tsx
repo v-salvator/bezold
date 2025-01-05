@@ -103,7 +103,7 @@ const SearchBar = ({ className }: SearchBarProps) => {
           }}
           trigger={["click"]}
         >
-          <Filter label="City" placeholder="Select City" value={city?.label} />
+          <Filter label="城市" placeholder="選擇城市" value={city?.label} />
         </Dropdown>
         {/* <Dropdown
           menu={{
@@ -123,15 +123,15 @@ const SearchBar = ({ className }: SearchBarProps) => {
           menu={{ items: tagItems, onClick: handleTagMenuClick }}
           trigger={["click"]}
         >
-          <Filter label="Tag" placeholder="Select Tag" value={tag?.label} />
+          <Filter label="標籤" placeholder="選擇標籤" value={tag?.label} />
         </Dropdown>
         <Dropdown
           menu={{ items: amountItems, onClick: handleAmountMenuClick }}
           trigger={["click"]}
         >
           <Filter
-            label="Amount"
-            placeholder="Select Amount"
+            label="金額"
+            placeholder="選擇金額"
             value={amountFilter?.label}
           />
         </Dropdown>
