@@ -76,7 +76,7 @@ export default function EditStoreImage({ params }: EditStoreImageProps) {
 
   useEffect(() => {
     fetchStore();
-  }, []);
+  }, [fetchStore]);
 
   const handleUploadFile = async () => {
     if (file) {

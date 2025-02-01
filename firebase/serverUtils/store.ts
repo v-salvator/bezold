@@ -31,9 +31,17 @@ export const getStores = async (searchObj: Record<string, string>) => {
           if (searchValue === "all") return ref;
           return ref.where("tags", "array-contains", searchValue);
         case "amountMin":
-          return ref.where("price", ">=", parseInt(searchValue) * 10000);
+          return ref.where(
+            "price",
+            ">=",
+            parseInt(searchValue as string) * 10000
+          );
         case "amountMax":
-          return ref.where("price", "<=", parseInt(searchValue) * 10000);
+          return ref.where(
+            "price",
+            "<=",
+            parseInt(searchValue as string) * 10000
+          );
         case "category":
           if (searchValue === "all")
             return ref.where("category", "in", Object.values(STORE_CATEGORY));

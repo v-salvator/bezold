@@ -1,4 +1,5 @@
 "use client";
+import * as React from "react";
 import { getTwCities, getTwDistricts } from "@/utils";
 import { STORE_CATEGORIES } from "@/constant/storeType";
 import { STORE_TAGS } from "@/constant/storeTags";
@@ -6,7 +7,7 @@ import { STORE_TAGS } from "@/constant/storeTags";
 import TagIcon from "../TagIcon";
 
 export type DropDownItem<T = undefined> = {
-  label: string;
+  label: string | React.ReactNode;
   key: string;
   value?: T;
 };

@@ -16,7 +16,7 @@ interface FilterProps {
   label: ReactNode;
   placeholder: ReactNode;
   onClick?: () => void;
-  value?: string;
+  value?: ReactNode;
 }
 
 const Filter = ({ label, placeholder, onClick, value }: FilterProps) => {

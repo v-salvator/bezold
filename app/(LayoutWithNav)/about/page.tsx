@@ -41,7 +41,7 @@ const DoubleBreak = () => {
   );
 };
 
-export default function About() {
+export default async function About() {
   return (
     <div className="text-center px-[52px]">
       <Section>
@@ -129,7 +129,7 @@ export default function About() {
         <blockquote>
           <Paragraph>
             “You can’t connect the dots looking forward ; you can only connect
-            them looking backwards." – Steve Jobs
+            them looking backwards.&quot; – Steve Jobs
           </Paragraph>
         </blockquote>
       </Section>
