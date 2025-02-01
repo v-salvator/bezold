@@ -7,12 +7,14 @@
   --foreground-rgb: rgba(255, 255, 255, 1);
 
   /* Spacing */
-  --header-height:64px;
+  --header-height: 64px;
   --switcher-height: 64px;
-  --header-and-switcher-height: calc(var(--header-height) + var(--switcher-height));
+  --header-and-switcher-height: calc(
+    var(--header-height) + var(--switcher-height)
+  );
 }
 
- /* dark mode*/
+/* dark mode*/
 /* @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: rgba(0, 0, 0, 1);
@@ -20,9 +22,12 @@
 } */
 
 .border-test {
-  border: 1px solid red
+  border: 1px solid red;
+}
+
+html {
+  font-family: var(--font-noto-sans-mono), var(--font-noto-sans-tc);
 }
 
 body {
-  
 }
