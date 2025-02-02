@@ -10,7 +10,9 @@ async function getStores(searchParams: StorePageProps["searchParams"]) {
   const storeSearchParams = new URLSearchParams(searchParams);
   // TODO: add get store by category
   const res = await fetch(
-    `http://localhost:3000/api/stores?${storeSearchParams.toString()}`,
+    `${
+      process.env.NEXT_PUBLIC_APP_URL
+    }/api/stores?${storeSearchParams.toString()}`,
     {
       cache: "no-store",
     }

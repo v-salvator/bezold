@@ -9,9 +9,12 @@ interface StoreProps {
 
 async function getStoreById(storeId: StoreProps["params"]["storeId"]) {
   // TODO: add get store by category
-  const res = await fetch(`http://localhost:3000/api/stores/${storeId}`, {
-    cache: "no-store",
-  });
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_APP_URL}/api/stores/${storeId}`,
+    {
+      cache: "no-store",
+    }
+  );
   return res.json();
 }
 
