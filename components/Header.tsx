@@ -2,14 +2,14 @@ import * as React from "react";
 import Link from "next/link";
 
 import { AnimatedImage } from "@/components/animated";
-import { SearchBar } from "@/components";
+import { SearchBar, SearchDrawer } from "@/components";
 import { cn } from "@/utils";
 
-const LogoLink = () => {
+const LogoLink = ({ className }: { className: string }) => {
   return (
     <Link
       href="/store-list?category=all"
-      className="w-[144px] h-[32px] relative"
+      className={cn("w-[144px] h-[32px] relative", className)}
     >
       <AnimatedImage
         className="bg-transparent"
@@ -19,10 +19,6 @@ const LogoLink = () => {
       />
     </Link>
   );
-};
-
-const SupportIcon = () => {
-  return <div className="w-[32px] h-[32px] bg-gray-300 rounded-[50%]"></div>;
 };
 
 export default function Header({ withSearchBar = true }) {
@@ -35,11 +31,13 @@ export default function Header({ withSearchBar = true }) {
         "fixed top-0 z-10"
       )}
     >
-      <LogoLink />
+      <LogoLink className="max-sm:hidden" />
       {withSearchBar && (
-        <SearchBar className="absolute left-1/2 -translate-x-1/2" />
+        <SearchBar className="absolute left-1/2 -translate-x-1/2 max-sm:hidden" />
       )}
-      <SupportIcon />
+      {withSearchBar && (
+        <SearchDrawer className="absolute left-1/2 -translate-x-1/2 w-[80%] sm:hidden" />
+      )}
     </div>
   );
 }
