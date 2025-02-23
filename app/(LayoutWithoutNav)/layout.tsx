@@ -1,7 +1,7 @@
 import "../globals.css";
 import type { Metadata } from "next";
 import { Noto_Sans_Mono, Noto_Sans_TC } from "next/font/google";
-
+import { Provider } from "jotai";
 import { Header } from "@/components";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 
@@ -37,10 +37,12 @@ export default function RootLayout({
       className={`${notoSansMono.variable} ${notoSansTC.variable}`}
     >
       <body>
-        <AntdRegistry>
-          <Header withSearchBar />
-          <div className="mt-header">{children}</div>
-        </AntdRegistry>
+        <Provider>
+          <AntdRegistry>
+            <Header withSearchBar />
+            <div className="mt-header">{children}</div>
+          </AntdRegistry>
+        </Provider>
       </body>
     </html>
   );

@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Noto_Sans_Mono, Noto_Sans_TC } from "next/font/google";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
+import { Provider } from "jotai";
 
 const notoSansMono = Noto_Sans_Mono({
   style: ["normal"],
@@ -35,7 +36,9 @@ export default function RootLayout({
       className={`${notoSansMono.variable} ${notoSansTC.variable}`}
     >
       <body>
-        <AntdRegistry>{children}</AntdRegistry>
+        <Provider>
+          <AntdRegistry>{children}</AntdRegistry>
+        </Provider>
       </body>
     </html>
   );

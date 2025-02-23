@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Noto_Sans_Mono, Noto_Sans_TC } from "next/font/google";
 import { cn } from "@/utils";
+import { Provider } from "jotai";
 
 import { Header, Switcher } from "@/components";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
@@ -39,15 +40,17 @@ export default function RootLayout({
       className={`${notoSansMono.variable} ${notoSansTC.variable}`}
     >
       <body>
-        <AntdRegistry>
-          <Suspense>
-            <Header withSearchBar />
-            <div className="fixed top-header z-10 w-[100%] bg-primary">
-              <Switcher className={cn("mx-auto text-center")}></Switcher>
-            </div>
-            <div className="pt-header-and-switcher">{children}</div>
-          </Suspense>
-        </AntdRegistry>
+        <Provider>
+          <AntdRegistry>
+            <Suspense>
+              <Header withSearchBar />
+              <div className="fixed top-header z-10 w-[100%] bg-primary">
+                <Switcher className={cn("mx-auto text-center")}></Switcher>
+              </div>
+              <div className="pt-header-and-switcher">{children}</div>
+            </Suspense>
+          </AntdRegistry>
+        </Provider>
       </body>
     </html>
   );
