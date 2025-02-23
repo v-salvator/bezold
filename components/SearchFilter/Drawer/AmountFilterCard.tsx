@@ -1,9 +1,12 @@
 "use client";
-import { Slider } from "antd";
+import { useAtom } from "jotai";
+import { amountFilterAtom } from "@/atoms/SearchFilterAtom";
 import { cn } from "@/utils";
-import { amountItems } from "@/components/SearchBar/DropDowns";
+import { amountItems } from "../DropDowns";
 
 const AmountFilterCard = () => {
+  const [amountFilter, setAmountFilter] = useAtom(amountFilterAtom);
+
   return (
     <div>
       <div className="text-2xl font-bold pb-[8px]">選擇金額</div>
@@ -13,13 +16,14 @@ const AmountFilterCard = () => {
             <div
               key={amountItem.key}
               className={cn(
-                "border border-solid border-black rounded-[24px]",
+                "border border-solid border-slate-200 rounded-[24px]",
                 "px-[12px] py-[8px]",
-                "text-xl"
+                "text-xl",
+                amountItem.key === amountFilter?.key && "border-black"
               )}
               onClick={(e) => {
                 e.stopPropagation();
-                console.log(amountItem);
+                setAmountFilter(amountItem);
               }}
             >
               <span className="ml-[4px]">{amountItem.label}</span>
@@ -27,17 +31,6 @@ const AmountFilterCard = () => {
           );
         })}
       </div>
-      <Slider
-        range
-        defaultValue={[0, 200]}
-        max={200}
-        min={0}
-        step={5}
-        marks={{
-          0: "0",
-          200: "200萬",
-        }}
-      />
     </div>
   );
 };

@@ -1,26 +1,31 @@
 "use client";
 import { useState } from "react";
 import { Drawer, Button } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined, LoadingOutlined } from "@ant-design/icons";
 import { cn } from "@/utils";
+import { useAtom } from "jotai";
+import { activeDrawerCardAtom, filtersAtom } from "@/atoms/SearchFilterAtom";
 
 import FilterCard from "./FilterCard";
 import CityCard from "./CityCard";
 import TagCard from "./TagCard";
 import AmountFilterCard from "./AmountFilterCard";
+import useHandleSearch from "../hooks/useHandleSearch";
 
 type FilterKey = "city" | "tag" | "amountFilter";
 
 const SearchDrawer = ({ className }: { className?: string }) => {
   const [open, setOpen] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<FilterKey>("city");
+  const [activeDrawerCard, setActiveDrawerCard] = useAtom(activeDrawerCardAtom);
+  const [{ city, tag, amountFilter }, setFilters] = useAtom(filtersAtom);
+  const { handleSearchClick, isPending } = useHandleSearch();
 
   const onClose = () => {
     setOpen(false);
   };
 
   const handleFilterCardClick = (filterKey: FilterKey) => {
-    setActiveFilter(filterKey);
+    setActiveDrawerCard(filterKey);
   };
 
   return (
@@ -34,8 +39,8 @@ const SearchDrawer = ({ className }: { className?: string }) => {
           "shadow"
         )}
       >
-        <SearchOutlined />
-        <span className="ml-[4px]">開始搜尋</span>
+        {isPending ? <LoadingOutlined /> : <SearchOutlined />}
+        <span className="ml-[4px]">{isPending ? "搜尋中..." : "開始搜尋"}</span>
       </div>
       <Drawer
         placement={"top"}
@@ -52,20 +57,23 @@ const SearchDrawer = ({ className }: { className?: string }) => {
               type="dashed"
               size="large"
               onClick={() => {
-                console.log("search");
+                setFilters({
+                  city: undefined,
+                  tag: undefined,
+                  amountFilter: undefined,
+                });
               }}
             >
               清除全部
             </Button>
             <Button
               className="mr-[-7px]"
-              // shape="circle"
               type="primary"
               size="large"
-              // loading={isPending}
               icon={<SearchOutlined />}
               onClick={() => {
-                console.log("search");
+                handleSearchClick();
+                onClose();
               }}
             >
               搜尋
@@ -75,27 +83,27 @@ const SearchDrawer = ({ className }: { className?: string }) => {
       >
         <FilterCard
           label="城市"
-          placeholder="新增城市"
+          placeholder={city?.label ?? "新增城市"}
           key="city"
-          active={activeFilter === "city"}
+          active={activeDrawerCard === "city"}
           onClick={() => handleFilterCardClick("city")}
         >
           <CityCard />
         </FilterCard>
         <FilterCard
           label="標籤"
-          placeholder="新增標籤"
+          placeholder={tag?.label ?? "新增標籤"}
           key="tag"
-          active={activeFilter === "tag"}
+          active={activeDrawerCard === "tag"}
           onClick={() => handleFilterCardClick("tag")}
         >
           <TagCard></TagCard>
         </FilterCard>
         <FilterCard
           label="金額"
-          placeholder="新增金額"
+          placeholder={amountFilter?.label ?? "新增金額"}
           key="amountFilter"
-          active={activeFilter === "amountFilter"}
+          active={activeDrawerCard === "amountFilter"}
           onClick={() => handleFilterCardClick("amountFilter")}
         >
           <AmountFilterCard />

@@ -1,15 +1,11 @@
 "use client";
-import { useState, ReactNode, CSSProperties } from "react";
+import { ReactNode, CSSProperties } from "react";
 import { Dropdown, MenuProps } from "antd";
 import { cn } from "@/utils";
+import { useAtom } from "jotai";
+import { cityAtom, tagAtom, amountFilterAtom } from "@/atoms/SearchFilterAtom";
 
-import {
-  cityItems,
-  districtItems,
-  tagItems,
-  amountItems,
-  DropDownItem,
-} from "./DropDowns";
+import { cityItems, tagItems, amountItems } from "../DropDowns";
 import SearchButton from "./SearchButton";
 
 interface FilterProps {
@@ -47,29 +43,15 @@ interface SearchBarProps {
 }
 
 const SearchBar = ({ className }: SearchBarProps) => {
-  const [city, setCity] = useState<DropDownItem | undefined>(undefined);
-  const [district, setDistrict] = useState<DropDownItem<string> | undefined>(
-    undefined
-  );
-  const [tag, setTag] = useState<DropDownItem | undefined>(undefined);
-  const [amountFilter, setAmountFilter] = useState<
-    DropDownItem<number[]> | undefined
-  >(undefined);
+  const [city, setCity] = useAtom(cityAtom);
+  const [tag, setTag] = useAtom(tagAtom);
+  const [amountFilter, setAmountFilter] = useAtom(amountFilterAtom);
 
   const handleCityMenuClick: MenuProps["onClick"] = (e) => {
     const selectedCity = e.key;
     const cityItem = cityItems.find((el) => el.key === selectedCity);
     setCity(cityItem);
-    setDistrict(undefined);
   };
-
-  // const handleDistrictMenuClick: MenuProps["onClick"] = (e) => {
-  //   const selectedDistrict = e.key;
-  //   const districtItem = districtItems(city?.label).find(
-  //     (el) => el.key === selectedDistrict
-  //   );
-  //   setDistrict(districtItem);
-  // };
 
   const handleTagMenuClick: MenuProps["onClick"] = (e) => {
     const selectedTagFilter = e.key;
@@ -105,20 +87,6 @@ const SearchBar = ({ className }: SearchBarProps) => {
         >
           <Filter label="城市" placeholder="選擇城市" value={city?.label} />
         </Dropdown>
-        {/* <Dropdown
-          menu={{
-            items: districtItems(city?.label),
-            onClick: handleDistrictMenuClick,
-          }}
-          trigger={["click"]}
-          disabled={!city}
-        >
-          <Filter
-            label="District"
-            placeholder="Select District"
-            value={district?.label}
-          />
-        </Dropdown> */}
         <Dropdown
           menu={{ items: tagItems, onClick: handleTagMenuClick }}
           trigger={["click"]}
@@ -135,14 +103,7 @@ const SearchBar = ({ className }: SearchBarProps) => {
             value={amountFilter?.label}
           />
         </Dropdown>
-        <SearchButton
-          filterInfo={{
-            city,
-            district,
-            tag,
-            amountFilter,
-          }}
-        />
+        <SearchButton />
       </div>
     </div>
   );

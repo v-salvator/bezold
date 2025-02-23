@@ -3,8 +3,7 @@ import * as React from "react";
 import { getTwCities, getTwDistricts } from "@/utils";
 import { STORE_CATEGORIES } from "@/constant/storeType";
 import { STORE_TAGS } from "@/constant/storeTags";
-
-import TagIcon from "../TagIcon";
+import TagIcon from "@/components/TagIcon";
 
 export type DropDownItem<T = undefined> = {
   label: string | React.ReactNode;
