@@ -36,6 +36,7 @@ export async function generateMetadata(
     title: `Bezold - ${store.storeName}`,
     openGraph: {
       title: `Bezold - ${store.storeName}`,
+      siteName: `Bezold - ${store.storeName}`,
       description: store.description,
       url: `${process.env.NEXT_PUBLIC_APP_URL}/store/${id}`,
       images: store.images.length ? store.images : ["/assets/bezold.png"],
