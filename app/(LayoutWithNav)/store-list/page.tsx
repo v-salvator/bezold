@@ -13,9 +13,11 @@ async function getStores(searchParams: StorePageProps["searchParams"]) {
     `${
       process.env.NEXT_PUBLIC_APP_URL
     }/api/stores?${storeSearchParams.toString()}`,
-    {
-      cache: "no-store",
-    }
+    process.env.NODE_ENV === "development"
+      ? {
+          cache: "no-store",
+        }
+      : undefined
   );
   return res.json();
 }

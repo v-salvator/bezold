@@ -1,6 +1,7 @@
 import { Tag, Carousel, Divider } from "antd";
 import { curencyFormatter } from "@/utils";
 import { AnimatedImage } from "@/components/animated";
+import type { Metadata, ResolvingMetadata } from "next";
 
 import type { Store } from "@/types";
 interface StoreProps {
@@ -9,13 +10,37 @@ interface StoreProps {
 
 async function getStoreById(storeId: StoreProps["params"]["storeId"]) {
   // TODO: add get store by category
+  console.log("!!!!!Enviroment!!!!!!->", process.env.NODE_ENV);
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_APP_URL}/api/stores/${storeId}`,
-    {
-      cache: "no-store",
-    }
+    process.env.NODE_ENV === "development"
+      ? {
+          cache: "no-store",
+        }
+      : undefined
   );
   return res.json();
+}
+
+export async function generateMetadata(
+  { params }: StoreProps,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  // read route params
+  const id = (await params).storeId;
+
+  // fetch data
+  const { data: store } = await getStoreById(id);
+
+  return {
+    title: `Bezold - ${store.storeName}`,
+    openGraph: {
+      title: `Bezold - ${store.storeName}`,
+      description: store.description,
+      url: `${process.env.NEXT_PUBLIC_APP_URL}/store/${id}`,
+      images: store.images.length ? store.images : ["/assets/bezold.png"],
+    },
+  };
 }
 
 export default async function Store({ params }: StoreProps) {
