@@ -15,7 +15,6 @@ export const getStores = async (searchObj: Record<string, string>) => {
   const defaultSearchObj = {
     category: "all",
     amountMin: 0,
-    amountMax: 1_000_000_000, // HACK: default to 1 billion (might need to extend in the future)
   };
   const mergedSearchObj = { ...defaultSearchObj, ...searchObj };
 
@@ -37,6 +36,7 @@ export const getStores = async (searchObj: Record<string, string>) => {
             parseInt(searchValue as string) * 10000
           );
         case "amountMax":
+          if (searchValue === "Infinity") return ref;
           return ref.where(
             "price",
             "<=",

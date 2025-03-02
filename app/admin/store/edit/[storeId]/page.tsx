@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getStoreById, editStoreById } from "@/firebase/clientUtils";
 import {
   Input,
@@ -50,7 +50,7 @@ export default function EditStore({ params }: EditStoreProps) {
         storeName: storeCloned.storeName,
         location: storeCloned.location,
         description: storeCloned.description,
-        price: storeCloned.price,
+        price: Number(storeCloned.price),
         tags: storeCloned.tags,
         category: storeCloned.category,
         city: storeCloned.city,

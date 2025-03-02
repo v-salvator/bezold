@@ -51,6 +51,7 @@ export default function StoreBaseForm() {
       const userId = userRef.id;
       const storeRef = await createStoreDoc({
         ...store,
+        price: Number(store.price),
         user: userId,
       } as Store);
       const storeId = storeRef.id;
