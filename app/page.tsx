@@ -1,21 +1,10 @@
 import { StoreSliderCard } from "@/components";
 import { Slider3D } from "@/components/animated";
 import { Store } from "@/types";
-
-async function getHighlightedStores() {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_APP_URL}/api/stores/highlight`,
-    process.env.NODE_ENV === "development"
-      ? {
-          cache: "no-store",
-        }
-      : undefined
-  );
-  return res.json();
-}
+import { getHighlightedStores } from "@/firebase/serverUtils";
 
 export default async function Home() {
-  const { data: highlightedStores } = await getHighlightedStores();
+  const highlightedStores = await getHighlightedStores();
 
   return (
     <div>
