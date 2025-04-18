@@ -1,0 +1,48 @@
+.banner {
+  width: 100vw;
+  height: 800px;
+  border: 1px solid red;
+  overflow: hidden;
+  position: relative;
+}
+
+.slider {
+  width: 200px;
+  height: 250px;
+  border: 1px solid blue;
+  position: absolute;
+  top: 10%;
+  left: calc(50% - 100px);
+
+  transform-style: preserve-3d;
+  transform: perspective(1000px);
+
+  animation: sliderRun 40s linear infinite;
+}
+
+.slider:hover {
+  animation-play-state: paused;
+}
+
+@keyframes sliderRun {
+  from {
+    transform: perspective(1000px) rotateX(-10deg) rotateY(0deg);
+  }
+  to {
+    transform: perspective(1000px) rotateX(-10deg) rotateY(360deg);
+  }
+}
+
+.item {
+  position: absolute;
+  inset: 0 0 0 0;
+  background-color: red;
+  transform: rotateY(calc(var(--position) * (360 / var(--quantity)) * 1deg))
+    translateZ(550px);
+  transition: transform 0.3s ease;
+}
+
+.item:hover {
+  transform: rotateY(calc(var(--position) * (360 / var(--quantity)) * 1deg))
+    translateZ(600px) rotateX(5deg);
+}

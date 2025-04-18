@@ -1,4 +1,5 @@
 import { StoreCard } from "@/components";
+import { Slider3D } from "@/components/animated";
 import { Store } from "@/types";
 
 async function getHighlightedStores() {
@@ -19,6 +20,7 @@ export default async function Home() {
   return (
     <div>
       <div className="h-[100px] bg-red-500 text-white"> banner</div>
+      <Slider3D />
       <div
         className="grid grid-cols-4 gap-4 py-[16px] mx-[48px] justify-items-center"
         style={{ border: "1px solid green" }}
