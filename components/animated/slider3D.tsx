@@ -1,6 +1,8 @@
 import { cn } from "@/utils";
 import styles from "./slider3D.module.css";
 
+// * reference: https://www.youtube.com/watch?v=yqaLSlPOUxM
+
 const Slider3D = ({
   cards = [],
   debug = false,
