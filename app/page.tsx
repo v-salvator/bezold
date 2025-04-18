@@ -1,21 +1,33 @@
-import { redirect } from "next/navigation";
-import { Header, Footer } from "@/components";
+import { StoreCard } from "@/components";
+import { Store } from "@/types";
 
-export default function Home({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
-  // You can access search params like this:
-  // const category = searchParams.category;
-  // const query = searchParams.q;
-  console.log("Test parameter:", searchParams.test);
+async function getHighlightedStores() {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_APP_URL}/api/stores/highlight`,
+    process.env.NODE_ENV === "development"
+      ? {
+          cache: "no-store",
+        }
+      : undefined
+  );
+  return res.json();
+}
+
+export default async function Home() {
+  const { data: highlightedStores } = await getHighlightedStores();
 
   return (
-    <>
-      <Header withSearchBar={false} withNavLinks />
-      <div className="mt-header">Home</div>
-      <Footer />
-    </>
+    <div>
+      <div className="h-[100px] bg-red-500 text-white"> banner</div>
+      <div
+        className="grid grid-cols-4 gap-4 py-[16px] mx-[48px] justify-items-center"
+        style={{ border: "1px solid green" }}
+      >
+        {highlightedStores.map((store: Store) => (
+          <StoreCard key={store.id} store={store} />
+        ))}
+      </div>
+      <div>bezold guide 3 steps or 3 features</div>
+    </div>
   );
 }

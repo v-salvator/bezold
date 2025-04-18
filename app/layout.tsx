@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Noto_Sans_Mono, Noto_Sans_TC } from "next/font/google";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { Provider } from "jotai";
+import { Header, Footer } from "@/components";
 
 const notoSansMono = Noto_Sans_Mono({
   style: ["normal"],
@@ -37,7 +38,11 @@ export default function RootLayout({
     >
       <body>
         <Provider>
-          <AntdRegistry>{children}</AntdRegistry>
+          <AntdRegistry>
+            <Header withSearchBar={false} withNavLinks />
+            <div className="mt-header">{children}</div>
+            <Footer />
+          </AntdRegistry>
         </Provider>
       </body>
     </html>

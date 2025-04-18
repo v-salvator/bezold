@@ -107,4 +107,34 @@ export const getStoreById = async (storeId: string) => {
   }
 };
 
+export const getHighlightedStores = async () => {
+  const storesRef = db.collection(COLLECTION);
+
+  const snapshot = await storesRef.orderBy("updateTime", "desc").limit(8).get();
+
+  const stores: Store[] = []; // TODO: modify the type here
+  snapshot.forEach((doc) => {
+    const storeData = doc.data();
+    const store = {
+      id: doc.id,
+      ...storeData,
+      createTime: storeData.createTime.toDate(),
+      updateTime: storeData.updateTime.toDate(),
+    } as Store;
+    stores.push(store);
+  });
+
+  // * transforming image path to visible url
+  for (let storeData of stores) {
+    const hasImage = storeData?.images?.length > 0;
+    let images: string[] = [];
+    // * get images here
+    if (hasImage) {
+      images = await getImagesByPath(storeData.images);
+      storeData.images = images;
+    }
+  }
+  return stores;
+};
+
 // TODO: create store
