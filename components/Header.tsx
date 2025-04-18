@@ -7,10 +7,7 @@ import { cn } from "@/utils";
 
 const LogoLink = ({ className }: { className: string }) => {
   return (
-    <Link
-      href="/store-list?category=all"
-      className={cn("w-[144px] h-[32px] relative", className)}
-    >
+    <Link href="/" className={cn("w-[144px] h-[32px] relative", className)}>
       <AnimatedImage
         className="bg-transparent"
         isRounded={false}
@@ -21,22 +18,49 @@ const LogoLink = ({ className }: { className: string }) => {
   );
 };
 
-export default function Header({ withSearchBar = true }) {
+export default function Header({ withSearchBar = true, withNavLinks = false }) {
   return (
     <div
       className={cn(
-        "h-header px-[16px] w-[100%] bg-primary",
+        // Layout & Positioning
+        "fixed top-0 z-10",
+        "h-header w-[100%]",
+        // Spacing & Background
+        "px-[16px] bg-primary",
+        // Border
         "border-b-[1px] border-b-gray-200",
-        "flex items-center justify-between",
-        "fixed top-0 z-10"
+        // Flexbox
+        "flex items-center justify-between"
       )}
     >
       <LogoLink className="max-sm:hidden" />
       {withSearchBar && (
-        <SearchBar className="absolute left-1/2 -translate-x-1/2 max-sm:hidden" />
+        <>
+          <SearchBar className="absolute left-1/2 -translate-x-1/2 max-sm:hidden" />
+          <SearchDrawer className="absolute left-1/2 -translate-x-1/2 w-[80%] sm:hidden" />
+        </>
       )}
-      {withSearchBar && (
-        <SearchDrawer className="absolute left-1/2 -translate-x-1/2 w-[80%] sm:hidden" />
+      {withNavLinks && (
+        <div>
+          <Link className="mx-[4px] font-extralight" href="/about">
+            關於我們
+          </Link>
+          <Link
+            className="mx-[4px] font-extralight"
+            href="/store-list?category=all"
+          >
+            店家列表
+          </Link>
+          <Link className="mx-[4px] font-extralight" href="/about">
+            立即刊登
+          </Link>
+          <Link className="mx-[4px] font-extralight sliding-bg" href="/about">
+            如何付款
+          </Link>
+          <Link className="mx-[4px] font-extralight cross-swap" href="/about">
+            加入line
+          </Link>
+        </div>
       )}
     </div>
   );
