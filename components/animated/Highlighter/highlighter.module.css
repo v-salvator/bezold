@@ -1,0 +1,47 @@
+.highlighter {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 32px;
+  width: 100%;
+
+  transform-style: preserve-3d;
+  transform: perspective(1000px);
+}
+
+.card {
+  --backward-distance: -300px;
+  --forward-distance: 50px;
+  --default-brightness: 1;
+  --unactive-brightness: 0.8;
+  --unactive-blur: 3px;
+  filter: brightness(var(--default-brightness));
+  /* border: 1px solid blue; */
+
+  /* items currently hovered */
+  &:hover {
+    transform: translateZ(var(--forward-distance));
+  }
+
+  /* items on the right */
+  &:hover + * {
+    transform: translateZ(var(--backward-distance));
+    filter: brightness(var(--unactive-brightness)) blur(var(--unactive-blur));
+  }
+
+  &:hover + * + * {
+    transform: translateZ(var(--backward-distance));
+    filter: brightness(var(--unactive-brightness)) blur(var(--unactive-blur));
+  }
+
+  /* items on the left */
+  &:has(+ *:hover) {
+    transform: translateZ(var(--backward-distance));
+    filter: brightness(var(--unactive-brightness)) blur(var(--unactive-blur));
+  }
+
+  &:has(+ * + *:hover) {
+    transform: translateZ(var(--backward-distance));
+    filter: brightness(var(--unactive-brightness)) blur(var(--unactive-blur));
+  }
+}

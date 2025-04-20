@@ -1,5 +1,7 @@
 import { ReactNode } from "react";
 import { cn } from "@/utils";
+import { Highlighter } from "@/components/animated";
+import { CurveCard } from "@/components";
 
 const Section = ({
   children,
@@ -85,20 +87,31 @@ export default async function About() {
         <Paragraph>
           每一個創業者都知道，成功不僅僅取決於一個方面，而是需要多方面的配合與支持。選擇對的行銷策略與高效的工具，能夠大大提高創業者的成功機率，縮短成長時間，減少風險。
         </Paragraph>
-        <div className="flex gap-[32px] justify-between">
-          <Paragraph>
-            <strong>創業思維</strong>
-            ，是成功的根基。創業者需要具備創新思維和解決問題的能力。每一個創業的起點都是一個未解的問題或一個未滿足的市場需求。創業者需要抓住市場空隙，快速反應並提供相應的解決方案。而這個過程中，行銷策略的運用至關重要。
-          </Paragraph>
-          <Paragraph>
-            <strong>行銷</strong>
-            ，則是將創業者的產品或服務傳遞給潛在客戶的橋樑。創業者必須明確自己的目標市場，並根據不同的市場需求制定精確的行銷計劃。在這個過程中，行銷工具的運用能大大提高行銷效率，並幫助創業者掌握關鍵數據，以做出精準的行銷決策。
-          </Paragraph>
-          <Paragraph>
-            <strong>工具</strong>
-            ，則是創業過程中的無形助手。隨著科技發展，這些工具能夠幫助創業者在繁雜的業務中輕鬆找到重點。選擇適合的工具不僅能節省時間，還能提高營運效率，讓創業者專注於最重要的業務發展和創新。
-          </Paragraph>
-        </div>
+        <Highlighter
+          cards={[
+            <CurveCard
+              key="mindset"
+              title="創業思維"
+              content={
+                "創業者需要具備創新思維和解決問題的能力。每一個創業的起點都是一個未解的問題或一個未滿足的市場需求。創業者需要抓住市場空隙，快速反應並提供相應的解決方案。而這個過程中，行銷策略的運用至關重要。"
+              }
+            ></CurveCard>,
+            <CurveCard
+              key="marketing"
+              title="行銷"
+              content={
+                "則是將創業者的產品或服務傳遞給潛在客戶的橋樑。創業者必須明確自己的目標市場，並根據不同的市場需求制定精確的行銷計劃。在這個過程中，行銷工具的運用能大大提高行銷效率，並幫助創業者掌握關鍵數據，以做出精準的行銷決策。"
+              }
+            ></CurveCard>,
+            <CurveCard
+              key="tool"
+              title="工具"
+              content={
+                "則是創業過程中的無形助手。隨著科技發展，這些工具能夠幫助創業者在繁雜的業務中輕鬆找到重點。選擇適合的工具不僅能節省時間，還能提高營運效率，讓創業者專注於最重要的業務發展和創新。"
+              }
+            />,
+          ]}
+        ></Highlighter>
         <Paragraph>
           BEZOLD
           除了提供輕鬆上手的頂讓平台，還致力於打造全方位的創業資訊網。我們的使命是幫助創業者實現最佳的收益來源，無論是在選擇頂讓店面，還是規劃業務發展上。

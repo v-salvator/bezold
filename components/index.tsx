@@ -5,3 +5,4 @@ export { default as SearchDrawer } from "./SearchFilter/Drawer";
 export { default as Header } from "./Header";
 export { default as Footer } from "./Footer";
 export { default as StoreSliderCard } from "./StoreSliderCard";
+export { default as CurveCard } from "./CurveCard";
