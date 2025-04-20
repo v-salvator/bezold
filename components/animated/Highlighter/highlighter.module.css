@@ -2,8 +2,9 @@
   display: flex;
   justify-content: center;
   align-items: stretch;
-  gap: 32px;
   width: 100%;
+
+  @apply flex-col gap-[16px] md:flex-row md:gap-[32px];
 
   transform-style: preserve-3d;
   transform: perspective(1000px);
