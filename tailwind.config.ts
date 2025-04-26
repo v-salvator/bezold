@@ -31,6 +31,9 @@ const config: Config = {
       backgroundColor: {
         primary: "var(--foreground-rgb)",
       },
+      fontFamily: {
+        noto: ["var(--font-noto-sans-mono)", "var(--font-noto-sans-tc)"],
+      },
     },
   },
   plugins: [],

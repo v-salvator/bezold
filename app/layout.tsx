@@ -5,18 +5,12 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { Provider } from "jotai";
 
 const notoSansMono = Noto_Sans_Mono({
-  style: ["normal"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   subsets: ["latin"],
-  display: "swap",
   variable: "--font-noto-sans-mono",
 });
 
 const notoSansTC = Noto_Sans_TC({
-  style: ["normal"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   subsets: ["latin"],
-  display: "swap",
   variable: "--font-noto-sans-tc",
 });
 
@@ -33,7 +27,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${notoSansMono.variable} ${notoSansTC.variable}`}
+      className={`${notoSansMono.variable} ${notoSansTC.variable} font-noto`}
     >
       <body>
         <Provider>
