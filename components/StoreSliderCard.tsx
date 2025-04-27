@@ -5,7 +5,6 @@ import { cn, curencyFormatter } from "@/utils";
 
 import Image from "next/image";
 import TagIcon from "./TagIcon";
-import { motion } from "framer-motion";
 
 const StoreSliderCard = ({ store }: { store: Store }) => {
   const {
@@ -40,8 +39,10 @@ const StoreSliderCard = ({ store }: { store: Store }) => {
           </div>
         ))}
       </div>
-      <div className="w-[180px] h-[200px] mb-[12px] relative mx-auto ">
+
+      <div className="w-[180px] h-[200px] mb-[12px] relative mx-auto">
         <Image
+          className="rounded"
           src={store.images?.[0] ? store.images?.[0] : "/assets/bezold.png"}
           fill
           alt={store.storeName}
