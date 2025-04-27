@@ -27,7 +27,7 @@ export default async function Home() {
 
       <div
         className={cn(
-          "max-w-[376px] rounded bg-white mx-auto shadow-xl",
+          "max-w-[376px] rounded bg-white mx-auto hover:shadow-xl",
           "grid grid-cols-2 gap-y-[24px] justify-items-center",
           "py-[16px]",
           "md:grid-cols-4 md:gap-4 md:p-[16px] md:max-w-[900px]"
