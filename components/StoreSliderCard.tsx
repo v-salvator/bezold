@@ -1,7 +1,8 @@
 import * as React from "react";
 import { Store } from "@/types";
 import Link from "next/link";
-import { cn, curencyFormatter } from "@/utils";
+import { curencyFormatter } from "@/utils";
+import { cn } from "@/lib/utils";
 
 import Image from "next/image";
 import TagIcon from "./TagIcon";
@@ -22,7 +23,11 @@ const StoreSliderCard = ({ store }: { store: Store }) => {
 
   return (
     <Link
-      className="inline-block w-[200px] h-[350px] bg-gray-100 shadow-lg rounded border-[2px] border-slate-500"
+      className={cn(
+        "inline-block bg-gray-100 shadow-lg rounded border-[2px] border-slate-500",
+        "w-[180px] h-[330px] ",
+        "md:w-[200px] md:h-[350px]"
+      )}
       href={`/store/${id}`}
       target="_blank"
       // style={{
@@ -40,7 +45,13 @@ const StoreSliderCard = ({ store }: { store: Store }) => {
         ))}
       </div>
 
-      <div className="w-[180px] h-[200px] mb-[12px] relative mx-auto">
+      <div
+        className={cn(
+          "mb-[12px] relative mx-auto",
+          "w-[160px] h-[180px]",
+          "md:w-[180px] md:h-[200px]"
+        )}
+      >
         <Image
           className="rounded"
           src={store.images?.[0] ? store.images?.[0] : "/assets/bezold.png"}
@@ -51,7 +62,7 @@ const StoreSliderCard = ({ store }: { store: Store }) => {
 
       <div className="mx-[10px] p-[4px] shadow">
         <div className="text-[10px]">{`${city} ${district}`}</div>
-        <div className="text-slate-500 line-clamp-1 text-[12px]">
+        <div className="text-slate-500 line-clamp-1 text-[10px]">
           {description}
         </div>
         <div className="h-[1px] bg-slate-200 my-[8px]"></div>
