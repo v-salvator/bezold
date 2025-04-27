@@ -14,10 +14,6 @@ const mockData = [
     key: "all",
   },
   ...STORE_CATEGORIES,
-  {
-    label: "關於",
-    key: "about",
-  },
 ];
 
 interface SwitcherProps {
@@ -51,12 +47,7 @@ const Switcher = ({ className, style }: SwitcherProps) => {
         onChange={(selectedKey) => {
           const newSearchParams = new URLSearchParams(searchParams.toString());
           newSearchParams.set("category", selectedKey);
-
-          if (selectedKey !== "about") {
-            router.push(`/store-list?${newSearchParams.toString()}`);
-          } else {
-            router.push(`/about`);
-          }
+          router.push(`/store-list?${newSearchParams.toString()}`);
         }}
       />
     </div>

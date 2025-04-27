@@ -10,7 +10,7 @@ import LineIcon from "./icon/LineIcon";
 
 const Footer = () => {
   return (
-    <footer className="bg-black text-white py-8 px-6">
+    <footer className="bg-black text-white py-8 px-6 min-h-[100px]">
       <div className="flex flex-col md:flex-row justify-between items-center md:justify-start gap-2">
         {/* Logo */}
         <div className="mb-4 md:mb-0">
