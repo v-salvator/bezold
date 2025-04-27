@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { cn } from "@/utils";
 import { Highlighter } from "@/components/animated";
 import { CurveCard } from "@/components";
+import { Spotlight } from "@/components/motion-primitives/spotlight";
 
 const Section = ({
   children,
@@ -132,19 +133,36 @@ export default async function About() {
       </Section>
 
       <Section>
+        <div className="relative overflow-hidden rounded-xl bg-transparent p-[1.4px] display-inline-block shadow inline-flex">
+          <Spotlight
+            className="from-red-400 via-red-500 to-red-600"
+            size={120}
+          />
+          <div className="box-border relative h-full w-full rounded-xl bg-white">
+            <blockquote>
+              <p className="p-[16px] text-left">
+                <span className="block">“</span>
+                <span className="px-[16px] inline-flex">
+                  You can’t connect the dots looking forward ;
+                  <br />
+                  you can only connect them looking backwards.
+                </span>
+                <br />
+                <span className="block text-right">&quot;</span>
+                <span className="block text-right">– Steve Jobs</span>
+              </p>
+            </blockquote>
+          </div>
+        </div>
+      </Section>
+
+      <Section>
         <H3>加入 BEZOLD，探索各種可能性</H3>
         <Paragraph>
           加入 BEZOLD 輕鬆找到最合適的店面，並利用現有資源快速啟動事業。
           <DoubleBreak />
           讓我們開創新的事業巔峰！
         </Paragraph>
-
-        <blockquote>
-          <Paragraph>
-            “You can’t connect the dots looking forward ; you can only connect
-            them looking backwards.&quot; – Steve Jobs
-          </Paragraph>
-        </blockquote>
       </Section>
     </div>
   );
