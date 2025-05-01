@@ -4,6 +4,7 @@ import { Store } from "@/types";
 import { getHighlightedStores } from "@/firebase/serverUtils";
 import { GlowEffect } from "@/components/motion-primitives/glow-effect";
 import { cn } from "@/lib/utils";
+import { Banner } from "@/components/home";
 
 const glowingArr = [
   ["#0894FF", "#C959DD", "#FF2E54", "#FF9004"],
@@ -17,7 +18,7 @@ export default async function Home() {
 
   return (
     <div>
-      <div className="h-[100px] bg-red-500 text-white"> banner</div>
+      <Banner />
       <Slider3D
         cards={highlightedStores.map((store: Store) => (
           <StoreSliderCard key={store.id} store={store} />
