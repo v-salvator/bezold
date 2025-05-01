@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 export default function Banner() {
   return (
-    <div className="px-[16px]">
+    <div className={cn("px-[32px] w-[300px] mx-auto", "md:w-[100%]")}>
       <div
         className={cn(
           "flex flex-col gap-y-[16px]",
