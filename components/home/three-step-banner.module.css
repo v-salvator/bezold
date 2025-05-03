@@ -1,0 +1,15 @@
+.accordionTrigger {
+  @apply w-full text-left text-zinc-950 dark:text-zinc-50;
+}
+
+.accordionTriggerTitle {
+  @apply flex items-center justify-between font-[400] text-lg;
+}
+
+.accordionTriggerIcon {
+  @apply h-4 w-4 text-zinc-200 transition-transform duration-200;
+}
+
+.accordionContentParagraph {
+  @apply pt-[12px] text-sm dark:text-zinc-50;
+}

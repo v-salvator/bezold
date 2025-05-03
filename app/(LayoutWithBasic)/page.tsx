@@ -4,7 +4,7 @@ import { Store } from "@/types";
 import { getHighlightedStores } from "@/firebase/serverUtils";
 import { GlowEffect } from "@/components/motion-primitives/glow-effect";
 import { cn } from "@/lib/utils";
-import { Banner } from "@/components/home";
+import { Banner, ThreeStepBanner } from "@/components/home";
 
 const glowingArr = [
   ["#0894FF", "#C959DD", "#FF2E54", "#FF9004"],
@@ -62,7 +62,7 @@ export default async function Home() {
         ))}
       </div>
 
-      <div>bezold guide 3 steps or 3 features</div>
+      <ThreeStepBanner />
     </div>
   );
 }
