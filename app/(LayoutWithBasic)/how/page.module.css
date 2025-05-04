@@ -1,0 +1,21 @@
+.info {
+  @apply mt-[42px] relative;
+}
+.info-title {
+  @apply font-bold mb-[12px] text-xl ml-[12px] md:ml-[-24px] md:text-2xl;
+}
+.info-card {
+  @apply shadow-md rounded-xl p-[2px] relative w-auto mx-[16px] md:w-auto;
+}
+
+.info-card-content {
+  @apply bg-white rounded-xl relative p-[6px] text-sm md:p-[32px] md:text-base;
+
+  & :global(.ant-table-cell) {
+    @apply !p-[8px] md:!p-[16px];
+  }
+}
+
+.info-card-content-inner-header {
+  @apply font-bold ml-[-2px] md:ml-[-8px];
+}

@@ -51,11 +51,8 @@ export default function Header({ withSearchBar = true, withNavLinks = false }) {
           >
             店家列表
           </Link>
-          <Link className="mx-[4px] font-extralight" href="/about">
-            立即刊登
-          </Link>
-          <Link className="mx-[4px] font-extralight sliding-bg" href="/about">
-            如何付款
+          <Link className="mx-[4px] font-extralight sliding-bg" href="/how">
+            如何刊登
           </Link>
           <Link className="mx-[4px] font-extralight cross-swap" href="/about">
             加入line
