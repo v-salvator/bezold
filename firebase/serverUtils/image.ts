@@ -1,7 +1,7 @@
 import { db, bucket } from "@/firebase/server";
 import { FieldValue } from "firebase-admin/firestore";
 import dayjs from "dayjs";
-import { COLLECTIONS } from "./constants";
+import { COLLECTIONS } from "@/firebase/constants";
 
 const COLLECTION = COLLECTIONS.STORE;
 
@@ -17,7 +17,7 @@ export const uploadImageFromLocal = async ({
   fileName: string;
 }) => {
   // TODO: might need a dynamic file name
-  const destination = `mockStore/${storeId}/${fileName}`;
+  const destination = `${COLLECTION}/${storeId}/${fileName}`;
   const options = {
     destination,
     validation: "crc32c",

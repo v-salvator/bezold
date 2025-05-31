@@ -13,8 +13,9 @@ import {
 import { db } from "@/firebase/client";
 
 import type { Store, StoreDoc } from "@/types";
+import { COLLECTIONS } from "@/firebase/constants";
 
-const COLLECTION = "mockStore";
+const COLLECTION = COLLECTIONS.STORE;
 
 const storeConverter = {
   // * try to figure out how to use toFirestore, dosn't seem to work maybe seems only work on setDoc not upateDoc
