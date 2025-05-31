@@ -14,7 +14,7 @@ export default function Banner() {
         )}
       >
         <TextEffect per="char" delay={0.5}>
-          買下事業
+          買下事業測試版456
         </TextEffect>
         <TextEffect per="char" delay={1}>
           複製成功模式
