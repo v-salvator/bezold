@@ -51,7 +51,7 @@ export default function EditStore({ params }: EditStoreProps) {
         location: storeCloned.location,
         description: storeCloned.description,
         price: Number(storeCloned.price),
-        tags: storeCloned.tags,
+        tags: storeCloned.tags ?? [],
         category: storeCloned.category,
         city: storeCloned.city,
         district: storeCloned.district,

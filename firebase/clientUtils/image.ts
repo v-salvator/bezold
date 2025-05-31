@@ -13,8 +13,9 @@ import {
   arrayRemove,
 } from "firebase/firestore";
 import { Store } from "@/types";
+import { COLLECTIONS } from "@/firebase/constants";
 
-const COLLECTION = "mockStore";
+const COLLECTION = COLLECTIONS.STORE;
 
 export const uploadStoreImageByFile = async (
   storeId: Store["id"],

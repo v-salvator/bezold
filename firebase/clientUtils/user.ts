@@ -10,8 +10,9 @@ import {
 } from "firebase/firestore";
 import { db } from "@/firebase/client";
 import type { User, UserDoc } from "@/types";
+import { COLLECTIONS } from "@/firebase/constants";
 
-const COLLECTION = "mockUser";
+const COLLECTION = COLLECTIONS.USER;
 
 const userConverter = {
   // * try to figure out how to use toFirestore, dosn't seem to work maybe seems only work on setDoc not upateDoc

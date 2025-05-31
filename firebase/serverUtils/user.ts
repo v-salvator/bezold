@@ -1,6 +1,6 @@
 import { db } from "@/firebase/server";
 import { User, UserBase } from "@/types";
-import { COLLECTIONS } from "./constants";
+import { COLLECTIONS } from "@/firebase/constants";
 
 const COLLECTION = COLLECTIONS.USER;
 

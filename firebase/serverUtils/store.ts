@@ -2,7 +2,7 @@ import { db } from "@/firebase/server";
 import { Store, STORE_CATEGORY } from "@/types";
 import { getImagesByPath } from "./image";
 import { getUserById } from "./user";
-import { COLLECTIONS } from "./constants";
+import { COLLECTIONS } from "@/firebase/constants";
 
 const COLLECTION = COLLECTIONS.STORE;
 

@@ -14,7 +14,9 @@ export default function Banner() {
         )}
       >
         <TextEffect per="char" delay={0.5}>
-          買下事業
+          {process.env.NEXT_PUBLIC_ENV_VERSION === "dev"
+            ? "買下事業(測試版)"
+            : "買下事業"}
         </TextEffect>
         <TextEffect per="char" delay={1}>
           複製成功模式
