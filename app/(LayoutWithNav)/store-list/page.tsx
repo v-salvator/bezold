@@ -1,29 +1,23 @@
 import { StoreCard } from "@/components";
 import { Store } from "@/types";
 import { cn } from "@/utils";
+import { getStores } from "@/firebase/serverUtils";
 
 interface StorePageProps {
   searchParams: URLSearchParams;
 }
 
-async function getStores(searchParams: StorePageProps["searchParams"]) {
+async function getStoresData(searchParams: StorePageProps["searchParams"]) {
   const storeSearchParams = new URLSearchParams(searchParams);
-  // TODO: add get store by category
-  const res = await fetch(
-    `${
-      process.env.NEXT_PUBLIC_APP_URL
-    }/api/stores?${storeSearchParams.toString()}`,
-    process.env.NODE_ENV === "development"
-      ? {
-          cache: "no-store",
-        }
-      : undefined
-  );
-  return res.json();
+  const searchObj = Object.fromEntries(storeSearchParams);
+  // * query data from firebase
+  const mockStoresByDB = await getStores(searchObj);
+  return mockStoresByDB;
 }
 
 export default async function Home({ searchParams }: StorePageProps) {
-  const { data: stores } = await getStores(searchParams);
+  const stores = await getStoresData(searchParams);
+
   if (stores.length === 0) {
     return (
       <div className="flex items-center justify-center pt-[150px]">

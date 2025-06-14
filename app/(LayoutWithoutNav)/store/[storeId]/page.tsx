@@ -2,24 +2,12 @@ import { Tag, Carousel, Divider } from "antd";
 import { curencyFormatter } from "@/utils";
 import { AnimatedImage } from "@/components/animated";
 import type { Metadata, ResolvingMetadata } from "next";
+import { getStoreById } from "@/firebase/serverUtils";
+import dayjs from "dayjs";
 
 import type { Store } from "@/types";
 interface StoreProps {
   params: { storeId: string };
-}
-
-async function getStoreById(storeId: StoreProps["params"]["storeId"]) {
-  // TODO: add get store by category
-  console.log("!!!!!Enviroment!!!!!!->", process.env.NODE_ENV);
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_APP_URL}/api/stores/${storeId}`,
-    process.env.NODE_ENV === "development"
-      ? {
-          cache: "no-store",
-        }
-      : undefined
-  );
-  return res.json();
 }
 
 export async function generateMetadata(
@@ -30,7 +18,19 @@ export async function generateMetadata(
   const id = (await params).storeId;
 
   // fetch data
-  const { data: store } = await getStoreById(id);
+  const store = await getStoreById(id);
+  if (!store) {
+    return {
+      title: `Bezold - Store not found`,
+      openGraph: {
+        title: `Bezold - Store not found`,
+        siteName: `Bezold - Store not found`,
+        description: "Store not found",
+        url: `${process.env.NEXT_PUBLIC_APP_URL}/store/${id}`,
+        images: ["/assets/bezold.png"],
+      },
+    };
+  }
 
   return {
     title: `Bezold - ${store.storeName}`,
@@ -46,7 +46,12 @@ export async function generateMetadata(
 
 export default async function Store({ params }: StoreProps) {
   const { storeId } = params;
-  const { data: store }: { data: Store } = await getStoreById(storeId);
+  const store = await getStoreById(storeId);
+
+  if (!store) {
+    throw new Error("Store not found");
+  }
+
   const {
     storeName,
     location,
@@ -97,7 +102,9 @@ export default async function Store({ params }: StoreProps) {
         </Divider>
         <div className="my-[12px]">聯絡人: {userInfo?.userName}</div>
         <div className="my-[12px]">聯絡手機: {userInfo?.phone}</div>
-        <div className="my-[12px] text-[12px]">{`最近更新時間: ${updateTime}`}</div>
+        <div className="my-[12px] text-[12px]">{`最近更新時間: ${dayjs(
+          updateTime
+        ).format("YYYY/MM/DD")}`}</div>
       </div>
     </div>
   );

@@ -25,18 +25,18 @@ const Footer = () => {
 
         {/* Navigation Links */}
         <nav className="flex-1 flex flex-wrap justify-start gap-6 mb-4 md:mb-0 md:pl-32">
-          <Link href="/sell" className="hover:text-gray-300">
+          <Link href="/how" className="hover:text-gray-300">
             刊登
           </Link>
           <Link href="/store-list?category=all" className="hover:text-gray-300">
             購買
           </Link>
-          <Link href="/learn" className="hover:text-gray-300">
+          {/* <Link href="/learn" className="hover:text-gray-300">
             創業知識
-          </Link>
-          <Link href="/about" className="hover:text-gray-300">
+          </Link> */}
+          {/* <Link href="/about" className="hover:text-gray-300">
             關於我們
-          </Link>
+          </Link> */}
           {/* <Link href="/success-stories" className="hover:text-gray-300">
                 成功故事
               </Link> */}
