@@ -3,6 +3,7 @@ import { curencyFormatter } from "@/utils";
 import { AnimatedImage } from "@/components/animated";
 import type { Metadata, ResolvingMetadata } from "next";
 import { getStoreById } from "@/firebase/serverUtils";
+import dayjs from "dayjs";
 
 import type { Store } from "@/types";
 interface StoreProps {
@@ -101,7 +102,9 @@ export default async function Store({ params }: StoreProps) {
         </Divider>
         <div className="my-[12px]">聯絡人: {userInfo?.userName}</div>
         <div className="my-[12px]">聯絡手機: {userInfo?.phone}</div>
-        <div className="my-[12px] text-[12px]">{`最近更新時間: ${updateTime}`}</div>
+        <div className="my-[12px] text-[12px]">{`最近更新時間: ${dayjs(
+          updateTime
+        ).format("YYYY/MM/DD")}`}</div>
       </div>
     </div>
   );
