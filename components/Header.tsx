@@ -42,9 +42,9 @@ export default function Header({ withSearchBar = true, withNavLinks = false }) {
       )}
       {withNavLinks && (
         <div>
-          <Link className="mx-[4px] font-extralight" href="/about">
+          {/* <Link className="mx-[4px] font-extralight" href="/about">
             關於我們
-          </Link>
+          </Link> */}
           <Link
             className="mx-[4px] font-extralight"
             href="/store-list?category=all"

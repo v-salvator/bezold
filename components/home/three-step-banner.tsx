@@ -110,9 +110,9 @@ export default function ThreeStepBanner() {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-      <div className="w-[300px] h-[300px] bg-zinc-200 rounded-xl relative hidden md:block">
+      {/* <div className="w-[300px] h-[300px] bg-zinc-200 rounded-xl relative hidden md:block">
         image of three
-      </div>
+      </div> */}
     </div>
   );
 }
