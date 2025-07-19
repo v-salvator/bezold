@@ -38,6 +38,7 @@ export default function RootLayout({
                 token: {
                   fontFamily:
                     "var(--font-noto-sans-mono), var(--font-noto-sans-tc)",
+                  colorPrimary: "#ff4a31",
                 },
               }}
             >

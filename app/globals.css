@@ -28,7 +28,15 @@
   border: 1px solid red;
 }
 
-body {
+/* Text Selection Color */
+::selection {
+  background-color: #ff4a31;
+  color: white;
+}
+
+::-moz-selection {
+  background-color: #ff4a31;
+  color: white;
 }
 
 /* link animations */
