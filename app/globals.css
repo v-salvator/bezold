@@ -14,7 +14,7 @@
   );
 
   /* link animation color */
-  --animation-color: red;
+  --animation-color: #ff4a31;
 }
 
 /* dark mode*/
@@ -36,8 +36,8 @@ body {
 a.sliding-bg {
   box-shadow: inset 0 0 0 0 var(--animation-color);
   color: var(--animation-color);
-	padding: 0 2px;
-  transition: color .3s ease-in-out, box-shadow .3s ease-in-out;
+  padding: 0 2px;
+  transition: color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
   border-radius: 2px;
 }
 a.sliding-bg:hover {
@@ -62,8 +62,8 @@ a.cross-swap {
   transition: all 0.3s ease-in-out;
 }
 
-a.cross-swap:before{
-  content: '';
+a.cross-swap:before {
+  content: "";
   background: var(--animation-color);
   display: block;
   position: absolute;
@@ -75,9 +75,9 @@ a.cross-swap:before{
 }
 
 a.cross-swap:hover {
- background-position: 0;
+  background-position: 0;
 }
 
-a.cross-swap:hover::before{
+a.cross-swap:hover::before {
   width: 100%;
 }
