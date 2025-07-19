@@ -63,7 +63,7 @@ export default async function Home() {
         ))}
       </div>
 
-      <div className="flex w-fit mx-auto my-[32px] pt-[12px]">
+      <div className="flex w-fit mx-auto my-[32px] pt-[12px] px-[32px]">
         <Steps
           className="mx-auto"
           progressDot
