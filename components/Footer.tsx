@@ -7,6 +7,7 @@ import {
   LinkedinFilled,
 } from "@ant-design/icons";
 import LineIcon from "./icon/LineIcon";
+import ThreadsIcon from "./icon/ThreadsIcon";
 
 const Footer = () => {
   return (
@@ -58,6 +59,9 @@ const Footer = () => {
           </a>
           <a href="#" className="hover:text-gray-300" aria-label="LinkedIn">
             <LinkedinFilled className="text-2xl" />
+          </a>
+          <a href="#" className="hover:text-gray-300" aria-label="Threads">
+            <ThreadsIcon className="text-2xl" />
           </a>
         </div>
       </div>
