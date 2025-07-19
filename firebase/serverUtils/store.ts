@@ -1,5 +1,5 @@
 import { db } from "@/firebase/server";
-import { Store, STORE_CATEGORY } from "@/types";
+import { Store, STORE_CATEGORY, STORE_TAG } from "@/types";
 import { getImagesByPath } from "./image";
 import { getUserById } from "./user";
 import { COLLECTIONS } from "@/firebase/constants";
@@ -110,7 +110,11 @@ export const getStoreById = async (storeId: string) => {
 export const getHighlightedStores = async () => {
   const storesRef = db.collection(COLLECTION);
 
-  const snapshot = await storesRef.orderBy("updateTime", "desc").limit(8).get();
+  const snapshot = await storesRef
+    .where("tags", "array-contains", STORE_TAG.RECOMMENDED)
+    .orderBy("updateTime", "desc")
+    .limit(8)
+    .get();
 
   const stores: Store[] = []; // TODO: modify the type here
   snapshot.forEach((doc) => {

@@ -54,7 +54,11 @@ export default function Header({ withSearchBar = true, withNavLinks = false }) {
           <Link className="mx-[4px] font-extralight sliding-bg" href="/how">
             如何刊登
           </Link>
-          <Link className="mx-[4px] font-extralight cross-swap" href="/about">
+          <Link
+            className="mx-[4px] font-extralight cross-swap"
+            href="https://line.me/R/ti/p/@316zvvmj"
+            target="_blank"
+          >
             加入line
           </Link>
         </div>
