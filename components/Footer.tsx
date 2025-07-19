@@ -14,7 +14,7 @@ const Footer = () => {
     <footer className="bg-black text-white py-8 px-6 min-h-[100px]">
       <div className="flex flex-col md:flex-row justify-between items-center md:justify-start gap-2">
         {/* Logo */}
-        <div className="mb-4 md:mb-0">
+        <Link className="mb-4 md:mb-0" href="/">
           <Image
             src="/bezold-removebg-rect.png"
             alt="bezold logo"
@@ -22,7 +22,7 @@ const Footer = () => {
             height={40}
             className="h-auto"
           />
-        </div>
+        </Link>
 
         {/* Navigation Links */}
         <nav className="flex-1 flex flex-wrap justify-start gap-6 mb-4 md:mb-0 md:pl-32">
