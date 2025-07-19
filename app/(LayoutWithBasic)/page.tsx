@@ -4,7 +4,8 @@ import { Store } from "@/types";
 import { getHighlightedStores } from "@/firebase/serverUtils";
 import { GlowEffect } from "@/components/motion-primitives/glow-effect";
 import { cn } from "@/lib/utils";
-import { Banner, ThreeStepBanner } from "@/components/home";
+import { Banner } from "@/components/home";
+import { Steps } from "antd";
 
 const glowingArr = [
   ["#0894FF", "#C959DD", "#FF2E54", "#FF9004"],
@@ -62,7 +63,49 @@ export default async function Home() {
         ))}
       </div>
 
-      <ThreeStepBanner />
+      <div className="flex w-fit mx-auto my-[32px] pt-[12px]">
+        <Steps
+          className="mx-auto"
+          progressDot
+          direction="vertical"
+          current={3}
+          items={[
+            {
+              title: "步驟一：換個角度看財富",
+              description: (
+                <>
+                  你不一定要從零開始創業，買下一間已經穩定賺錢的生意，可能是更聰明的選擇。
+                  <br />
+                  我們也將分享成功案例及行銷工具，幫助你複製成功模式！
+                </>
+              ),
+            },
+            {
+              title: "步驟二：實際出手行動",
+              description: (
+                <>
+                  Bezold 提供： 專業的「買賣平台」與成功案例分享
+                  <br />
+                  從挑選佈局、接手生意、行銷策略等完整教學
+                  如何復盤、建立每月穩定現金流
+                </>
+              ),
+            },
+            {
+              title: "步驟三：加入 Bezold 社群",
+              description: (
+                <>
+                  別再孤軍奮戰！
+                  <br />
+                  你將加入一個由買家、賣家、專家組成的強大社群，獲得指導、回饋與人脈。
+                  <br />
+                  有同路人，才走得更快、更遠。
+                </>
+              ),
+            },
+          ]}
+        />
+      </div>
     </div>
   );
 }

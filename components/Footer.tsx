@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-  TwitterCircleFilled,
+  InstagramFilled,
   YoutubeFilled,
   FacebookFilled,
   LinkedinFilled,
@@ -45,22 +45,52 @@ const Footer = () => {
 
         {/* Social Media Icons */}
         <div className="flex gap-4">
-          <a href="#" className="hover:text-gray-300" aria-label="Twitter">
-            <TwitterCircleFilled className="text-2xl" />
+          <a
+            href="https://www.instagram.com/bezold.tw?igsh=enVjMDUwZWh3dnJy&utm_source=qr"
+            className="hover:text-gray-300"
+            aria-label="Instagram"
+            target="_blank"
+          >
+            <InstagramFilled className="text-2xl" />
           </a>
-          <a href="#" className="hover:text-gray-300" aria-label="YouTube">
+          <a
+            href="https://www.youtube.com/@Bezold-v4u"
+            className="hover:text-gray-300"
+            aria-label="YouTube"
+            target="_blank"
+          >
             <YoutubeFilled className="text-2xl" />
           </a>
-          <a href="#" className="hover:text-gray-300" aria-label="Line">
+          <a
+            href="https://line.me/R/ti/p/@316zvvmj"
+            className="hover:text-gray-300"
+            aria-label="Line"
+            target="_blank"
+          >
             <LineIcon className="text-2xl" />
           </a>
-          <a href="#" className="hover:text-gray-300" aria-label="Facebook">
+          <a
+            href="https://www.facebook.com/share/19BX272yzL/?mibextid=wwXIfr"
+            className="hover:text-gray-300"
+            aria-label="Facebook"
+            target="_blank"
+          >
             <FacebookFilled className="text-2xl" />
           </a>
-          <a href="#" className="hover:text-gray-300" aria-label="LinkedIn">
+          <a
+            href="https://www.linkedin.com/in/bezold-tw-98390936b"
+            className="hover:text-gray-300"
+            aria-label="LinkedIn"
+            target="_blank"
+          >
             <LinkedinFilled className="text-2xl" />
           </a>
-          <a href="#" className="hover:text-gray-300" aria-label="Threads">
+          <a
+            href="https://www.threads.com/@bezold.tw?igshid=NTc4MTIwNjQ2YQ=="
+            className="hover:text-gray-300"
+            aria-label="Threads"
+            target="_blank"
+          >
             <ThreadsIcon className="text-2xl" />
           </a>
         </div>
