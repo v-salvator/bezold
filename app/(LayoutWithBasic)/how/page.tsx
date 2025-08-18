@@ -29,27 +29,11 @@ export default function How() {
           <p>
             店面資訊永久曝光
             <br />
-            首頁推薦位曝光 90 天
+            首頁推薦位曝光 60 天
           </p>
         </>
       ),
-      price: <AnimatedNTValue targetValue={3800} />,
-    },
-    {
-      key: "3",
-      name: "加值推薦",
-      contex: (
-        <>
-          <p>
-            店面資訊永久曝光
-            <br />
-            首頁推薦位曝光 90 天
-            <br />
-            顧問審核優化
-          </p>
-        </>
-      ),
-      price: <AnimatedNTValue targetValue={4800} />,
+      price: <AnimatedNTValue targetValue={2600} />,
     },
   ];
 
@@ -72,7 +56,7 @@ export default function How() {
   ];
 
   return (
-    <div className="relative">
+    <div className="relative h-[calc(100vh-164px)]">
       <div className="absolute inset-0">
         <FloatingPaths position={-1} />
       </div>
@@ -94,7 +78,7 @@ export default function How() {
           </Tilt>
         </div>
 
-        <div className={styles["info"]}>
+        {/* <div className={styles["info"]}>
           <h1 className={styles["info-title"]}>限時優惠活動</h1>
           <Tilt className={styles["info-card"]} rotationFactor={8} isRevese>
             <Spotlight
@@ -126,13 +110,6 @@ export default function How() {
               原價 NT$ 3,800 → 優惠價{" "}
               <AnimatedNTValue targetValue={2660} initialValue={3800} />
               <br />
-              <span className={styles["info-card-content-inner-header"]}>
-                一對一顧問方案：
-              </span>
-              <br />
-              原價 NT$ 7,800 → 優惠價{" "}
-              <AnimatedNTValue targetValue={5460} initialValue={7800} />
-              <br />
               <p className="text-sm mt-[12px] text-gray-500">
                 <span className={styles["info-card-content-inner-header"]}>
                   注意事項：
@@ -151,27 +128,7 @@ export default function How() {
               </p>
             </div>
           </Tilt>
-        </div>
-        <div className={styles["info"]}>
-          <h1 className={styles["info-title"]}>銀行轉帳</h1>
-          <Tilt className={styles["info-card"]} rotationFactor={8} isRevese>
-            <Spotlight
-              className="from-red-400 via-red-500 to-red-600"
-              size={120}
-            />
-            <div className={styles["info-card-content"]}>
-              銀行名稱：○○銀行（代碼：123）
-              <br />
-              帳號：123-456-789-000
-              <br />
-              戶名：○○○○有限公司
-              <br />
-              👉 匯款後，請透過 line or email
-              <br />
-              提供您的帳號後五碼 + 店名，我們會盡快開通！
-            </div>
-          </Tilt>
-        </div>
+        </div> */}
       </div>
     </div>
   );
