@@ -1,7 +1,7 @@
 "use client";
 import AdminSidebar from "@/components/AdminSidebar";
 
-export default function AdminStoreLayout({
+export default function AdminUsersLayout({
   children,
 }: {
   children: React.ReactNode;

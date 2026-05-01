@@ -6,6 +6,7 @@ import {
 } from "firebase-admin/app";
 import { getStorage } from "firebase-admin/storage";
 import { getFirestore } from "firebase-admin/firestore";
+import { getAuth } from "firebase-admin/auth";
 import { serverServiceAccountConfig } from "./configs";
 
 const createdApps = getApps();
@@ -23,3 +24,4 @@ const app =
 
 export const db = getFirestore(app);
 export const bucket = getStorage(app).bucket();
+export const adminAuth = getAuth(app);
