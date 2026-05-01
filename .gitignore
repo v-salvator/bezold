@@ -27,6 +27,7 @@ yarn-error.log*
 # local env files
 .env*.local
 .env
+.env.development
 
 # vercel
 .vercel
@@ -38,3 +39,6 @@ next-env.d.ts
 # firebase
 /firebase/serviceAccount.json
 /firebase/configs_old.ts
+
+# claude code
+.claude/settings.local.json
