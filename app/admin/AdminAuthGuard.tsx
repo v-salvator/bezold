@@ -10,12 +10,21 @@ export default function AdminAuthGuard({ children }: { children: React.ReactNode
   const pathname = usePathname();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user && pathname !== "/admin/login") {
-        router.replace("/admin/login");
-      } else {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (pathname === "/admin/login") {
         setChecked(true);
+        return;
       }
+      if (!user) {
+        router.replace("/admin/login");
+        return;
+      }
+      const token = await user.getIdTokenResult();
+      if (!token.claims.admin) {
+        router.replace("/admin/login");
+        return;
+      }
+      setChecked(true);
     });
     return unsubscribe;
   }, [pathname, router]);
