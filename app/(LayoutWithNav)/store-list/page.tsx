@@ -31,7 +31,7 @@ export default async function Home({ searchParams }: StorePageProps) {
       className={cn(
         "grid grid-cols-[repeat(auto-fill,_minmax(240px,_1fr))] ",
         "justify-items-center gap-y-[24px] gap-x-[8px]",
-        "py-[16px] mx-[48px]"
+        "py-[16px] mx-[48px]",
       )}
     >
       {stores.map((store: Store) => (

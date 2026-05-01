@@ -47,7 +47,7 @@ export default function AdminUsersPage() {
       });
       if (!res.ok) throw new Error();
       setUsers((prev) =>
-        prev.map((u) => (u.uid === uid ? { ...u, isAdmin: grant } : u))
+        prev.map((u) => (u.uid === uid ? { ...u, isAdmin: grant } : u)),
       );
       api.success({ message: `Admin access ${grant ? "granted" : "revoked"}` });
     } catch {
@@ -57,7 +57,9 @@ export default function AdminUsersPage() {
     }
   };
 
-  useEffect(() => { fetchUsers(); }, [idToken]);
+  useEffect(() => {
+    fetchUsers();
+  }, [idToken]);
 
   const columns: ColumnsType<UserRow> = [
     {

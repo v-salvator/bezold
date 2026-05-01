@@ -36,7 +36,7 @@ const Switcher = ({ className, style }: SwitcherProps) => {
       className={cn(
         "px-[16px] py-[12px]",
         y > 0 && "shadow-lg shadow-slate-200",
-        className
+        className,
       )}
       style={style}
     >

@@ -19,7 +19,7 @@ const AmountFilterCard = () => {
                 "border border-solid border-slate-200 rounded-[24px]",
                 "px-[12px] py-[8px]",
                 "text-xl",
-                amountItem.key === amountFilter?.key && "border-black"
+                amountItem.key === amountFilter?.key && "border-black",
               )}
               onClick={(e) => {
                 e.stopPropagation();

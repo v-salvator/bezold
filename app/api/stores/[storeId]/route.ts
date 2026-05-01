@@ -16,7 +16,7 @@ export async function GET(request: Request, { params }: StoreProps) {
   if (!storeInfo) {
     return Response.json(
       { data: null },
-      { status: 400, statusText: "Store not found" }
+      { status: 400, statusText: "Store not found" },
     );
   }
 

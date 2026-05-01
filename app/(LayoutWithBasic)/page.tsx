@@ -32,7 +32,7 @@ export default async function Home() {
           "max-w-[376px] rounded bg-white mx-auto hover:shadow-xl",
           "grid grid-cols-2 gap-y-[24px] justify-items-center",
           "py-[16px]",
-          "md:grid-cols-4 md:gap-4 md:p-[16px] md:max-w-[900px]"
+          "md:grid-cols-4 md:gap-4 md:p-[16px] md:max-w-[900px]",
         )}
       >
         {highlightedStores.map((store: Store, index) => (
@@ -40,7 +40,7 @@ export default async function Home() {
             className={cn(
               "relative ",
               "w-[180px] h-[330px] ",
-              "md:w-[200px] md:h-[350px]"
+              "md:w-[200px] md:h-[350px]",
             )}
             key={store.id}
           >
@@ -54,7 +54,7 @@ export default async function Home() {
               className={cn(
                 "relative rounded-lg bg-black",
                 "w-[180px] h-[330px] ",
-                "md:w-[200px] md:h-[350px]"
+                "md:w-[200px] md:h-[350px]",
               )}
             >
               <StoreSliderCard key={store.id} store={store} />

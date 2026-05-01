@@ -1,1 +1,1 @@
-export {default as mockStores} from './mockStores'
+export { default as mockStores } from "./mockStores";

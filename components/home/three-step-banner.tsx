@@ -16,7 +16,7 @@ export default function ThreeStepBanner() {
         "flex gap-[16px] justify-between items-center",
         "relative bg-black shadow",
         "p-[24px]  m-[8px] h-[260px]",
-        "md:p-[32px] md:m-[32px] md:h-auto"
+        "md:p-[32px] md:m-[32px] md:h-auto",
       )}
     >
       <Waves
@@ -51,7 +51,7 @@ export default function ThreeStepBanner() {
               <ChevronUp
                 className={cn(
                   styles.accordionTriggerIcon,
-                  "group-data-[expanded]:-rotate-180"
+                  "group-data-[expanded]:-rotate-180",
                 )}
               />
             </div>
@@ -72,7 +72,7 @@ export default function ThreeStepBanner() {
               <ChevronUp
                 className={cn(
                   styles.accordionTriggerIcon,
-                  "group-data-[expanded]:-rotate-180"
+                  "group-data-[expanded]:-rotate-180",
                 )}
               />
             </div>
@@ -94,7 +94,7 @@ export default function ThreeStepBanner() {
               <ChevronUp
                 className={cn(
                   styles.accordionTriggerIcon,
-                  "group-data-[expanded]:-rotate-180"
+                  "group-data-[expanded]:-rotate-180",
                 )}
               />
             </div>

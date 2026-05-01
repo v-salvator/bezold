@@ -43,7 +43,7 @@ const storeConverter = {
 
 export const createStoreDoc = async (store: Store) => {
   const collectionRef = collection(db, COLLECTION).withConverter(
-    storeConverter
+    storeConverter,
   );
   const storeRef = await addDoc(collectionRef, store);
   return storeRef;
@@ -51,7 +51,7 @@ export const createStoreDoc = async (store: Store) => {
 
 export const getStores = async () => {
   const collectionRef = collection(db, COLLECTION).withConverter(
-    storeConverter
+    storeConverter,
   );
   const collectionQuery = query(collectionRef, orderBy("createTime", "desc"));
   const querySnapshot = await getDocs(collectionQuery);
@@ -80,7 +80,7 @@ export const getStoreById = async (storeId: Store["id"]) => {
 
 export const editStoreById = async (
   storeId: Store["id"],
-  editedStore: Partial<Store>
+  editedStore: Partial<Store>,
 ) => {
   const docRef = doc(db, COLLECTION, storeId);
   const docSnap = await updateDoc(docRef, {

@@ -10,7 +10,7 @@ export default function Banner() {
           "flex flex-col gap-y-[16px]",
           "text-[24px] font-bold w-fit ",
           "mx-auto mt-[100px]",
-          "md:text-[34px]"
+          "md:text-[34px]",
         )}
       >
         <TextEffect per="char" delay={0.5}>

@@ -36,7 +36,7 @@ const SearchDrawer = ({ className }: { className?: string }) => {
           "flex items-center justify-center",
           "rounded-[24px] border-slate-200 border-[1px]",
           "px-[12px] h-[48px]",
-          "shadow"
+          "shadow",
         )}
       >
         {isPending ? <LoadingOutlined /> : <SearchOutlined />}

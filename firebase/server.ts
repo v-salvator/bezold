@@ -18,7 +18,7 @@ const app =
           credential: cert(serverServiceAccountConfig as ServiceAccount),
           storageBucket: "bezold.appspot.com",
         },
-        "bezold server"
+        "bezold server",
       )
     : createdApps[0];
 
