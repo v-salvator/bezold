@@ -1,3 +1,5 @@
-export default function AdminLogin() {
-  return <div className="flex h-full">????? maybe a login page?????</div>;
+import { redirect } from "next/navigation";
+
+export default function AdminPage() {
+  redirect("/admin/login");
 }
