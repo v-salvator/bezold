@@ -10,8 +10,10 @@ export default function AdminUserBadge() {
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setEmail(user?.email ?? null);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) { setEmail(null); return; }
+      const token = await user.getIdTokenResult();
+      setEmail(token.claims.admin ? (user.email ?? null) : null);
     });
     return unsubscribe;
   }, []);

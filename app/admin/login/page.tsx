@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Button, Card, Input, Typography, notification } from "antd";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth } from "@/firebase/client";
 import { useRouter } from "next/navigation";
 
@@ -19,7 +19,16 @@ export default function AdminLoginPage() {
     }
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const { user } = await signInWithEmailAndPassword(auth, email, password);
+      const token = await user.getIdTokenResult();
+      if (!token.claims.admin) {
+        await signOut(auth);
+        api.error({
+          message: "Access denied",
+          description: "Your account does not have admin privileges.",
+        });
+        return;
+      }
       router.push("/admin/store/list");
     } catch {
       api.error({ message: "Login failed", description: "Invalid email or password" });
