@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Table, Tag, Switch, notification, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { auth } from "@/firebase/client";
+import { useAdminAuth } from "@/hooks";
 
 type UserRow = {
   uid: string;
@@ -10,27 +10,22 @@ type UserRow = {
   isAdmin: boolean;
 };
 
-async function getIdToken() {
-  const user = auth.currentUser;
-  if (!user) throw new Error("Not authenticated");
-  return user.getIdToken();
-}
-
 export default function AdminUsersPage() {
+  const { idToken } = useAdminAuth();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [togglingUid, setTogglingUid] = useState<string | null>(null);
   const [api, contextHolder] = notification.useNotification();
 
   const fetchUsers = async () => {
+    if (!idToken) return;
     setLoading(true);
     try {
-      const token = await getIdToken();
       const res = await fetch("/api/admin/users", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${idToken}` },
       });
-      const data = await res.json();
-      setUsers(data);
+      if (!res.ok) throw new Error();
+      setUsers(await res.json());
     } catch {
       api.error({ message: "Failed to load users" });
     } finally {
@@ -39,22 +34,22 @@ export default function AdminUsersPage() {
   };
 
   const handleToggleAdmin = async (uid: string, grant: boolean) => {
+    if (!idToken) return;
     setTogglingUid(uid);
     try {
-      const token = await getIdToken();
       const res = await fetch("/api/admin/set-claim", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify({ uid, admin: grant }),
       });
       if (!res.ok) throw new Error();
       setUsers((prev) =>
-        prev.map((u) => (u.uid === uid ? { ...u, isAdmin: grant } : u))
+        prev.map((u) => (u.uid === uid ? { ...u, isAdmin: grant } : u)),
       );
-      api.success({ message: `User ${grant ? "granted" : "revoked"} admin access` });
+      api.success({ message: `Admin access ${grant ? "granted" : "revoked"}` });
     } catch {
       api.error({ message: "Failed to update role" });
     } finally {
@@ -62,7 +57,9 @@ export default function AdminUsersPage() {
     }
   };
 
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => {
+    fetchUsers();
+  }, [idToken]);
 
   const columns: ColumnsType<UserRow> = [
     {

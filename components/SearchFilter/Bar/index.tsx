@@ -20,7 +20,7 @@ const Filter = ({ label, placeholder, onClick, value }: FilterProps) => {
     <div
       className={cn(
         "py-[6px] px-[8px] w-[120px] relative cursor-pointer",
-        "before:content-[''] before:absolute before:left-0 before:inline-block before:h-[36px] before:w-[1px] [&+div::before]:bg-slate-200"
+        "before:content-[''] before:absolute before:left-0 before:inline-block before:h-[36px] before:w-[1px] [&+div::before]:bg-slate-200",
       )}
       onClick={onClick}
     >
@@ -28,7 +28,7 @@ const Filter = ({ label, placeholder, onClick, value }: FilterProps) => {
       <div
         className={cn(
           "text-sm",
-          value ? "text-black font-bold" : "text-slate-500"
+          value ? "text-black font-bold" : "text-slate-500",
         )}
       >
         {value ?? placeholder}
@@ -62,7 +62,7 @@ const SearchBar = ({ className }: SearchBarProps) => {
   const handleAmountMenuClick: MenuProps["onClick"] = (e) => {
     const selectedAmountFilter = e.key;
     const amountFilter = amountItems.find(
-      (el) => el.key === selectedAmountFilter
+      (el) => el.key === selectedAmountFilter,
     );
     setAmountFilter(amountFilter);
   };
@@ -74,7 +74,7 @@ const SearchBar = ({ className }: SearchBarProps) => {
           "flex items-center",
           "rounded-[24px] border-slate-200 border-[1px]",
           "px-[12px]",
-          "shadow"
+          "shadow",
         )}
       >
         <Dropdown

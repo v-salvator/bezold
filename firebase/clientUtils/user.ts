@@ -54,7 +54,7 @@ export const getUserById = async (userId: User["id"]) => {
 
 export const editUserById = async (
   storeId: User["id"],
-  editedUser: Partial<User>
+  editedUser: Partial<User>,
 ) => {
   const docRef = doc(db, COLLECTION, storeId);
   const docSnap = await updateDoc(docRef, {

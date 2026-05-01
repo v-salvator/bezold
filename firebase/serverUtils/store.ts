@@ -33,14 +33,14 @@ export const getStores = async (searchObj: Record<string, string>) => {
           return ref.where(
             "price",
             ">=",
-            parseInt(searchValue as string) * 10000
+            parseInt(searchValue as string) * 10000,
           );
         case "amountMax":
           if (searchValue === "Infinity") return ref;
           return ref.where(
             "price",
             "<=",
-            parseInt(searchValue as string) * 10000
+            parseInt(searchValue as string) * 10000,
           );
         case "category":
           if (searchValue === "all")
@@ -50,7 +50,7 @@ export const getStores = async (searchObj: Record<string, string>) => {
           return ref;
       }
     },
-    storesRef as FirebaseFirestore.Query<FirebaseFirestore.DocumentData>
+    storesRef as FirebaseFirestore.Query<FirebaseFirestore.DocumentData>,
   );
   const snapshot = await storesWithQueryRef.orderBy("updateTime", "desc").get();
 

@@ -38,7 +38,7 @@ export default function Header({
         // Border
         "border-b-[1px] border-b-gray-200",
         // Flexbox
-        "flex items-center justify-between"
+        "flex items-center justify-between",
       )}
     >
       <LogoLink className="max-sm:hidden" />

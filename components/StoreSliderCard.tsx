@@ -26,7 +26,7 @@ const StoreSliderCard = ({ store }: { store: Store }) => {
       className={cn(
         "inline-block bg-gray-100 shadow-lg rounded border-[2px] border-slate-500",
         "w-[180px] h-[330px] ",
-        "md:w-[200px] md:h-[350px]"
+        "md:w-[200px] md:h-[350px]",
       )}
       href={`/store/${id}`}
       target="_blank"
@@ -49,7 +49,7 @@ const StoreSliderCard = ({ store }: { store: Store }) => {
         className={cn(
           "mb-[12px] relative mx-auto",
           "w-[160px] h-[180px]",
-          "md:w-[180px] md:h-[200px]"
+          "md:w-[180px] md:h-[200px]",
         )}
       >
         <Image
@@ -68,7 +68,7 @@ const StoreSliderCard = ({ store }: { store: Store }) => {
         <div className="h-[1px] bg-slate-200 my-[8px]"></div>
 
         <div className="font-bold text-right text-[12px]">{`頂讓金/${curencyFormatter(
-          price
+          price,
         )}`}</div>
       </div>
     </Link>

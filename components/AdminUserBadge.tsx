@@ -1,24 +1,15 @@
 "use client";
-import { useEffect, useState } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { signOut } from "firebase/auth";
 import { auth } from "@/firebase/client";
 import { Button, Typography } from "antd";
 import { useRouter } from "next/navigation";
+import { useAdminAuth } from "@/hooks";
 
 export default function AdminUserBadge() {
-  const [email, setEmail] = useState<string | null>(null);
+  const { user, isAdmin } = useAdminAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) { setEmail(null); return; }
-      const token = await user.getIdTokenResult();
-      setEmail(token.claims.admin ? (user.email ?? null) : null);
-    });
-    return unsubscribe;
-  }, []);
-
-  if (!email) return null;
+  if (!isAdmin || !user?.email) return null;
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -27,7 +18,7 @@ export default function AdminUserBadge() {
 
   return (
     <div className="flex items-center gap-[12px]">
-      <Typography.Text className="text-sm">{email}</Typography.Text>
+      <Typography.Text className="text-sm">{user.email}</Typography.Text>
       <Button size="small" onClick={handleLogout}>
         Logout
       </Button>

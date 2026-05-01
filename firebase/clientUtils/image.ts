@@ -19,7 +19,7 @@ const COLLECTION = COLLECTIONS.STORE;
 
 export const uploadStoreImageByFile = async (
   storeId: Store["id"],
-  file: File
+  file: File,
 ) => {
   const storageRef = ref(storage, `${COLLECTION}/${storeId}/${file.name}`);
   const snapshot = await uploadBytes(storageRef, file);
@@ -34,7 +34,7 @@ export const uploadStoreImageByFile = async (
 
 export const delateStoreImage = async (
   storeId: Store["id"],
-  imagePath: Store["images"][number]
+  imagePath: Store["images"][number],
 ) => {
   const imageRef = ref(storage, `${imagePath}`);
   const snapshot = await deleteObject(imageRef);

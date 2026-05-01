@@ -18,7 +18,7 @@ export default function RootLayout({
         className={cn(
           "pt-header-and-switcher pb-[16px]",
           "min-h-[calc(100vh-100px)]", // * for footer height
-          "overflow-x-hidden" // * for template animating not showing x scroll bar
+          "overflow-x-hidden", // * for template animating not showing x scroll bar
         )}
       >
         {children}

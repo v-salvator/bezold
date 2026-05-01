@@ -20,7 +20,7 @@ const CityCard = () => {
                 "border border-solid border-slate-200 rounded-[24px]",
                 "px-[12px] py-[8px]",
                 "text-xl",
-                cityItem.key === city?.key && "border-black"
+                cityItem.key === city?.key && "border-black",
               )}
               onClick={(e) => {
                 e.stopPropagation();

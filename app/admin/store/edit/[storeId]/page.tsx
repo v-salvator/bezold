@@ -65,7 +65,7 @@ export default function EditStore({ params }: EditStoreProps) {
 
   const handleStoreFieldChange = (
     key: keyof Store,
-    value: Store[keyof Store]
+    value: Store[keyof Store],
   ) => {
     if (!storeCloned) return;
     setStoreCloned({

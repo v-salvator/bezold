@@ -12,7 +12,7 @@ interface StoreProps {
 
 export async function generateMetadata(
   { params }: StoreProps,
-  parent: ResolvingMetadata
+  parent: ResolvingMetadata,
 ): Promise<Metadata> {
   // read route params
   const id = (await params).storeId;
@@ -95,7 +95,7 @@ export default async function Store({ params }: StoreProps) {
           ))}
         </div>
         <div className="my-[12px] font-bold text-[24px] text-right">{`頂讓金: ${curencyFormatter(
-          price
+          price,
         )}`}</div>
         <Divider orientation="left" orientationMargin="0">
           聯絡資訊
@@ -103,7 +103,7 @@ export default async function Store({ params }: StoreProps) {
         <div className="my-[12px]">聯絡人: {userInfo?.userName}</div>
         <div className="my-[12px]">聯絡手機: {userInfo?.phone}</div>
         <div className="my-[12px] text-[12px]">{`最近更新時間: ${dayjs(
-          updateTime
+          updateTime,
         ).format("YYYY/MM/DD")}`}</div>
       </div>
     </div>

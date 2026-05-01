@@ -31,7 +31,10 @@ export default function AdminLoginPage() {
       }
       router.push("/admin/store/list");
     } catch {
-      api.error({ message: "Login failed", description: "Invalid email or password" });
+      api.error({
+        message: "Login failed",
+        description: "Invalid email or password",
+      });
     } finally {
       setLoading(false);
     }

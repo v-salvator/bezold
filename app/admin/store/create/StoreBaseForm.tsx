@@ -72,7 +72,7 @@ export default function StoreBaseForm() {
 
   const handleStoreFieldChange = (
     key: keyof Store,
-    value: Store[keyof Store]
+    value: Store[keyof Store],
   ) => {
     setStore({
       ...store,

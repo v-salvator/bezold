@@ -21,7 +21,7 @@ const AnimatedImage = ({
       className={cn(
         "relative w-full h-full bg-gray-200 cursor-pointer",
         isRounded && "rounded-[24px]",
-        className
+        className,
       )}
       // * animation
       initial={{ opacity: 0 }}

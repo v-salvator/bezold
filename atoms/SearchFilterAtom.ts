@@ -5,7 +5,7 @@ import type { DropDownItem } from "@/components/SearchFilter/DropDowns";
 export const cityAtom = atom<DropDownItem | undefined>(undefined);
 export const tagAtom = atom<DropDownItem | undefined>(undefined);
 export const amountFilterAtom = atom<DropDownItem<number[]> | undefined>(
-  undefined
+  undefined,
 );
 
 // * compose atoms
@@ -24,7 +24,7 @@ export const filtersAtom = atom(
       city?: DropDownItem;
       tag?: DropDownItem;
       amountFilter?: DropDownItem<number[]>;
-    }
+    },
   ) => {
     if (newValue) {
       Object.keys(newValue).forEach((key) => {
@@ -41,7 +41,7 @@ export const filtersAtom = atom(
         }
       });
     }
-  }
+  },
 );
 
 // * drawer ui
