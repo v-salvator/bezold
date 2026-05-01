@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const p=JSON.parse(d);console.log(p.tool_input?.file_path||p.tool_response?.filePath||'');});\" | { read -r f; [ -n \"$f\" ] && npx prettier --write \"$f\"; } 2>/dev/null || true",
+            "statusMessage": "Formatting with prettier..."
+          }
+        ]
+      }
+    ]
+  }
+}
