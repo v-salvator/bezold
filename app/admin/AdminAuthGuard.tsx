@@ -4,7 +4,11 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { Spin } from "antd";
 
-export default function AdminAuthGuard({ children }: { children: React.ReactNode }) {
+export default function AdminAuthGuard({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { isAdmin, loading } = useAdminAuth();
   const router = useRouter();
   const pathname = usePathname();
