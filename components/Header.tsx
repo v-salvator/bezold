@@ -18,7 +18,15 @@ const LogoLink = ({ className }: { className: string }) => {
   );
 };
 
-export default function Header({ withSearchBar = true, withNavLinks = false }) {
+export default function Header({
+  withSearchBar = true,
+  withNavLinks = false,
+  rightSlot,
+}: {
+  withSearchBar?: boolean;
+  withNavLinks?: boolean;
+  rightSlot?: React.ReactNode;
+}) {
   return (
     <div
       className={cn(
@@ -40,6 +48,7 @@ export default function Header({ withSearchBar = true, withNavLinks = false }) {
           <SearchDrawer className="absolute left-1/2 -translate-x-1/2 w-[80%] sm:hidden" />
         </>
       )}
+      {rightSlot && <div className="ml-auto">{rightSlot}</div>}
       {withNavLinks && (
         <div>
           {/* <Link className="mx-[4px] font-extralight" href="/about">
