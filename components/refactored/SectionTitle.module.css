@@ -1,0 +1,49 @@
+.wrap {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.left {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.num {
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 3px 8px;
+  border-radius: 2px;
+  letter-spacing: 0.1em;
+}
+.numDark {
+  background: var(--paper);
+  color: var(--ink);
+}
+.h {
+  font-family: var(--display);
+  font-size: 36px;
+  margin: 0;
+  font-weight: 700;
+  line-height: 1;
+}
+.sub {
+  font-family: var(--note);
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.subDark {
+  color: #cfc8b8;
+}
+.more {
+  font-family: var(--hand);
+  font-size: 13px;
+  color: var(--ink);
+  text-decoration: underline wavy var(--accent);
+  cursor: pointer;
+}

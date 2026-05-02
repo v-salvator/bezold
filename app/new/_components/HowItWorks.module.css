@@ -1,0 +1,90 @@
+.step {
+  border: 1.5px solid var(--paper);
+  background: transparent;
+  border-radius: 4px;
+  padding: 16px 14px 14px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.number {
+  position: absolute;
+  top: -14px;
+  left: -14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  border: 2px solid var(--paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 18px;
+}
+.title {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1;
+}
+.desc {
+  font-family: var(--hand);
+  font-size: 12px;
+  margin: 0;
+  line-height: 1.45;
+}
+.type {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  align-self: flex-start;
+  border: 1px solid var(--paper);
+  padding: 1px 5px;
+  border-radius: 2px;
+  margin-bottom: 2px;
+}
+.seller {
+  & .type {
+    color: var(--accent-3);
+    border-color: var(--accent-3);
+  }
+
+  & .number {
+    background: var(--accent-3);
+  }
+}
+.buyer {
+  & .type {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  & .number {
+    background: var(--accent);
+  }
+}
+
+.footer {
+  margin-top: 22px;
+  border: 1.5px dashed var(--paper);
+  padding: 14px 18px;
+  border-radius: 4px;
+  font-family: var(--hand);
+  font-size: 13px;
+  color: #cfc8b8;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+.footer b {
+  font-family: var(--display);
+  font-size: 20px;
+  color: var(--paper);
+  font-weight: 700;
+}

@@ -1,0 +1,37 @@
+.btn {
+  font-family: var(--hand);
+  font-weight: 700;
+  font-size: 14px;
+  border: 1.5px solid var(--ink);
+  padding: 8px 16px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 2px 2px 0 var(--ink);
+  display: inline-block;
+  cursor: pointer;
+  text-align: center;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+  &.mus {
+    background: var(--accent-3);
+    color: var(--ink);
+  }
+  &.ghost {
+    background: #fff;
+    color: var(--ink);
+    box-shadow: none;
+  }
+}
+.btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.md {
+  padding: 8px 16px;
+}
+.sm {
+  padding: 5px 10px;
+}

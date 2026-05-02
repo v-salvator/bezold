@@ -1,0 +1,204 @@
+.hero {
+  padding: 36px 28px 28px;
+  border-bottom: 1.5px solid var(--ink);
+  position: relative;
+}
+.kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--accent);
+  margin-bottom: 10px;
+  text-align: center;
+}
+.title {
+  font-family: var(--display);
+  font-size: 80px;
+  line-height: 0.95;
+  margin: 0 0 8px;
+  font-weight: 700;
+  text-align: center;
+}
+.title em {
+  font-style: normal;
+  color: var(--accent);
+  text-decoration: underline wavy var(--accent);
+  text-underline-offset: 6px;
+}
+.sub {
+  font-family: var(--hand);
+  font-size: 15px;
+  color: var(--ink-2);
+  text-align: center;
+  margin: 0 auto 24px;
+  max-width: 560px;
+  line-height: 1.5;
+}
+.subAccent {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+}
+.col {
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  min-height: 340px;
+}
+.buy {
+  background: var(--paper-2);
+}
+.sell {
+  background: var(--ink);
+  color: var(--paper);
+  border-left: 1.5px solid var(--ink);
+}
+.sell * {
+  color: var(--paper);
+}
+.lab {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lab::before {
+  content: "▸";
+  color: var(--accent);
+}
+.sell .lab {
+  color: var(--accent-3);
+}
+.sell .lab::before {
+  color: var(--accent-3);
+}
+.colTitle {
+  font-family: var(--display);
+  font-size: 42px;
+  margin: 0;
+  font-weight: 700;
+  line-height: 0.95;
+}
+.lead {
+  font-family: var(--hand);
+  font-size: 13px;
+  margin: 0;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+.sell .lead {
+  color: #cfc8b8;
+}
+.sell .lead b {
+  color: var(--accent-3);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+.formGrid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.field {
+  border: 1.5px solid var(--ink);
+  background: #fff;
+  border-radius: 4px;
+  padding: 9px 12px;
+  font-family: var(--hand);
+  font-size: 13px;
+  color: var(--ink-2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.field b {
+  color: var(--ink);
+  font-weight: 700;
+  min-width: 40px;
+  display: inline-block;
+}
+.fieldCar {
+  color: var(--muted);
+  flex: 1;
+}
+.field::after {
+  content: "▾";
+  color: var(--ink-2);
+  font-size: 10px;
+}
+.fieldInput::after {
+  content: "";
+}
+.sell .field {
+  background: #2a2723;
+  color: #cfc8b8;
+  border-color: var(--paper);
+}
+.sell .field b {
+  color: var(--paper);
+}
+
+.btn {
+  font-family: var(--hand);
+  font-weight: 700;
+  font-size: 14px;
+  border: 1.5px solid var(--ink);
+  padding: 8px 16px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 2px 2px 0 var(--ink);
+  display: inline-block;
+  cursor: pointer;
+  text-align: center;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.btnMus {
+  background: var(--accent-3);
+  color: var(--ink);
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+@media (max-width: 640px) {
+  .title {
+    font-size: 56px;
+  }
+  .split {
+    grid-template-columns: 1fr;
+  }
+  .sell {
+    border-left: 0;
+    border-top: 1.5px solid var(--ink);
+  }
+}

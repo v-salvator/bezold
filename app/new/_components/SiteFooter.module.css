@@ -1,0 +1,72 @@
+.footer {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 32px 28px 18px;
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr 1fr;
+  gap: 24px;
+}
+.footer h6 {
+  font-family: var(--display);
+  font-size: 22px;
+  margin: 0 0 8px;
+  color: var(--paper);
+  font-weight: 700;
+  line-height: 1;
+}
+.footer ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: var(--hand);
+  font-size: 13px;
+  color: #cfc8b8;
+  line-height: 1.9;
+}
+.brand p {
+  font-family: var(--hand);
+  font-size: 13px;
+  color: #cfc8b8;
+  line-height: 1.5;
+  margin: 8px 0;
+}
+.line {
+  border: 1.5px dashed var(--paper);
+  padding: 10px;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #cfc8b8;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+.line b {
+  color: var(--paper);
+}
+.qr {
+  width: 50px;
+  height: 50px;
+  border: 1.5px solid var(--paper);
+  background:
+    repeating-linear-gradient(45deg, var(--paper) 0 3px, transparent 3px 5px),
+    repeating-linear-gradient(-45deg, var(--paper) 0 3px, transparent 3px 5px);
+}
+.legal {
+  grid-column: 1 / -1;
+  border-top: 1.5px dashed var(--paper);
+  margin-top: 18px;
+  padding-top: 14px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: #999083;
+  display: flex;
+  justify-content: space-between;
+}
+
+@media (max-width: 900px) {
+  .footer {
+    grid-template-columns: 1fr 1fr;
+  }
+}

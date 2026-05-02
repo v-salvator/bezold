@@ -1,0 +1,31 @@
+.pill {
+  font-family: var(--hand);
+  font-size: 13px;
+  border: 1.5px solid var(--ink);
+  padding: 5px 12px;
+  border-radius: 99px;
+  background: #fff;
+  color: var(--ink);
+  display: inline-block;
+}
+.solid {
+  background: var(--ink);
+  color: var(--paper);
+}
+.warm {
+  background: var(--accent);
+  color: #fff;
+}
+.sage {
+  background: var(--accent-2);
+  color: #fff;
+}
+.mus {
+  background: var(--accent-3);
+  color: var(--ink);
+}
+.outlineLight {
+  background: transparent;
+  border-color: var(--paper);
+  color: var(--paper);
+}
