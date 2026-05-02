@@ -1,0 +1,37 @@
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--display);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+}
+.mark {
+  width: 34px;
+  height: 34px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: #fff;
+  font-weight: 700;
+}
+.text small {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-2);
+  letter-spacing: 0.15em;
+  font-weight: 400;
+}
+.light {
+  color: var(--paper);
+}
+.light .text small {
+  color: #cfc8b8;
+}

@@ -1,0 +1,8 @@
+.link {
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+}
+.link:hover {
+  text-decoration: underline wavy var(--accent);
+}
