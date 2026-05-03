@@ -3,6 +3,7 @@ import styles from "./page.module.css";
 import LaunchBanner from "@/app/new/_components/LaunchBanner";
 import SiteNav from "@/app/new/_components/SiteNav";
 import SiteFooter from "@/app/new/_components/SiteFooter";
+import Breadcrumbs from "./_components/Breadcrumbs";
 
 export const metadata: Metadata = {
   title: "頂讓.tw — 我要找店",
@@ -16,7 +17,7 @@ export default function StoreListPage() {
       <LaunchBanner />
       <SiteNav activeLink="我要找店" />
       <main className={styles.main}>
-        {/* Breadcrumbs — item 3 */}
+        <Breadcrumbs />
         {/* SearchBar — item 4 */}
         {/* ActiveFilters — item 5 */}
         <div className={styles.layout}>
