@@ -1,0 +1,8 @@
+.main {
+  flex: 1;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+}
