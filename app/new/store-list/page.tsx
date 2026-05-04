@@ -6,6 +6,7 @@ import SiteFooter from "@/app/new/_components/SiteFooter";
 import Breadcrumbs from "./_components/Breadcrumbs";
 import SearchBar from "./_components/SearchBar";
 import ActiveFilters from "./_components/ActiveFilters";
+import ResultsArea from "./_components/ResultsArea";
 
 export const metadata: Metadata = {
   title: "頂讓.tw — 我要找店",
@@ -22,7 +23,7 @@ export default function StoreListPage() {
         <Breadcrumbs />
         <SearchBar />
         <ActiveFilters />
-        {/* ResultsArea — item 7 */}
+        <ResultsArea />
       </main>
       <SiteFooter />
     </>
