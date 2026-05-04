@@ -22,10 +22,7 @@ export default function StoreListPage() {
         <Breadcrumbs />
         <SearchBar />
         <ActiveFilters />
-        <div className={styles.layout}>
-          {/* FilterSidebar — item 6 */}
-          {/* ResultsArea — item 8 */}
-        </div>
+        {/* ResultsArea — item 7 */}
       </main>
       <SiteFooter />
     </>
