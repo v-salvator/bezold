@@ -1,10 +1,4 @@
 import type { Metadata } from "next";
-import {
-  Caveat,
-  Kalam,
-  Gloria_Hallelujah,
-  JetBrains_Mono,
-} from "next/font/google";
 import styles from "./page.module.css";
 import LaunchBanner from "./_components/LaunchBanner";
 import SiteNav from "./_components/SiteNav";
@@ -20,31 +14,6 @@ import SellerCta from "./_components/SellerCta";
 import Faq from "./_components/Faq";
 import SiteFooter from "./_components/SiteFooter";
 
-const caveat = Caveat({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-  variable: "--font-caveat",
-  display: "swap",
-});
-const kalam = Kalam({
-  subsets: ["latin"],
-  weight: ["300", "400", "700"],
-  variable: "--font-kalam",
-  display: "swap",
-});
-const gloria = Gloria_Hallelujah({
-  subsets: ["latin"],
-  weight: ["400"],
-  variable: "--font-gloria",
-  display: "swap",
-});
-const jetbrains = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "600"],
-  variable: "--font-jetbrains",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
   title: "頂讓.tw — 找一間準備好的店",
   description:
@@ -52,10 +21,8 @@ export const metadata: Metadata = {
 };
 
 export default function NewHomePage() {
-  const fontVars = `${caveat.variable} ${kalam.variable} ${gloria.variable} ${jetbrains.variable}`;
-
   return (
-    <div className={`${styles.root} ${fontVars}`}>
+    <>
       <LaunchBanner />
       <SiteNav />
       <div className={styles.frame}>
@@ -71,6 +38,6 @@ export default function NewHomePage() {
         <Faq />
       </div>
       <SiteFooter />
-    </div>
+    </>
   );
 }

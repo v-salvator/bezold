@@ -7,6 +7,7 @@ export const tagAtom = atom<DropDownItem | undefined>(undefined);
 export const amountFilterAtom = atom<DropDownItem<number[]> | undefined>(
   undefined,
 );
+export const categoryAtom = atom<DropDownItem | undefined>(undefined);
 
 // * compose atoms
 export const filtersAtom = atom(
@@ -15,6 +16,7 @@ export const filtersAtom = atom(
       city: get(cityAtom),
       tag: get(tagAtom),
       amountFilter: get(amountFilterAtom),
+      category: get(categoryAtom),
     };
   },
   (
@@ -24,6 +26,7 @@ export const filtersAtom = atom(
       city?: DropDownItem;
       tag?: DropDownItem;
       amountFilter?: DropDownItem<number[]>;
+      category?: DropDownItem;
     },
   ) => {
     if (newValue) {
@@ -38,6 +41,9 @@ export const filtersAtom = atom(
           case "amountFilter":
             set(amountFilterAtom, newValue.amountFilter);
             break;
+          case "category":
+            set(categoryAtom, newValue.category);
+            break;
         }
       });
     }
@@ -45,5 +51,5 @@ export const filtersAtom = atom(
 );
 
 // * drawer ui
-type FilterKey = "city" | "tag" | "amountFilter";
+type FilterKey = "city" | "tag" | "amountFilter" | "category";
 export const activeDrawerCardAtom = atom<FilterKey | undefined>("city");

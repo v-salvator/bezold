@@ -1,0 +1,56 @@
+.crumbs {
+  padding: 14px 28px;
+  border-bottom: 1.5px solid var(--ink);
+  background: var(--paper-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.trail {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-2);
+  letter-spacing: 0.05em;
+}
+
+.trail a {
+  color: var(--ink-2);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.trail a:hover {
+  color: var(--accent);
+}
+
+.title {
+  font-family: var(--display);
+  font-size: 36px;
+  margin: 4px 0 0;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.title em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.stat {
+  font-family: var(--hand);
+  font-size: 13px;
+  color: var(--ink-2);
+  text-align: right;
+}
+
+.statNum {
+  font-family: var(--display);
+  font-size: 24px;
+  color: var(--ink);
+  font-weight: 700;
+  line-height: 1;
+  display: block;
+}

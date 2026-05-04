@@ -4,9 +4,15 @@ import Button from "@/components/refactored/Button";
 import Link from "@/components/refactored/Link";
 import { cn } from "@/lib/utils";
 
-const navLinks = ["我要找店", "我要頂出", "頂讓指南", "成交故事", "常見問題"];
+const navLinks = [
+  { label: "我要找店", href: "/new/store-list" },
+  { label: "我要頂出", href: "/new/store-sell" },
+  { label: "頂讓指南", href: "/new/store-guide" },
+  { label: "成交故事", href: "/new/stories" },
+  { label: "常見問題", href: "/new/faq" },
+];
 
-export default function SiteNav() {
+export default function SiteNav({ activeLink }: { activeLink?: string }) {
   return (
     <nav
       className={cn(
@@ -25,9 +31,9 @@ export default function SiteNav() {
           "list-none",
         )}
       >
-        {navLinks.map((l) => (
-          <Link href={`/${l.toLowerCase()}`} key={l}>
-            {l}
+        {navLinks.map(({ label, href }) => (
+          <Link href={href} key={label} active={label === activeLink}>
+            {label}
           </Link>
         ))}
       </ul>
