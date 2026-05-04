@@ -3,6 +3,7 @@ import {
   Kalam,
   Gloria_Hallelujah,
   JetBrains_Mono,
+  Rubik_Mono_One,
 } from "next/font/google";
 import styles from "./layout.module.css";
 
@@ -30,9 +31,15 @@ const jetbrains = JetBrains_Mono({
   variable: "--font-jetbrains",
   display: "swap",
 });
+const rubikMono = Rubik_Mono_One({
+  subsets: ["latin"],
+  weight: ["400"],
+  variable: "--font-rubik-mono",
+  display: "swap",
+});
 
 export default function NewLayout({ children }: { children: React.ReactNode }) {
-  const fontVars = `${caveat.variable} ${kalam.variable} ${gloria.variable} ${jetbrains.variable}`;
+  const fontVars = `${caveat.variable} ${kalam.variable} ${gloria.variable} ${jetbrains.variable} ${rubikMono.variable}`;
 
   return <div className={`${styles.root} ${fontVars}`}>{children}</div>;
 }

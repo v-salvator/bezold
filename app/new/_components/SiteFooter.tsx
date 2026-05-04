@@ -5,7 +5,7 @@ export default function SiteFooter() {
   return (
     <footer className={styles.footer}>
       <div className={styles.brand}>
-        <Logo tagline="DING-RANG" light />
+        <Logo light />
         <p>
           全台最大店面頂讓平台。
           <br />
@@ -53,8 +53,8 @@ export default function SiteFooter() {
         </ul>
       </div>
       <div className={styles.legal}>
-        <span>© 2026 頂讓 . tw · ding-rang.tw</span>
-        <span>made in Taipei · 北市商字第 12345678 號</span>
+        <span>© 2026 bezold . tw · 必售！ 頂讓創業平台</span>
+        <span>made in Taipei</span>
       </div>
     </footer>
   );

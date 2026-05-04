@@ -1,17 +1,22 @@
 import styles from "./Logo.module.css";
 
 export default function Logo({
-  tagline = "DING-RANG · since 2024",
+  subtitle = "頂讓創業平台",
+  emphasize = "必售！",
   light = false,
 }: {
-  tagline?: string;
+  subtitle?: string;
+  emphasize?: string;
   light?: boolean;
 }) {
   return (
     <div className={`${styles.logo} ${light ? styles.light : ""}`}>
-      <span className={styles.mark}>頂</span>
       <div className={styles.text}>
-        頂讓 . tw <small>{tagline}</small>
+        Bezold
+        <small>
+          <em>{emphasize}</em>
+          {subtitle}
+        </small>
       </div>
     </div>
   );

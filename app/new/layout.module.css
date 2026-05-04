@@ -12,6 +12,7 @@
   --display: var(--font-caveat), "Noto Sans TC", sans-serif;
   --note: var(--font-gloria), var(--font-kalam), sans-serif;
   --mono: var(--font-jetbrains), monospace;
+  --brand: var(--font-rubik-mono), var(--font-jetbrains), monospace;
 
   background: var(--paper);
   color: var(--ink);

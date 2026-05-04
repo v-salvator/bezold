@@ -1,37 +1,52 @@
 .logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-family: var(--display);
-  font-size: 30px;
-  font-weight: 700;
+  display: inline-flex;
+  align-items: flex-start;
   line-height: 1;
 }
-.mark {
-  width: 34px;
-  height: 34px;
-  border: 2px solid var(--ink);
-  border-radius: 50%;
-  background: var(--accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--mono);
-  font-size: 13px;
-  color: #fff;
-  font-weight: 700;
+
+.text {
+  font-family: var(--brand);
+  font-size: 1.875rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--ink);
+  line-height: 0.95;
+  text-shadow: 2px 2px 0 var(--accent);
 }
+
 .text small {
   display: block;
-  font-family: var(--mono);
-  font-size: 9px;
+  margin-top: 2px;
+  font-family: "Noto Sans TC", sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 700;
   color: var(--ink-2);
-  letter-spacing: 0.15em;
-  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  text-shadow: none;
 }
+
+.text small em {
+  margin-right: 2px;
+  font-style: normal;
+  font-weight: 900;
+  color: var(--accent);
+}
+
 .light {
   color: var(--paper);
 }
+
+.light .text {
+  color: var(--paper);
+  text-shadow: 2px 2px 0 var(--accent);
+}
+
 .light .text small {
   color: #cfc8b8;
+}
+
+.light .text small em {
+  color: var(--accent-3);
 }
