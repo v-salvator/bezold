@@ -1,80 +1,87 @@
 "use client";
 
-import { useState } from "react";
 import styles from "./SearchBar.module.css";
 import Button from "@/components/refactored/Button";
-import Dropdown, {
-  type DropdownOption,
-} from "@/components/refactored/Dropdown";
+import Dropdown from "@/components/refactored/Dropdown";
+import { useAtom } from "jotai";
+import {
+  cityAtom,
+  tagAtom,
+  amountFilterAtom,
+  categoryAtom,
+} from "@/atoms/SearchFilterAtom";
+import {
+  cityItems,
+  tagItems,
+  amountItems,
+} from "@/components/SearchFilter/DropDowns";
+import { STORE_TAGS } from "@/constant/storeTags";
+import { STORE_CATEGORIES } from "@/constant/storeType";
 
-const areaOptions: DropdownOption[] = [
-  { label: "不限", value: "", count: 412 },
-  { label: "台北市", value: "taipei", count: 213 },
-  { label: "新北市", value: "new-taipei", count: 98 },
-  { label: "桃園市", value: "taoyuan", count: 45 },
-  { label: "台中市", value: "taichung", count: 67 },
-  { label: "台南市", value: "tainan", count: 31 },
-  { label: "高雄市", value: "kaohsiung", count: 28 },
-  { label: "其他", value: "other", count: 30 },
-];
-
-const industryOptions: DropdownOption[] = [
-  { label: "不限", value: "", count: 412 },
-  { label: "餐飲", value: "food", count: 118 },
-  { label: "服飾", value: "fashion", count: 36 },
-  { label: "美容 / 美髮", value: "beauty", count: 54 },
-  { label: "服務業", value: "service", count: 28 },
-  { label: "便利商店", value: "convenience", count: 11 },
-  { label: "教育 / 補習", value: "education", count: 9 },
-  { label: "其他", value: "other", count: 156 },
-];
-
-const priceOptions: DropdownOption[] = [
-  { label: "不限", value: "" },
-  { label: "50 萬以下", value: "lt50" },
-  { label: "50 – 100 萬", value: "50-100" },
-  { label: "100 – 200 萬", value: "100-200" },
-  { label: "200 萬以上", value: "gt200" },
-];
+export type SearchFilters = {
+  keyword: string;
+  area: string;
+  industry: string;
+  price: string;
+};
 
 export default function SearchBar() {
-  const [keyword, setKeyword] = useState("");
-  const [area, setArea] = useState("");
-  const [industry, setIndustry] = useState("");
-  const [price, setPrice] = useState("");
+  const [city, setCity] = useAtom(cityAtom);
+  const [tag, setTag] = useAtom(tagAtom);
+  const [amountFilter, setAmountFilter] = useAtom(amountFilterAtom);
+  const [category, setCategory] = useAtom(categoryAtom);
 
-  function handleSearch() {
-    console.log("搜尋條件", { keyword, area, industry, price });
-  }
+  const handleSearch = () => {
+    console.log("city", city);
+    console.log("tag", tag);
+    console.log("amountFilter", amountFilter);
+  };
 
   return (
     <div className={styles.searchbar}>
-      <div className={`${styles.field} ${styles.fieldInput}`}>
-        <span className={styles.label}>關鍵字</span>
-        <input
-          className={styles.input}
-          placeholder="店名 / 街名 / 行業…"
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-        />
-      </div>
       <Dropdown
         label="地區"
-        options={areaOptions}
-        value={area}
-        onChange={setArea}
+        options={cityItems.map((item) => ({
+          label: item.label,
+          value: item.key,
+        }))}
+        value={city?.key ?? ""}
+        onChange={(value) =>
+          setCity(cityItems.find((item) => item.key === value))
+        }
+      />
+      <Dropdown
+        label="Tag"
+        options={STORE_TAGS.map((item) => ({
+          label: item.label,
+          value: item.key,
+        }))}
+        value={tag?.key ?? ""}
+        onChange={(value) =>
+          setTag(tagItems.find((item) => item.key === value))
+        }
       />
       <Dropdown
         label="行業"
-        options={industryOptions}
-        value={industry}
-        onChange={setIndustry}
+        options={STORE_CATEGORIES.map((item) => ({
+          label: item.label,
+          value: item.key,
+        }))}
+        value={category?.key ?? ""}
+        onChange={(value) =>
+          setCategory(STORE_CATEGORIES.find((item) => item.key === value))
+        }
       />
       <Dropdown
         label="頂讓金"
-        options={priceOptions}
-        value={price}
-        onChange={setPrice}
+        options={amountItems.map((item) => ({
+          label: item.label,
+          value: item.key,
+        }))}
+        value={amountFilter?.key ?? ""}
+        onChange={(value) =>
+          setAmountFilter(amountItems.find((item) => item.key === value))
+        }
       />
       <Button onClick={handleSearch}>🔍 搜尋</Button>
     </div>

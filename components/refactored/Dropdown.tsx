@@ -19,7 +19,7 @@ export default function Dropdown({
   label: string;
   options: DropdownOption[];
   value: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
   placeholder?: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -40,7 +40,7 @@ export default function Dropdown({
   }, []);
 
   function handleSelect(opt: DropdownOption) {
-    onChange(opt.value === value ? "" : opt.value);
+    onChange?.(opt.value === value ? "" : opt.value);
     setOpen(false);
     setFocusedIndex(-1);
   }

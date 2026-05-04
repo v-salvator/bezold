@@ -5,6 +5,7 @@ import SiteNav from "@/app/new/_components/SiteNav";
 import SiteFooter from "@/app/new/_components/SiteFooter";
 import Breadcrumbs from "./_components/Breadcrumbs";
 import SearchBar from "./_components/SearchBar";
+import ActiveFilters from "./_components/ActiveFilters";
 
 export const metadata: Metadata = {
   title: "頂讓.tw — 我要找店",
@@ -20,7 +21,7 @@ export default function StoreListPage() {
       <main className={styles.main}>
         <Breadcrumbs />
         <SearchBar />
-        {/* ActiveFilters — item 5 */}
+        <ActiveFilters />
         <div className={styles.layout}>
           {/* FilterSidebar — item 6 */}
           {/* ResultsArea — item 8 */}

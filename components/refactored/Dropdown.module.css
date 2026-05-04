@@ -61,7 +61,8 @@
   background: #fff;
   border-radius: 4px;
   box-shadow: 3px 3px 0 var(--ink);
-  overflow: hidden;
+  max-height: 240px;
+  overflow-y: auto;
   font-family: var(--hand);
   animation: slideDown 0.12s ease;
 }
