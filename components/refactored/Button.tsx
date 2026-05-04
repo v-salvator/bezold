@@ -8,16 +8,21 @@ export default function Button({
   size = "md",
   children,
   className,
+  onClick,
 }: {
   variant?: ButtonVariant;
   size?: "md" | "sm";
   children: React.ReactNode;
   className?: string;
+  onClick?: () => void;
 }) {
   const variantCls = variant === "default" ? "" : styles[variant];
   const sizeCls = size === "md" ? styles.md : styles.sm;
   return (
-    <button className={cn(styles.btn, variantCls, sizeCls, className)}>
+    <button
+      className={cn(styles.btn, variantCls, sizeCls, className)}
+      onClick={onClick}
+    >
       {children}
     </button>
   );

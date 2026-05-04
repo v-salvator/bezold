@@ -4,6 +4,7 @@ import LaunchBanner from "@/app/new/_components/LaunchBanner";
 import SiteNav from "@/app/new/_components/SiteNav";
 import SiteFooter from "@/app/new/_components/SiteFooter";
 import Breadcrumbs from "./_components/Breadcrumbs";
+import SearchBar from "./_components/SearchBar";
 
 export const metadata: Metadata = {
   title: "頂讓.tw — 我要找店",
@@ -18,7 +19,7 @@ export default function StoreListPage() {
       <SiteNav activeLink="我要找店" />
       <main className={styles.main}>
         <Breadcrumbs />
-        {/* SearchBar — item 4 */}
+        <SearchBar />
         {/* ActiveFilters — item 5 */}
         <div className={styles.layout}>
           {/* FilterSidebar — item 6 */}
