@@ -4,14 +4,18 @@ import { useState } from "react";
 import styles from "./ResultsArea.module.css";
 import StoreCard, {
   type StoreCard as StoreCardType,
-  type RibbonVariant,
 } from "@/components/refactored/StoreCard";
 import Dropdown, {
   type DropdownOption,
 } from "@/components/refactored/Dropdown";
 import { type PillVariant } from "@/components/refactored/Pill";
-import { type Store, STORE_TAG } from "@/types";
+import { type Store } from "@/types";
 import { STORE_CATEGORIES } from "@/constant/storeType";
+import {
+  TAG_DISPLAY,
+  RIBBON_DISPLAY,
+  RIBBON_PRIORITY,
+} from "@/constant/storeDisplay";
 
 const sortOptions: DropdownOption[] = [
   { label: "頂讓金：低 → 高", value: "price-asc" },
@@ -19,30 +23,11 @@ const sortOptions: DropdownOption[] = [
   { label: "最新上架", value: "newest" },
 ];
 
-const TAG_MAP: Record<string, { label: string; variant: PillVariant }> = {
-  [STORE_TAG.EMERGENCY]: { label: "急售", variant: "warm" },
-  [STORE_TAG.HOT]: { label: "熱門", variant: "default" },
-  [STORE_TAG.CHEAP]: { label: "划算", variant: "default" },
-  [STORE_TAG.RECOMMENDED]: { label: "精選", variant: "sage" },
-};
-
-const RIBBON_MAP: Record<string, { label: string; variant: RibbonVariant }> = {
-  [STORE_TAG.EMERGENCY]: { label: "急售", variant: "default" },
-  [STORE_TAG.RECOMMENDED]: { label: "精選", variant: "sage" },
-  [STORE_TAG.CHEAP]: { label: "划算", variant: "mus" },
-};
-
-const RIBBON_PRIORITY = [
-  STORE_TAG.EMERGENCY,
-  STORE_TAG.RECOMMENDED,
-  STORE_TAG.CHEAP,
-];
-
 function storeToCard(store: Store): StoreCardType {
   const tags = store.tags ?? [];
 
   const ribbonTag = RIBBON_PRIORITY.find((tag) => tags.includes(tag));
-  const ribbon = ribbonTag ? RIBBON_MAP[ribbonTag] : undefined;
+  const ribbon = ribbonTag ? RIBBON_DISPLAY[ribbonTag] : undefined;
 
   const categoryEntry = STORE_CATEGORIES.find(
     (cat) => cat.key === store.category,
@@ -52,7 +37,7 @@ function storeToCard(store: Store): StoreCardType {
   const tagPills = [
     ...tags.map(
       (tag) =>
-        TAG_MAP[tag] ?? { label: tag, variant: "default" as PillVariant },
+        TAG_DISPLAY[tag] ?? { label: tag, variant: "default" as PillVariant },
     ),
     ...(categoryLabel
       ? [{ label: categoryLabel, variant: "default" as PillVariant }]

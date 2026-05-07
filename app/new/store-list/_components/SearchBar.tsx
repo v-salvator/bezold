@@ -12,13 +12,12 @@ import {
   amountFilterAtom,
   categoryAtom,
 } from "@/atoms/SearchFilterAtom";
-import {
-  cityItems,
-  tagItems,
-  amountItems,
-} from "@/components/SearchFilter/DropDowns";
+import { cityItems, amountItems } from "@/components/SearchFilter/DropDowns";
 import { STORE_TAGS } from "@/constant/storeTags";
 import { STORE_CATEGORIES } from "@/constant/storeType";
+
+const toOptions = (items: { label: string; key: string }[]) =>
+  items.map((item) => ({ label: item.label, value: item.key }));
 
 export default function SearchBar() {
   const router = useRouter();
@@ -48,10 +47,7 @@ export default function SearchBar() {
     <div className={styles.searchbar}>
       <Dropdown
         label="地區"
-        options={cityItems.map((item) => ({
-          label: item.label,
-          value: item.key,
-        }))}
+        options={toOptions(cityItems)}
         value={city?.key ?? ""}
         onChange={(value) =>
           setCity(cityItems.find((item) => item.key === value))
@@ -59,21 +55,15 @@ export default function SearchBar() {
       />
       <Dropdown
         label="Tag"
-        options={STORE_TAGS.map((item) => ({
-          label: item.label,
-          value: item.key,
-        }))}
+        options={toOptions(STORE_TAGS)}
         value={tag?.key ?? ""}
         onChange={(value) =>
-          setTag(tagItems.find((item) => item.key === value))
+          setTag(STORE_TAGS.find((item) => item.key === value))
         }
       />
       <Dropdown
         label="行業"
-        options={STORE_CATEGORIES.map((item) => ({
-          label: item.label,
-          value: item.key,
-        }))}
+        options={toOptions(STORE_CATEGORIES)}
         value={category?.key ?? ""}
         onChange={(value) =>
           setCategory(STORE_CATEGORIES.find((item) => item.key === value))
@@ -81,10 +71,7 @@ export default function SearchBar() {
       />
       <Dropdown
         label="頂讓金"
-        options={amountItems.map((item) => ({
-          label: item.label,
-          value: item.key,
-        }))}
+        options={toOptions(amountItems)}
         value={amountFilter?.key ?? ""}
         onChange={(value) =>
           setAmountFilter(amountItems.find((item) => item.key === value))

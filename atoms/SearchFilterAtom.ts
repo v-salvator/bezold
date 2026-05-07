@@ -51,5 +51,5 @@ export const filtersAtom = atom(
 );
 
 // * drawer ui
-type FilterKey = "city" | "tag" | "amountFilter" | "category";
+export type FilterKey = "city" | "tag" | "amountFilter" | "category";
 export const activeDrawerCardAtom = atom<FilterKey | undefined>("city");
