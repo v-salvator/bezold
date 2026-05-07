@@ -8,6 +8,14 @@ import StoreCard, {
 import Dropdown, {
   type DropdownOption,
 } from "@/components/refactored/Dropdown";
+import { type PillVariant } from "@/components/refactored/Pill";
+import { type Store } from "@/types";
+import { STORE_CATEGORIES } from "@/constant/storeType";
+import {
+  TAG_DISPLAY,
+  RIBBON_DISPLAY,
+  RIBBON_PRIORITY,
+} from "@/constant/storeDisplay";
 
 const sortOptions: DropdownOption[] = [
   { label: "頂讓金：低 → 高", value: "price-asc" },
@@ -15,165 +23,67 @@ const sortOptions: DropdownOption[] = [
   { label: "最新上架", value: "newest" },
 ];
 
-const listings: StoreCardType[] = [
-  {
-    ribbon: { label: "急售", variant: "default" },
-    tags: [
-      { label: "急售", variant: "warm" },
-      { label: "餐飲", variant: "default" },
-      { label: "含設備", variant: "mus" },
-    ],
-    title: "大安溫州街 · 老字號麵店",
-    location: "台北市大安區 · 近台電大樓站 200m",
-    meta: [
-      ["坪數", "12 坪"],
-      ["月租", "4.8 萬"],
-      ["已開", "8 年"],
-      ["客群", "學生/鄰里"],
-    ],
-    price: "NT$ 65 萬",
-    rent: "含設備",
-  },
-  {
-    ribbon: { label: "含證照", variant: "sage" },
-    tags: [
-      { label: "含證照", variant: "sage" },
-      { label: "飲料", variant: "default" },
-    ],
-    title: "中山赤峰 · 手搖飲品牌店",
-    location: "台北市中山區 · 中山站 3 分鐘",
-    meta: [
-      ["坪數", "8 坪"],
-      ["月租", "3.2 萬"],
-      ["已開", "3 年"],
-      ["設備", "全新整套"],
-    ],
-    price: "NT$ 45 萬",
-    rent: "押 2 含轉約",
-  },
-  {
-    ribbon: { label: "議價", variant: "mus" },
-    tags: [
-      { label: "議價", variant: "mus" },
-      { label: "咖啡", variant: "default" },
-    ],
-    title: "大安信義 · 獨立咖啡館",
-    location: "台北市大安區 · 信義安和站",
-    meta: [
-      ["坪數", "18 坪"],
-      ["月租", "5.5 萬"],
-      ["已開", "4 年"],
-      ["客群", "上班族"],
-    ],
-    price: "NT$ 88 萬",
-    rent: "含咖啡機",
-  },
-  {
-    tags: [
-      { label: "餐飲", variant: "default" },
-      { label: "含設備", variant: "mus" },
-    ],
-    title: "松山民生社區 · 早午餐店",
-    location: "台北市松山區 · 公車站旁",
-    meta: [
-      ["坪數", "15 坪"],
-      ["月租", "4.2 萬"],
-      ["已開", "2 年"],
-      ["設備", "完整廚房"],
-    ],
-    price: "NT$ 55 萬",
-    rent: "押 2",
-  },
-  {
-    ribbon: { label: "急售", variant: "default" },
-    tags: [
-      { label: "急售", variant: "warm" },
-      { label: "餐飲", variant: "default" },
-    ],
-    title: "大同迪化街 · 文青小餐館",
-    location: "台北市大同區 · 大橋頭站",
-    meta: [
-      ["坪數", "10 坪"],
-      ["月租", "3.8 萬"],
-      ["已開", "5 年"],
-      ["客群", "觀光/在地"],
-    ],
-    price: "NT$ 38 萬",
-    rent: "含裝潢",
-  },
-  {
-    tags: [
-      { label: "餐飲", variant: "default" },
-      { label: "含證照", variant: "sage" },
-    ],
-    title: "信義永春 · 日式定食",
-    location: "台北市信義區 · 永春站 200m",
-    meta: [
-      ["坪數", "20 坪"],
-      ["月租", "6.8 萬"],
-      ["已開", "6 年"],
-      ["座位", "24 席"],
-    ],
-    price: "NT$ 95 萬",
-    rent: "含全套設備",
-  },
-  {
-    ribbon: { label: "早鳥", variant: "mus" },
-    tags: [
-      { label: "早鳥精選", variant: "mus" },
-      { label: "餐飲", variant: "default" },
-    ],
-    title: "萬華西門 · 鐵板燒",
-    location: "台北市萬華區 · 西門站 5 分",
-    meta: [
-      ["坪數", "14 坪"],
-      ["月租", "4 萬"],
-      ["已開", "3 年"],
-      ["客群", "上班族"],
-    ],
-    price: "NT$ 60 萬",
-    rent: "含吧台",
-  },
-  {
-    tags: [{ label: "餐飲", variant: "default" }],
-    title: "中正南門 · 滷味便當店",
-    location: "台北市中正區 · 公館商圈",
-    meta: [
-      ["坪數", "9 坪"],
-      ["月租", "3 萬"],
-      ["已開", "10 年"],
-      ["客群", "學生穩定"],
-    ],
-    price: "NT$ 42 萬",
-    rent: "含設備",
-  },
-  {
-    tags: [
-      { label: "餐飲", variant: "default" },
-      { label: "含設備", variant: "mus" },
-    ],
-    title: "士林天母 · 義式餐廳",
-    location: "台北市士林區 · 天母商圈",
-    meta: [
-      ["坪數", "28 坪"],
-      ["月租", "7.5 萬"],
-      ["已開", "7 年"],
-      ["座位", "40 席"],
-    ],
-    price: "NT$ 120 萬",
-    rent: "含烤箱+冷藏",
-  },
-];
+function storeToCard(store: Store): StoreCardType {
+  const tags = store.tags ?? [];
 
-export default function ResultsArea() {
+  const ribbonTag = RIBBON_PRIORITY.find((tag) => tags.includes(tag));
+  const ribbon = ribbonTag ? RIBBON_DISPLAY[ribbonTag] : undefined;
+
+  const categoryEntry = STORE_CATEGORIES.find(
+    (cat) => cat.key === store.category,
+  );
+  const categoryLabel = categoryEntry?.label ?? store.category;
+
+  const tagPills = [
+    ...tags.map(
+      (tag) =>
+        TAG_DISPLAY[tag] ?? { label: tag, variant: "default" as PillVariant },
+    ),
+    ...(categoryLabel
+      ? [{ label: categoryLabel, variant: "default" as PillVariant }]
+      : []),
+  ];
+
+  const location =
+    store.location ||
+    [store.city, store.district].filter(Boolean).join(" · ") ||
+    undefined;
+
+  const meta: [string, string][] = [
+    ...(categoryLabel ? [["行業", categoryLabel] as [string, string]] : []),
+    ...(store.city ? [["城市", store.city] as [string, string]] : []),
+  ];
+
+  const price = `NT$ ${Math.round(store.price / 10000)} 萬`;
+
+  return {
+    ribbon,
+    tags: tagPills,
+    title: store.storeName,
+    location,
+    meta,
+    price,
+    rent: store.description?.slice(0, 20) ?? "-",
+  };
+}
+
+function sortStores(stores: Store[], sort: string): Store[] {
+  const sorted = [...stores];
+  if (sort === "price-asc") return sorted.sort((a, b) => a.price - b.price);
+  if (sort === "price-desc") return sorted.sort((a, b) => b.price - a.price);
+  return sorted.sort((a, b) => b.updateTime.getTime() - a.updateTime.getTime());
+}
+
+export default function ResultsArea({ stores }: { stores: Store[] }) {
   const [sort, setSort] = useState("newest");
+  const sortedStores = sortStores(stores, sort);
 
   return (
     <div className={styles.area}>
       <div className={styles.controlbar}>
         <div className={styles.count}>
           <span className={styles.countNum}>
-            顯示 <span className={styles.countRange}>1–9</span> / 共 412 間
+            共 <span className={styles.countRange}>{stores.length}</span> 間
           </span>
         </div>
         <Dropdown
@@ -185,8 +95,8 @@ export default function ResultsArea() {
       </div>
 
       <div className={styles.grid}>
-        {listings.map((listing) => (
-          <StoreCard key={listing.title} card={listing} />
+        {sortedStores.map((store) => (
+          <StoreCard key={store.id} card={storeToCard(store)} />
         ))}
       </div>
 

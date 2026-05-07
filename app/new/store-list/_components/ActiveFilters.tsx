@@ -6,6 +6,7 @@ import {
   tagAtom,
   amountFilterAtom,
   categoryAtom,
+  type FilterKey,
 } from "@/atoms/SearchFilterAtom";
 import { STORE_TAGS } from "@/constant/storeTags";
 import styles from "./ActiveFilters.module.css";
@@ -27,11 +28,11 @@ export default function ActiveFilters() {
       key: "amountFilter",
       label: amountFilter.label as string,
     },
-  ].filter(Boolean) as { key: string; label: string }[];
+  ].filter(Boolean) as { key: FilterKey; label: string }[];
 
   if (filters.length === 0) return null;
 
-  function handleRemove(key: string) {
+  function handleRemove(key: FilterKey) {
     if (key === "city") setCity(undefined);
     if (key === "tag") setTag(undefined);
     if (key === "category") setCategory(undefined);

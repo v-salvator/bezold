@@ -28,6 +28,12 @@
   transform: translate(-1px, -1px);
   box-shadow: 3px 3px 0 var(--ink);
 }
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 2px 2px 0 var(--ink);
+}
 
 .md {
   padding: 8px 16px;
