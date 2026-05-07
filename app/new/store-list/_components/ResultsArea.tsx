@@ -67,8 +67,16 @@ function storeToCard(store: Store): StoreCardType {
   };
 }
 
+function sortStores(stores: Store[], sort: string): Store[] {
+  const sorted = [...stores];
+  if (sort === "price-asc") return sorted.sort((a, b) => a.price - b.price);
+  if (sort === "price-desc") return sorted.sort((a, b) => b.price - a.price);
+  return sorted.sort((a, b) => b.updateTime.getTime() - a.updateTime.getTime());
+}
+
 export default function ResultsArea({ stores }: { stores: Store[] }) {
   const [sort, setSort] = useState("newest");
+  const sortedStores = sortStores(stores, sort);
 
   return (
     <div className={styles.area}>
@@ -87,7 +95,7 @@ export default function ResultsArea({ stores }: { stores: Store[] }) {
       </div>
 
       <div className={styles.grid}>
-        {stores.map((store) => (
+        {sortedStores.map((store) => (
           <StoreCard key={store.id} card={storeToCard(store)} />
         ))}
       </div>
