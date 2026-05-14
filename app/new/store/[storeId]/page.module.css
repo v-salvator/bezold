@@ -1,0 +1,28 @@
+.main {
+  flex: 1;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+}
+
+.mainCol {
+  padding: 28px;
+  border-right: 1.5px dashed var(--ink);
+}
+
+.side {
+  padding: 28px;
+  background: var(--paper-2);
+}
+
+.disclaimer {
+  padding: 18px 28px;
+  font-family: var(--hand);
+  font-size: 12px;
+  color: var(--ink-2);
+  background: var(--paper-2);
+  border-top: 1.5px solid var(--ink);
+  line-height: 1.6;
+}
