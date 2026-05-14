@@ -23,6 +23,10 @@
     color: var(--ink);
     box-shadow: none;
   }
+  &.sage {
+    background: var(--accent-2);
+    color: #fff;
+  }
 }
 .btn:hover {
   transform: translate(-1px, -1px);
