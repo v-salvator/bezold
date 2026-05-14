@@ -8,6 +8,7 @@ import StoreGallery from "./_components/StoreGallery";
 import StoreTitleRow from "./_components/StoreTitleRow";
 import StoreDescription from "./_components/StoreDescription";
 import StorePriceCard from "./_components/StorePriceCard";
+import StoreSellerInfo from "./_components/StoreSellerInfo";
 import styles from "./page.module.css";
 
 interface StorePageProps {
@@ -66,6 +67,7 @@ export default async function StoreDetailPage({ params }: StorePageProps) {
           </div>
           <div className={styles.side}>
             <StorePriceCard store={store} />
+            <StoreSellerInfo store={store} />
           </div>
         </div>
       </main>
