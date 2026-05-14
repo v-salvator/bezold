@@ -7,6 +7,7 @@ import StoreBreadcrumb from "./_components/StoreBreadcrumb";
 import StoreGallery from "./_components/StoreGallery";
 import StoreTitleRow from "./_components/StoreTitleRow";
 import StoreDescription from "./_components/StoreDescription";
+import StorePriceCard from "./_components/StorePriceCard";
 import styles from "./page.module.css";
 
 interface StorePageProps {
@@ -63,7 +64,9 @@ export default async function StoreDetailPage({ params }: StorePageProps) {
           <div className={styles.mainCol}>
             <StoreDescription description={store.description} />
           </div>
-          <div className={styles.side}>{/* components coming soon */}</div>
+          <div className={styles.side}>
+            <StorePriceCard store={store} />
+          </div>
         </div>
       </main>
       <SiteFooter />
