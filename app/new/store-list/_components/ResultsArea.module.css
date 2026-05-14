@@ -39,6 +39,12 @@
   gap: 14px;
 }
 
+.cardLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
 .saveCta {
   margin-top: 24px;
   border: 1.5px dashed var(--ink);
