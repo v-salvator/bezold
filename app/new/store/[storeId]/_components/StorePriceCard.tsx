@@ -15,9 +15,11 @@ export default function StorePriceCard({ store }: { store: Store }) {
       </div>
 
       <div className={styles.cta}>
-        <a href={`tel:${userInfo?.phone}`} className={styles.ctaLink}>
-          <Button className={styles.btn}>📞 撥打賣家電話</Button>
-        </a>
+        {userInfo?.phone && (
+          <a href={`tel:${userInfo.phone}`} className={styles.ctaLink}>
+            <Button className={styles.btn}>📞 撥打賣家電話</Button>
+          </a>
+        )}
         {userInfo?.lineId && (
           <a
             href={`https://line.me/ti/p/~${userInfo.lineId}`}
