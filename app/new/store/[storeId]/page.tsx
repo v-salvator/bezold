@@ -6,6 +6,7 @@ import SiteFooter from "@/app/new/_components/SiteFooter";
 import StoreBreadcrumb from "./_components/StoreBreadcrumb";
 import StoreGallery from "./_components/StoreGallery";
 import StoreTitleRow from "./_components/StoreTitleRow";
+import StoreDescription from "./_components/StoreDescription";
 import styles from "./page.module.css";
 
 interface StorePageProps {
@@ -59,7 +60,9 @@ export default async function StoreDetailPage({ params }: StorePageProps) {
         <StoreGallery images={store.images} tags={store.tags} />
         <StoreTitleRow store={store} />
         <div className={styles.grid}>
-          <div className={styles.mainCol}>{/* components coming soon */}</div>
+          <div className={styles.mainCol}>
+            <StoreDescription description={store.description} />
+          </div>
           <div className={styles.side}>{/* components coming soon */}</div>
         </div>
       </main>
