@@ -45,11 +45,3 @@
     color: var(--accent);
   }
 }
-
-.report {
-  color: var(--muted);
-
-  &:hover {
-    color: var(--muted) !important;
-  }
-}

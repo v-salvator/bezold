@@ -14,10 +14,7 @@ export default function StoreBreadcrumb({ store }: { store: Store }) {
         <b>{storeName}</b>
       </div>
       <div className={styles.actions}>
-        <span>♡ 收藏物件</span>
         <span>📤 分享</span>
-        <span>🖨 列印</span>
-        <span className={styles.report}>⋯ 檢舉</span>
       </div>
     </div>
   );
