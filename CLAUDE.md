@@ -53,6 +53,7 @@ Environment variables switch between dev and prod Firestore collections (`mockSt
 - Tailwind may be used freely on elements that carry no CSS module class (plain layout wrappers, spacing divs, responsive containers).
 - Use CSS nesting syntax (`& .child`, `&.modifier`) — all existing modules already do this.
 - CSS variable tokens (`--ink`, `--paper`, `--accent`, `--hand`, `--display`, `--mono`) are defined on the root wrapper div and cascade to all children — reference via `var(--token)`, never redefine per component.
+- The `/new` route defines an extended token set in `app/new/layout.module.css`: `--ink-2`, `--paper-2`, `--paper-3`, `--accent-2`, `--accent-3`, `--muted`, `--note`, `--brand`. Use these when building any page under `app/new/`.
 
 ## Component conventions
 
