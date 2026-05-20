@@ -1,0 +1,92 @@
+.seller {
+  border: 1.5px solid var(--ink);
+  background: #fff;
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-top: 14px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink);
+  background: var(--accent-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.name {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+
+  & small {
+    display: block;
+    font-family: var(--hand);
+    font-size: 11px;
+    color: var(--ink-2);
+    margin-top: 3px;
+    font-weight: 400;
+  }
+}
+
+.badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--hand);
+  font-size: 11px;
+  border: 1.5px solid var(--ink);
+  background: var(--paper-2);
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-weight: 700;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  flex-shrink: 0;
+}
+
+.warm .dot {
+  background: var(--accent);
+}
+
+.meta {
+  font-family: var(--hand);
+  font-size: 12px;
+  color: var(--ink-2);
+  line-height: 1.6;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--paper-3);
+
+  & b {
+    color: var(--ink);
+    font-weight: 700;
+  }
+}

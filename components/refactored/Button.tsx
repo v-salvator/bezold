@@ -1,7 +1,7 @@
 import styles from "./Button.module.css";
 import { cn } from "@/lib/utils";
 
-export type ButtonVariant = "default" | "mus" | "ghost";
+export type ButtonVariant = "default" | "mus" | "ghost" | "sage";
 
 export default function Button({
   variant = "default",

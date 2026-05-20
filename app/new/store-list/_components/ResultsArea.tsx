@@ -96,7 +96,13 @@ export default function ResultsArea({ stores }: { stores: Store[] }) {
 
       <div className={styles.grid}>
         {sortedStores.map((store) => (
-          <StoreCard key={store.id} card={storeToCard(store)} />
+          <a
+            key={store.id}
+            href={`/new/store/${store.id}`}
+            className={styles.cardLink}
+          >
+            <StoreCard card={storeToCard(store)} />
+          </a>
         ))}
       </div>
 

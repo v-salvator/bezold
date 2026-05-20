@@ -1,0 +1,33 @@
+.section {
+  margin-bottom: 32px;
+}
+
+.heading {
+  font-family: var(--display);
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 12px;
+  line-height: 1;
+  border-bottom: 1.5px dashed var(--ink);
+  padding-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+
+  & small {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-2);
+    font-weight: 400;
+    letter-spacing: 0.1em;
+  }
+}
+
+.body {
+  font-family: var(--hand);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink);
+  margin: 8px 0;
+  white-space: pre-line;
+}
