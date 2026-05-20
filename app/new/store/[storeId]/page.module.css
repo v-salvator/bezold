@@ -2,22 +2,8 @@
   flex: 1;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: 1.6fr 1fr;
-}
-
 .mainCol {
   padding: 28px;
-  border-right: 1.5px dashed var(--ink);
-}
-
-.side {
-  padding: 28px;
-  background: var(--paper-2);
-  position: sticky;
-  top: 0;
-  align-self: start;
 }
 
 .disclaimer {

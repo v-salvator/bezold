@@ -61,14 +61,10 @@ export default async function StoreDetailPage({ params }: StorePageProps) {
         <StoreBreadcrumb store={store} />
         <StoreGallery images={store.images} tags={store.tags} />
         <StoreTitleRow store={store} />
-        <div className={styles.grid}>
-          <div className={styles.mainCol}>
-            <StoreDescription description={store.description} />
-          </div>
-          <div className={styles.side}>
-            <StorePriceCard store={store} />
-            <StoreSellerInfo store={store} />
-          </div>
+        <div className={styles.mainCol}>
+          <StoreDescription description={store.description} />
+          <StorePriceCard store={store} />
+          <StoreSellerInfo store={store} />
         </div>
       </main>
       <SiteFooter />
