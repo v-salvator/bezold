@@ -6,6 +6,7 @@ export type ButtonVariant = "default" | "mus" | "ghost" | "sage";
 export default function Button({
   variant = "default",
   size = "md",
+  type = "button",
   children,
   className,
   disabled,
@@ -13,6 +14,7 @@ export default function Button({
 }: {
   variant?: ButtonVariant;
   size?: "md" | "sm";
+  type?: "button" | "submit" | "reset";
   children: React.ReactNode;
   className?: string;
   disabled?: boolean;
@@ -23,6 +25,7 @@ export default function Button({
   return (
     <button
       className={cn(styles.btn, variantCls, sizeCls, className)}
+      type={type}
       disabled={disabled}
       onClick={onClick}
     >

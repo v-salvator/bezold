@@ -1,0 +1,51 @@
+.wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  background-color: var(--paper-2);
+  background-image: radial-gradient(
+    circle,
+    var(--paper-3) 1.5px,
+    transparent 1.5px
+  );
+  background-size: 24px 24px;
+}
+
+.heading {
+  font-family: var(--display);
+  font-size: 2.5rem;
+  font-weight: 400;
+  color: var(--ink);
+  margin: 0 0 2rem;
+  line-height: 1.1;
+
+  & strong {
+    font-weight: 700;
+    color: var(--accent);
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  font-family: var(--hand);
+  font-size: 0.875rem;
+  color: var(--ink-2);
+}
+
+.checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
