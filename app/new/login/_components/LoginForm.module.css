@@ -48,3 +48,13 @@
   accent-color: var(--accent);
   cursor: pointer;
 }
+
+.errorMsg {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--accent);
+  font-family: var(--hand);
+  font-size: 0.875rem;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
