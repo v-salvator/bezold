@@ -11,7 +11,12 @@
   color: var(--ink-2);
 }
 
+.inputWrap {
+  position: relative;
+}
+
 .input {
+  width: 100%;
   padding: 0.625rem 0.75rem;
   background: var(--paper);
   border: 1.5px solid var(--ink);
@@ -31,4 +36,24 @@
     border-color: var(--accent);
     box-shadow: 3px 3px 0 var(--accent);
   }
+}
+
+.inputWithSuffix {
+  padding-right: 2.5rem;
+}
+
+.suffix {
+  position: absolute;
+  right: 0.625rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+}
+
+.hint {
+  margin: 0.25rem 0 0;
+  font-family: var(--hand);
+  font-size: 0.75rem;
+  color: var(--accent);
 }

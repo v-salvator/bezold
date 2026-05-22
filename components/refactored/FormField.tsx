@@ -1,4 +1,5 @@
 import styles from "./FormField.module.css";
+import { cn } from "@/lib/utils";
 
 export default function FormField({
   id,
@@ -6,25 +7,42 @@ export default function FormField({
   type = "text",
   placeholder,
   autoComplete,
+  value,
+  onChange,
+  onBlur,
+  suffix,
+  hint,
 }: {
   id: string;
   label: string;
   type?: "text" | "email" | "password";
   placeholder?: string;
   autoComplete?: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  suffix?: React.ReactNode;
+  hint?: string;
 }) {
   return (
     <div className={styles.field}>
       <label className={styles.label} htmlFor={id}>
         {label}
       </label>
-      <input
-        className={styles.input}
-        id={id}
-        type={type}
-        placeholder={placeholder}
-        autoComplete={autoComplete}
-      />
+      <div className={styles.inputWrap}>
+        <input
+          className={cn(styles.input, suffix && styles.inputWithSuffix)}
+          id={id}
+          type={type}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+        />
+        {suffix && <div className={styles.suffix}>{suffix}</div>}
+      </div>
+      {hint && <p className={styles.hint}>{hint}</p>}
     </div>
   );
 }
