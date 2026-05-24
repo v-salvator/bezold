@@ -9,7 +9,7 @@ import Dropdown, {
   type DropdownOption,
 } from "@/components/refactored/Dropdown";
 import { type PillVariant } from "@/components/refactored/Pill";
-import { type Store } from "@/types";
+import { type Store, STORE_STATUS } from "@/types";
 import { STORE_CATEGORIES } from "@/constant/storeType";
 import {
   TAG_DISPLAY,
@@ -76,14 +76,19 @@ function sortStores(stores: Store[], sort: string): Store[] {
 
 export default function ResultsArea({ stores }: { stores: Store[] }) {
   const [sort, setSort] = useState("newest");
-  const sortedStores = sortStores(stores, sort);
+  const approvedStores = stores.filter(
+    (store) => store.status === STORE_STATUS.APPROVED,
+  );
+  const sortedStores = sortStores(approvedStores, sort);
 
   return (
     <div className={styles.area}>
       <div className={styles.controlbar}>
         <div className={styles.count}>
           <span className={styles.countNum}>
-            共 <span className={styles.countRange}>{stores.length}</span> 間
+            共{" "}
+            <span className={styles.countRange}>{approvedStores.length}</span>{" "}
+            間
           </span>
         </div>
         <Dropdown

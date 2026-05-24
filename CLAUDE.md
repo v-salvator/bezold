@@ -20,14 +20,14 @@ No test runner is configured.
 
 ### Route groups
 
-| Group                     | Purpose                                             |
-| ------------------------- | --------------------------------------------------- |
-| `app/(LayoutWithBasic)/`  | Main marketplace pages (home, browse, store detail) |
-| `app/(LayoutWithNav)/`    | Pages with persistent nav bar                       |
-| `app/(LayoutWithoutNav)/` | Minimal layout (auth, onboarding)                   |
-| `app/admin/`              | Admin dashboard (Firebase custom-claims gating)     |
-| `app/new/`                | Store creation and editing flows                    |
-| `app/api/`                | Route handlers (admin auth, stores)                 |
+| Group                     | Purpose                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------- |
+| `app/(LayoutWithBasic)/`  | Main marketplace pages (home, browse, store detail)                                   |
+| `app/(LayoutWithNav)/`    | Pages with persistent nav bar                                                         |
+| `app/(LayoutWithoutNav)/` | Minimal layout (auth, onboarding)                                                     |
+| `app/admin/`              | Admin dashboard (Firebase custom-claims gating)                                       |
+| `app/new/`                | Redesigned public-facing site — auth, store browse, store detail, seller listing form |
+| `app/api/`                | Route handlers (admin auth, stores)                                                   |
 
 ### Key directories
 
@@ -37,13 +37,17 @@ No test runner is configured.
 - `firebase/client.ts` — exports `db`, `storage`, `auth` (browser SDK).
 - `firebase/server.ts` — exports `db`, `bucket`, `adminAuth` (Admin SDK, server-only).
 - `hooks/` — `useAdminAuth` (Firebase auth + admin token), `useCategoryKey`, `useAdminMenuKey`.
-- `types/` — `Store`, `StoreDoc`, `User`, `StoreTag`, `StoreCategory` interfaces.
+- `types/` — `Store`, `StoreDoc`, `User`, `StoreTag`, `StoreCategory`, `StoreStatus` interfaces.
 - `utils/className.ts` and `lib/utils.ts` — both export `cn()` (clsx + tailwind-merge). Prefer `@/lib/utils`.
 - `mocks/` — Mockaroo-generated mock data for development.
 
 ### Firebase collections
 
 Environment variables switch between dev and prod Firestore collections (`mockStore`/`mockUser` vs `prodStore`/`prodUser`). Never hardcode collection names — use the env-driven constants.
+
+### Firestore write constraints
+
+`updateDoc` rejects `undefined` values — Firestore will throw at runtime if any field is `undefined`. Always pass `""` for optional string fields that are empty, never `field || undefined`.
 
 ## Styling rules
 

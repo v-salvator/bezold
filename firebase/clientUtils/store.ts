@@ -12,7 +12,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/firebase/client";
 
-import type { Store, StoreDoc } from "@/types";
+import type { Store, StoreDoc, StoreStatus } from "@/types";
 import { COLLECTIONS } from "@/firebase/constants";
 
 const COLLECTION = COLLECTIONS.STORE;
@@ -83,8 +83,16 @@ export const editStoreById = async (
   editedStore: Partial<Store>,
 ) => {
   const docRef = doc(db, COLLECTION, storeId);
-  const docSnap = await updateDoc(docRef, {
+  await updateDoc(docRef, {
     ...editedStore,
     updateTime: serverTimestamp(),
   });
+};
+
+export const updateStoreStatus = async (
+  storeId: Store["id"],
+  status: StoreStatus,
+) => {
+  const docRef = doc(db, COLLECTION, storeId);
+  await updateDoc(docRef, { status, updateTime: serverTimestamp() });
 };
