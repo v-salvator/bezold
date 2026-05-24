@@ -32,7 +32,7 @@ No test runner is configured.
 ### Key directories
 
 - `atoms/` — Jotai atoms. `SearchFilterAtom.ts` owns all filter state (`cityAtom`, `tagAtom`, `amountFilterAtom`, `categoryAtom`, composed `filtersAtom`, `activeDrawerCardAtom`).
-- `components/refactored/` — Shared design-system primitives (Button, Pill, StoreCard, SectionTitle, Category, Link, Dropdown). Each has a co-located `*.module.css`. Use these before creating new ones.
+- `components/refactored/` — Shared design-system primitives (Button, Pill, Card, FormField, StoreCard, SectionTitle, Category, Link, Dropdown). Each has a co-located `*.module.css`. **Before building any UI for a new route, check here first for reusable primitives.** When a new component built inside a route is generic enough (no route-specific logic or data), extract it here so future routes can reuse it.
 - `components/home/`, `components/animated/`, `components/SearchFilter/` — Feature-specific component groups.
 - `firebase/client.ts` — exports `db`, `storage`, `auth` (browser SDK).
 - `firebase/server.ts` — exports `db`, `bucket`, `adminAuth` (Admin SDK, server-only).
