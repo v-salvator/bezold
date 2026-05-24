@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import styles from "./page.module.css";
 import LaunchBanner from "../_components/LaunchBanner";
 import SiteNav from "../_components/SiteNav";
 import SiteFooter from "../_components/SiteFooter";
@@ -20,7 +19,7 @@ export default function StoreGuidePage() {
     <>
       <LaunchBanner />
       <SiteNav activeLink="頂讓指南" />
-      <div className={styles.frame}>
+      <div className="flex-1">
         <GuideHero />
         <GlossaryGrid />
         <BuyerSteps />
