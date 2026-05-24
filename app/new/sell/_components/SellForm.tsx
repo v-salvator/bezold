@@ -163,7 +163,7 @@ export default function SellForm() {
       <Card className="w-full max-w-[640px]">
         <StoreImageUpload
           storeId={createdStoreId}
-          onDone={() => router.push("/new/store-list")}
+          onDone={() => router.push("/new/my-listings")}
         />
       </Card>
     );

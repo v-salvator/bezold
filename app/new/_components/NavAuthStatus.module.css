@@ -50,6 +50,22 @@
   max-width: 200px;
 }
 
+.dropdownLink {
+  font-family: var(--hand);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 0.625rem 0.875rem;
+  display: block;
+  transition: background 0.15s;
+  border-bottom: 1px solid var(--paper-3);
+
+  &:hover {
+    background: var(--paper-2);
+  }
+}
+
 .logoutBtn {
   font-family: var(--hand);
   font-size: 0.875rem;
