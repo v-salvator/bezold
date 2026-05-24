@@ -1,0 +1,57 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 640px;
+}
+
+.badge {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border: 1px solid var(--paper);
+  padding: 3px 8px;
+  border-radius: 2px;
+  align-self: flex-start;
+  color: var(--paper);
+  opacity: 0.7;
+}
+
+.title {
+  font-family: var(--display);
+  font-size: clamp(36px, 6vw, 64px);
+  font-weight: 700;
+  margin: 0;
+  line-height: 1;
+  color: var(--paper);
+}
+
+.sub {
+  font-family: var(--hand);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--paper);
+  opacity: 0.85;
+  margin: 0;
+}
+
+.links {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.link {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--accent-3);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-3);
+  padding-bottom: 2px;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}

@@ -1,0 +1,36 @@
+.card {
+  border: 1.5px solid var(--ink);
+  border-radius: 4px;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--paper);
+}
+
+.term {
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--accent);
+}
+
+.definition {
+  font-family: var(--hand);
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.example {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  margin: 0;
+  color: var(--ink-2);
+  border-top: 1px dashed var(--paper-3);
+  padding-top: 8px;
+  line-height: 1.5;
+}
