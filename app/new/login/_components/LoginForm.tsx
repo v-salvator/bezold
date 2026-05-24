@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebase/client";
 import Button from "@/components/refactored/Button";
@@ -21,6 +21,8 @@ const AUTH_ERRORS: Record<string, string> = {
 
 export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get("redirect") ?? "/new/store-list";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -33,7 +35,7 @@ export default function LoginForm() {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push("/new/store-list");
+      router.push(redirectPath);
     } catch (err) {
       const code = (err as { code?: string }).code ?? "";
       setError(AUTH_ERRORS[code] ?? "發生未知錯誤，請再試一次");
