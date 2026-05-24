@@ -74,3 +74,23 @@ Images in Firestore are stored as raw Storage paths (e.g. `mockStore/{storeId}/1
 - **Sub-components** (FaqItem, Step, WhyUsItem, etc.) go at the bottom of the parent file unless reused elsewhere or the file becomes hard to navigate.
 - Use `cn()` from `@/lib/utils` for all conditional class name composition — never string template literals.
 - Ant Design is configured with primary color `#ff4a31` via `ConfigProvider` in the root layout.
+
+### `/new` page shell pattern
+
+Every page under `app/new/` follows this structure:
+
+```tsx
+<>
+  <LaunchBanner />
+  <SiteNav activeLink="頁面名稱" /> {/* label must match navLinks exactly */}
+  <div className="flex-1">
+    <SectionA />
+    <SectionB />
+    ...
+  </div>
+  <SiteFooter />
+</>
+```
+
+- Pass `activeLink` matching the **exact label string** from the `navLinks` array in `SiteNav.tsx` — this highlights the current page.
+- The inner wrapper must be `<div className="flex-1">` (or omitted entirely) — **never** wrap sections in a `max-width` constrained frame div. The `Section` component handles its own full-width background colors; a constrained wrapper causes dark/alt sections to render as floating boxes instead of full-width bands.
