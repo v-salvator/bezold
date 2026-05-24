@@ -1,0 +1,32 @@
+.item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  padding: 14px 16px;
+}
+
+.icon {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.title {
+  font-family: var(--display);
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: var(--paper);
+}
+
+.desc {
+  font-family: var(--hand);
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+  color: var(--paper);
+  opacity: 0.8;
+}
