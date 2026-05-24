@@ -66,6 +66,13 @@ export default function NavAuthStatus() {
           <span className={styles.dropdownEmail}>
             {user.displayName ?? user.email}
           </span>
+          <NextLink
+            href="/new/my-listings"
+            className={styles.dropdownLink}
+            onClick={() => setOpen(false)}
+          >
+            我的刊登
+          </NextLink>
           <button
             type="button"
             className={styles.logoutBtn}

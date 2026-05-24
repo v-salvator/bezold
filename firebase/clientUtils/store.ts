@@ -9,6 +9,7 @@ import {
   Timestamp,
   query,
   orderBy,
+  where,
 } from "firebase/firestore";
 import { db } from "@/firebase/client";
 
@@ -95,4 +96,21 @@ export const updateStoreStatus = async (
 ) => {
   const docRef = doc(db, COLLECTION, storeId);
   await updateDoc(docRef, { status, updateTime: serverTimestamp() });
+};
+
+export const getStoresByUserId = async (userId: string) => {
+  const collectionRef = collection(db, COLLECTION).withConverter(
+    storeConverter,
+  );
+  const collectionQuery = query(
+    collectionRef,
+    where("user", "==", userId),
+    orderBy("createTime", "desc"),
+  );
+  const querySnapshot = await getDocs(collectionQuery);
+  const stores: Store[] = [];
+  querySnapshot.forEach((docSnap) => {
+    stores.push(docSnap.data());
+  });
+  return stores;
 };
