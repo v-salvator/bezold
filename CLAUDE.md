@@ -45,6 +45,15 @@ No test runner is configured.
 
 Environment variables switch between dev and prod Firestore collections (`mockStore`/`mockUser` vs `prodStore`/`prodUser`). Never hardcode collection names — use the env-driven constants.
 
+Queries that combine `where("field", "==", value)` with `orderBy("otherField")` require a **composite Firestore index**. If one is missing, Firestore logs an error with a direct link to create it in the console.
+
+### Firebase Storage images
+
+Images in Firestore are stored as raw Storage paths (e.g. `mockStore/{storeId}/1.png`), **not** download URLs.
+
+- **Client components**: resolve with `getDownloadURL(ref(storage, path))` from `firebase/storage` before passing to `<Image src>`. Passing the raw path directly causes a `next/image` parse error.
+- **Server components**: use `getImagesByPath()` from `firebase/serverUtils/image.ts`, which resolves via Admin SDK signed URLs.
+
 ### Firestore write constraints
 
 `updateDoc` rejects `undefined` values — Firestore will throw at runtime if any field is `undefined`. Always pass `""` for optional string fields that are empty, never `field || undefined`.
