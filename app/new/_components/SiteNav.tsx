@@ -1,7 +1,7 @@
 import Logo from "./Logo";
 import Pill from "@/components/refactored/Pill";
-import Button from "@/components/refactored/Button";
 import Link from "@/components/refactored/Link";
+import SellButton from "./SellButton";
 import { cn } from "@/lib/utils";
 import NextLink from "next/link";
 
@@ -42,9 +42,7 @@ export default function SiteNav({ activeLink }: { activeLink?: string }) {
         <NextLink href="/new/login" style={{ textDecoration: "none" }}>
           <Pill>登入</Pill>
         </NextLink>
-        <Button variant="mus" className="px-2 py-1 text-xs">
-          + 限時免費刊登
-        </Button>
+        <SellButton />
       </div>
     </nav>
   );
