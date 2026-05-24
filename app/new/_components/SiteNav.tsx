@@ -1,9 +1,8 @@
 import Logo from "./Logo";
-import Pill from "@/components/refactored/Pill";
 import Link from "@/components/refactored/Link";
 import SellButton from "./SellButton";
+import NavAuthStatus from "./NavAuthStatus";
 import { cn } from "@/lib/utils";
-import NextLink from "next/link";
 
 const navLinks = [
   { label: "我要找店", href: "/new/store-list" },
@@ -39,9 +38,7 @@ export default function SiteNav({ activeLink }: { activeLink?: string }) {
         ))}
       </ul>
       <div className="flex items-center gap-2">
-        <NextLink href="/new/login" style={{ textDecoration: "none" }}>
-          <Pill>登入</Pill>
-        </NextLink>
+        <NavAuthStatus />
         <SellButton />
       </div>
     </nav>
