@@ -5,8 +5,12 @@ import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import type { User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/firebase/client";
-import { getUserById, editUserById } from "@/firebase/clientUtils";
-import { createStoreDoc } from "@/firebase/clientUtils";
+import {
+  getUserById,
+  editUserById,
+  createStoreDoc,
+} from "@/firebase/clientUtils";
+import StoreImageUpload from "./StoreImageUpload";
 import {
   getStoreCities,
   getStoreDistrictByCity,
@@ -62,7 +66,7 @@ export default function SellForm() {
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [createdStoreId, setCreatedStoreId] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -130,14 +134,14 @@ export default function SellForm() {
     }
 
     try {
-      await createStoreDoc({
+      const storeRef = await createStoreDoc({
         ...store,
         price: Number(store.price),
         currency: "TWD",
         user: authUser.uid,
         images: [],
       } as unknown as Store);
-      setSuccess(true);
+      setCreatedStoreId(storeRef.id);
     } catch {
       setError("刊登店面失敗，請稍後再試");
     } finally {
@@ -153,20 +157,13 @@ export default function SellForm() {
     );
   }
 
-  if (success) {
+  if (createdStoreId) {
     return (
       <Card className="w-full max-w-[640px]">
-        <div className={styles.successBox}>
-          <strong>刊登成功！</strong>
-          <br />
-          我們已收到您的店面資料，審核後將盡快上架。感謝您使用 Bezold
-          限時免費刊登服務。
-        </div>
-        <div className={`${styles.actions} mt-4`}>
-          <Button onClick={() => router.push("/new/store-list")}>
-            瀏覽店面
-          </Button>
-        </div>
+        <StoreImageUpload
+          storeId={createdStoreId}
+          onDone={() => router.push("/new/store-list")}
+        />
       </Card>
     );
   }
