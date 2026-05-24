@@ -21,7 +21,7 @@ import { genDefaultStore } from "@/utils/store";
 import FormField from "@/components/refactored/FormField";
 import Button from "@/components/refactored/Button";
 import Card from "@/components/refactored/Card";
-import type { Store } from "@/types";
+import { type Store, STORE_STATUS } from "@/types";
 import styles from "./SellForm.module.css";
 
 interface StoreFields {
@@ -140,6 +140,7 @@ export default function SellForm() {
         currency: "TWD",
         user: authUser.uid,
         images: [],
+        status: STORE_STATUS.PENDING,
       } as unknown as Store);
       setCreatedStoreId(storeRef.id);
     } catch {

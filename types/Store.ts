@@ -1,6 +1,7 @@
 import { User } from "./User";
 import type { Timestamp } from "firebase/firestore";
 import { StoreTag } from "@/types/StoreTags";
+import { StoreStatus } from "@/types/StoreStatus";
 
 // * types in client
 export interface Store {
@@ -19,6 +20,7 @@ export interface Store {
   userInfo?: User;
   city?: string; // TODO: will not be option in the future
   district?: string; // TODO: will not be option in the future
+  status?: StoreStatus;
 }
 
 // * types in firestore doc
@@ -37,4 +39,5 @@ export interface StoreDoc {
   userInfo?: User;
   city?: string; // TODO: will not be option in the future
   district?: string; // TODO: will not be option in the future
+  status?: StoreStatus;
 }
