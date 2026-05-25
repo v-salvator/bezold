@@ -45,7 +45,6 @@
   gap: 0;
   border: 2px solid var(--ink);
   border-radius: 6px;
-  overflow: hidden;
   background: #fff;
 }
 .col {
@@ -58,11 +57,13 @@
 }
 .buy {
   background: var(--paper-2);
+  border-radius: 4px 0 0 4px;
 }
 .sell {
   background: var(--ink);
   color: var(--paper);
   border-left: 1.5px solid var(--ink);
+  border-radius: 0 4px 4px 0;
 }
 .sell * {
   color: var(--paper);
@@ -197,8 +198,12 @@
   .split {
     grid-template-columns: 1fr;
   }
+  .buy {
+    border-radius: 4px 4px 0 0;
+  }
   .sell {
     border-left: 0;
     border-top: 1.5px solid var(--ink);
+    border-radius: 0 0 4px 4px;
   }
 }

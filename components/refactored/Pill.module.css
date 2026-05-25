@@ -8,6 +8,10 @@
   color: var(--ink);
   display: inline-block;
 }
+.clickable {
+  cursor: pointer;
+  user-select: none;
+}
 .solid {
   background: var(--ink);
   color: var(--paper);

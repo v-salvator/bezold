@@ -1,5 +1,6 @@
 import Pill from "@/components/refactored/Pill";
 import styles from "./HeroSplit.module.css";
+import BuyerForm from "./BuyerForm";
 
 export default function HeroSplit() {
   return (
@@ -25,36 +26,8 @@ export default function HeroSplit() {
             <br />
             接手就開張
           </h2>
-          <p className={styles.lead}>
-            2,481 間真實刊登 · 含設備清單、客群分析、月營業額參考
-          </p>
-          <div className={styles.form}>
-            <div className={styles.field}>
-              <b>地區</b>
-              <span className={styles.fieldCar}>選擇縣市 / 行政區</span>
-            </div>
-            <div className={styles.field}>
-              <b>行業</b>
-              <span className={styles.fieldCar}>餐飲 · 飲料 · 零售 …</span>
-            </div>
-            <div className={styles.formGrid2}>
-              <div className={styles.field}>
-                <b>頂讓金</b>
-                <span className={styles.fieldCar}>不限</span>
-              </div>
-              <div className={styles.field}>
-                <b>坪數</b>
-                <span className={styles.fieldCar}>不限</span>
-              </div>
-            </div>
-            <span className={styles.btn}>瀏覽符合的店 →</span>
-          </div>
-          <div className={styles.row}>
-            <Pill>100 萬以下</Pill>
-            <Pill>含生財設備</Pill>
-            <Pill variant="warm">急售</Pill>
-            <Pill>捷運站旁</Pill>
-          </div>
+          <p className={styles.lead}>真實刊登 · 直接聯絡賣家，不經中間人</p>
+          <BuyerForm />
         </div>
 
         <div className={`${styles.col} ${styles.sell}`}>
