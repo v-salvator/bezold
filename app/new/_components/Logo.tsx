@@ -1,3 +1,4 @@
+import Link from "next/link";
 import styles from "./Logo.module.css";
 
 export default function Logo({
@@ -10,7 +11,7 @@ export default function Logo({
   light?: boolean;
 }) {
   return (
-    <div className={`${styles.logo} ${light ? styles.light : ""}`}>
+    <Link href="/new" className={`${styles.logo} ${light ? styles.light : ""}`}>
       <div className={styles.text}>
         Bezold
         <small>
@@ -18,6 +19,6 @@ export default function Logo({
           {subtitle}
         </small>
       </div>
-    </div>
+    </Link>
   );
 }

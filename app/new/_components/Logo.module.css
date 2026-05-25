@@ -2,6 +2,7 @@
   display: inline-flex;
   align-items: flex-start;
   line-height: 1;
+  text-decoration: none;
 }
 
 .text {
