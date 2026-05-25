@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Dropdown from "@/components/refactored/Dropdown";
 import { cityItems, amountItems } from "@/components/SearchFilter/DropDowns";
 import { STORE_CATEGORIES } from "@/constant/storeType";
-import { STORE_TAGS } from "@/constant/storeTags";
 import styles from "./HeroSplit.module.css";
 
 const cityOptions = cityItems.map((item) => ({
@@ -14,11 +13,6 @@ const cityOptions = cityItems.map((item) => ({
 }));
 
 const categoryOptions = STORE_CATEGORIES.map((item) => ({
-  label: item.label,
-  value: item.key,
-}));
-
-const tagOptions = STORE_TAGS.map((item) => ({
   label: item.label,
   value: item.key,
 }));
@@ -33,14 +27,12 @@ export default function BuyerForm() {
   const [isPending, startTransition] = useTransition();
   const [city, setCity] = useState("");
   const [category, setCategory] = useState("");
-  const [tag, setTag] = useState("");
   const [amountKey, setAmountKey] = useState("");
 
   function buildParams() {
     const params = new URLSearchParams();
     if (city) params.set("city", city);
     if (category) params.set("category", category);
-    if (tag) params.set("tag", tag);
     const amountItem = amountItems.find((item) => item.key === amountKey);
     if (amountItem) {
       const [min, max] = amountItem.value;
@@ -66,13 +58,6 @@ export default function BuyerForm() {
         value={category}
         onChange={setCategory}
         placeholder="餐飲 · 飲料 · 零售 …"
-      />
-      <Dropdown
-        label="標籤"
-        options={tagOptions}
-        value={tag}
-        onChange={setTag}
-        placeholder="急售 · 熱門 · 精選 …"
       />
       <Dropdown
         label="頂讓金"
