@@ -7,9 +7,9 @@ export default function SiteFooter() {
       <div className={styles.brand}>
         <Logo light />
         <p>
-          全台最大店面頂讓平台。
+          台灣店面頂讓媒合平台。
           <br />
-          真實刊登 · 履約保障 · 專人陪跑。
+          真實刊登 · 直接聯絡 · 永久不抽成。
         </p>
         <div className={styles.line}>
           <div className={styles.qr} />
