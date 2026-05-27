@@ -36,7 +36,7 @@ export default async function NewHomePage() {
       <SiteNav />
       <div className={styles.frame}>
         <HeroSplit />
-        <TrustBar />
+        {/* <TrustBar /> */}
         <FeaturedListings
           stores={highlightedStores}
           moreHref="/new/store-list?tag=RECOMMENDED"
@@ -53,7 +53,7 @@ export default async function NewHomePage() {
         <Districts />
         <HowItWorks />
         <WhyUs />
-        <Stories />
+        {/* <Stories /> */}
         <SellerCta />
         <Faq />
       </div>

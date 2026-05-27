@@ -1,0 +1,21 @@
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 24px;
+  background: var(--accent-3);
+  font-family: var(--hand);
+  font-size: 13px;
+  color: var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+}
+
+.cta {
+  text-decoration: none;
+  color: var(--ink);
+  font-weight: 700;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

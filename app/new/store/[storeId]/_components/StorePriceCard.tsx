@@ -2,8 +2,15 @@ import Button from "@/components/refactored/Button";
 import type { Store } from "@/types";
 import styles from "./StorePriceCard.module.css";
 
-export default function StorePriceCard({ store }: { store: Store }) {
+export default function StorePriceCard({
+  store,
+  isExample = false,
+}: {
+  store: Store;
+  isExample?: boolean;
+}) {
   const { price, userInfo } = store;
+  const exampleTitle = "這是示範頁面，非真實物件";
   const priceInWan = (price / 10000).toFixed(0);
 
   return (
@@ -15,29 +22,51 @@ export default function StorePriceCard({ store }: { store: Store }) {
       </div>
 
       <div className={styles.cta}>
-        {userInfo?.phone && (
-          <a href={`tel:${userInfo.phone}`} className={styles.ctaLink}>
-            <Button className={styles.btn}>📞 撥打賣家電話</Button>
-          </a>
-        )}
-        {userInfo?.lineId && (
-          <a
-            href={`https://line.me/ti/p/~${userInfo.lineId}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.ctaLink}
+        {userInfo?.phone &&
+          (isExample ? (
+            <span title={exampleTitle} className={styles.ctaLink}>
+              <Button className={styles.btn} disabled>
+                📞 撥打賣家電話
+              </Button>
+            </span>
+          ) : (
+            <a href={`tel:${userInfo.phone}`} className={styles.ctaLink}>
+              <Button className={styles.btn}>📞 撥打賣家電話</Button>
+            </a>
+          ))}
+        {userInfo?.lineId &&
+          (isExample ? (
+            <span title={exampleTitle} className={styles.ctaLink}>
+              <Button variant="sage" className={styles.btn} disabled>
+                💬 加 LINE 聯繫
+              </Button>
+            </span>
+          ) : (
+            <a
+              href={`https://line.me/ti/p/~${userInfo.lineId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.ctaLink}
+            >
+              <Button variant="sage" className={styles.btn}>
+                💬 加 LINE 聯繫
+              </Button>
+            </a>
+          ))}
+        <span title={isExample ? exampleTitle : undefined}>
+          <Button variant="ghost" className={styles.btn} disabled={isExample}>
+            ✉️ 站內留言
+          </Button>
+        </span>
+        <span title={isExample ? exampleTitle : undefined}>
+          <Button
+            variant="ghost"
+            className={`${styles.btn} ${styles.visit}`}
+            disabled={isExample}
           >
-            <Button variant="sage" className={styles.btn}>
-              💬 加 LINE 聯繫
-            </Button>
-          </a>
-        )}
-        <Button variant="ghost" className={styles.btn}>
-          ✉️ 站內留言
-        </Button>
-        <Button variant="ghost" className={`${styles.btn} ${styles.visit}`}>
-          📅 預約現場看店
-        </Button>
+            📅 預約現場看店
+          </Button>
+        </span>
       </div>
 
       <div className={styles.trust}>
