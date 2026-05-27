@@ -89,12 +89,10 @@
   font-size: 10px;
   color: var(--ink-2);
 }
-.tabs {
-  display: flex;
-  justify-content: center;
-  margin-top: 18px;
-  gap: 12px;
-  flex-wrap: wrap;
+.cardLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
 }
 
 @media (max-width: 900px) {
