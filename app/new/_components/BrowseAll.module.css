@@ -1,0 +1,40 @@
+.body {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.text {
+  font-family: var(--hand);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink-2);
+  flex: 1;
+  min-width: 200px;
+  margin: 0;
+}
+
+.btn {
+  display: inline-block;
+  font-family: var(--hand);
+  font-weight: 700;
+  font-size: 14px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  border: 1.5px solid var(--ink);
+  border-radius: 4px;
+  padding: 8px 16px;
+  box-shadow: 2px 2px 0 var(--ink);
+  white-space: nowrap;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+
+  &:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+}

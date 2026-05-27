@@ -16,7 +16,7 @@ type Props = {
 
 export default function FeaturedListings({
   stores,
-  num = "04",
+  num = "01",
   title = "編輯精選",
   sub = "— 編輯挑選，含設備、地段佳 —",
   more = "看全部 →",

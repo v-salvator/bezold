@@ -76,7 +76,7 @@ export default function Faq() {
   return (
     <Section variant="alt">
       <SectionTitle
-        num="11"
+        num="08"
         title="常見問題"
         sub="— 第一次接手 / 頂出？這些先看 —"
         more="完整 FAQ →"

@@ -37,7 +37,7 @@ export default function HowItWorks() {
   return (
     <Section variant="dark">
       <SectionTitle
-        num="07"
+        num="06"
         title="運作方式 · 簡單兩步"
         sub="— 我們先把買賣雙方湊在一起，剩下你們自己談 —"
         dark
