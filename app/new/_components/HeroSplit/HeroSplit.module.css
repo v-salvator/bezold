@@ -45,7 +45,6 @@
   gap: 0;
   border: 2px solid var(--ink);
   border-radius: 6px;
-  overflow: hidden;
   background: #fff;
 }
 .col {
@@ -58,11 +57,13 @@
 }
 .buy {
   background: var(--paper-2);
+  border-radius: 4px 0 0 4px;
 }
 .sell {
   background: var(--ink);
   color: var(--paper);
   border-left: 1.5px solid var(--ink);
+  border-radius: 0 4px 4px 0;
 }
 .sell * {
   color: var(--paper);
@@ -157,6 +158,41 @@
   color: var(--paper);
 }
 
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-family: var(--hand);
+  font-size: 16px;
+  counter-reset: steps;
+}
+.steps li {
+  counter-increment: steps;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #cfc8b8;
+}
+.steps li::before {
+  content: counter(steps);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent-3);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--accent-3);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
 .btn {
   font-family: var(--hand);
   font-weight: 700;
@@ -181,6 +217,7 @@
 .btnMus {
   background: var(--accent-3);
   color: var(--ink);
+  margin-top: auto;
 }
 
 .row {
@@ -197,8 +234,12 @@
   .split {
     grid-template-columns: 1fr;
   }
+  .buy {
+    border-radius: 4px 4px 0 0;
+  }
   .sell {
     border-left: 0;
     border-top: 1.5px solid var(--ink);
+    border-radius: 0 0 4px 4px;
   }
 }

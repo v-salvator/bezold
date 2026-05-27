@@ -67,6 +67,7 @@ Images in Firestore are stored as raw Storage paths (e.g. `mockStore/{storeId}/1
 - Use CSS nesting syntax (`& .child`, `&.modifier`) — all existing modules already do this.
 - CSS variable tokens (`--ink`, `--paper`, `--accent`, `--hand`, `--display`, `--mono`) are defined on the root wrapper div and cascade to all children — reference via `var(--token)`, never redefine per component.
 - The `/new` route defines an extended token set in `app/new/layout.module.css`: `--ink-2`, `--paper-2`, `--paper-3`, `--accent-2`, `--accent-3`, `--muted`, `--note`, `--brand`. Use these when building any page under `app/new/`.
+- Never use `overflow: hidden` on a container that holds `<Dropdown>` or any other absolutely-positioned menu — the menu will be clipped. Apply `border-radius` to the child elements directly instead.
 
 ## Component conventions
 
@@ -94,3 +95,11 @@ Every page under `app/new/` follows this structure:
 
 - Pass `activeLink` matching the **exact label string** from the `navLinks` array in `SiteNav.tsx` — this highlights the current page.
 - The inner wrapper must be `<div className="flex-1">` (or omitted entirely) — **never** wrap sections in a `max-width` constrained frame div. The `Section` component handles its own full-width background colors; a constrained wrapper causes dark/alt sections to render as floating boxes instead of full-width bands.
+
+### Search filter state pattern
+
+URL params are the source of truth for filter state in `/new/store-list`. Two rules:
+
+1. **Navigation into store-list** — always build a `URLSearchParams` object and call `router.push('/new/store-list?...')`. Never write to Jotai atoms cross-page. Supported params: `city`, `category`, `tag`, `amountMin`, `amountMax`.
+
+2. **SearchBar hydration** — `SearchBar.tsx` runs a `useEffect([], [])` on mount that reads `useSearchParams()` and sets `cityAtom`, `tagAtom`, `categoryAtom`, `amountFilterAtom` so the dropdowns reflect the current URL. This must be preserved whenever SearchBar is modified.

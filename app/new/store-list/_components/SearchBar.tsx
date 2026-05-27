@@ -4,8 +4,8 @@ import styles from "./SearchBar.module.css";
 import Button from "@/components/refactored/Button";
 import Dropdown from "@/components/refactored/Dropdown";
 import { useAtom } from "jotai";
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useTransition } from "react";
 import {
   cityAtom,
   tagAtom,
@@ -21,11 +21,37 @@ const toOptions = (items: { label: string; key: string }[]) =>
 
 export default function SearchBar() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [city, setCity] = useAtom(cityAtom);
   const [tag, setTag] = useAtom(tagAtom);
   const [amountFilter, setAmountFilter] = useAtom(amountFilterAtom);
   const [category, setCategory] = useAtom(categoryAtom);
+
+  useEffect(() => {
+    const cityParam = searchParams.get("city");
+    const tagParam = searchParams.get("tag");
+    const categoryParam = searchParams.get("category");
+    const amountMinParam = searchParams.get("amountMin");
+    const amountMaxParam = searchParams.get("amountMax");
+
+    if (cityParam) setCity(cityItems.find((item) => item.key === cityParam));
+    if (tagParam) setTag(STORE_TAGS.find((item) => item.key === tagParam));
+    if (categoryParam)
+      setCategory(STORE_CATEGORIES.find((item) => item.key === categoryParam));
+    if (amountMinParam || amountMaxParam) {
+      const min = amountMinParam ? Number(amountMinParam) : 0;
+      const max = amountMaxParam
+        ? Number(amountMaxParam)
+        : Number.POSITIVE_INFINITY;
+      setAmountFilter(
+        amountItems.find(
+          (item) => item.value[0] === min && item.value[1] === max,
+        ),
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSearch = () => {
     const params = new URLSearchParams();

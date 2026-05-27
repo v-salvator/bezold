@@ -11,10 +11,19 @@ export type PillVariant =
 export default function Pill({
   variant = "default",
   children,
+  onClick,
 }: {
   variant?: PillVariant;
   children: React.ReactNode;
+  onClick?: () => void;
 }) {
   const variantCls = variant === "default" ? "" : styles[variant];
-  return <span className={`${styles.pill} ${variantCls}`}>{children}</span>;
+  return (
+    <span
+      className={`${styles.pill} ${variantCls} ${onClick ? styles.clickable : ""}`}
+      onClick={onClick}
+    >
+      {children}
+    </span>
+  );
 }
