@@ -6,8 +6,10 @@ export type Category = {
   ico: string;
   variant: CategoryVariant;
   name: string;
-  count: string;
+  count?: string;
+  href?: string;
 };
+
 const variantClass: Record<CategoryVariant, string> = {
   a: styles.icoA,
   b: styles.icoB,
@@ -16,12 +18,22 @@ const variantClass: Record<CategoryVariant, string> = {
 };
 
 export default function Category({ category }: { category: Category }) {
-  const { ico, variant, name, count } = category;
-  return (
-    <div key={name} className={styles.category}>
+  const { ico, variant, name, count, href } = category;
+  const inner = (
+    <>
       <div className={`${styles.ico} ${variantClass[variant]}`}>{ico}</div>
       <b>{name}</b>
-      <span>{count}</span>
-    </div>
+      {count && <span>{count}</span>}
+    </>
   );
+
+  if (href) {
+    return (
+      <a href={href} className={styles.category}>
+        {inner}
+      </a>
+    );
+  }
+
+  return <div className={styles.category}>{inner}</div>;
 }
