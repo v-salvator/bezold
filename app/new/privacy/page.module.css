@@ -1,0 +1,15 @@
+.prose {
+  font-family: var(--hand);
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--ink-2);
+  max-width: 720px;
+
+  & p {
+    margin: 8px 0;
+  }
+
+  & b {
+    color: var(--ink);
+  }
+}

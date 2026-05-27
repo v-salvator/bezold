@@ -45,7 +45,6 @@ export default function SiteFooter() {
           <li>
             <a href="/new/store-example">刊登範例</a>
           </li>
-          <li>定價指南</li>
           <li>
             <a href="/new/my-listings">賣家後台</a>
           </li>
@@ -66,8 +65,12 @@ export default function SiteFooter() {
               聯絡客服
             </a>
           </li>
-          <li>服務條款</li>
-          <li>隱私政策</li>
+          <li>
+            <a href="/new/terms">服務條款</a>
+          </li>
+          <li>
+            <a href="/new/privacy">隱私政策</a>
+          </li>
         </ul>
       </div>
       <div className={styles.legal}>
