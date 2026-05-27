@@ -6,12 +6,14 @@ export default function SectionTitle({
   title,
   sub,
   more,
+  moreHref,
   dark = false,
 }: {
   num: string;
   title: string;
   sub?: string;
   more?: string;
+  moreHref?: string;
   dark?: boolean;
 }) {
   return (
@@ -23,7 +25,11 @@ export default function SectionTitle({
           <span className={cn(styles.sub, dark && styles.subDark)}>{sub}</span>
         )}
       </div>
-      {more && <a className={styles.more}>{more}</a>}
+      {more && (
+        <a className={styles.more} href={moreHref}>
+          {more}
+        </a>
+      )}
     </div>
   );
 }

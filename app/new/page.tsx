@@ -13,7 +13,10 @@ import Stories from "./_components/Stories";
 import SellerCta from "./_components/SellerCta";
 import Faq from "./_components/Faq";
 import SiteFooter from "./_components/SiteFooter";
-import { getHighlightedStores } from "@/firebase/serverUtils/store";
+import {
+  getHighlightedStores,
+  getEmergencyStores,
+} from "@/firebase/serverUtils/store";
 
 export const metadata: Metadata = {
   title: "頂讓.tw — 找一間準備好的店",
@@ -22,7 +25,10 @@ export const metadata: Metadata = {
 };
 
 export default async function NewHomePage() {
-  const highlightedStores = await getHighlightedStores();
+  const [highlightedStores, emergencyStores] = await Promise.all([
+    getHighlightedStores(),
+    getEmergencyStores(),
+  ]);
 
   return (
     <>
@@ -31,7 +37,18 @@ export default async function NewHomePage() {
       <div className={styles.frame}>
         <HeroSplit />
         <TrustBar />
-        <FeaturedListings stores={highlightedStores} />
+        <FeaturedListings
+          stores={highlightedStores}
+          moreHref="/new/store-list?tag=RECOMMENDED"
+        />
+        <FeaturedListings
+          stores={emergencyStores}
+          num="05"
+          title="急售特區"
+          sub="— 限時出售，把握機會 —"
+          more="看全部急售 →"
+          moreHref="/new/store-list?tag=EMERGENCY"
+        />
         <Categories />
         <Districts />
         <HowItWorks />

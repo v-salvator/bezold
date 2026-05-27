@@ -5,7 +5,23 @@ import StoreCard from "@/components/refactored/StoreCard";
 import { type Store, STORE_STATUS } from "@/types";
 import { storeToCard } from "@/utils/store";
 
-export default function FeaturedListings({ stores }: { stores: Store[] }) {
+type Props = {
+  stores: Store[];
+  num?: string;
+  title?: string;
+  sub?: string;
+  more?: string;
+  moreHref?: string;
+};
+
+export default function FeaturedListings({
+  stores,
+  num = "04",
+  title = "編輯精選",
+  sub = "— 編輯挑選，含設備、地段佳 —",
+  more = "看全部 →",
+  moreHref,
+}: Props) {
   const approvedStores = stores.filter(
     (store) => store.status === STORE_STATUS.APPROVED,
   );
@@ -15,10 +31,11 @@ export default function FeaturedListings({ stores }: { stores: Store[] }) {
   return (
     <Section variant="alt">
       <SectionTitle
-        num="04"
-        title="本週精選 / 急售"
-        sub="— 編輯挑選，含設備、地段佳 —"
-        more="看全部 →"
+        num={num}
+        title={title}
+        sub={sub}
+        more={more}
+        moreHref={moreHref}
       />
       <div className={styles.listings}>
         {approvedStores.map((store) => (
