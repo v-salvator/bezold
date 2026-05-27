@@ -141,4 +141,36 @@ export const getHighlightedStores = async () => {
   return stores;
 };
 
+export const getEmergencyStores = async () => {
+  const storesRef = db.collection(COLLECTION);
+
+  const snapshot = await storesRef
+    .where("tags", "array-contains", STORE_TAG.EMERGENCY)
+    .orderBy("updateTime", "desc")
+    .limit(8)
+    .get();
+
+  const stores: Store[] = [];
+  snapshot.forEach((doc) => {
+    const storeData = doc.data();
+    const store = {
+      id: doc.id,
+      ...storeData,
+      createTime: storeData.createTime.toDate(),
+      updateTime: storeData.updateTime.toDate(),
+    } as Store;
+    stores.push(store);
+  });
+
+  for (let storeData of stores) {
+    const hasImage = storeData?.images?.length > 0;
+    let images: string[] = [];
+    if (hasImage) {
+      images = await getImagesByPath(storeData.images);
+      storeData.images = images;
+    }
+  }
+  return stores;
+};
+
 // TODO: create store

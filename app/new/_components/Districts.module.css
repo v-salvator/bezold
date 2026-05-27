@@ -1,4 +1,6 @@
 .dist {
+  text-decoration: none;
+  color: inherit;
   border: 1.5px solid var(--ink);
   background: #fff;
   border-radius: 4px;

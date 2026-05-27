@@ -68,6 +68,7 @@ Images in Firestore are stored as raw Storage paths (e.g. `mockStore/{storeId}/1
 - CSS variable tokens (`--ink`, `--paper`, `--accent`, `--hand`, `--display`, `--mono`) are defined on the root wrapper div and cascade to all children — reference via `var(--token)`, never redefine per component.
 - The `/new` route defines an extended token set in `app/new/layout.module.css`: `--ink-2`, `--paper-2`, `--paper-3`, `--accent-2`, `--accent-3`, `--muted`, `--note`, `--brand`. Use these when building any page under `app/new/`.
 - Never use `overflow: hidden` on a container that holds `<Dropdown>` or any other absolutely-positioned menu — the menu will be clipped. Apply `border-radius` to the child elements directly instead.
+- When a CSS module class is applied to an `<a>` element, always add `text-decoration: none; color: inherit` to that class — browser link defaults otherwise override the design system styles.
 
 ## Component conventions
 
@@ -75,6 +76,7 @@ Images in Firestore are stored as raw Storage paths (e.g. `mockStore/{storeId}/1
 - **Sub-components** (FaqItem, Step, WhyUsItem, etc.) go at the bottom of the parent file unless reused elsewhere or the file becomes hard to navigate.
 - Use `cn()` from `@/lib/utils` for all conditional class name composition — never string template literals.
 - Ant Design is configured with primary color `#ff4a31` via `ConfigProvider` in the root layout.
+- **Optionally-clickable primitives** — shared components that are sometimes links and sometimes static accept `href?: string` and render as `<a>` when provided, `<div>` otherwise. See `Category.tsx` and the `District` sub-component in `Districts.tsx` for the established pattern.
 
 ### `/new` page shell pattern
 

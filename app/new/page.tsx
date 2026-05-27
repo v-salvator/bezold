@@ -13,6 +13,10 @@ import Stories from "./_components/Stories";
 import SellerCta from "./_components/SellerCta";
 import Faq from "./_components/Faq";
 import SiteFooter from "./_components/SiteFooter";
+import {
+  getHighlightedStores,
+  getEmergencyStores,
+} from "@/firebase/serverUtils/store";
 
 export const metadata: Metadata = {
   title: "頂讓.tw — 找一間準備好的店",
@@ -20,7 +24,12 @@ export const metadata: Metadata = {
     "全台店面頂讓平台。買家直接接手已有客群、設備、營運的店面；賣家把心血交給合適的人。早鳥前 3 個月免費刊登，永久不抽成。",
 };
 
-export default function NewHomePage() {
+export default async function NewHomePage() {
+  const [highlightedStores, emergencyStores] = await Promise.all([
+    getHighlightedStores(),
+    getEmergencyStores(),
+  ]);
+
   return (
     <>
       <LaunchBanner />
@@ -28,7 +37,18 @@ export default function NewHomePage() {
       <div className={styles.frame}>
         <HeroSplit />
         <TrustBar />
-        <FeaturedListings />
+        <FeaturedListings
+          stores={highlightedStores}
+          moreHref="/new/store-list?tag=RECOMMENDED"
+        />
+        <FeaturedListings
+          stores={emergencyStores}
+          num="05"
+          title="急售特區"
+          sub="— 限時出售，把握機會 —"
+          more="看全部急售 →"
+          moreHref="/new/store-list?tag=EMERGENCY"
+        />
         <Categories />
         <Districts />
         <HowItWorks />
