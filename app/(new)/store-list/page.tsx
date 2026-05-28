@@ -8,6 +8,7 @@ import SearchBar from "./_components/SearchBar";
 import ActiveFilters from "./_components/ActiveFilters";
 import ResultsArea from "./_components/ResultsArea";
 import { getStores } from "@/firebase/serverUtils";
+import { STORE_STATUS } from "@/types";
 
 export const metadata: Metadata = {
   title: "Bezold 頂讓必售 — 我要找店",
@@ -24,13 +25,16 @@ export default async function StoreListPage({ searchParams }: PageProps) {
   const searchObj = Object.fromEntries(storeSearchParams);
 
   const stores = await getStores(searchObj);
+  const approvedStores = stores.filter(
+    (store) => store.status === STORE_STATUS.APPROVED,
+  );
 
   return (
     <>
       <LaunchBanner />
       <SiteNav activeLink="我要找店" />
       <main className={styles.main}>
-        <Breadcrumbs count={stores.length} />
+        <Breadcrumbs count={approvedStores.length} />
         <SearchBar />
         <ActiveFilters />
         <ResultsArea stores={stores} />
