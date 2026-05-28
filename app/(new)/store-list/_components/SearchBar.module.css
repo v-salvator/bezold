@@ -8,6 +8,17 @@
   align-items: center;
 }
 
+@media (max-width: 640px) {
+  .searchbar {
+    padding: 12px 16px;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .searchbar > *:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
 .field {
   border: 1.5px solid var(--ink);
   background: #fff;

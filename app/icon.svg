@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" rx="7" fill="#d94a2a"/>
+  <rect x="0.75" y="0.75" width="30.5" height="30.5" rx="6.5" fill="none" stroke="#1c1a17" stroke-width="1.5"/>
+  <text
+    x="16"
+    y="24"
+    text-anchor="middle"
+    font-family="'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif"
+    font-weight="900"
+    font-size="21"
+    fill="#f6f2e9"
+  >頂</text>
+</svg>
