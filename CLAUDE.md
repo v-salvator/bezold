@@ -20,14 +20,12 @@ No test runner is configured.
 
 ### Route groups
 
-| Group                     | Purpose                                                                               |
-| ------------------------- | ------------------------------------------------------------------------------------- |
-| `app/(LayoutWithBasic)/`  | Main marketplace pages (home, browse, store detail)                                   |
-| `app/(LayoutWithNav)/`    | Pages with persistent nav bar                                                         |
-| `app/(LayoutWithoutNav)/` | Minimal layout (auth, onboarding)                                                     |
-| `app/admin/`              | Admin dashboard (Firebase custom-claims gating)                                       |
-| `app/new/`                | Redesigned public-facing site — auth, store browse, store detail, seller listing form |
-| `app/api/`                | Route handlers (admin auth, stores)                                                   |
+| Group        | Purpose                                                                                       |
+| ------------ | --------------------------------------------------------------------------------------------- |
+| `app/(new)/` | Primary public-facing site (root `/`) — home, browse, store detail, auth, sell, legal, guide  |
+| `app/admin/` | Admin dashboard (Firebase custom-claims gating)                                               |
+| `app/api/`   | Route handlers (admin auth, stores)                                                           |
+| `app/old/`   | Archived previous site — old route groups preserved at `/old/*` for reference, not production |
 
 ### Key directories
 
@@ -66,7 +64,7 @@ Images in Firestore are stored as raw Storage paths (e.g. `mockStore/{storeId}/1
 - Tailwind may be used freely on elements that carry no CSS module class (plain layout wrappers, spacing divs, responsive containers).
 - Use CSS nesting syntax (`& .child`, `&.modifier`) — all existing modules already do this.
 - CSS variable tokens (`--ink`, `--paper`, `--accent`, `--hand`, `--display`, `--mono`) are defined on the root wrapper div and cascade to all children — reference via `var(--token)`, never redefine per component.
-- The `/new` route defines an extended token set in `app/new/layout.module.css`: `--ink-2`, `--paper-2`, `--paper-3`, `--accent-2`, `--accent-3`, `--muted`, `--note`, `--brand`. Use these when building any page under `app/new/`.
+- The `app/(new)/` route group defines an extended token set in `app/(new)/layout.module.css`: `--ink-2`, `--paper-2`, `--paper-3`, `--accent-2`, `--accent-3`, `--muted`, `--note`, `--brand`. Use these when building any page under `app/(new)/`.
 - Never use `overflow: hidden` on a container that holds `<Dropdown>` or any other absolutely-positioned menu — the menu will be clipped. Apply `border-radius` to the child elements directly instead.
 - When a CSS module class is applied to an `<a>` element, always add `text-decoration: none; color: inherit` to that class — browser link defaults otherwise override the design system styles.
 
@@ -78,9 +76,9 @@ Images in Firestore are stored as raw Storage paths (e.g. `mockStore/{storeId}/1
 - Ant Design is configured with primary color `#ff4a31` via `ConfigProvider` in the root layout.
 - **Optionally-clickable primitives** — shared components that are sometimes links and sometimes static accept `href?: string` and render as `<a>` when provided, `<div>` otherwise. See `Category.tsx` and the `District` sub-component in `Districts.tsx` for the established pattern.
 
-### `/new` page shell pattern
+### Page shell pattern
 
-Every page under `app/new/` follows this structure:
+Every page under `app/(new)/` follows this structure:
 
 ```tsx
 <>
@@ -100,8 +98,8 @@ Every page under `app/new/` follows this structure:
 
 ### Search filter state pattern
 
-URL params are the source of truth for filter state in `/new/store-list`. Two rules:
+URL params are the source of truth for filter state in `/store-list`. Two rules:
 
-1. **Navigation into store-list** — always build a `URLSearchParams` object and call `router.push('/new/store-list?...')`. Never write to Jotai atoms cross-page. Supported params: `city`, `category`, `tag`, `amountMin`, `amountMax`.
+1. **Navigation into store-list** — always build a `URLSearchParams` object and call `router.push('/store-list?...')`. Never write to Jotai atoms cross-page. Supported params: `city`, `category`, `tag`, `amountMin`, `amountMax`.
 
 2. **SearchBar hydration** — `SearchBar.tsx` runs a `useEffect([], [])` on mount that reads `useSearchParams()` and sets `cityAtom`, `tagAtom`, `categoryAtom`, `amountFilterAtom` so the dropdowns reflect the current URL. This must be preserved whenever SearchBar is modified.
