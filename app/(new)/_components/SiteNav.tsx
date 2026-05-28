@@ -15,19 +15,40 @@ export default function SiteNav({ activeLink }: { activeLink?: string }) {
   return (
     <nav
       className={cn(
-        "flex items-center justify-between",
         "border-b-[1.5px] border-solid border-[var(--ink)]",
         "px-7 py-3.5",
         "bg-[var(--paper)]",
       )}
     >
-      <Logo />
+      <div className="flex items-center justify-between">
+        <Logo />
+        <ul
+          className={cn(
+            "text-sm font-[var(--hand)]",
+            "hidden sm:flex gap-[22px]",
+            "m-0 p-0",
+            "list-none",
+          )}
+        >
+          {navLinks.map(({ label, href }) => (
+            <Link href={href} key={label} active={label === activeLink}>
+              {label}
+            </Link>
+          ))}
+        </ul>
+        <div className="flex items-center gap-2">
+          <NavAuthStatus />
+          <SellButton />
+        </div>
+      </div>
+
+      {/* Mobile-only nav row */}
       <ul
         className={cn(
-          "text-sm font-[var(--hand)]",
-          "hidden sm:flex gap-[22px]",
-          "m-0 p-0 ",
-          "list-none",
+          "flex sm:hidden justify-around",
+          "m-0 p-0 mt-2.5 pt-2.5 list-none",
+          "border-t border-dashed border-[var(--ink-2)]",
+          "text-sm",
         )}
       >
         {navLinks.map(({ label, href }) => (
@@ -36,10 +57,6 @@ export default function SiteNav({ activeLink }: { activeLink?: string }) {
           </Link>
         ))}
       </ul>
-      <div className="flex items-center gap-2">
-        <NavAuthStatus />
-        <SellButton />
-      </div>
     </nav>
   );
 }
