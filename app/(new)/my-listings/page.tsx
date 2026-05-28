@@ -6,8 +6,8 @@ import MyListingsContent from "./_components/MyListingsContent";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
-  title: "頂讓.tw — 我的刊登",
-  description: "查看你提交的店面與審核狀態。",
+  title: "Bezold 頂讓必售 — 我的刊登",
+  description: "查看你在 Bezold 頂讓必售 提交的頂讓店面與審核狀態。",
 };
 
 export default function MyListingsPage() {

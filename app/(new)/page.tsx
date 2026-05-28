@@ -20,7 +20,7 @@ import {
 } from "@/firebase/serverUtils/store";
 
 export const metadata: Metadata = {
-  title: "頂讓.tw — 找一間準備好的店",
+  title: "Bezold 頂讓必售 — 找一間準備好的店",
   description:
     "全台店面頂讓平台。買家直接接手已有客群、設備、營運的店面；賣家把心血交給合適的人。早鳥前 3 個月免費刊登，永久不抽成。",
 };

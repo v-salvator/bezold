@@ -5,8 +5,8 @@ import SellForm from "./_components/SellForm";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
-  title: "頂讓.tw — 限時免費刊登",
-  description: "免費刊登您的店面，快速找到合適買家。",
+  title: "Bezold 頂讓必售 — 限時免費刊登",
+  description: "在 Bezold 頂讓必售 免費刊登您的頂讓店面，快速找到合適買家。",
 };
 
 export default function SellPage() {

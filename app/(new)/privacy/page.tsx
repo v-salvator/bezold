@@ -8,9 +8,9 @@ import SectionTitle from "@/components/refactored/SectionTitle";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
-  title: "隱私政策 — 頂讓.tw",
+  title: "隱私政策 — Bezold 頂讓必售",
   description:
-    "頂讓.tw 如何蒐集、使用與保護您的個人資料，依個人資料保護法說明您的權利。",
+    "Bezold 頂讓必售 如何蒐集、使用與保護您的個人資料，依個人資料保護法說明您的權利。",
 };
 
 export default function PrivacyPage() {

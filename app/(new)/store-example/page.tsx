@@ -13,8 +13,8 @@ import { exampleStore } from "./_data/exampleStore";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
-  title: "頂讓.tw — 刊登範例",
-  description: "查看刊登後的頁面長什麼樣子，這是示範頁面，非真實物件。",
+  title: "Bezold 頂讓必售 — 刊登範例",
+  description: "查看頂讓店面刊登後的頁面樣式，這是示範頁面，非真實物件。",
 };
 
 export default function StoreExamplePage() {

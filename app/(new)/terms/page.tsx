@@ -8,8 +8,9 @@ import SectionTitle from "@/components/refactored/SectionTitle";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = {
-  title: "服務條款 — 頂讓.tw",
-  description: "頂讓.tw 平台服務條款，規範買賣雙方使用本平台之權利與義務。",
+  title: "服務條款 — Bezold 頂讓必售",
+  description:
+    "Bezold 頂讓必售 平台服務條款，規範買賣雙方使用本平台之權利與義務。",
 };
 
 export default function TermsPage() {
@@ -28,7 +29,7 @@ export default function TermsPage() {
           <SectionTitle num="01" title="平台說明" />
           <div className={styles.prose}>
             <p>
-              頂讓.tw（以下簡稱「本平台」）由 bezold
+              Bezold 頂讓必售（以下簡稱「本平台」）由 bezold
               營運，提供台灣店面頂讓資訊之刊登、搜尋與媒合服務。
             </p>
             <p>

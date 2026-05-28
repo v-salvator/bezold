@@ -10,7 +10,7 @@ import PitfallsList from "./_components/PitfallsList";
 import GuideCta from "./_components/GuideCta";
 
 export const metadata: Metadata = {
-  title: "頂讓指南 — 頂讓.tw",
+  title: "頂讓指南 — Bezold 頂讓必售",
   description: "第一次買店或頂出？從名詞解釋到交接流程，一頁看懂頂讓全攻略。",
 };
 

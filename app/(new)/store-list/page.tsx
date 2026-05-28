@@ -10,7 +10,7 @@ import ResultsArea from "./_components/ResultsArea";
 import { getStores } from "@/firebase/serverUtils";
 
 export const metadata: Metadata = {
-  title: "頂讓.tw — 我要找店",
+  title: "Bezold 頂讓必售 — 我要找店",
   description:
     "瀏覽全台頂讓店面。依地區、行業、頂讓金快速篩選，直接聯絡賣家，沒有中間人。",
 };

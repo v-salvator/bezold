@@ -8,7 +8,7 @@ import FaqCta from "./_components/FaqCta";
 import type { FaqItem } from "./_components/FaqCategory";
 
 export const metadata: Metadata = {
-  title: "常見問題 — 頂讓.tw",
+  title: "常見問題 — Bezold 頂讓必售",
   description:
     "關於頂讓平台的刊登、買賣流程、費用、安全保障等常見問題一次解答。",
 };
