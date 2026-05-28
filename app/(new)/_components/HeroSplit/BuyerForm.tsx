@@ -71,7 +71,7 @@ export default function BuyerForm() {
         className={styles.btn}
         onClick={() =>
           startTransition(() =>
-            router.push(`/new/store-list?${buildParams().toString()}`),
+            router.push(`/store-list?${buildParams().toString()}`),
           )
         }
         disabled={isPending}

@@ -65,7 +65,7 @@ export default function SearchBar() {
         params.set("amountMax", String(max));
     }
     startTransition(() => {
-      router.push(`/new/store-list?${params.toString()}`);
+      router.push(`/store-list?${params.toString()}`);
     });
   };
 

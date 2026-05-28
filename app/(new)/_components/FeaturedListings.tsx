@@ -41,7 +41,7 @@ export default function FeaturedListings({
         {approvedStores.map((store) => (
           <a
             key={store.id}
-            href={`/new/store/${store.id}`}
+            href={`/store/${store.id}`}
             className={styles.cardLink}
           >
             <StoreCard card={storeToCard(store)} />

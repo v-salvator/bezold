@@ -44,7 +44,7 @@ function District({ district }: { district: District }) {
   const { name, en, count, city } = district;
   return (
     <a
-      href={`/new/store-list?city=${encodeURIComponent(city)}`}
+      href={`/store-list?city=${encodeURIComponent(city)}`}
       className={styles.dist}
     >
       <div className={styles.left}>

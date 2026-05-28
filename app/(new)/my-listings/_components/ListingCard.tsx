@@ -67,10 +67,7 @@ export default function ListingCard({ store }: { store: Store }) {
         <div className={styles.footer}>
           <span className={styles.date}>{formatDate(store.createTime)}</span>
           {store.status === STORE_STATUS.APPROVED && (
-            <NextLink
-              href={`/new/store/${store.id}`}
-              className={styles.viewLink}
-            >
+            <NextLink href={`/store/${store.id}`} className={styles.viewLink}>
               查看刊登 →
             </NextLink>
           )}

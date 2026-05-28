@@ -11,31 +11,31 @@ const categories: CategoryType[] = [
     ico: "餐",
     variant: "a",
     name: "餐飲",
-    href: `/new/store-list?category=${STORE_CATEGORY.RESTAURANT}`,
+    href: `/store-list?category=${STORE_CATEGORY.RESTAURANT}`,
   },
   {
     ico: "服",
     variant: "b",
     name: "服飾",
-    href: `/new/store-list?category=${STORE_CATEGORY.CLOTHING}`,
+    href: `/store-list?category=${STORE_CATEGORY.CLOTHING}`,
   },
   {
     ico: "工",
     variant: "c",
     name: "工廠",
-    href: `/new/store-list?category=${STORE_CATEGORY.FACTORY}`,
+    href: `/store-list?category=${STORE_CATEGORY.FACTORY}`,
   },
   {
     ico: "百",
     variant: "default",
     name: "百貨",
-    href: `/new/store-list?category=${STORE_CATEGORY.DEPARTMENT}`,
+    href: `/store-list?category=${STORE_CATEGORY.DEPARTMENT}`,
   },
   {
     ico: "他",
     variant: "a",
     name: "其他",
-    href: `/new/store-list?category=${STORE_CATEGORY.OTHERS}`,
+    href: `/store-list?category=${STORE_CATEGORY.OTHERS}`,
   },
 ];
 

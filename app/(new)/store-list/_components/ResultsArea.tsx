@@ -53,7 +53,7 @@ export default function ResultsArea({ stores }: { stores: Store[] }) {
         {sortedStores.map((store) => (
           <a
             key={store.id}
-            href={`/new/store/${store.id}`}
+            href={`/store/${store.id}`}
             className={styles.cardLink}
           >
             <StoreCard card={storeToCard(store)} />
