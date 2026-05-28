@@ -9,6 +9,16 @@
   flex-wrap: wrap;
 }
 
+@media (max-width: 640px) {
+  .crumbs {
+    padding: 12px 16px;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+}
+
 .trail {
   font-family: var(--mono);
   font-size: 11px;
