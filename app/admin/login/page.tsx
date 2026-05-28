@@ -1,9 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Card, Input, Typography, notification } from "antd";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth } from "@/firebase/client";
 import { useRouter } from "next/navigation";
+import useAdminAuth from "@/hooks/useAdminAuth";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -11,6 +12,13 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [api, contextHolder] = notification.useNotification();
   const router = useRouter();
+  const { isAdmin, loading: authLoading } = useAdminAuth();
+
+  useEffect(() => {
+    if (!authLoading && isAdmin) {
+      router.replace("/admin/store/list");
+    }
+  }, [isAdmin, authLoading, router]);
 
   const handleLogin = async () => {
     if (!email || !password) {

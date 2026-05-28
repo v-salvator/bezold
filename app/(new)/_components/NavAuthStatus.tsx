@@ -16,11 +16,20 @@ function getInitial(user: User): string {
 
 export default function NavAuthStatus() {
   const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, setUser);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser);
+      if (firebaseUser) {
+        const token = await firebaseUser.getIdTokenResult();
+        setIsAdmin(token.claims.admin === true);
+      } else {
+        setIsAdmin(false);
+      }
+    });
     return () => unsubscribe();
   }, []);
 
@@ -73,6 +82,15 @@ export default function NavAuthStatus() {
           >
             我的刊登
           </NextLink>
+          {isAdmin && (
+            <NextLink
+              href="/admin"
+              className={styles.dropdownLink}
+              onClick={() => setOpen(false)}
+            >
+              後台管理
+            </NextLink>
+          )}
           <button
             type="button"
             className={styles.logoutBtn}
