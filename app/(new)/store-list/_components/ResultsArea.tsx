@@ -65,10 +65,12 @@ export default function ResultsArea({ stores }: { stores: Store[] }) {
         <div>
           <div className={styles.saveCtaTitle}>沒找到合適的？</div>
           <div className={styles.saveCtaSub}>
-            儲存搜尋條件 · 有新刊登時主動 email / LINE 通知你
+            新店面每週持續上架 · 歡迎告訴我們你在找什麼，我們幫你留意
           </div>
         </div>
-        <button className={styles.saveCtaBtn}>儲存此搜尋</button>
+        <a href="/store-guide#contact" className={styles.saveCtaBtn}>
+          聯絡我們
+        </a>
       </div>
     </div>
   );

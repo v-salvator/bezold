@@ -97,6 +97,7 @@
   border-radius: 4px;
   background: var(--accent);
   color: #fff;
+  text-decoration: none;
   box-shadow: 2px 2px 0 var(--ink);
   cursor: pointer;
   transition:
