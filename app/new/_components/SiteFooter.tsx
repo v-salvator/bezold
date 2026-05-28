@@ -7,9 +7,9 @@ export default function SiteFooter() {
       <div className={styles.brand}>
         <Logo light />
         <p>
-          全台最大店面頂讓平台。
+          台灣店面頂讓媒合平台。
           <br />
-          真實刊登 · 履約保障 · 專人陪跑。
+          真實刊登 · 直接聯絡 · 永久不抽成。
         </p>
         <div className={styles.line}>
           <div className={styles.qr} />
@@ -25,31 +25,52 @@ export default function SiteFooter() {
       <div>
         <h6>找店</h6>
         <ul>
-          <li>所有店面</li>
-          <li>地圖瀏覽</li>
-          <li>依行業</li>
-          <li>依地區</li>
-          <li>急售專區</li>
+          <li>
+            <a href="/new/store-list">所有店面</a>
+          </li>
+          <li>
+            <a href="/new/store-list?tag=RECOMMENDED">精選專區</a>
+          </li>
+          <li>
+            <a href="/new/store-list?tag=EMERGENCY">急售專區</a>
+          </li>
         </ul>
       </div>
       <div>
         <h6>頂出</h6>
         <ul>
-          <li>早鳥免費刊登</li>
-          <li>刊登範例</li>
-          <li>定價指南</li>
-          <li>賣家後台</li>
-          <li>成交故事</li>
+          <li>
+            <a href="/new/sell">早鳥免費刊登</a>
+          </li>
+          <li>
+            <a href="/new/store-example">刊登範例</a>
+          </li>
+          <li>
+            <a href="/new/my-listings">賣家後台</a>
+          </li>
         </ul>
       </div>
       <div>
         <h6>關於 / 支援</h6>
         <ul>
-          <li>關於我們</li>
-          <li>常見問題</li>
-          <li>聯絡客服</li>
-          <li>服務條款</li>
-          <li>隱私政策</li>
+          <li>
+            <a href="/new/faq">常見問題</a>
+          </li>
+          <li>
+            <a
+              href="https://line.me/ti/p/~@ding-rang"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              聯絡客服
+            </a>
+          </li>
+          <li>
+            <a href="/new/terms">服務條款</a>
+          </li>
+          <li>
+            <a href="/new/privacy">隱私政策</a>
+          </li>
         </ul>
       </div>
       <div className={styles.legal}>

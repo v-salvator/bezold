@@ -22,6 +22,15 @@
   font-size: 13px;
   color: #cfc8b8;
   line-height: 1.9;
+
+  & a {
+    text-decoration: none;
+    color: inherit;
+
+    &:hover {
+      color: var(--paper);
+    }
+  }
 }
 .brand p {
   font-family: var(--hand);

@@ -7,6 +7,7 @@ import TrustBar from "./_components/TrustBar";
 import FeaturedListings from "./_components/FeaturedListings";
 import Categories from "./_components/Categories";
 import Districts from "./_components/Districts";
+import BrowseAll from "./_components/BrowseAll";
 import HowItWorks from "./_components/HowItWorks";
 import WhyUs from "./_components/WhyUs";
 import Stories from "./_components/Stories";
@@ -36,14 +37,14 @@ export default async function NewHomePage() {
       <SiteNav />
       <div className={styles.frame}>
         <HeroSplit />
-        <TrustBar />
+        {/* <TrustBar /> */}
         <FeaturedListings
           stores={highlightedStores}
           moreHref="/new/store-list?tag=RECOMMENDED"
         />
         <FeaturedListings
           stores={emergencyStores}
-          num="05"
+          num="02"
           title="急售特區"
           sub="— 限時出售，把握機會 —"
           more="看全部急售 →"
@@ -51,9 +52,10 @@ export default async function NewHomePage() {
         />
         <Categories />
         <Districts />
+        <BrowseAll />
         <HowItWorks />
         <WhyUs />
-        <Stories />
+        {/* <Stories /> */}
         <SellerCta />
         <Faq />
       </div>

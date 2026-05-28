@@ -1,8 +1,22 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { auth } from "@/firebase/client";
 import Section from "./Section";
 import styles from "./SellerCta.module.css";
 import Button from "@/components/refactored/Button";
 
 export default function SellerCta() {
+  const router = useRouter();
+
+  function handleSell() {
+    if (auth.currentUser) {
+      router.push("/new/sell");
+    } else {
+      router.push("/new/login?redirect=/new/sell");
+    }
+  }
+
   return (
     <Section>
       <div className={styles.band}>
@@ -32,8 +46,12 @@ export default function SellerCta() {
           </div>
         </div>
         <div className={"flex flex-col gap-2"}>
-          <Button>搶早鳥免費刊登 →</Button>
-          <Button variant="ghost" size="sm">
+          <Button onClick={handleSell}>搶早鳥免費刊登 →</Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push("/new/store-example")}
+          >
             看刊登範例
           </Button>
         </div>
