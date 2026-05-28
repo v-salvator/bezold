@@ -4,14 +4,14 @@ import styles from "./Districts.module.css";
 import cn from "classnames";
 
 const districts = [
-  { name: "臺北市", en: "TAIPEI", count: "289", city: "臺北市" },
-  { name: "新北市", en: "NEW-TAIPEI", count: "132", city: "新北市" },
-  { name: "桃園市", en: "TAOYUAN", count: "112", city: "桃園市" },
-  { name: "臺中市", en: "TAICHUNG", count: "67", city: "臺中市" },
-  { name: "臺南市", en: "TAINAN", count: "54", city: "臺南市" },
-  { name: "高雄市", en: "KAOHSIUNG", count: "48", city: "高雄市" },
-  { name: "新竹市", en: "HSINCHU", count: "31", city: "新竹市" },
-  { name: "基隆市", en: "KEELUNG", count: "24", city: "基隆市" },
+  { name: "臺北市", en: "TAIPEI", city: "臺北市" },
+  { name: "新北市", en: "NEW-TAIPEI", city: "新北市" },
+  { name: "桃園市", en: "TAOYUAN", city: "桃園市" },
+  { name: "臺中市", en: "TAICHUNG", city: "臺中市" },
+  { name: "臺南市", en: "TAINAN", city: "臺南市" },
+  { name: "高雄市", en: "KAOHSIUNG", city: "高雄市" },
+  { name: "新竹市", en: "HSINCHU", city: "新竹市" },
+  { name: "基隆市", en: "KEELUNG", city: "基隆市" },
 ];
 
 export default function Districts() {
@@ -36,12 +36,11 @@ export default function Districts() {
 type District = {
   name: string;
   en: string;
-  count: string;
   city: string;
 };
 
 function District({ district }: { district: District }) {
-  const { name, en, count, city } = district;
+  const { name, en, city } = district;
   return (
     <a
       href={`/store-list?city=${encodeURIComponent(city)}`}
@@ -51,7 +50,6 @@ function District({ district }: { district: District }) {
         {name}
         <small>{en}</small>
       </div>
-      <div className={styles.count}>{count}</div>
     </a>
   );
 }
