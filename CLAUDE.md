@@ -96,6 +96,10 @@ Every page under `app/(new)/` follows this structure:
 - Pass `activeLink` matching the **exact label string** from the `navLinks` array in `SiteNav.tsx` — this highlights the current page.
 - The inner wrapper must be `<div className="flex-1">` (or omitted entirely) — **never** wrap sections in a `max-width` constrained frame div. The `Section` component handles its own full-width background colors; a constrained wrapper causes dark/alt sections to render as floating boxes instead of full-width bands.
 
+### Route group URL paths
+
+`app/(new)/` is the primary site served at root paths — `/sell`, `/my-listings`, `/store-list`, `/faq`, etc. The `/new/` segment is a Next.js route group name only and never appears in URLs. Never include `/new/` in `router.push`, `href`, or `redirect` query param values.
+
 ### Search filter state pattern
 
 URL params are the source of truth for filter state in `/store-list`. Two rules:
