@@ -192,7 +192,7 @@ export default function SignupForm() {
             不想註冊？想要專業代刊嗎？{" "}
             <a
               className={styles.lineLink}
-              href="https://line.me/ti/p/~@ding-rang"
+              href="https://line.me/ti/p/~bezoldtw"
               target="_blank"
               rel="noopener noreferrer"
             >

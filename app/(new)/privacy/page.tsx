@@ -129,7 +129,7 @@ export default function PrivacyPage() {
             <p>· 請求停止蒐集、處理或利用。</p>
             <p>· 請求刪除。</p>
             <p>
-              如需行使上述任何權利，請透過客服 LINE <b>@ding-rang</b>{" "}
+              如需行使上述任何權利，請透過客服 LINE <b>bezoldtw</b>{" "}
               與我們聯繫，說明您的帳號與請求內容，我們將於 <b>15 個工作日</b>
               內回覆處理。
             </p>
@@ -143,7 +143,7 @@ export default function PrivacyPage() {
               如對本隱私政策有任何疑問，或需行使個人資料相關權利，請透過以下方式聯繫：
             </p>
             <p>
-              客服 LINE：<b>@ding-rang</b>
+              客服 LINE：<b>bezoldtw</b>
               <br />
               服務時間：09:00 – 21:00（週一至週日）
             </p>

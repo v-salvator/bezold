@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Logo from "./Logo";
 import styles from "./SiteFooter.module.css";
 
@@ -12,11 +13,17 @@ export default function SiteFooter() {
           真實刊登 · 直接聯絡 · 永久不抽成。
         </p>
         <div className={styles.line}>
-          <div className={styles.qr} />
+          <Image
+            src="/bezold-line-qr.jpeg"
+            alt="LINE QR code"
+            width={50}
+            height={50}
+            className={styles.qr}
+          />
           <div>
             客服 LINE
             <br />
-            <b>@ding-rang</b>
+            <b>bezoldtw</b>
             <br />
             09:00 – 21:00
           </div>
@@ -58,7 +65,7 @@ export default function SiteFooter() {
           </li>
           <li>
             <a
-              href="https://line.me/ti/p/~@ding-rang"
+              href="https://line.me/ti/p/~bezoldtw"
               target="_blank"
               rel="noopener noreferrer"
             >

@@ -8,11 +8,11 @@ export default function FaqCta() {
       <div className={styles.wrap}>
         <h3 className={styles.title}>找不到你要的答案？</h3>
         <p className={styles.sub}>
-          LINE 客服 <b>@ding-rang</b> · 09:00 – 21:00
+          LINE 客服 <b>bezoldtw</b> · 09:00 – 21:00
         </p>
         <div className={styles.actions}>
           <a
-            href="https://line.me/R/ti/p/@ding-rang"
+            href="https://line.me/ti/p/~bezoldtw"
             target="_blank"
             rel="noopener noreferrer"
             className={styles.line}
