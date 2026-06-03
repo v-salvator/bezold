@@ -1,3 +1,4 @@
+import Image from "next/image";
 import styles from "./StoreCard.module.css";
 import Pill, { type PillVariant } from "@/components/refactored/Pill";
 
@@ -5,6 +6,7 @@ export type RibbonVariant = "default" | "mus" | "sage";
 
 export type StoreCard = {
   ribbon?: { label: string; variant: RibbonVariant };
+  image?: string;
   photoLabel?: string;
   tags: { label: string; variant: PillVariant }[];
   title: string;
@@ -24,6 +26,15 @@ export default function StoreCard({ card }: { card: StoreCard }) {
   return (
     <div className={styles.card}>
       <div className={styles.placeholderPhoto}>
+        {card.image && (
+          <Image
+            src={card.image}
+            fill
+            alt={card.title}
+            className={styles.photo}
+            sizes="(max-width: 640px) 100vw, 50vw"
+          />
+        )}
         {card.ribbon && (
           <span
             className={`${styles.ribbon} ${ribbonClass[card.ribbon.variant]}`}
@@ -31,7 +42,11 @@ export default function StoreCard({ card }: { card: StoreCard }) {
             {card.ribbon.label}
           </span>
         )}
-        <span className={styles.photoLabel}>{card.photoLabel ?? "店面照"}</span>
+        {!card.image && (
+          <span className={styles.photoLabel}>
+            {card.photoLabel ?? "店面照"}
+          </span>
+        )}
       </div>
       <div className={"p-3.5 flex flex-col gap-2"}>
         <div className={"flex flex-wrap gap-1.5"}>

@@ -49,6 +49,7 @@ export function storeToCard(store: Store): StoreCard {
 
   return {
     ribbon,
+    image: store.images?.[0],
     tags: tagPills,
     title: store.storeName,
     location,

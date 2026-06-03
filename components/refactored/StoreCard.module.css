@@ -41,6 +41,10 @@
   pointer-events: none;
 }
 
+.photo {
+  object-fit: cover;
+}
+
 .photoLabel {
   position: relative;
   z-index: 1;
