@@ -86,19 +86,3 @@
   box-shadow: 2px 2px 0 var(--ink);
   cursor: pointer;
 }
-
-.heart {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: var(--paper);
-  border: 1.5px solid var(--ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  cursor: pointer;
-}

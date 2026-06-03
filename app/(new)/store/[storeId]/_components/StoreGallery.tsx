@@ -37,7 +37,6 @@ export default function StoreGallery({ images, tags }: StoreGalleryProps) {
               📷 查看全部 {totalImages} 張
             </span>
           )}
-          <span className={styles.heart}>♡</span>
         </div>
 
         {/* 4 thumbnails */}
