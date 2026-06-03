@@ -2,6 +2,7 @@ import { Phone, MessageCircle } from "lucide-react";
 import Button from "@/components/refactored/Button";
 import type { Store } from "@/types";
 import { STORE_TAG } from "@/types/StoreTags";
+import { formatPriceParts } from "@/utils/store";
 import styles from "./StorePriceCard.module.css";
 
 export default function StorePriceCard({
@@ -13,7 +14,7 @@ export default function StorePriceCard({
 }) {
   const { price, userInfo, tags } = store;
   const exampleTitle = "這是示範頁面，非真實物件";
-  const priceInWan = (price / 10000).toFixed(0);
+  const { amount: priceAmount, unit: priceUnit } = formatPriceParts(price);
   const isUrgent = tags?.includes(STORE_TAG.EMERGENCY);
 
   return (
@@ -44,8 +45,8 @@ export default function StorePriceCard({
 
       <span className={styles.label}>頂讓金 ASKING</span>
       <div className={styles.price}>
-        NT$ {priceInWan}
-        <em>萬</em>
+        {priceAmount}
+        <em>{priceUnit}</em>
       </div>
 
       <div className={styles.cta}>

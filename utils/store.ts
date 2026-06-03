@@ -8,10 +8,22 @@ import {
   RIBBON_PRIORITY,
 } from "@/constant/storeDisplay";
 
+export function formatPriceParts(price: number): {
+  amount: string;
+  unit: string;
+} {
+  if (price < 10_000) return { amount: `NT$ ${price}`, unit: "元" };
+  if (price < 100_000_000)
+    return { amount: `NT$ ${Math.round(price / 10_000)}`, unit: "萬" };
+  return {
+    amount: `NT$ ${(price / 100_000_000).toFixed(2).replace(/\.?0+$/, "")}`,
+    unit: "億",
+  };
+}
+
 export function formatPrice(price: number): string {
-  if (price < 10_000) return `NT$ ${price} 元`;
-  if (price < 100_000_000) return `NT$ ${Math.round(price / 10_000)} 萬`;
-  return `NT$ ${(price / 100_000_000).toFixed(2).replace(/\.?0+$/, "")} 億`;
+  const { amount, unit } = formatPriceParts(price);
+  return `${amount} ${unit}`;
 }
 
 export function storeToCard(store: Store): StoreCard {
