@@ -1,4 +1,5 @@
 import type { Store } from "@/types";
+import ShareButton from "./ShareButton";
 import styles from "./StoreBreadcrumb.module.css";
 
 export default function StoreBreadcrumb({ store }: { store: Store }) {
@@ -14,7 +15,7 @@ export default function StoreBreadcrumb({ store }: { store: Store }) {
         <b>{storeName}</b>
       </div>
       <div className={styles.actions}>
-        <span>📤 分享</span>
+        <ShareButton />
       </div>
     </div>
   );
