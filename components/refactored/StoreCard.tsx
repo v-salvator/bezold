@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { MapPin } from "lucide-react";
 import styles from "./StoreCard.module.css";
 import Pill, { type PillVariant } from "@/components/refactored/Pill";
 
@@ -11,9 +12,8 @@ export type StoreCard = {
   tags: { label: string; variant: PillVariant }[];
   title: string;
   location?: string;
-  meta: [string, string][];
+  description?: string;
   price: string;
-  rent: string;
 };
 
 const ribbonClass: Record<RibbonVariant, string> = {
@@ -58,18 +58,16 @@ export default function StoreCard({ card }: { card: StoreCard }) {
         </div>
         <h4 className={styles.title}>{card.title}</h4>
         {card.location && (
-          <div className={styles.location}>📍 {card.location}</div>
+          <div className={styles.location}>
+            <MapPin size={13} strokeWidth={2} />
+            {card.location}
+          </div>
         )}
-        <div className={styles.meta}>
-          {card.meta.map(([k, v]) => (
-            <div key={k}>
-              <b>{k}</b> {v}
-            </div>
-          ))}
-        </div>
+        {card.description && (
+          <p className={styles.description}>{card.description}</p>
+        )}
         <div className={styles.price}>
           <b>{card.price}</b>
-          <span className={styles.rent}>{card.rent}</span>
         </div>
       </div>
     </div>

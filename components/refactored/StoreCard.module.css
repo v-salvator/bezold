@@ -89,24 +89,26 @@
 }
 
 .location {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-family: var(--hand);
-  font-size: 12px;
+  font-size: 16px;
   color: var(--ink-2);
 }
 
-.meta {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px 10px;
-  font-family: var(--mono);
-  font-size: 10px;
+.description {
+  font-family: var(--hand);
+  font-size: 14px;
   color: var(--ink-2);
   line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin: 0;
 }
-.meta b {
-  color: var(--ink);
-  font-weight: 600;
-}
+
 .price {
   display: flex;
   align-items: baseline;
@@ -120,9 +122,4 @@
   color: var(--accent);
   font-weight: 700;
   line-height: 1;
-}
-.rent {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--ink-2);
 }

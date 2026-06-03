@@ -47,15 +47,11 @@ export function storeToCard(store: Store): StoreCard {
       : []),
   ];
 
+  const locationParts = [store.city, store.location || store.district].filter(
+    Boolean,
+  );
   const location =
-    store.location ||
-    [store.city, store.district].filter(Boolean).join(" · ") ||
-    undefined;
-
-  const meta: [string, string][] = [
-    ...(categoryLabel ? [["行業", categoryLabel] as [string, string]] : []),
-    ...(store.city ? [["城市", store.city] as [string, string]] : []),
-  ];
+    locationParts.length > 0 ? locationParts.join(" · ") : undefined;
 
   const price = formatPrice(store.price);
 
@@ -65,9 +61,8 @@ export function storeToCard(store: Store): StoreCard {
     tags: tagPills,
     title: store.storeName,
     location,
-    meta,
+    description: store.description || undefined,
     price,
-    rent: store.description?.slice(0, 20) ?? "-",
   };
 }
 
