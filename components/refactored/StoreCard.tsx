@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { MapPin } from "lucide-react";
 import styles from "./StoreCard.module.css";
-import Pill, { type PillVariant } from "@/components/refactored/Pill";
 
 export type RibbonVariant = "default" | "mus" | "sage";
 
@@ -9,7 +8,6 @@ export type StoreCard = {
   ribbon?: { label: string; variant: RibbonVariant };
   image?: string;
   photoLabel?: string;
-  tags: { label: string; variant: PillVariant }[];
   title: string;
   location?: string;
   description?: string;
@@ -49,13 +47,6 @@ export default function StoreCard({ card }: { card: StoreCard }) {
         )}
       </div>
       <div className={"p-3.5 flex flex-col gap-2"}>
-        <div className={"flex flex-wrap gap-1.5"}>
-          {card.tags.map((t) => (
-            <Pill key={t.label} variant={t.variant}>
-              {t.label}
-            </Pill>
-          ))}
-        </div>
         <h4 className={styles.title}>{card.title}</h4>
         {card.location && (
           <div className={styles.location}>

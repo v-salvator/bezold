@@ -1,12 +1,7 @@
-import { type PillVariant } from "@/components/refactored/Pill";
 import { type StoreCard } from "@/components/refactored/StoreCard";
 import { type Store } from "@/types";
 import { STORE_CATEGORIES } from "@/constant/storeType";
-import {
-  TAG_DISPLAY,
-  RIBBON_DISPLAY,
-  RIBBON_PRIORITY,
-} from "@/constant/storeDisplay";
+import { RIBBON_DISPLAY, RIBBON_PRIORITY } from "@/constant/storeDisplay";
 
 export function formatPriceParts(price: number): {
   amount: string;
@@ -37,19 +32,11 @@ export function storeToCard(store: Store): StoreCard {
   );
   const categoryLabel = categoryEntry?.label ?? store.category;
 
-  const tagPills = [
-    ...tags.map(
-      (tag) =>
-        TAG_DISPLAY[tag] ?? { label: tag, variant: "default" as PillVariant },
-    ),
-    ...(categoryLabel
-      ? [{ label: categoryLabel, variant: "default" as PillVariant }]
-      : []),
-  ];
-
-  const locationParts = [store.city, store.location || store.district].filter(
-    Boolean,
-  );
+  const locationParts = [
+    categoryLabel,
+    store.city,
+    store.location || store.district,
+  ].filter(Boolean);
   const location =
     locationParts.length > 0 ? locationParts.join(" · ") : undefined;
 
@@ -58,7 +45,6 @@ export function storeToCard(store: Store): StoreCard {
   return {
     ribbon,
     image: store.images?.[0],
-    tags: tagPills,
     title: store.storeName,
     location,
     description: store.description || undefined,

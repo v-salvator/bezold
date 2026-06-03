@@ -57,19 +57,34 @@
   color: var(--ink-2);
 }
 
+@keyframes ribbonFloat {
+  0%,
+  100% {
+    transform: translateY(0px);
+    box-shadow: 3px 4px 0 var(--ink);
+  }
+  50% {
+    transform: translateY(-5px);
+    box-shadow: 3px 9px 12px rgba(28, 26, 23, 0.18);
+  }
+}
+
 .ribbon {
   position: absolute;
-  left: 0;
-  top: 14px;
+  left: 12px;
+  top: 12px;
   background: var(--accent);
   color: #fff;
   border: 1.5px solid var(--ink);
-  padding: 2px 10px 2px 8px;
+  border-radius: 4px;
+  padding: 5px 12px;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   z-index: 2;
+  box-shadow: 3px 4px 0 var(--ink);
+  animation: ribbonFloat 2.8s ease-in-out infinite;
 }
 .ribbonMus {
   background: var(--accent-3);
