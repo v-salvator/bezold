@@ -13,7 +13,7 @@ export default function SellerCta() {
     if (auth.currentUser) {
       router.push("/sell");
     } else {
-      router.push("/login?redirect=/new/sell");
+      router.push("/login?redirect=/sell");
     }
   }
 

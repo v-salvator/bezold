@@ -18,7 +18,7 @@ export default function MyListingsContent() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        router.push("/login?redirect=/new/my-listings");
+        router.push("/login?redirect=/my-listings");
         return;
       }
       try {

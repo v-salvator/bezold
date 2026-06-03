@@ -71,7 +71,7 @@ export default function SellForm() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
-        router.push("/login?redirect=/new/sell");
+        router.push("/login?redirect=/sell");
         return;
       }
       setAuthUser(firebaseUser);
