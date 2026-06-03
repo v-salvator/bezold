@@ -7,7 +7,6 @@ import StoreGallery from "@/app/(new)/store/[storeId]/_components/StoreGallery";
 import StoreTitleRow from "@/app/(new)/store/[storeId]/_components/StoreTitleRow";
 import StoreDescription from "@/app/(new)/store/[storeId]/_components/StoreDescription";
 import StorePriceCard from "@/app/(new)/store/[storeId]/_components/StorePriceCard";
-import StoreSellerInfo from "@/app/(new)/store/[storeId]/_components/StoreSellerInfo";
 import ExampleBanner from "./_components/ExampleBanner";
 import { exampleStore } from "./_data/exampleStore";
 import styles from "./page.module.css";
@@ -30,7 +29,6 @@ export default function StoreExamplePage() {
         <div className={styles.mainCol}>
           <StoreDescription description={exampleStore.description} />
           <StorePriceCard store={exampleStore} isExample />
-          <StoreSellerInfo store={exampleStore} />
         </div>
       </main>
       <SiteFooter />

@@ -1,6 +1,7 @@
-import { Phone, MessageCircle, Mail, CalendarDays } from "lucide-react";
+import { Phone, MessageCircle } from "lucide-react";
 import Button from "@/components/refactored/Button";
 import type { Store } from "@/types";
+import { STORE_TAG } from "@/types/StoreTags";
 import styles from "./StorePriceCard.module.css";
 
 export default function StorePriceCard({
@@ -10,12 +11,37 @@ export default function StorePriceCard({
   store: Store;
   isExample?: boolean;
 }) {
-  const { price, userInfo } = store;
+  const { price, userInfo, tags } = store;
   const exampleTitle = "這是示範頁面，非真實物件";
   const priceInWan = (price / 10000).toFixed(0);
+  const isUrgent = tags?.includes(STORE_TAG.EMERGENCY);
 
   return (
     <div className={styles.card}>
+      {userInfo && (
+        <div className={styles.seller}>
+          <div className={styles.avatar}>{userInfo.userName.charAt(0)}</div>
+          <div>
+            <div className={styles.sellerName}>
+              {userInfo.userName}
+              <small>屋主直接刊登</small>
+            </div>
+            <div className={styles.badges}>
+              <span className={styles.badge}>
+                <span className={styles.dot} />
+                身份已驗證
+              </span>
+              {isUrgent && (
+                <span className={`${styles.badge} ${styles.warm}`}>
+                  <span className={styles.dot} />
+                  急售標記
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <span className={styles.label}>頂讓金 ASKING</span>
       <div className={styles.price}>
         NT$ {priceInWan}
@@ -58,22 +84,6 @@ export default function StorePriceCard({
               </Button>
             </a>
           ))}
-        <span title={isExample ? exampleTitle : undefined}>
-          <Button variant="ghost" className={styles.btn} disabled={isExample}>
-            <Mail size={15} strokeWidth={2.5} />
-            站內留言
-          </Button>
-        </span>
-        <span title={isExample ? exampleTitle : undefined}>
-          <Button
-            variant="ghost"
-            className={`${styles.btn} ${styles.visit}`}
-            disabled={isExample}
-          >
-            <CalendarDays size={15} strokeWidth={2.5} />
-            預約現場看店
-          </Button>
-        </span>
       </div>
 
       <div className={styles.trust}>
