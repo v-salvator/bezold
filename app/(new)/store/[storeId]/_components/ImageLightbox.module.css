@@ -122,6 +122,49 @@
   background: var(--paper);
 }
 
+@media (max-width: 640px) {
+  .imageWrap {
+    width: 100vw;
+    height: 72vh;
+  }
+
+  .closeBtn {
+    top: 14px;
+    right: 14px;
+    width: 44px;
+    height: 44px;
+  }
+
+  .counter {
+    top: 16px;
+    font-size: 12px;
+    padding: 3px 11px;
+  }
+
+  .nav {
+    width: 44px;
+    height: 44px;
+  }
+
+  .navLeft {
+    left: 8px;
+  }
+
+  .navRight {
+    right: 8px;
+  }
+
+  .dots {
+    bottom: 20px;
+    gap: 10px;
+  }
+
+  .dot {
+    width: 9px;
+    height: 9px;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
