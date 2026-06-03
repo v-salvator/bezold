@@ -8,9 +8,11 @@
   background: var(--accent);
   color: #fff;
   box-shadow: 2px 2px 0 var(--ink);
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   cursor: pointer;
-  text-align: center;
   transition:
     transform 0.12s ease,
     box-shadow 0.12s ease;

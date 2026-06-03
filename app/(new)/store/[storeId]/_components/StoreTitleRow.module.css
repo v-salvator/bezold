@@ -30,8 +30,17 @@
 .loc {
   font-family: var(--hand);
   font-size: 15px;
+  line-height: 1;
   color: var(--ink-2);
   margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pin {
+  color: var(--accent);
+  flex-shrink: 0;
 }
 
 .meta {

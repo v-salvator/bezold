@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { Camera } from "lucide-react";
 import type { StoreTag } from "@/types";
 import { STORE_TAG } from "@/types/StoreTags";
 import ImageLightbox from "./ImageLightbox";
@@ -56,7 +57,9 @@ export default function StoreGallery({ images, tags }: StoreGalleryProps) {
             )}
             {isUrgent && <span className={styles.ribbon}>急售</span>}
             {totalImages > 0 && (
-              <span className={styles.photoCount}>📷 {totalImages} 張</span>
+              <span className={styles.photoCount}>
+                <Camera size={13} strokeWidth={2.5} /> {totalImages} 張
+              </span>
             )}
           </div>
 

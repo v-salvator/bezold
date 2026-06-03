@@ -1,3 +1,4 @@
+import { Phone, MessageCircle, Mail, CalendarDays } from "lucide-react";
 import Button from "@/components/refactored/Button";
 import type { Store } from "@/types";
 import styles from "./StorePriceCard.module.css";
@@ -26,19 +27,23 @@ export default function StorePriceCard({
           (isExample ? (
             <span title={exampleTitle} className={styles.ctaLink}>
               <Button className={styles.btn} disabled>
-                📞 撥打賣家電話
+                <Phone size={15} strokeWidth={2.5} />
+                撥打賣家電話
               </Button>
             </span>
           ) : (
             <a href={`tel:${userInfo.phone}`} className={styles.ctaLink}>
-              <Button className={styles.btn}>📞 撥打賣家電話</Button>
+              <Button className={styles.btn}>
+                <Phone size={15} strokeWidth={2.5} />
+                撥打賣家電話
+              </Button>
             </a>
           ))}
         {userInfo?.lineId &&
           (isExample ? (
             <span title={exampleTitle} className={styles.ctaLink}>
               <Button variant="sage" className={styles.btn} disabled>
-                💬 加 LINE 聯繫
+                <MessageCircle size={15} strokeWidth={2.5} />加 LINE 聯繫
               </Button>
             </span>
           ) : (
@@ -49,13 +54,14 @@ export default function StorePriceCard({
               className={styles.ctaLink}
             >
               <Button variant="sage" className={styles.btn}>
-                💬 加 LINE 聯繫
+                <MessageCircle size={15} strokeWidth={2.5} />加 LINE 聯繫
               </Button>
             </a>
           ))}
         <span title={isExample ? exampleTitle : undefined}>
           <Button variant="ghost" className={styles.btn} disabled={isExample}>
-            ✉️ 站內留言
+            <Mail size={15} strokeWidth={2.5} />
+            站內留言
           </Button>
         </span>
         <span title={isExample ? exampleTitle : undefined}>
@@ -64,7 +70,8 @@ export default function StorePriceCard({
             className={`${styles.btn} ${styles.visit}`}
             disabled={isExample}
           >
-            📅 預約現場看店
+            <CalendarDays size={15} strokeWidth={2.5} />
+            預約現場看店
           </Button>
         </span>
       </div>

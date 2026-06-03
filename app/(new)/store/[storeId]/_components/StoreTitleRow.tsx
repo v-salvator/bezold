@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import { MapPin } from "lucide-react";
 import Pill from "@/components/refactored/Pill";
 import type { Store } from "@/types";
 import { STORE_TAG } from "@/types/StoreTags";
@@ -43,7 +44,8 @@ export default function StoreTitleRow({ store }: { store: Store }) {
           <em>{storeName}</em>
         </h2>
         <div className={styles.loc}>
-          📍 {city}
+          <MapPin size={18} strokeWidth={2.5} className={styles.pin} />
+          {city}
           {district} · {location}
         </div>
       </div>
