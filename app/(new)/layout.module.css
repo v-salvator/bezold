@@ -1,19 +1,4 @@
 .root {
-  --ink: #1c1a17;
-  --ink-2: #3a3631;
-  --paper: #f6f2e9;
-  --paper-2: #ece5d3;
-  --paper-3: #e0d6bc;
-  --accent: #d94a2a;
-  --accent-2: #2a6f4d;
-  --accent-3: #e6b833;
-  --muted: #8a8278;
-  --hand: var(--font-kalam), "Noto Sans TC", sans-serif;
-  --display: var(--font-caveat), "Noto Sans TC", sans-serif;
-  --note: var(--font-gloria), var(--font-kalam), sans-serif;
-  --mono: var(--font-jetbrains), monospace;
-  --brand: var(--font-rubik-mono), var(--font-jetbrains), monospace;
-
   background: var(--paper);
   color: var(--ink);
   font-family: var(--hand);

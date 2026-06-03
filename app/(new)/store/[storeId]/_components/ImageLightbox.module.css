@@ -70,7 +70,7 @@
   position: fixed;
   top: 50%;
   transform: translateY(-50%);
-  background: var(--paper);
+  background: var(--accent);
   border: 1.5px solid var(--ink);
   border-radius: 4px;
   width: 44px;
@@ -82,9 +82,10 @@
   box-shadow: 2px 2px 0 var(--ink);
   z-index: 52;
   transition: background 0.12s;
+  color: #fff;
 
   &:hover {
-    background: var(--paper-2);
+    background: #c23e22;
   }
 }
 
