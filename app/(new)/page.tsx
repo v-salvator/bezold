@@ -19,6 +19,8 @@ import {
   getEmergencyStores,
 } from "@/firebase/serverUtils/store";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Bezold 頂讓必售 — 找一間準備好的店",
   description:
