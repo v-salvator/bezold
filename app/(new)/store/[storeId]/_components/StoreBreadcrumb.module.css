@@ -45,3 +45,9 @@
     color: var(--accent);
   }
 }
+
+@media (max-width: 640px) {
+  .crumbs {
+    padding: 10px 16px;
+  }
+}

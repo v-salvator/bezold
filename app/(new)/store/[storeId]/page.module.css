@@ -1,9 +1,18 @@
 .main {
   flex: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .mainCol {
   padding: 28px;
+}
+
+@media (max-width: 640px) {
+  .mainCol {
+    padding: 16px;
+  }
 }
 
 .disclaimer {

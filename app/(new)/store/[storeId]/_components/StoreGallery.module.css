@@ -123,6 +123,7 @@
   .grid {
     grid-template-columns: 1fr;
     grid-template-rows: auto;
+    aspect-ratio: 4 / 3;
     gap: 0;
   }
 
