@@ -1,14 +1,43 @@
+.headingBlock {
+  margin: 0 0 2rem;
+}
+
 .heading {
   font-family: var(--display);
   font-size: 2.5rem;
   font-weight: 400;
   color: var(--ink);
-  margin: 0 0 2rem;
+  margin: 0 0 0.4rem;
   line-height: 1.1;
 
   & strong {
     font-weight: 700;
     color: var(--accent);
+  }
+}
+
+.subheading {
+  font-family: var(--hand);
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.registerHint {
+  margin: 1.5rem 0 0;
+  font-family: var(--hand);
+  font-size: 0.875rem;
+  color: var(--ink-2);
+  text-align: center;
+}
+
+.registerLink {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+
+  &:hover {
+    text-decoration: underline;
   }
 }
 

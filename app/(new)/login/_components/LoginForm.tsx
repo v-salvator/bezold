@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebase/client";
+import Link from "next/link";
 import Button from "@/components/refactored/Button";
 import Card from "@/components/refactored/Card";
 import FormField from "@/components/refactored/FormField";
@@ -46,9 +47,12 @@ export default function LoginForm() {
 
   return (
     <Card className="w-full max-w-[400px]">
-      <h1 className={styles.heading}>
-        歡迎<strong>回來</strong>
-      </h1>
+      <div className={styles.headingBlock}>
+        <h1 className={styles.heading}>
+          登入 <strong>Bezold</strong> 會員
+        </h1>
+        <p className={styles.subheading}>刊登店面，開始您的買賣旅程</p>
+      </div>
       <form className={styles.form} onSubmit={handleSubmit}>
         <FormField
           id="email"
@@ -87,6 +91,12 @@ export default function LoginForm() {
           {loading ? "登入中..." : "登入"}
         </Button>
       </form>
+      <p className={styles.registerHint}>
+        還不是會員？{" "}
+        <Link className={styles.registerLink} href="/signup">
+          立即免費註冊
+        </Link>
+      </p>
     </Card>
   );
 }
