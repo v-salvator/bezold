@@ -1,4 +1,4 @@
-import { Phone, MessageCircle } from "lucide-react";
+import { Phone, MessageCircle, Ruler, Banknote, Package } from "lucide-react";
 import Button from "@/components/refactored/Button";
 import type { Store } from "@/types";
 import { STORE_TAG } from "@/types/StoreTags";
@@ -48,20 +48,38 @@ export default function StorePriceCard({
         <dl className={styles.specs}>
           {areaPing && (
             <div className={styles.specItem}>
+              <dd>
+                <Ruler size={14} strokeWidth={2} className={styles.specIcon} />
+                {areaPing} 坪
+              </dd>
               <dt>坪數</dt>
-              <dd>{areaPing} 坪</dd>
             </div>
           )}
           {monthlyRent && (
             <div className={styles.specItem}>
+              <dd>
+                <Banknote
+                  size={14}
+                  strokeWidth={2}
+                  className={styles.specIcon}
+                />
+                NT$ {monthlyRent.toLocaleString()}
+                <span className={styles.specUnit}>/月</span>
+              </dd>
               <dt>租金</dt>
-              <dd>NT$ {monthlyRent.toLocaleString()} /月</dd>
             </div>
           )}
           {equipment && (
             <div className={styles.specItem}>
+              <dd>
+                <Package
+                  size={14}
+                  strokeWidth={2}
+                  className={styles.specIcon}
+                />
+                {EQUIPMENT_LABEL[equipment]}
+              </dd>
               <dt>設備</dt>
-              <dd>{EQUIPMENT_LABEL[equipment]}</dd>
             </div>
           )}
         </dl>
