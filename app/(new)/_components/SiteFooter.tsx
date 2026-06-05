@@ -1,4 +1,11 @@
 import Image from "next/image";
+import {
+  InstagramFilled,
+  YoutubeFilled,
+  FacebookFilled,
+  LinkedinFilled,
+} from "@ant-design/icons";
+import ThreadsIcon from "@/components/icon/ThreadsIcon";
 import Logo from "./Logo";
 import styles from "./SiteFooter.module.css";
 
@@ -27,6 +34,53 @@ export default function SiteFooter() {
             <br />
             09:00 – 21:00
           </div>
+        </div>
+        <div className={styles.socials}>
+          <a
+            className={styles.socialLink}
+            href="https://www.instagram.com/bezold.tw?igsh=enVjMDUwZWh3dnJy&utm_source=qr"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+          >
+            <InstagramFilled />
+          </a>
+          <a
+            className={styles.socialLink}
+            href="https://www.youtube.com/@Bezold-v4u"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="YouTube"
+          >
+            <YoutubeFilled />
+          </a>
+          <a
+            className={styles.socialLink}
+            href="https://www.threads.com/@bezold.tw?igshid=NTc4MTIwNjQ2YQ=="
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Threads"
+          >
+            <ThreadsIcon />
+          </a>
+          <a
+            className={styles.socialLink}
+            href="https://www.facebook.com/share/19BX272yzL/?mibextid=wwXIfr"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook"
+          >
+            <FacebookFilled />
+          </a>
+          <a
+            className={styles.socialLink}
+            href="https://www.linkedin.com/in/bezold-tw-98390936b"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="LinkedIn"
+          >
+            <LinkedinFilled />
+          </a>
         </div>
       </div>
       <div>
