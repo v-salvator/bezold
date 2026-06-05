@@ -133,6 +133,24 @@
   background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
 
+.loginHint {
+  margin: 1.5rem 0 0;
+  font-family: var(--hand);
+  font-size: 0.875rem;
+  color: var(--ink-2);
+  text-align: center;
+}
+
+.loginLink {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .lineCta {
   margin: 0.25rem 0 0;
   font-family: var(--hand);

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/firebase/client";
@@ -172,13 +173,13 @@ export default function SignupForm() {
             />
             <label htmlFor="terms">
               我同意{" "}
-              <a className={styles.termsLink} href="#">
+              <Link className={styles.termsLink} href="/terms">
                 服務條款
-              </a>{" "}
+              </Link>{" "}
               與{" "}
-              <a className={styles.termsLink} href="#">
+              <Link className={styles.termsLink} href="/privacy">
                 隱私政策
-              </a>
+              </Link>
             </label>
           </div>
 
@@ -200,6 +201,12 @@ export default function SignupForm() {
             </a>
           </p>
         </form>
+        <p className={styles.loginHint}>
+          已經有帳號？{" "}
+          <Link className={styles.loginLink} href="/login">
+            由此登入
+          </Link>
+        </p>
       </Card>
     </div>
   );
