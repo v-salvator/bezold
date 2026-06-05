@@ -1,5 +1,7 @@
 import type { Store } from "@/types";
 import { STORE_TAG } from "@/types/StoreTags";
+import { cn } from "@/lib/utils";
+import { isLatinChar } from "@/utils/string";
 import styles from "./StoreSellerInfo.module.css";
 
 export default function StoreSellerInfo({ store }: { store: Store }) {
@@ -13,7 +15,14 @@ export default function StoreSellerInfo({ store }: { store: Store }) {
   return (
     <div className={styles.seller}>
       <div className={styles.row}>
-        <div className={styles.avatar}>{userName.charAt(0)}</div>
+        <div
+          className={cn(
+            styles.avatar,
+            isLatinChar(userName.charAt(0)) && styles.avatarLatin,
+          )}
+        >
+          {userName.charAt(0)}
+        </div>
         <div>
           <div className={styles.name}>
             {userName}

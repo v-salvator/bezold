@@ -1,6 +1,12 @@
 import Image from "next/image";
-import { MapPin } from "lucide-react";
+import { MapPin, Ruler, Banknote, Package } from "lucide-react";
 import styles from "./StoreCard.module.css";
+
+const SPEC_ICONS = {
+  ruler: <Ruler size={13} strokeWidth={2} />,
+  banknote: <Banknote size={13} strokeWidth={2} />,
+  package: <Package size={13} strokeWidth={2} />,
+};
 
 export type RibbonVariant = "default" | "mus" | "sage";
 
@@ -11,6 +17,7 @@ export type StoreCard = {
   title: string;
   location?: string;
   description?: string;
+  specs?: { iconName: keyof typeof SPEC_ICONS; label: string }[];
   price: string;
 };
 
@@ -56,6 +63,16 @@ export default function StoreCard({ card }: { card: StoreCard }) {
         )}
         {card.description && (
           <p className={styles.description}>{card.description}</p>
+        )}
+        {card.specs && card.specs.length > 0 && (
+          <div className={styles.specs}>
+            {card.specs.map((spec, index) => (
+              <span key={index} className={styles.specItem}>
+                {SPEC_ICONS[spec.iconName]}
+                {spec.label}
+              </span>
+            ))}
+          </div>
         )}
         <div className={styles.price}>
           <b>{card.price}</b>

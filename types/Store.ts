@@ -3,6 +3,8 @@ import type { Timestamp } from "firebase/firestore";
 import { StoreTag } from "@/types/StoreTags";
 import { StoreStatus } from "@/types/StoreStatus";
 
+export type EquipmentStatus = "all" | "none" | "partial";
+
 // * types in client
 export interface Store {
   id: string;
@@ -21,6 +23,9 @@ export interface Store {
   city?: string; // TODO: will not be option in the future
   district?: string; // TODO: will not be option in the future
   status?: StoreStatus;
+  areaPing?: number;
+  monthlyRent?: number;
+  equipment?: EquipmentStatus;
 }
 
 // * types in firestore doc
@@ -40,4 +45,7 @@ export interface StoreDoc {
   city?: string; // TODO: will not be option in the future
   district?: string; // TODO: will not be option in the future
   status?: StoreStatus;
+  areaPing?: number;
+  monthlyRent?: number;
+  equipment?: EquipmentStatus;
 }

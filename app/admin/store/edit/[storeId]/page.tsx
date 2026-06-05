@@ -15,6 +15,7 @@ import { useRouter, usePathname } from "next/navigation";
 import type { Store } from "@/types";
 import { STORE_TAGS } from "@/constant/storeTags";
 import { STORE_CATEGORIES } from "@/constant/storeType";
+import { EQUIPMENT_OPTIONS } from "@/constant/storeEquipment";
 import {
   getStoreCities,
   getStoreDistrictByCity,
@@ -55,6 +56,15 @@ export default function EditStore({ params }: EditStoreProps) {
         category: storeCloned.category,
         city: storeCloned.city,
         district: storeCloned.district,
+        ...(storeCloned.areaPing !== undefined
+          ? { areaPing: storeCloned.areaPing }
+          : {}),
+        ...(storeCloned.monthlyRent !== undefined
+          ? { monthlyRent: storeCloned.monthlyRent }
+          : {}),
+        ...(storeCloned.equipment !== undefined
+          ? { equipment: storeCloned.equipment }
+          : {}),
       });
       api.success({
         message: "Successfuly update store",
@@ -147,6 +157,41 @@ export default function EditStore({ params }: EditStoreProps) {
             value: category.key,
           };
         })}
+      />
+      <Typography.Title level={5}>坪數 Area Ping (optional)</Typography.Title>
+      <Input
+        defaultValue={storeCloned?.areaPing}
+        placeholder="e.g. 25"
+        onChange={(event) =>
+          handleStoreFieldChange(
+            "areaPing",
+            Number(event.target.value) || undefined,
+          )
+        }
+      />
+      <Typography.Title level={5}>
+        租金 Monthly Rent TWD (optional)
+      </Typography.Title>
+      <Input
+        defaultValue={storeCloned?.monthlyRent}
+        placeholder="e.g. 50000"
+        onChange={(event) =>
+          handleStoreFieldChange(
+            "monthlyRent",
+            Number(event.target.value) || undefined,
+          )
+        }
+      />
+      <Typography.Title level={5}>設備 Equipment (optional)</Typography.Title>
+      <Select
+        defaultValue={storeCloned?.equipment}
+        allowClear
+        style={{ width: "100%" }}
+        onChange={(val) => handleStoreFieldChange("equipment", val)}
+        options={EQUIPMENT_OPTIONS.map((option) => ({
+          label: option.label,
+          value: option.value,
+        }))}
       />
 
       <div className="flex justify-end gap-[8px] mt-[16px]">

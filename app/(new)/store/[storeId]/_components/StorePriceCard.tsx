@@ -1,8 +1,11 @@
-import { Phone, MessageCircle } from "lucide-react";
+import { Phone, MessageCircle, Ruler, Banknote, Package } from "lucide-react";
 import Button from "@/components/refactored/Button";
+import { cn } from "@/lib/utils";
 import type { Store } from "@/types";
 import { STORE_TAG } from "@/types/StoreTags";
+import { EQUIPMENT_LABEL } from "@/constant/storeEquipment";
 import { formatPriceParts } from "@/utils/store";
+import { isLatinChar } from "@/utils/string";
 import styles from "./StorePriceCard.module.css";
 
 export default function StorePriceCard({
@@ -12,7 +15,7 @@ export default function StorePriceCard({
   store: Store;
   isExample?: boolean;
 }) {
-  const { price, userInfo, tags } = store;
+  const { price, userInfo, tags, areaPing, monthlyRent, equipment } = store;
   const exampleTitle = "這是示範頁面，非真實物件";
   const { amount: priceAmount, unit: priceUnit } = formatPriceParts(price);
   const isUrgent = tags?.includes(STORE_TAG.EMERGENCY);
@@ -21,7 +24,14 @@ export default function StorePriceCard({
     <div className={styles.card}>
       {userInfo && (
         <div className={styles.seller}>
-          <div className={styles.avatar}>{userInfo.userName.charAt(0)}</div>
+          <div
+            className={cn(
+              styles.avatar,
+              isLatinChar(userInfo.userName.charAt(0)) && styles.avatarLatin,
+            )}
+          >
+            {userInfo.userName.charAt(0)}
+          </div>
           <div>
             <div className={styles.sellerName}>
               {userInfo.userName}
@@ -40,7 +50,62 @@ export default function StorePriceCard({
               )}
             </div>
           </div>
+          <div className={styles.sellerContact}>
+            {userInfo.phone && (
+              <span>
+                <Phone size={12} strokeWidth={2} />
+                {userInfo.phone}
+              </span>
+            )}
+            {userInfo.lineId && (
+              <span>
+                <MessageCircle size={12} strokeWidth={2} />
+                {userInfo.lineId}
+              </span>
+            )}
+          </div>
         </div>
+      )}
+
+      {(areaPing || monthlyRent || equipment) && (
+        <dl className={styles.specs}>
+          {areaPing && (
+            <div className={styles.specItem}>
+              <dd>
+                <Ruler size={14} strokeWidth={2} className={styles.specIcon} />
+                {areaPing} 坪
+              </dd>
+              <dt>坪數</dt>
+            </div>
+          )}
+          {monthlyRent && (
+            <div className={styles.specItem}>
+              <dd>
+                <Banknote
+                  size={14}
+                  strokeWidth={2}
+                  className={styles.specIcon}
+                />
+                NT$ {monthlyRent.toLocaleString()}
+                <span className={styles.specUnit}>/月</span>
+              </dd>
+              <dt>租金</dt>
+            </div>
+          )}
+          {equipment && (
+            <div className={styles.specItem}>
+              <dd>
+                <Package
+                  size={14}
+                  strokeWidth={2}
+                  className={styles.specIcon}
+                />
+                {EQUIPMENT_LABEL[equipment]}
+              </dd>
+              <dt>設備</dt>
+            </div>
+          )}
+        </dl>
       )}
 
       <span className={styles.label}>頂讓金 ASKING</span>

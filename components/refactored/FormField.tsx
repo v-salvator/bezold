@@ -14,7 +14,7 @@ export default function FormField({
   hint,
 }: {
   id: string;
-  label: string;
+  label: React.ReactNode;
   type?: "text" | "email" | "password";
   placeholder?: string;
   autoComplete?: string;

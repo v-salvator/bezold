@@ -6,6 +6,8 @@ import type { User } from "firebase/auth";
 import NextLink from "next/link";
 import { auth } from "@/firebase/client";
 import Pill from "@/components/refactored/Pill";
+import { cn } from "@/lib/utils";
+import { isLatinChar } from "@/utils/string";
 import styles from "./NavAuthStatus.module.css";
 
 function getInitial(user: User): string {
@@ -63,7 +65,10 @@ export default function NavAuthStatus() {
     <div className={styles.wrapper} ref={wrapperRef}>
       <button
         type="button"
-        className={styles.avatar}
+        className={cn(
+          styles.avatar,
+          isLatinChar(getInitial(user)) && styles.avatarLatin,
+        )}
         onClick={() => setOpen((previous) => !previous)}
         aria-label="帳號選單"
       >

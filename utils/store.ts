@@ -2,6 +2,7 @@ import { type StoreCard } from "@/components/refactored/StoreCard";
 import { type Store } from "@/types";
 import { STORE_CATEGORIES } from "@/constant/storeType";
 import { RIBBON_DISPLAY, RIBBON_PRIORITY } from "@/constant/storeDisplay";
+import { EQUIPMENT_LABEL } from "@/constant/storeEquipment";
 
 export function formatPriceParts(price: number): {
   amount: string;
@@ -42,12 +43,31 @@ export function storeToCard(store: Store): StoreCard {
 
   const price = formatPrice(store.price);
 
+  let rentSpec = "租金 —";
+  if (store.monthlyRent) {
+    const { amount, unit } = formatPriceParts(store.monthlyRent);
+    rentSpec =
+      unit === "元"
+        ? `租金 NT$ ${store.monthlyRent.toLocaleString()}/月`
+        : `租金 ${amount} ${unit}/月`;
+  }
+
+  const specs: StoreCard["specs"] = [
+    { iconName: "ruler", label: store.areaPing ? `${store.areaPing} 坪` : "—" },
+    { iconName: "banknote", label: rentSpec },
+    {
+      iconName: "package",
+      label: store.equipment ? EQUIPMENT_LABEL[store.equipment] : "—",
+    },
+  ];
+
   return {
     ribbon,
     image: store.images?.[0],
     title: store.storeName,
     location,
     description: store.description || undefined,
+    specs,
     price,
   };
 }

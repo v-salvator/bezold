@@ -21,6 +21,10 @@
   }
 }
 
+.avatar.avatarLatin {
+  font-family: var(--mono);
+}
+
 .wrapper {
   position: relative;
 }
