@@ -119,7 +119,7 @@
 
   & dt {
     font-family: var(--hand);
-    font-size: 11px;
+    font-size: 16px;
     color: var(--muted);
   }
 }
@@ -141,7 +141,7 @@
 
 .label {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 16px;
   color: var(--ink-2);
   letter-spacing: 0.18em;
   text-transform: uppercase;
