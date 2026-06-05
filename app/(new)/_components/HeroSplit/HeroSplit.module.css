@@ -10,6 +10,8 @@
   color: var(--accent);
   margin-bottom: 10px;
   text-align: center;
+
+  animation: fadeInDown 0.4s ease-out both;
 }
 .title {
   font-family: var(--display);
@@ -33,6 +35,8 @@
   margin: 0 auto 24px;
   max-width: 560px;
   line-height: 1.5;
+
+  animation: fadeInUp 0.5s ease-out 0.4s both;
 }
 .subAccent {
   color: var(--accent);
@@ -225,6 +229,51 @@
   gap: 8px;
   flex-wrap: wrap;
   margin-top: 4px;
+}
+
+.titleLine {
+  display: block;
+}
+.titleLineInner {
+  display: block;
+
+  animation: heroLineIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both;
+}
+.titleLineInner2 {
+  display: block;
+
+  animation: heroLineIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.18s both;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes heroLineIn {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 640px) {

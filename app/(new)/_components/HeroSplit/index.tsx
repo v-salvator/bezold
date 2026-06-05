@@ -6,9 +6,14 @@ export default function HeroSplit() {
     <section className={styles.hero}>
       <div className={styles.kicker}>— 全台店面頂讓平台 · 真實刊登 —</div>
       <h1 className={styles.title}>
-        找一間<em>準備好</em>的店
-        <br />
-        開門就營業
+        <span className={styles.titleLine}>
+          <span className={styles.titleLineInner}>
+            找一間<em>準備好</em>的店
+          </span>
+        </span>
+        <span className={styles.titleLine}>
+          <span className={styles.titleLineInner2}>開門就營業</span>
+        </span>
       </h1>
       <p className={styles.sub}>
         買家直接接手已有客群、設備、營運的店面 · 賣家把心血交給合適的人。
