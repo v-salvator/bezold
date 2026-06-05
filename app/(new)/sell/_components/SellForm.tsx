@@ -17,6 +17,7 @@ import {
 } from "@/constant/StoreLocation";
 import { STORE_TAGS } from "@/constant/storeTags";
 import { STORE_CATEGORIES } from "@/constant/storeType";
+import { EQUIPMENT_OPTIONS } from "@/constant/storeEquipment";
 import { genDefaultStore } from "@/utils/store";
 import FormField from "@/components/refactored/FormField";
 import Button from "@/components/refactored/Button";
@@ -33,6 +34,9 @@ interface StoreFields {
   price: string;
   tags: string[];
   category: string;
+  areaPing: string;
+  monthlyRent: string;
+  equipment: string;
 }
 
 interface BossFields {
@@ -55,6 +59,9 @@ export default function SellForm() {
     tags: [],
     category: "",
     price: String(genDefaultStore().price),
+    areaPing: "",
+    monthlyRent: "",
+    equipment: "",
   });
   const [boss, setBoss] = useState<BossFields>({
     userName: "",
@@ -134,14 +141,20 @@ export default function SellForm() {
     }
 
     try {
-      const storeRef = await createStoreDoc({
+      const storePayload = {
         ...store,
         price: Number(store.price),
         currency: "TWD",
         user: authUser.uid,
         images: [],
         status: STORE_STATUS.PENDING,
-      } as unknown as Store);
+        ...(store.areaPing ? { areaPing: Number(store.areaPing) } : {}),
+        ...(store.monthlyRent
+          ? { monthlyRent: Number(store.monthlyRent) }
+          : {}),
+        ...(store.equipment ? { equipment: store.equipment } : {}),
+      };
+      const storeRef = await createStoreDoc(storePayload as unknown as Store);
       setCreatedStoreId(storeRef.id);
     } catch {
       setError("刊登店面失敗，請稍後再試");
@@ -260,6 +273,58 @@ export default function SellForm() {
             value={store.price}
             onChange={(event) => setStoreField("price", event.target.value)}
           />
+
+          <div className={styles.twoCol}>
+            <FormField
+              id="areaPing"
+              label={
+                <>
+                  坪數<span className={styles.optionalBadge}>（選填）</span>
+                </>
+              }
+              placeholder="例：25"
+              value={store.areaPing}
+              onChange={(event) =>
+                setStoreField("areaPing", event.target.value)
+              }
+            />
+            <FormField
+              id="monthlyRent"
+              label={
+                <>
+                  租金（TWD/月）
+                  <span className={styles.optionalBadge}>（選填）</span>
+                </>
+              }
+              placeholder="例：50000"
+              value={store.monthlyRent}
+              onChange={(event) =>
+                setStoreField("monthlyRent", event.target.value)
+              }
+            />
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor="equipment">
+              設備狀況
+              <span className={styles.optionalBadge}>（選填）</span>
+            </label>
+            <select
+              id="equipment"
+              className={styles.select}
+              value={store.equipment}
+              onChange={(event) =>
+                setStoreField("equipment", event.target.value)
+              }
+            >
+              <option value="">請選擇設備狀況</option>
+              {EQUIPMENT_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <div className={styles.field}>
             <label className={styles.label} htmlFor="category">

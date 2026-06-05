@@ -2,6 +2,7 @@ import { Phone, MessageCircle } from "lucide-react";
 import Button from "@/components/refactored/Button";
 import type { Store } from "@/types";
 import { STORE_TAG } from "@/types/StoreTags";
+import { EQUIPMENT_LABEL } from "@/constant/storeEquipment";
 import { formatPriceParts } from "@/utils/store";
 import styles from "./StorePriceCard.module.css";
 
@@ -12,7 +13,7 @@ export default function StorePriceCard({
   store: Store;
   isExample?: boolean;
 }) {
-  const { price, userInfo, tags } = store;
+  const { price, userInfo, tags, areaPing, monthlyRent, equipment } = store;
   const exampleTitle = "這是示範頁面，非真實物件";
   const { amount: priceAmount, unit: priceUnit } = formatPriceParts(price);
   const isUrgent = tags?.includes(STORE_TAG.EMERGENCY);
@@ -41,6 +42,29 @@ export default function StorePriceCard({
             </div>
           </div>
         </div>
+      )}
+
+      {(areaPing || monthlyRent || equipment) && (
+        <dl className={styles.specs}>
+          {areaPing && (
+            <div className={styles.specItem}>
+              <dt>坪數</dt>
+              <dd>{areaPing} 坪</dd>
+            </div>
+          )}
+          {monthlyRent && (
+            <div className={styles.specItem}>
+              <dt>租金</dt>
+              <dd>NT$ {monthlyRent.toLocaleString()} /月</dd>
+            </div>
+          )}
+          {equipment && (
+            <div className={styles.specItem}>
+              <dt>設備</dt>
+              <dd>{EQUIPMENT_LABEL[equipment]}</dd>
+            </div>
+          )}
+        </dl>
       )}
 
       <span className={styles.label}>頂讓金 ASKING</span>

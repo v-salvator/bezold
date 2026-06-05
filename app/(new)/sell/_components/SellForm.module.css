@@ -26,6 +26,12 @@
   gap: 0.375rem;
 }
 
+.twoCol {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
 .label {
   font-family: var(--hand);
   font-size: 0.875rem;

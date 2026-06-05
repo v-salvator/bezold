@@ -80,6 +80,48 @@
   background: var(--accent);
 }
 
+/* ── Specs strip ── */
+
+.specs {
+  display: flex;
+  gap: 0;
+  margin: 0 0 16px;
+  padding: 0;
+  border: 1.5px solid var(--ink);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.specItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
+  border-right: 1.5px solid var(--ink);
+
+  &:last-child {
+    border-right: none;
+  }
+
+  & dt {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-2);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  & dd {
+    font-family: var(--display);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    margin: 0;
+    white-space: nowrap;
+  }
+}
+
 /* ── Price ── */
 
 .label {

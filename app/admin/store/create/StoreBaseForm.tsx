@@ -17,6 +17,7 @@ import { genDefaultUser } from "@/utils/user";
 import type { Store, User } from "@/types";
 import { STORE_TAGS } from "@/constant/storeTags";
 import { STORE_CATEGORIES } from "@/constant/storeType";
+import { EQUIPMENT_OPTIONS } from "@/constant/storeEquipment";
 import {
   getStoreCities,
   getStoreDistrictByCity,
@@ -155,6 +156,41 @@ export default function StoreBaseForm() {
             value: category.key,
           };
         })}
+      />
+      <Typography.Title level={5}>坪數 Area Ping (optional)</Typography.Title>
+      <Input
+        defaultValue={store?.areaPing}
+        placeholder="e.g. 25"
+        onChange={(event) =>
+          handleStoreFieldChange(
+            "areaPing",
+            Number(event.target.value) || undefined,
+          )
+        }
+      />
+      <Typography.Title level={5}>
+        租金 Monthly Rent TWD (optional)
+      </Typography.Title>
+      <Input
+        defaultValue={store?.monthlyRent}
+        placeholder="e.g. 50000"
+        onChange={(event) =>
+          handleStoreFieldChange(
+            "monthlyRent",
+            Number(event.target.value) || undefined,
+          )
+        }
+      />
+      <Typography.Title level={5}>設備 Equipment (optional)</Typography.Title>
+      <Select
+        defaultValue={store?.equipment}
+        allowClear
+        style={{ width: "100%" }}
+        onChange={(val) => handleStoreFieldChange("equipment", val)}
+        options={EQUIPMENT_OPTIONS.map((option) => ({
+          label: option.label,
+          value: option.value,
+        }))}
       />
 
       <Divider orientation="left" orientationMargin="0">
