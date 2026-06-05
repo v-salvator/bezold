@@ -100,6 +100,15 @@ Every page under `app/(new)/` follows this structure:
 
 `app/(new)/` is the primary site served at root paths — `/sell`, `/my-listings`, `/store-list`, `/faq`, etc. The `/new/` segment is a Next.js route group name only and never appears in URLs. Never include `/new/` in `router.push`, `href`, or `redirect` query param values.
 
+### Adding fields to the Store type
+
+Any new field on `Store` / `StoreDoc` requires updating **four** places:
+
+1. `app/(new)/sell/_components/SellForm.tsx` — public sell form inputs + submit payload
+2. `app/admin/store/create/StoreBaseForm.tsx` — admin create form
+3. `app/admin/store/edit/[storeId]/page.tsx` — admin edit form + `handleUpdateStore` payload (use conditional spreading to avoid writing `undefined` via `updateDoc`)
+4. `utils/store.ts` `storeToCard()` — if the field should appear on store list cards
+
 ### Search filter state pattern
 
 URL params are the source of truth for filter state in `/store-list`. Two rules:
