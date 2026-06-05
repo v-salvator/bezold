@@ -4,6 +4,7 @@ import {
   YoutubeFilled,
   FacebookFilled,
   LinkedinFilled,
+  TeamOutlined,
 } from "@ant-design/icons";
 import ThreadsIcon from "@/components/icon/ThreadsIcon";
 import { SOCIAL_LINKS } from "@/constant/socials";
@@ -72,6 +73,15 @@ export default function SiteFooter() {
             aria-label="Facebook"
           >
             <FacebookFilled />
+          </a>
+          <a
+            className={styles.socialLink}
+            href={SOCIAL_LINKS.facebookGroup}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook 社團"
+          >
+            <TeamOutlined />
           </a>
           <a
             className={styles.socialLink}

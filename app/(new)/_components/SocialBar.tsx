@@ -6,6 +6,7 @@ import {
   YoutubeFilled,
   FacebookFilled,
   LinkedinFilled,
+  TeamOutlined,
 } from "@ant-design/icons";
 import ThreadsIcon from "@/components/icon/ThreadsIcon";
 import { SOCIAL_LINKS } from "@/constant/socials";
@@ -50,6 +51,11 @@ const SOCIALS = [
   { href: SOCIAL_LINKS.youtube, label: "YouTube", icon: <YoutubeFilled /> },
   { href: SOCIAL_LINKS.threads, label: "Threads", icon: <ThreadsIcon /> },
   { href: SOCIAL_LINKS.facebook, label: "Facebook", icon: <FacebookFilled /> },
+  {
+    href: SOCIAL_LINKS.facebookGroup,
+    label: "FB 社團",
+    icon: <TeamOutlined />,
+  },
   { href: SOCIAL_LINKS.linkedin, label: "LinkedIn", icon: <LinkedinFilled /> },
 ];
 
