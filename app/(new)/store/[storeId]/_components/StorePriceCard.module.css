@@ -8,6 +8,22 @@
 
 /* ── Seller row ── */
 
+.sellerContact {
+  margin-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  & span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--hand);
+    font-size: 16px;
+    color: var(--ink-2);
+  }
+}
+
 .seller {
   display: flex;
   align-items: center;

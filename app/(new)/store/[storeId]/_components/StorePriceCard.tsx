@@ -41,6 +41,20 @@ export default function StorePriceCard({
               )}
             </div>
           </div>
+          <div className={styles.sellerContact}>
+            {userInfo.phone && (
+              <span>
+                <Phone size={12} strokeWidth={2} />
+                {userInfo.phone}
+              </span>
+            )}
+            {userInfo.lineId && (
+              <span>
+                <MessageCircle size={12} strokeWidth={2} />
+                {userInfo.lineId}
+              </span>
+            )}
+          </div>
         </div>
       )}
 
