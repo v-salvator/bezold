@@ -8,6 +8,10 @@
 
 /* ── Seller row ── */
 
+.avatar.avatarLatin {
+  font-family: var(--mono);
+}
+
 .sellerContact {
   margin-left: 16px;
   display: flex;

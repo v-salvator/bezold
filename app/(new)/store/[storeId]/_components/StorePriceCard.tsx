@@ -1,9 +1,11 @@
 import { Phone, MessageCircle, Ruler, Banknote, Package } from "lucide-react";
 import Button from "@/components/refactored/Button";
+import { cn } from "@/lib/utils";
 import type { Store } from "@/types";
 import { STORE_TAG } from "@/types/StoreTags";
 import { EQUIPMENT_LABEL } from "@/constant/storeEquipment";
 import { formatPriceParts } from "@/utils/store";
+import { isLatinChar } from "@/utils/string";
 import styles from "./StorePriceCard.module.css";
 
 export default function StorePriceCard({
@@ -22,7 +24,14 @@ export default function StorePriceCard({
     <div className={styles.card}>
       {userInfo && (
         <div className={styles.seller}>
-          <div className={styles.avatar}>{userInfo.userName.charAt(0)}</div>
+          <div
+            className={cn(
+              styles.avatar,
+              isLatinChar(userInfo.userName.charAt(0)) && styles.avatarLatin,
+            )}
+          >
+            {userInfo.userName.charAt(0)}
+          </div>
           <div>
             <div className={styles.sellerName}>
               {userInfo.userName}

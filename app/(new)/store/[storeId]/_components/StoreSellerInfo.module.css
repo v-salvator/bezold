@@ -28,6 +28,10 @@
   flex-shrink: 0;
 }
 
+.avatar.avatarLatin {
+  font-family: var(--mono);
+}
+
 .name {
   font-family: var(--display);
   font-size: 22px;
