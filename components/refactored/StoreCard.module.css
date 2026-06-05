@@ -124,6 +124,22 @@
   margin: 0;
 }
 
+.specs {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.specItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink-2);
+  letter-spacing: 0.04em;
+}
+
 .price {
   display: flex;
   align-items: baseline;
