@@ -1,4 +1,13 @@
 import Image from "next/image";
+import {
+  InstagramFilled,
+  YoutubeFilled,
+  FacebookFilled,
+  LinkedinFilled,
+  TeamOutlined,
+} from "@ant-design/icons";
+import ThreadsIcon from "@/components/icon/ThreadsIcon";
+import { SOCIAL_LINKS } from "@/constant/socials";
 import Logo from "./Logo";
 import styles from "./SiteFooter.module.css";
 
@@ -27,6 +36,62 @@ export default function SiteFooter() {
             <br />
             09:00 – 21:00
           </div>
+        </div>
+        <div className={styles.socials}>
+          <a
+            className={styles.socialLink}
+            href={SOCIAL_LINKS.instagram}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+          >
+            <InstagramFilled />
+          </a>
+          <a
+            className={styles.socialLink}
+            href={SOCIAL_LINKS.youtube}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="YouTube"
+          >
+            <YoutubeFilled />
+          </a>
+          <a
+            className={styles.socialLink}
+            href={SOCIAL_LINKS.threads}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Threads"
+          >
+            <ThreadsIcon />
+          </a>
+          <a
+            className={styles.socialLink}
+            href={SOCIAL_LINKS.facebook}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook"
+          >
+            <FacebookFilled />
+          </a>
+          <a
+            className={styles.socialLink}
+            href={SOCIAL_LINKS.facebookGroup}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Facebook 社團"
+          >
+            <TeamOutlined />
+          </a>
+          <a
+            className={styles.socialLink}
+            href={SOCIAL_LINKS.linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="LinkedIn"
+          >
+            <LinkedinFilled />
+          </a>
         </div>
       </div>
       <div>

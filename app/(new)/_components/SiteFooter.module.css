@@ -60,6 +60,20 @@
   border-radius: 4px;
   object-fit: cover;
 }
+.socials {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+.socialLink {
+  color: #999083;
+  font-size: 18px;
+  text-decoration: none;
+
+  &:hover {
+    color: var(--paper);
+  }
+}
 .legal {
   grid-column: 1 / -1;
   border-top: 1.5px dashed var(--paper);

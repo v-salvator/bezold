@@ -12,6 +12,7 @@ import HowItWorks from "./_components/HowItWorks";
 import WhyUs from "./_components/WhyUs";
 import Stories from "./_components/Stories";
 import SellerCta from "./_components/SellerCta";
+import SocialBar from "./_components/SocialBar";
 import Faq from "./_components/Faq";
 import SiteFooter from "./_components/SiteFooter";
 import {
@@ -59,6 +60,7 @@ export default async function NewHomePage() {
         <WhyUs />
         {/* <Stories /> */}
         <SellerCta />
+        <SocialBar />
         <Faq />
       </div>
       <SiteFooter />
