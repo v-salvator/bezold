@@ -8,6 +8,7 @@ import {
   LinkedinFilled,
 } from "@ant-design/icons";
 import ThreadsIcon from "@/components/icon/ThreadsIcon";
+import { SOCIAL_LINKS } from "@/constant/socials";
 import Section from "./Section";
 import styles from "./SocialBar.module.css";
 
@@ -42,30 +43,14 @@ const iconVariants = {
 
 const SOCIALS = [
   {
-    href: "https://www.instagram.com/bezold.tw?igsh=enVjMDUwZWh3dnJy&utm_source=qr",
+    href: SOCIAL_LINKS.instagram,
     label: "Instagram",
     icon: <InstagramFilled />,
   },
-  {
-    href: "https://www.youtube.com/@Bezold-v4u",
-    label: "YouTube",
-    icon: <YoutubeFilled />,
-  },
-  {
-    href: "https://www.threads.com/@bezold.tw?igshid=NTc4MTIwNjQ2YQ==",
-    label: "Threads",
-    icon: <ThreadsIcon />,
-  },
-  {
-    href: "https://www.facebook.com/share/19BX272yzL/?mibextid=wwXIfr",
-    label: "Facebook",
-    icon: <FacebookFilled />,
-  },
-  {
-    href: "https://www.linkedin.com/in/bezold-tw-98390936b",
-    label: "LinkedIn",
-    icon: <LinkedinFilled />,
-  },
+  { href: SOCIAL_LINKS.youtube, label: "YouTube", icon: <YoutubeFilled /> },
+  { href: SOCIAL_LINKS.threads, label: "Threads", icon: <ThreadsIcon /> },
+  { href: SOCIAL_LINKS.facebook, label: "Facebook", icon: <FacebookFilled /> },
+  { href: SOCIAL_LINKS.linkedin, label: "LinkedIn", icon: <LinkedinFilled /> },
 ];
 
 export default function SocialBar() {

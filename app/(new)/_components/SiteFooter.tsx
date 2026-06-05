@@ -6,6 +6,7 @@ import {
   LinkedinFilled,
 } from "@ant-design/icons";
 import ThreadsIcon from "@/components/icon/ThreadsIcon";
+import { SOCIAL_LINKS } from "@/constant/socials";
 import Logo from "./Logo";
 import styles from "./SiteFooter.module.css";
 
@@ -38,7 +39,7 @@ export default function SiteFooter() {
         <div className={styles.socials}>
           <a
             className={styles.socialLink}
-            href="https://www.instagram.com/bezold.tw?igsh=enVjMDUwZWh3dnJy&utm_source=qr"
+            href={SOCIAL_LINKS.instagram}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Instagram"
@@ -47,7 +48,7 @@ export default function SiteFooter() {
           </a>
           <a
             className={styles.socialLink}
-            href="https://www.youtube.com/@Bezold-v4u"
+            href={SOCIAL_LINKS.youtube}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="YouTube"
@@ -56,7 +57,7 @@ export default function SiteFooter() {
           </a>
           <a
             className={styles.socialLink}
-            href="https://www.threads.com/@bezold.tw?igshid=NTc4MTIwNjQ2YQ=="
+            href={SOCIAL_LINKS.threads}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Threads"
@@ -65,7 +66,7 @@ export default function SiteFooter() {
           </a>
           <a
             className={styles.socialLink}
-            href="https://www.facebook.com/share/19BX272yzL/?mibextid=wwXIfr"
+            href={SOCIAL_LINKS.facebook}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Facebook"
@@ -74,7 +75,7 @@ export default function SiteFooter() {
           </a>
           <a
             className={styles.socialLink}
-            href="https://www.linkedin.com/in/bezold-tw-98390936b"
+            href={SOCIAL_LINKS.linkedin}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="LinkedIn"
