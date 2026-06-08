@@ -15,10 +15,12 @@ import SellerCta from "./_components/SellerCta";
 import SocialBar from "./_components/SocialBar";
 import Faq from "./_components/Faq";
 import SiteFooter from "./_components/SiteFooter";
+import JsonLd from "./_components/JsonLd";
 import {
   getHighlightedStores,
   getEmergencyStores,
 } from "@/firebase/serverUtils/store";
+import { SOCIAL_LINKS } from "@/constant/socials";
 
 export const revalidate = 60;
 
@@ -36,6 +38,24 @@ export default async function NewHomePage() {
 
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Bezold 頂讓必售",
+          url: process.env.NEXT_PUBLIC_APP_URL,
+          logo: `${process.env.NEXT_PUBLIC_APP_URL}/assets/bezold.png`,
+          sameAs: Object.values(SOCIAL_LINKS),
+        }}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Bezold 頂讓必售",
+          url: process.env.NEXT_PUBLIC_APP_URL,
+        }}
+      />
       <LaunchBanner />
       <SiteNav />
       <div className={styles.frame}>
