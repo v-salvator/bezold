@@ -6,6 +6,7 @@ import FaqHero from "./_components/FaqHero";
 import FaqCategory from "./_components/FaqCategory";
 import FaqCta from "./_components/FaqCta";
 import type { FaqItem } from "./_components/FaqCategory";
+import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "常見問題 — Bezold 頂讓必售",
@@ -152,7 +153,7 @@ export default function FaqPage() {
     <>
       <LaunchBanner />
       <SiteNav activeLink="常見問題" />
-      <div className="flex-1">
+      <div className={styles.frame}>
         <FaqHero />
         <FaqCategory
           sectionNum="01"

@@ -8,6 +8,7 @@ import BuyerSteps from "./_components/BuyerSteps";
 import SellerSteps from "./_components/SellerSteps";
 import PitfallsList from "./_components/PitfallsList";
 import GuideCta from "./_components/GuideCta";
+import styles from "./page.module.css";
 
 export const metadata: Metadata = {
   title: "頂讓指南 — Bezold 頂讓必售",
@@ -19,7 +20,7 @@ export default function StoreGuidePage() {
     <>
       <LaunchBanner />
       <SiteNav activeLink="頂讓指南" />
-      <div className="flex-1">
+      <div className={styles.frame}>
         <GuideHero />
         <GlossaryGrid />
         <BuyerSteps />
