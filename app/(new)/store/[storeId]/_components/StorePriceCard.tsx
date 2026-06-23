@@ -1,4 +1,11 @@
-import { Phone, MessageCircle, Ruler, Banknote, Package } from "lucide-react";
+import {
+  Phone,
+  MessageCircle,
+  Mail,
+  Ruler,
+  Banknote,
+  Package,
+} from "lucide-react";
 import Button from "@/components/refactored/Button";
 import { cn } from "@/lib/utils";
 import type { Store } from "@/types";
@@ -61,6 +68,12 @@ export default function StorePriceCard({
               <span>
                 <MessageCircle size={12} strokeWidth={2} />
                 {userInfo.lineId}
+              </span>
+            )}
+            {userInfo.email && (
+              <span>
+                <Mail size={12} strokeWidth={2} />
+                {userInfo.email}
               </span>
             )}
           </div>

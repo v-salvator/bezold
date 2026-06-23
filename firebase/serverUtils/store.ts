@@ -102,7 +102,6 @@ export const getStoreById = async (storeId: string) => {
       images: images,
       userInfo: userData,
     } as Store;
-    console.log("🚀 ~ getStoreById ~ store:", store);
     return store;
   }
 };
