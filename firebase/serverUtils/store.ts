@@ -1,5 +1,5 @@
 import { db } from "@/firebase/server";
-import { Store, STORE_CATEGORY, STORE_TAG } from "@/types";
+import { Store, STORE_CATEGORY, STORE_STATUS, STORE_TAG } from "@/types";
 import { getImagesByPath } from "./image";
 import { getUserById } from "./user";
 import { COLLECTIONS } from "@/firebase/constants";
@@ -111,8 +111,7 @@ export const getHighlightedStores = async () => {
 
   const snapshot = await storesRef
     .where("tags", "array-contains", STORE_TAG.RECOMMENDED)
-    .orderBy("updateTime", "desc")
-    .limit(8)
+    .orderBy("createTime", "desc")
     .get();
 
   const stores: Store[] = []; // TODO: modify the type here
@@ -127,8 +126,14 @@ export const getHighlightedStores = async () => {
     stores.push(store);
   });
 
+  // * limit to 9 approved stores — filter before slicing so unapproved
+  // * stores don't eat into the displayed count
+  const approvedStores = stores
+    .filter((store) => store.status === STORE_STATUS.APPROVED)
+    .slice(0, 9);
+
   // * transforming image path to visible url
-  for (let storeData of stores) {
+  for (let storeData of approvedStores) {
     const hasImage = storeData?.images?.length > 0;
     let images: string[] = [];
     // * get images here
@@ -137,7 +142,7 @@ export const getHighlightedStores = async () => {
       storeData.images = images;
     }
   }
-  return stores;
+  return approvedStores;
 };
 
 export const getEmergencyStores = async () => {
@@ -145,8 +150,7 @@ export const getEmergencyStores = async () => {
 
   const snapshot = await storesRef
     .where("tags", "array-contains", STORE_TAG.EMERGENCY)
-    .orderBy("updateTime", "desc")
-    .limit(8)
+    .orderBy("createTime", "desc")
     .get();
 
   const stores: Store[] = [];
@@ -161,7 +165,13 @@ export const getEmergencyStores = async () => {
     stores.push(store);
   });
 
-  for (let storeData of stores) {
+  // * limit to 9 approved stores — filter before slicing so unapproved
+  // * stores don't eat into the displayed count
+  const approvedStores = stores
+    .filter((store) => store.status === STORE_STATUS.APPROVED)
+    .slice(0, 9);
+
+  for (let storeData of approvedStores) {
     const hasImage = storeData?.images?.length > 0;
     let images: string[] = [];
     if (hasImage) {
@@ -169,7 +179,7 @@ export const getEmergencyStores = async () => {
       storeData.images = images;
     }
   }
-  return stores;
+  return approvedStores;
 };
 
 // TODO: create store
