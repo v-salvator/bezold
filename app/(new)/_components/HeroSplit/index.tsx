@@ -1,5 +1,6 @@
 import styles from "./HeroSplit.module.css";
 import BuyerForm from "./BuyerForm";
+import SellCtaLink from "../SellCtaLink";
 
 export default function HeroSplit() {
   return (
@@ -49,9 +50,12 @@ export default function HeroSplit() {
             <li>5 分鐘填完刊登表</li>
             <li>上架，買家直接聯絡你</li>
           </ol>
-          <a href="/sell" className={`${styles.btn} ${styles.btnMus}`}>
+          <SellCtaLink
+            ctaLocation="hero"
+            className={`${styles.btn} ${styles.btnMus}`}
+          >
             立即免費刊登 →
-          </a>
+          </SellCtaLink>
         </div>
       </div>
     </section>

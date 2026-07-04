@@ -1,13 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { auth } from "@/firebase/client";
+import { auth, trackEvent } from "@/firebase/client";
 import Button from "@/components/refactored/Button";
 
 export default function SellButton() {
   const router = useRouter();
 
   function handleClick() {
+    trackEvent("sell_cta_click", { cta_location: "nav" });
     if (auth.currentUser) {
       router.push("/sell");
     } else {
