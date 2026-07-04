@@ -1,9 +1,11 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Noto_Sans_Mono, Noto_Sans_TC } from "next/font/google";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ConfigProvider } from "antd";
 import { Provider } from "jotai";
+import AnalyticsTracker from "@/components/AnalyticsTracker";
 
 const notoSansMono = Noto_Sans_Mono({
   subsets: ["latin"],
@@ -48,6 +50,9 @@ export default function RootLayout({
       className={`${notoSansMono.variable} ${notoSansTC.variable} font-noto`}
     >
       <body>
+        <Suspense fallback={null}>
+          <AnalyticsTracker />
+        </Suspense>
         <Provider>
           <AntdRegistry>
             <ConfigProvider
