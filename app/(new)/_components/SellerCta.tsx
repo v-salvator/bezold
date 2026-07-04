@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { auth } from "@/firebase/client";
+import { auth, trackEvent } from "@/firebase/client";
 import Section from "./Section";
 import styles from "./SellerCta.module.css";
 import Button from "@/components/refactored/Button";
@@ -10,6 +10,7 @@ export default function SellerCta() {
   const router = useRouter();
 
   function handleSell() {
+    trackEvent("sell_cta_click", { cta_location: "seller_cta_section" });
     if (auth.currentUser) {
       router.push("/sell");
     } else {

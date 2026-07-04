@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import NextLink from "next/link";
-import { auth } from "@/firebase/client";
+import { auth, trackEvent } from "@/firebase/client";
 import { getStoresByUserId } from "@/firebase/clientUtils";
 import type { Store } from "@/types";
 import ListingCard from "./ListingCard";
@@ -43,7 +43,13 @@ export default function MyListingsContent() {
     return (
       <div className={styles.empty}>
         <p className={styles.emptyText}>你還沒有刊登任何店面</p>
-        <NextLink href="/sell" className={styles.emptyLink}>
+        <NextLink
+          href="/sell"
+          className={styles.emptyLink}
+          onClick={() =>
+            trackEvent("sell_cta_click", { cta_location: "my_listings_empty" })
+          }
+        >
           立即免費刊登 →
         </NextLink>
       </div>

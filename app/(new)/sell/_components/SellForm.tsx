@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import type { User as FirebaseUser } from "firebase/auth";
-import { auth } from "@/firebase/client";
+import { auth, trackEvent } from "@/firebase/client";
 import {
   getUserById,
   editUserById,
@@ -155,6 +155,11 @@ export default function SellForm() {
         ...(store.equipment ? { equipment: store.equipment } : {}),
       };
       const storeRef = await createStoreDoc(storePayload as unknown as Store);
+      trackEvent("store_listing_submit", {
+        store_id: storeRef.id,
+        category: store.category || "unspecified",
+        city: store.city || "unspecified",
+      });
       setCreatedStoreId(storeRef.id);
     } catch {
       setError("刊登店面失敗，請稍後再試");

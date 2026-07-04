@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db } from "@/firebase/client";
+import { auth, db, trackEvent } from "@/firebase/client";
 import { COLLECTIONS } from "@/firebase/constants";
 import Button from "@/components/refactored/Button";
 import Card from "@/components/refactored/Card";
@@ -80,6 +80,7 @@ export default function SignupForm() {
         createTime: serverTimestamp(),
         updateTime: serverTimestamp(),
       });
+      trackEvent("sign_up", { method: "email" });
       router.push("/store-list");
     } catch (err) {
       const code = (err as { code?: string }).code ?? "";
