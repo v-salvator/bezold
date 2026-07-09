@@ -35,6 +35,7 @@
   margin: 0 auto 24px;
   max-width: 560px;
   line-height: 1.5;
+  text-wrap: balance;
 
   animation: fadeInUp 0.5s ease-out 0.4s both;
 }

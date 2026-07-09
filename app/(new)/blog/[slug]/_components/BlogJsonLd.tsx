@@ -12,7 +12,7 @@ export default function BlogJsonLd({ meta }: { meta: BlogPostMeta }) {
   const url = `${APP_URL}/blog/${meta.slug}`;
   const image = meta.cover
     ? [`${APP_URL}${meta.cover}`]
-    : [`${APP_URL}/assets/bezold.png`];
+    : [`${APP_URL}/bezold-avatar-v2.png`];
 
   return (
     <>
@@ -32,7 +32,7 @@ export default function BlogJsonLd({ meta }: { meta: BlogPostMeta }) {
             name: SITE_NAME,
             logo: {
               "@type": "ImageObject",
-              url: `${APP_URL}/assets/bezold.png`,
+              url: `${APP_URL}/bezold-avatar-v2.png`,
             },
           },
           mainEntityOfPage: { "@type": "WebPage", "@id": url },

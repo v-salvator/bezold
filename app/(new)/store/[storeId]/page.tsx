@@ -36,7 +36,7 @@ export async function generateMetadata(
         siteName: "Bezold 頂讓必售",
         type: "website",
         locale: "zh_TW",
-        images: ["/assets/bezold.png"],
+        images: ["/bezold-og.png"],
       },
     };
   }
@@ -53,7 +53,7 @@ export async function generateMetadata(
       siteName: "Bezold 頂讓必售",
       type: "website",
       locale: "zh_TW",
-      images: store.images.length ? store.images : ["/assets/bezold.png"],
+      images: store.images.length ? store.images : ["/bezold-og.png"],
     },
   };
 }
@@ -74,7 +74,7 @@ export default async function StoreDetailPage({ params }: StorePageProps) {
           "@type": "Product",
           name: store.storeName,
           description: store.description,
-          image: store.images.length ? store.images : ["/assets/bezold.png"],
+          image: store.images.length ? store.images : ["/bezold-avatar-v2.png"],
           url: `${process.env.NEXT_PUBLIC_APP_URL}/store/${storeId}`,
           offers: {
             "@type": "Offer",
