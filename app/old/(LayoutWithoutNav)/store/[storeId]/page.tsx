@@ -27,7 +27,7 @@ export async function generateMetadata(
         siteName: `Bezold - Store not found`,
         description: "Store not found",
         url: `${process.env.NEXT_PUBLIC_APP_URL}/store/${id}`,
-        images: ["/assets/bezold.png"],
+        images: ["/bezold-avatar-v2.png"],
       },
     };
   }
@@ -39,7 +39,7 @@ export async function generateMetadata(
       siteName: `Bezold - ${store.storeName}`,
       description: store.description,
       url: `${process.env.NEXT_PUBLIC_APP_URL}/store/${id}`,
-      images: store.images.length ? store.images : ["/assets/bezold.png"],
+      images: store.images.length ? store.images : ["/bezold-avatar-v2.png"],
     },
   };
 }
@@ -65,7 +65,7 @@ export default async function Store({ params }: StoreProps) {
     city,
     district,
   } = store;
-  const defaultImage = ["/assets/bezold.png"];
+  const defaultImage = ["/bezold-avatar-v2.png"];
   const carouselImage = images.length ? images : defaultImage;
   return (
     <div className="max-w-[1024px] m-auto">

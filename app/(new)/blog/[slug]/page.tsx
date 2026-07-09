@@ -55,7 +55,7 @@ export async function generateMetadata({
       locale: "zh_TW",
       publishedTime: meta.publishedAt,
       modifiedTime: meta.updatedAt,
-      images: meta.cover ? [meta.cover] : ["/assets/bezold.png"],
+      images: meta.cover ? [meta.cover] : ["/bezold-og.png"],
     },
   };
 }

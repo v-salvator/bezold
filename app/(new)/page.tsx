@@ -25,9 +25,14 @@ import { SOCIAL_LINKS } from "@/constant/socials";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Bezold 頂讓必售 — 找一間準備好的店",
+  title: {
+    absolute: "頂讓網｜全台店面頂讓平台 - Bezold 頂讓必售",
+  },
   description:
-    "全台店面頂讓平台。買家直接接手已有客群、設備、營運的店面；賣家把心血交給合適的人。早鳥前 3 個月免費刊登，永久不抽成。",
+    "頂讓網 Bezold — 全台店面頂讓平台。買家直接接手已有客群、設備、營運的店面；賣家把心血交給合適的人。店面頂讓、生意頂讓真實刊登，早鳥前 3 個月免費刊登，永久不抽成。",
+  alternates: {
+    canonical: "/",
+  },
 };
 
 export default async function NewHomePage() {
@@ -43,8 +48,11 @@ export default async function NewHomePage() {
           "@context": "https://schema.org",
           "@type": "Organization",
           name: "Bezold 頂讓必售",
+          alternateName: ["頂讓網", "Bezold 頂讓網", "台灣頂讓網"],
           url: process.env.NEXT_PUBLIC_APP_URL,
-          logo: `${process.env.NEXT_PUBLIC_APP_URL}/assets/bezold.png`,
+          logo: `${process.env.NEXT_PUBLIC_APP_URL}/bezold-avatar-v2.png`,
+          description:
+            "全台店面頂讓平台，提供店面頂讓、生意頂讓真實刊登，買賣雙方直接聯絡。",
           sameAs: Object.values(SOCIAL_LINKS),
         }}
       />
@@ -53,7 +61,16 @@ export default async function NewHomePage() {
           "@context": "https://schema.org",
           "@type": "WebSite",
           name: "Bezold 頂讓必售",
+          alternateName: "頂讓網",
           url: process.env.NEXT_PUBLIC_APP_URL,
+          potentialAction: {
+            "@type": "SearchAction",
+            target: {
+              "@type": "EntryPoint",
+              urlTemplate: `${process.env.NEXT_PUBLIC_APP_URL}/store-list?city={search_term_string}`,
+            },
+            "query-input": "required name=search_term_string",
+          },
         }}
       />
       <LaunchBanner />

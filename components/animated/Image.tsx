@@ -33,7 +33,7 @@ const AnimatedImage = ({
     >
       <Image
         className={cn(isRounded && "rounded-[24px]")}
-        src={src ? src : "/assets/bezold.png"}
+        src={src ? src : "/bezold-avatar-v2.png"}
         fill
         alt={alt}
       />

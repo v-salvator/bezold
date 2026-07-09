@@ -54,7 +54,7 @@ const StoreSliderCard = ({ store }: { store: Store }) => {
       >
         <Image
           className="rounded"
-          src={store.images?.[0] ? store.images?.[0] : "/assets/bezold.png"}
+          src={store.images?.[0] ? store.images?.[0] : "/bezold-avatar-v2.png"}
           fill
           alt={store.storeName}
         />

@@ -17,14 +17,33 @@ const notoSansTC = Noto_Sans_TC({
   variable: "--font-noto-sans-tc",
 });
 
-const SITE_TITLE = "Bezold 頂讓必售 — 找一間準備好的店";
+const SITE_TITLE = "頂讓網｜全台店面頂讓平台 - Bezold 頂讓必售";
 const SITE_DESCRIPTION =
-  "全台店面頂讓平台。買家直接接手已有客群、設備、營運的店面；賣家把心血交給合適的人。早鳥前 3 個月免費刊登，永久不抽成。";
+  "頂讓網 Bezold — 全台店面頂讓平台。買家直接接手已有客群、設備、營運的店面；賣家把心血交給合適的人。店面頂讓、生意頂讓真實刊登，早鳥前 3 個月免費刊登，永久不抽成。";
+const SITE_KEYWORDS = [
+  "頂讓網",
+  "頂讓",
+  "店面頂讓",
+  "生意頂讓",
+  "店面轉讓",
+  "頂讓平台",
+  "餐廳頂讓",
+  "頂讓金",
+  "接手店面",
+  "台灣頂讓網",
+];
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL!),
-  title: SITE_TITLE,
+  title: {
+    default: SITE_TITLE,
+    template: "%s｜頂讓網 Bezold",
+  },
   description: SITE_DESCRIPTION,
+  keywords: SITE_KEYWORDS,
+  alternates: {
+    canonical: "/",
+  },
   robots: {
     index: true,
     follow: true,
@@ -35,7 +54,7 @@ export const metadata: Metadata = {
     locale: "zh_TW",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: ["/assets/bezold.png"],
+    images: ["/bezold-og.png"],
   },
 };
 

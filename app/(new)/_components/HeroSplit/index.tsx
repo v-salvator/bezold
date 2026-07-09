@@ -5,7 +5,9 @@ import SellCtaLink from "../SellCtaLink";
 export default function HeroSplit() {
   return (
     <section className={styles.hero}>
-      <div className={styles.kicker}>— 全台店面頂讓平台 · 真實刊登 —</div>
+      <div className={styles.kicker}>
+        — 頂讓網 · 全台店面頂讓平台 · 真實刊登 —
+      </div>
       <h1 className={styles.title}>
         <span className={styles.titleLine}>
           <span className={styles.titleLineInner}>
@@ -17,7 +19,8 @@ export default function HeroSplit() {
         </span>
       </h1>
       <p className={styles.sub}>
-        買家直接接手已有客群、設備、營運的店面 · 賣家把心血交給合適的人。
+        Bezold 頂讓網 ·
+        買家直接接手已有客群、設備、營運的店面，賣家把心血交給合適的人。
         <br />
         <b className={styles.subAccent}>開站慶 · 前 3 個月免費刊登</b> ·
         真實店家 · 買賣直接聯絡，沒有中間人。
