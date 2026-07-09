@@ -1,0 +1,60 @@
+.frame {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 28px 22px 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.breadcrumb {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.breadcrumb a {
+  color: var(--muted);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--accent);
+  }
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.title {
+  font-family: var(--display);
+  font-size: clamp(30px, 6vw, 48px);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--ink);
+  margin: 0;
+}
+
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.cover {
+  width: 100%;
+  height: auto;
+  border: 1.5px solid var(--ink);
+  border-radius: 4px;
+  display: block;
+}

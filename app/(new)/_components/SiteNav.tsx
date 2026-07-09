@@ -8,6 +8,7 @@ const navLinks = [
   { label: "我要找店", href: "/store-list" },
   { label: "我要頂出", href: "/sell" },
   { label: "頂讓指南", href: "/store-guide" },
+  { label: "部落格", href: "/blog" },
   { label: "常見問題", href: "/faq" },
 ];
 

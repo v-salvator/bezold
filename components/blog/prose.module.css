@@ -1,0 +1,160 @@
+/* Long-form article body. All standard markdown elements are styled here via
+   descendant selectors so MDX authors write plain markdown. */
+.prose {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-family: var(--hand);
+  color: var(--ink-2);
+  font-size: 16px;
+  line-height: 1.8;
+
+  & h2 {
+    font-family: var(--display);
+    font-size: clamp(24px, 4.5vw, 34px);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--ink);
+    margin: 18px 0 0;
+    padding-bottom: 8px;
+    border-bottom: 1.5px solid var(--ink);
+    scroll-margin-top: 90px;
+  }
+
+  & h3 {
+    font-family: var(--hand);
+    font-size: clamp(18px, 3vw, 22px);
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--ink);
+    margin: 10px 0 0;
+    scroll-margin-top: 90px;
+  }
+
+  & p {
+    margin: 0;
+  }
+
+  & a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  & strong,
+  & b {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  & ul,
+  & ol {
+    margin: 0;
+    padding-left: 24px;
+  }
+
+  & ul {
+    list-style: disc;
+  }
+
+  & ol {
+    list-style: decimal;
+  }
+
+  & li {
+    padding-left: 4px;
+  }
+
+  & li::marker {
+    color: var(--accent);
+  }
+
+  & li + li {
+    margin-top: 8px;
+  }
+
+  /* GFM task-list checkboxes (Checklist) — override marker/flex list styling */
+  & ul:has(input[type="checkbox"]) {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  & li:has(input[type="checkbox"]) {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    border: 1.5px solid var(--ink);
+    background: #fff;
+    border-radius: 4px;
+    padding: 10px 14px;
+  }
+
+  & input[type="checkbox"] {
+    margin-top: 5px;
+    width: 15px;
+    height: 15px;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  & blockquote {
+    margin: 0;
+    padding: 12px 16px;
+    border-left: 4px solid var(--accent);
+    background: var(--paper-2);
+    border-radius: 0 4px 4px 0;
+    font-style: italic;
+  }
+
+  & hr {
+    border: 0;
+    border-top: 1.5px dashed var(--ink-2);
+    margin: 8px 0;
+  }
+
+  & img {
+    max-width: 100%;
+    height: auto;
+    border: 1.5px solid var(--ink);
+    border-radius: 4px;
+    display: block;
+  }
+
+  /* Comparison tables (GFM) — horizontally scrollable on narrow screens */
+  & .tableWrap {
+    overflow-x: auto;
+    border: 1.5px solid var(--ink);
+    border-radius: 4px;
+  }
+
+  & table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    min-width: 560px;
+  }
+
+  & thead {
+    background: var(--ink);
+  }
+
+  & th {
+    font-family: var(--hand);
+    font-weight: 700;
+    color: var(--paper);
+    text-align: left;
+    padding: 10px 12px;
+    white-space: nowrap;
+  }
+
+  & td {
+    padding: 10px 12px;
+    border-top: 1.5px solid var(--paper-3);
+    color: var(--ink-2);
+    vertical-align: top;
+  }
+
+  & tbody tr:nth-child(even) {
+    background: var(--paper-2);
+  }
+}

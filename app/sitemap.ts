@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { db } from "@/firebase/server";
 import { COLLECTIONS } from "@/firebase/constants";
 import { STORE_STATUS } from "@/types";
+import { getAllPostsMeta } from "@/lib/blog";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL!;
 
@@ -25,6 +26,7 @@ const STATIC_ROUTES: MetadataRoute.Sitemap = [
   route("/sell", "weekly", 0.8),
   route("/faq", "monthly", 0.5),
   route("/store-guide", "monthly", 0.5),
+  route("/blog", "weekly", 0.6),
   route("/privacy", "yearly", 0.3),
   route("/terms", "yearly", 0.3),
   route("/login", "yearly", 0.2),
@@ -47,5 +49,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     };
   });
 
-  return [...STATIC_ROUTES, ...storeRoutes];
+  const blogRoutes: MetadataRoute.Sitemap = getAllPostsMeta().map((post) => ({
+    url: `${BASE_URL}/blog/${post.slug}`,
+    lastModified: post.updatedAt ? new Date(post.updatedAt) : new Date(),
+    changeFrequency: "monthly",
+    priority: 0.6,
+  }));
+
+  return [...STATIC_ROUTES, ...blogRoutes, ...storeRoutes];
 }
