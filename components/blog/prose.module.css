@@ -50,17 +50,30 @@
   & ul,
   & ol {
     margin: 0;
-    padding-left: 22px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    padding-left: 24px;
+  }
+
+  & ul {
+    list-style: disc;
+  }
+
+  & ol {
+    list-style: decimal;
   }
 
   & li {
-    padding-left: 2px;
+    padding-left: 4px;
   }
 
-  /* GFM task-list checkboxes (Checklist) */
+  & li::marker {
+    color: var(--accent);
+  }
+
+  & li + li {
+    margin-top: 8px;
+  }
+
+  /* GFM task-list checkboxes (Checklist) — override marker/flex list styling */
   & ul:has(input[type="checkbox"]) {
     list-style: none;
     padding-left: 0;
