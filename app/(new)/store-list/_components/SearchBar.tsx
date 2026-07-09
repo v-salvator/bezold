@@ -1,6 +1,7 @@
 "use client";
 
 import styles from "./SearchBar.module.css";
+import { Search } from "lucide-react";
 import Button from "@/components/refactored/Button";
 import Dropdown from "@/components/refactored/Dropdown";
 import { useAtom } from "jotai";
@@ -104,7 +105,14 @@ export default function SearchBar() {
         }
       />
       <Button onClick={handleSearch} disabled={isPending}>
-        {isPending ? "搜尋中…" : "🔍 搜尋"}
+        {isPending ? (
+          "搜尋中…"
+        ) : (
+          <>
+            <Search size={16} strokeWidth={2.5} aria-hidden />
+            搜尋
+          </>
+        )}
       </Button>
     </div>
   );
