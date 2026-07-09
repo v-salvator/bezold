@@ -126,6 +126,9 @@ export default function SiteFooter() {
         <h6>關於 / 支援</h6>
         <ul>
           <li>
+            <a href="/blog">創業部落格</a>
+          </li>
+          <li>
             <a href="/faq">常見問題</a>
           </li>
           <li>
