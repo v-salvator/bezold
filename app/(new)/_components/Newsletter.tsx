@@ -51,7 +51,7 @@ export default function Newsletter() {
     <Section variant="alt">
       <div ref={bandRef} className={styles.band}>
         <div className={styles.copy}>
-          <h3>每週精選頂讓好店，第一手送進你的信箱</h3>
+          <h3>每週頂讓、創業資訊，第一手送進你的信箱</h3>
           <p>
             訂閱 Bezold
             週報，搶先掌握本週新上架的頂讓與轉讓商機。一週一封，隨時可取消訂閱。
