@@ -1,0 +1,47 @@
+.band {
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  background: var(--accent-3);
+  padding: 28px 32px;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 32px;
+  align-items: center;
+  box-shadow: 5px 5px 0 var(--ink);
+  position: relative;
+}
+
+.copy h3 {
+  font-family: var(--display);
+  font-size: 32px;
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.copy p {
+  font-family: var(--hand);
+  font-size: 13px;
+  margin: 10px 0 0;
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+
+.form {
+  width: 100%;
+  /* Reserve the single-row form height so the band doesn't reflow when the
+     beehiiv iframe finishes loading and paints in. */
+  min-height: 56px;
+}
+
+.form iframe {
+  width: 100% !important;
+}
+
+@media (max-width: 900px) {
+  .band {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
