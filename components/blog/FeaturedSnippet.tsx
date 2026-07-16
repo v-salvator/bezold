@@ -15,7 +15,7 @@ export default function FeaturedSnippet({
   return (
     <div className={styles.box}>
       <span className={styles.label}>{label}</span>
-      <p className={styles.text}>{children}</p>
+      <div className={styles.text}>{children}</div>
     </div>
   );
 }
