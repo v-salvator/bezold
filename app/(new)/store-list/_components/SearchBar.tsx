@@ -67,6 +67,11 @@ export default function SearchBar() {
     }
     startTransition(() => {
       router.push(`/store-list?${params.toString()}`);
+      // The App Router client cache is keyed by pathname, not searchParams, so
+      // navigating between filtered variants of /store-list can reuse a stale
+      // RSC payload (e.g. arriving from home's tag=RECOMMENDED link). refresh()
+      // forces the server component to re-run with the new params.
+      router.refresh();
     });
   };
 
