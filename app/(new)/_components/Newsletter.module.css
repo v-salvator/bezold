@@ -45,3 +45,15 @@
     gap: 20px;
   }
 }
+
+/* On phones the beehiiv iframe keeps the email input and subscribe button on
+   one row, so it needs ~304px of width or "立即訂閱" wraps to two lines. The
+   band's default padding plus the Section padding starves it below that, so
+   here we trim the padding and let the band bleed slightly into the Section
+   padding (negative inline margin) to reclaim width down to ~360px viewports. */
+@media (max-width: 560px) {
+  .band {
+    margin-inline: -18px;
+    padding: 24px 16px;
+  }
+}
