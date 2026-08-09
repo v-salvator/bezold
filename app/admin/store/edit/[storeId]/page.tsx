@@ -119,10 +119,11 @@ export default function EditStore({ params }: EditStoreProps) {
         onChange={(e) => handleStoreFieldChange("location", e.target.value)}
       ></Input>
       <Typography.Title level={5}>Description</Typography.Title>
-      <Input
+      <Input.TextArea
         defaultValue={storeCloned?.description}
+        autoSize={{ minRows: 4 }}
         onChange={(e) => handleStoreFieldChange("description", e.target.value)}
-      ></Input>
+      ></Input.TextArea>
       <Typography.Title level={5}>Price</Typography.Title>
       <Input
         defaultValue={storeCloned?.price}
