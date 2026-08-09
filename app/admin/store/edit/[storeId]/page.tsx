@@ -13,6 +13,7 @@ import {
 import { useRouter, usePathname } from "next/navigation";
 
 import type { Store } from "@/types";
+import { formatPriceDisplay } from "@/utils/store";
 import { STORE_TAGS } from "@/constant/storeTags";
 import { STORE_CATEGORIES } from "@/constant/storeType";
 import { EQUIPMENT_OPTIONS } from "@/constant/storeEquipment";
@@ -93,6 +94,14 @@ export default function EditStore({ params }: EditStoreProps) {
     );
   }
 
+  // * live preview of the buyer-facing 頂讓金 label (invalid input → no preview)
+  const priceTrimmed = String(storeCloned.price ?? "").trim();
+  const previewValue = priceTrimmed ? Number(priceTrimmed) : 0;
+  const pricePreview =
+    !Number.isNaN(previewValue) && previewValue >= 0
+      ? formatPriceDisplay(previewValue, !!storeCloned.priceNegotiable)
+      : null;
+
   return (
     <div className="p-[16px]">
       <Typography.Title level={5}>Store Name</Typography.Title>
@@ -137,8 +146,23 @@ export default function EditStore({ params }: EditStoreProps) {
           handleStoreFieldChange("priceNegotiable", e.target.checked)
         }
       >
-        價格可議（price 0 → 面議；price &gt; 0 → 可面議）
+        價格可議（買家洽談）
       </Checkbox>
+      <Typography.Paragraph
+        type="secondary"
+        style={{ marginTop: 8, marginBottom: 0, fontSize: 12 }}
+      >
+        顯示規則：
+        <br />• 填數字、不勾可議 → <b>NT$ X 萬</b>（固定價）
+        <br />• 填數字、勾可議 → <b>NT$ X 萬（可面議）</b>
+        <br />• 填 0、勾可議 → <b>面議</b>（不顯示價格，SEO 不帶價）
+        <br />• 填 0、不勾可議 → <b>免頂讓金</b>（買家承接租約）
+      </Typography.Paragraph>
+      {pricePreview && (
+        <Typography.Paragraph style={{ marginTop: 4, marginBottom: 0 }}>
+          買家會看到：<Typography.Text strong>{pricePreview}</Typography.Text>
+        </Typography.Paragraph>
+      )}
       <Typography.Title level={5}>Currency</Typography.Title>
       <Input defaultValue={storeCloned?.currency} disabled></Input>
       <Typography.Title level={5}>Tags</Typography.Title>
