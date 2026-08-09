@@ -22,6 +22,18 @@ export function formatPrice(price: number): string {
   return `${amount} ${unit}`;
 }
 
+// * single source of truth for the buyer-facing 頂讓金 label across all cards.
+// * price 0 + negotiable = 面議; price 0 + !negotiable = 免頂讓金 (free transfer);
+// * price > 0 + negotiable = 可面議. `undefined` is treated as false.
+export function formatPriceDisplay(
+  price: number,
+  priceNegotiable?: boolean,
+): string {
+  if (price === 0) return priceNegotiable ? "面議" : "免頂讓金";
+  const base = formatPrice(price);
+  return priceNegotiable ? `${base}（可面議）` : base;
+}
+
 export function storeToCard(store: Store): StoreCard {
   const tags = store.tags ?? [];
 
@@ -41,7 +53,7 @@ export function storeToCard(store: Store): StoreCard {
   const location =
     locationParts.length > 0 ? locationParts.join(" · ") : undefined;
 
-  const price = formatPrice(store.price);
+  const price = formatPriceDisplay(store.price, store.priceNegotiable);
 
   let rentSpec = "租金 —";
   if (store.monthlyRent) {

@@ -7,6 +7,7 @@ import { ref, getDownloadURL } from "firebase/storage";
 import { storage } from "@/firebase/client";
 import { type Store, STORE_STATUS } from "@/types";
 import { STORE_CATEGORIES } from "@/constant/storeType";
+import { formatPriceDisplay } from "@/utils/store";
 import StatusBadge from "./StatusBadge";
 import styles from "./ListingCard.module.css";
 
@@ -38,7 +39,7 @@ export default function ListingCard({ store }: { store: Store }) {
   );
   const categoryLabel = categoryEntry?.label ?? "";
   const location = [store.city, store.district].filter(Boolean).join(" · ");
-  const price = `NT$ ${Math.round(store.price / 10000)} 萬`;
+  const price = formatPriceDisplay(store.price, store.priceNegotiable);
 
   return (
     <div className={styles.card}>

@@ -18,7 +18,7 @@ import {
 import { STORE_TAGS } from "@/constant/storeTags";
 import { STORE_CATEGORIES } from "@/constant/storeType";
 import { EQUIPMENT_OPTIONS } from "@/constant/storeEquipment";
-import { genDefaultStore } from "@/utils/store";
+import { genDefaultStore, formatPriceDisplay } from "@/utils/store";
 import FormField from "@/components/refactored/FormField";
 import Button from "@/components/refactored/Button";
 import Card from "@/components/refactored/Card";
@@ -32,6 +32,7 @@ interface StoreFields {
   location: string;
   description: string;
   price: string;
+  priceNegotiable: boolean;
   tags: string[];
   category: string;
   areaPing: string;
@@ -58,7 +59,8 @@ export default function SellForm() {
     district: "",
     tags: [],
     category: "",
-    price: String(genDefaultStore().price),
+    price: "",
+    priceNegotiable: false,
     areaPing: "",
     monthlyRent: "",
     equipment: "",
@@ -119,6 +121,18 @@ export default function SellForm() {
       setError("請填寫店面名稱、地址與描述");
       return;
     }
+    // * empty ≠ zero: an empty field is only allowed when 「價格可議」 is checked
+    // * (→ 面議). An explicit 0 is a valid price (免頂讓金).
+    const priceTrimmed = store.price.trim();
+    if (!priceTrimmed && !store.priceNegotiable) {
+      setError("請填寫頂讓金，或勾選「價格可議」");
+      return;
+    }
+    const priceValue = priceTrimmed ? Number(priceTrimmed) : 0;
+    if (Number.isNaN(priceValue) || priceValue < 0) {
+      setError("頂讓金請填寫有效數字");
+      return;
+    }
     if (!boss.userName || !boss.phone) {
       setError("請填寫聯絡人姓名與電話");
       return;
@@ -143,7 +157,8 @@ export default function SellForm() {
     try {
       const storePayload = {
         ...store,
-        price: Number(store.price),
+        price: priceValue,
+        priceNegotiable: store.priceNegotiable,
         currency: "TWD",
         user: authUser.uid,
         images: [],
@@ -189,6 +204,14 @@ export default function SellForm() {
 
   const cities = getStoreCities();
   const districts = getStoreDistrictByCity(store.city);
+
+  // * live preview of the buyer-facing 頂讓金 label (invalid input → no preview)
+  const priceTrimmed = store.price.trim();
+  const previewValue = priceTrimmed ? Number(priceTrimmed) : 0;
+  const pricePreview =
+    !Number.isNaN(previewValue) && previewValue >= 0
+      ? formatPriceDisplay(previewValue, store.priceNegotiable)
+      : null;
 
   return (
     <Card className="w-full max-w-[640px]">
@@ -271,13 +294,35 @@ export default function SellForm() {
             />
           </div>
 
-          <FormField
-            id="price"
-            label="頂讓金（TWD）"
-            placeholder="例：500000"
-            value={store.price}
-            onChange={(event) => setStoreField("price", event.target.value)}
-          />
+          <div className={styles.field}>
+            <FormField
+              id="price"
+              label="頂讓金（TWD）"
+              placeholder="例：500000"
+              value={store.price}
+              onChange={(event) => setStoreField("price", event.target.value)}
+            />
+            <label className={styles.checkboxLabel}>
+              <input
+                type="checkbox"
+                className={styles.checkbox}
+                checked={store.priceNegotiable}
+                onChange={(event) =>
+                  setStoreField("priceNegotiable", event.target.checked)
+                }
+              />
+              價格可議（買家洽談）
+            </label>
+            <p className={styles.readonlyNote}>
+              留空並勾選可議即為「面議」；填 0 為「免頂讓金」。
+              {pricePreview && (
+                <>
+                  {" "}
+                  買家會看到：<b>{pricePreview}</b>
+                </>
+              )}
+            </p>
+          </div>
 
           <div className={styles.twoCol}>
             <FormField

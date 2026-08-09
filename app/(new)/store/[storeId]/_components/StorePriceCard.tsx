@@ -22,8 +22,19 @@ export default function StorePriceCard({
   store: Store;
   isExample?: boolean;
 }) {
-  const { price, userInfo, tags, areaPing, monthlyRent, equipment } = store;
+  const {
+    price,
+    priceNegotiable,
+    userInfo,
+    tags,
+    areaPing,
+    monthlyRent,
+    equipment,
+  } = store;
   const exampleTitle = "這是示範頁面，非真實物件";
+  // * price 0 has no amount/unit split — render the label (面議 / 免頂讓金) alone.
+  const priceLabel =
+    price === 0 ? (priceNegotiable ? "面議" : "免頂讓金") : null;
   const { amount: priceAmount, unit: priceUnit } = formatPriceParts(price);
   const isUrgent = tags?.includes(STORE_TAG.EMERGENCY);
 
@@ -123,8 +134,12 @@ export default function StorePriceCard({
 
       <span className={styles.label}>頂讓金 ASKING</span>
       <div className={styles.price}>
-        {priceAmount}
-        <em>{priceUnit}</em>
+        {priceLabel ?? (
+          <>
+            {priceAmount}
+            <em>{priceUnit}</em>
+          </>
+        )}
       </div>
 
       <div className={styles.cta}>
