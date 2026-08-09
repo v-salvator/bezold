@@ -14,6 +14,7 @@ export interface Store {
   tags?: StoreTag[];
   category?: string; // TODO: maybe list type of category, will not be option in the future
   price: number;
+  priceNegotiable?: boolean; // price 0 + true = 面議; price 0 + false = 免頂讓金; price > 0 + true = 可面議
   currency: string; // TODO: maybe list all type of currency
   createTime: Date;
   updateTime: Date;
@@ -36,6 +37,7 @@ export interface StoreDoc {
   tags?: StoreTag[];
   category?: string; // TODO: maybe list type of category
   price: number;
+  priceNegotiable?: boolean; // price 0 + true = 面議; price 0 + false = 免頂讓金; price > 0 + true = 可面議
   currency: string; // TODO: maybe list all type of currency
   createTime: Timestamp;
   updateTime: Timestamp;

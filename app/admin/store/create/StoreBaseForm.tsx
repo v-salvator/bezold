@@ -31,7 +31,14 @@ export default function StoreBaseForm() {
   const pathName = usePathname();
 
   const isValidateStore = () => {
-    const allFilled = Object.values(store).every((storeField) => !!storeField);
+    // * explicit required fields — a falsy price (0 = 免頂讓金) or an unchecked
+    // * priceNegotiable flag must not fail validation.
+    const requiredFields = [
+      "storeName",
+      "location",
+      "description",
+    ] as (keyof Store)[];
+    const allFilled = requiredFields.every((storeField) => !!store[storeField]);
     return allFilled;
   };
   const isValidateUser = () => {
@@ -52,7 +59,8 @@ export default function StoreBaseForm() {
       const userId = userRef.id;
       const storeRef = await createStoreDoc({
         ...store,
-        price: Number(store.price),
+        price: Number(store.price) || 0,
+        priceNegotiable: !!store.priceNegotiable,
         user: userId,
       } as Store);
       const storeId = storeRef.id;
@@ -128,6 +136,15 @@ export default function StoreBaseForm() {
         defaultValue={store?.price}
         onChange={(e) => handleStoreFieldChange("price", e.target.value)}
       ></Input>
+      <Checkbox
+        style={{ marginTop: 8 }}
+        checked={!!store.priceNegotiable}
+        onChange={(e) =>
+          handleStoreFieldChange("priceNegotiable", e.target.checked)
+        }
+      >
+        價格可議（price 0 → 面議；price &gt; 0 → 可面議）
+      </Checkbox>
       <Typography.Title level={5}>Currency</Typography.Title>
       <Input defaultValue={store?.currency} disabled></Input>
       <Typography.Title level={5}>Tags</Typography.Title>

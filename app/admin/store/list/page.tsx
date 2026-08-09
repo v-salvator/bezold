@@ -9,6 +9,7 @@ import Link from "next/link";
 import type { TableProps } from "antd";
 import type { Store } from "@/types";
 import { STORE_STATUS, type StoreStatus } from "@/types";
+import { formatPriceDisplay } from "@/utils/store";
 
 const STATUS_COLOR: Record<StoreStatus, string> = {
   pending: "orange",
@@ -59,7 +60,8 @@ export default function List() {
       title: "Price",
       dataIndex: "price",
       key: "price",
-      render: (_, record) => `${record.price} ${record.currency}`,
+      render: (_, record) =>
+        formatPriceDisplay(record.price, record.priceNegotiable),
     },
     {
       title: "Location",

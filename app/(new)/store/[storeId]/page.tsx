@@ -76,13 +76,17 @@ export default async function StoreDetailPage({ params }: StorePageProps) {
           description: store.description,
           image: store.images.length ? store.images : ["/bezold-avatar-v2.png"],
           url: `${process.env.NEXT_PUBLIC_APP_URL}/store/${storeId}`,
-          offers: {
-            "@type": "Offer",
-            priceCurrency: store.currency,
-            price: store.price,
-            availability: "https://schema.org/InStock",
-            url: `${process.env.NEXT_PUBLIC_APP_URL}/store/${storeId}`,
-          },
+          // * 面議 (price 0 + negotiable) has no price to advertise — omit the
+          // * Offer entirely rather than emit an invalid non-numeric price.
+          ...(!(store.price === 0 && store.priceNegotiable) && {
+            offers: {
+              "@type": "Offer",
+              priceCurrency: store.currency,
+              price: store.price,
+              availability: "https://schema.org/InStock",
+              url: `${process.env.NEXT_PUBLIC_APP_URL}/store/${storeId}`,
+            },
+          }),
         }}
       />
       <LaunchBanner />

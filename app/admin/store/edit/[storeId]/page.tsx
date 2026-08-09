@@ -51,7 +51,8 @@ export default function EditStore({ params }: EditStoreProps) {
         storeName: storeCloned.storeName,
         location: storeCloned.location,
         description: storeCloned.description,
-        price: Number(storeCloned.price),
+        price: Number(storeCloned.price) || 0,
+        priceNegotiable: !!storeCloned.priceNegotiable,
         tags: storeCloned.tags ?? [],
         category: storeCloned.category,
         city: storeCloned.city,
@@ -129,6 +130,15 @@ export default function EditStore({ params }: EditStoreProps) {
         defaultValue={storeCloned?.price}
         onChange={(e) => handleStoreFieldChange("price", e.target.value)}
       ></Input>
+      <Checkbox
+        style={{ marginTop: 8 }}
+        checked={!!storeCloned.priceNegotiable}
+        onChange={(e) =>
+          handleStoreFieldChange("priceNegotiable", e.target.checked)
+        }
+      >
+        價格可議（price 0 → 面議；price &gt; 0 → 可面議）
+      </Checkbox>
       <Typography.Title level={5}>Currency</Typography.Title>
       <Input defaultValue={storeCloned?.currency} disabled></Input>
       <Typography.Title level={5}>Tags</Typography.Title>
