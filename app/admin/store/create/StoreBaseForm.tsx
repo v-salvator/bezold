@@ -118,10 +118,11 @@ export default function StoreBaseForm() {
         onChange={(e) => handleStoreFieldChange("location", e.target.value)}
       ></Input>
       <Typography.Title level={5}>Description</Typography.Title>
-      <Input
+      <Input.TextArea
         defaultValue={store?.description}
+        autoSize={{ minRows: 4 }}
         onChange={(e) => handleStoreFieldChange("description", e.target.value)}
-      ></Input>
+      ></Input.TextArea>
       <Typography.Title level={5}>Price</Typography.Title>
       <Input
         defaultValue={store?.price}
