@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import type { Store } from "@/types";
 import { STORE_TAG } from "@/types/StoreTags";
 import { EQUIPMENT_LABEL } from "@/constant/storeEquipment";
-import { formatPriceParts } from "@/utils/store";
+import { formatPriceDisplay, formatPriceParts } from "@/utils/store";
 import { isLatinChar } from "@/utils/string";
 import styles from "./StorePriceCard.module.css";
 
@@ -32,10 +32,12 @@ export default function StorePriceCard({
     equipment,
   } = store;
   const exampleTitle = "這是示範頁面，非真實物件";
-  // * price 0 has no amount/unit split — render the label (面議 / 免頂讓金) alone.
+  // * price 0 has no amount/unit split — reuse the shared label (面議 / 免頂讓金).
   const priceLabel =
-    price === 0 ? (priceNegotiable ? "面議" : "免頂讓金") : null;
+    price === 0 ? formatPriceDisplay(price, priceNegotiable) : null;
   const { amount: priceAmount, unit: priceUnit } = formatPriceParts(price);
+  // * price > 0 + negotiable = 可面議 (de-emphasised marker beside the amount).
+  const isNegotiable = price > 0 && !!priceNegotiable;
   const isUrgent = tags?.includes(STORE_TAG.EMERGENCY);
 
   return (
@@ -138,6 +140,9 @@ export default function StorePriceCard({
           <>
             {priceAmount}
             <em>{priceUnit}</em>
+            {isNegotiable && (
+              <span className={styles.negotiable}>（可面議）</span>
+            )}
           </>
         )}
       </div>

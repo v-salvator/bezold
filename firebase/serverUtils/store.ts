@@ -52,7 +52,7 @@ export const getStores = async (searchObj: Record<string, string>) => {
     },
     storesRef as FirebaseFirestore.Query<FirebaseFirestore.DocumentData>,
   );
-  const snapshot = await storesWithQueryRef.orderBy("updateTime", "desc").get();
+  const snapshot = await storesWithQueryRef.orderBy("createTime", "desc").get();
 
   const stores: Store[] = []; // TODO: modify the type here
   snapshot.forEach((doc) => {
