@@ -21,7 +21,7 @@ function sortStores(stores: Store[], sort: string): Store[] {
   const sorted = [...stores];
   if (sort === "price-asc") return sorted.sort((a, b) => a.price - b.price);
   if (sort === "price-desc") return sorted.sort((a, b) => b.price - a.price);
-  return sorted.sort((a, b) => b.updateTime.getTime() - a.updateTime.getTime());
+  return sorted.sort((a, b) => b.createTime.getTime() - a.createTime.getTime());
 }
 
 export default function ResultsArea({ stores }: { stores: Store[] }) {
