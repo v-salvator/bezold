@@ -28,3 +28,9 @@
   color: var(--accent);
   border-color: var(--accent);
 }
+
+.sold {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}

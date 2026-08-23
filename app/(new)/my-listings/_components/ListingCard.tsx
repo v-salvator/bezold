@@ -5,6 +5,7 @@ import Image from "next/image";
 import NextLink from "next/link";
 import { ref, getDownloadURL } from "firebase/storage";
 import { storage } from "@/firebase/client";
+import { updateStoreStatus } from "@/firebase/clientUtils";
 import { type Store, STORE_STATUS } from "@/types";
 import { STORE_CATEGORIES } from "@/constant/storeType";
 import { formatPriceDisplay } from "@/utils/store";
@@ -40,10 +41,27 @@ export default function ListingCard({ store }: { store: Store }) {
   const categoryLabel = categoryEntry?.label ?? "";
   const location = [store.city, store.district].filter(Boolean).join(" · ");
   const price = formatPriceDisplay(store.price, store.priceNegotiable);
-  const status = store.status ?? STORE_STATUS.PENDING;
-  // * sellers may edit pending/approved listings; rejected ones are admin-only
+
+  const [status, setStatus] = useState(store.status ?? STORE_STATUS.PENDING);
+  const [confirmingSold, setConfirmingSold] = useState(false);
+  const [markingSold, setMarkingSold] = useState(false);
+
+  // * sellers may edit pending/approved listings; rejected/sold ones are not editable
   const canEdit =
     status === STORE_STATUS.PENDING || status === STORE_STATUS.APPROVED;
+
+  const handleMarkSold = async () => {
+    setMarkingSold(true);
+    try {
+      await updateStoreStatus(store.id, STORE_STATUS.SOLD);
+      setStatus(STORE_STATUS.SOLD);
+      setConfirmingSold(false);
+    } catch {
+      // * keep the confirm open so the seller can retry
+    } finally {
+      setMarkingSold(false);
+    }
+  };
 
   return (
     <div className={styles.card}>
@@ -72,7 +90,37 @@ export default function ListingCard({ store }: { store: Store }) {
         <div className={styles.footer}>
           <span className={styles.date}>{formatDate(store.createTime)}</span>
           <div className={styles.links}>
-            {canEdit && (
+            {status === STORE_STATUS.APPROVED &&
+              (confirmingSold ? (
+                <>
+                  <span className={styles.confirmText}>確認已頂讓？</span>
+                  <button
+                    type="button"
+                    className={styles.confirmYes}
+                    onClick={handleMarkSold}
+                    disabled={markingSold}
+                  >
+                    {markingSold ? "處理中…" : "確認"}
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.confirmNo}
+                    onClick={() => setConfirmingSold(false)}
+                    disabled={markingSold}
+                  >
+                    取消
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.soldButton}
+                  onClick={() => setConfirmingSold(true)}
+                >
+                  標示為已頂讓
+                </button>
+              ))}
+            {canEdit && !confirmingSold && (
               <NextLink
                 href={`/my-listings/edit/${store.id}`}
                 className={styles.editLink}
@@ -80,7 +128,7 @@ export default function ListingCard({ store }: { store: Store }) {
                 編輯
               </NextLink>
             )}
-            {status === STORE_STATUS.APPROVED && (
+            {status === STORE_STATUS.APPROVED && !confirmingSold && (
               <NextLink href={`/store/${store.id}`} className={styles.viewLink}>
                 查看刊登 →
               </NextLink>

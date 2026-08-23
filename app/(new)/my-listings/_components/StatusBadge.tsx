@@ -6,12 +6,14 @@ const STATUS_LABEL: Record<StoreStatus, string> = {
   [STORE_STATUS.PENDING]: "審核中",
   [STORE_STATUS.APPROVED]: "刊登中",
   [STORE_STATUS.REJECTED]: "未通過",
+  [STORE_STATUS.SOLD]: "已頂讓",
 };
 
 const STATUS_CLASS: Record<StoreStatus, string> = {
   [STORE_STATUS.PENDING]: styles.pending,
   [STORE_STATUS.APPROVED]: styles.approved,
   [STORE_STATUS.REJECTED]: styles.rejected,
+  [STORE_STATUS.SOLD]: styles.sold,
 };
 
 export default function StatusBadge({ status }: { status: StoreStatus }) {
