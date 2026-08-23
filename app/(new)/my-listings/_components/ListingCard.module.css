@@ -136,6 +136,11 @@
   color: var(--ink);
 }
 
+.confirmError {
+  color: var(--accent);
+  font-weight: 700;
+}
+
 .confirmYes {
   font-family: var(--hand);
   font-size: 0.8125rem;

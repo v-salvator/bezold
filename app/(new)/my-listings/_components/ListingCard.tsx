@@ -6,6 +6,7 @@ import NextLink from "next/link";
 import { ref, getDownloadURL } from "firebase/storage";
 import { storage } from "@/firebase/client";
 import { updateStoreStatus } from "@/firebase/clientUtils";
+import { cn } from "@/lib/utils";
 import { type Store, STORE_STATUS } from "@/types";
 import { STORE_CATEGORIES } from "@/constant/storeType";
 import { formatPriceDisplay } from "@/utils/store";
@@ -45,19 +46,32 @@ export default function ListingCard({ store }: { store: Store }) {
   const [status, setStatus] = useState(store.status ?? STORE_STATUS.PENDING);
   const [confirmingSold, setConfirmingSold] = useState(false);
   const [markingSold, setMarkingSold] = useState(false);
+  const [soldError, setSoldError] = useState(false);
 
   // * sellers may edit pending/approved listings; rejected/sold ones are not editable
   const canEdit =
     status === STORE_STATUS.PENDING || status === STORE_STATUS.APPROVED;
 
+  const openConfirm = () => {
+    setSoldError(false);
+    setConfirmingSold(true);
+  };
+
+  const cancelConfirm = () => {
+    setSoldError(false);
+    setConfirmingSold(false);
+  };
+
   const handleMarkSold = async () => {
     setMarkingSold(true);
+    setSoldError(false);
     try {
       await updateStoreStatus(store.id, STORE_STATUS.SOLD);
       setStatus(STORE_STATUS.SOLD);
       setConfirmingSold(false);
     } catch {
-      // * keep the confirm open so the seller can retry
+      // * surface the failure so the seller knows to retry, not assume success
+      setSoldError(true);
     } finally {
       setMarkingSold(false);
     }
@@ -93,19 +107,26 @@ export default function ListingCard({ store }: { store: Store }) {
             {status === STORE_STATUS.APPROVED &&
               (confirmingSold ? (
                 <>
-                  <span className={styles.confirmText}>確認已頂讓？</span>
+                  <span
+                    className={cn(
+                      styles.confirmText,
+                      soldError && styles.confirmError,
+                    )}
+                  >
+                    {soldError ? "更新失敗，請重試" : "確認已頂讓？"}
+                  </span>
                   <button
                     type="button"
                     className={styles.confirmYes}
                     onClick={handleMarkSold}
                     disabled={markingSold}
                   >
-                    {markingSold ? "處理中…" : "確認"}
+                    {markingSold ? "處理中…" : soldError ? "重試" : "確認"}
                   </button>
                   <button
                     type="button"
                     className={styles.confirmNo}
-                    onClick={() => setConfirmingSold(false)}
+                    onClick={cancelConfirm}
                     disabled={markingSold}
                   >
                     取消
@@ -115,7 +136,7 @@ export default function ListingCard({ store }: { store: Store }) {
                 <button
                   type="button"
                   className={styles.soldButton}
-                  onClick={() => setConfirmingSold(true)}
+                  onClick={openConfirm}
                 >
                   標示為已頂讓
                 </button>
