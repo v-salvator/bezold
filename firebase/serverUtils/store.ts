@@ -6,6 +6,30 @@ import { COLLECTIONS } from "@/firebase/constants";
 
 const COLLECTION = COLLECTIONS.STORE;
 
+// * shared shape mapping — Firestore Timestamps → Date, doc id folded in.
+const mapDocsToStores = (
+  snapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>,
+): Store[] =>
+  snapshot.docs.map((doc) => {
+    const storeData = doc.data();
+    return {
+      id: doc.id,
+      ...storeData,
+      createTime: storeData.createTime.toDate(),
+      updateTime: storeData.updateTime.toDate(),
+    } as Store;
+  });
+
+// * resolve raw Storage paths to visible download URLs, mutating in place.
+const resolveStoreImages = async (stores: Store[]): Promise<Store[]> => {
+  for (const store of stores) {
+    if (store?.images?.length > 0) {
+      store.images = await getImagesByPath(store.images);
+    }
+  }
+  return stores;
+};
+
 // Store related
 
 export const getStores = async (searchObj: Record<string, string>) => {
@@ -54,29 +78,8 @@ export const getStores = async (searchObj: Record<string, string>) => {
   );
   const snapshot = await storesWithQueryRef.orderBy("createTime", "desc").get();
 
-  const stores: Store[] = []; // TODO: modify the type here
-  snapshot.forEach((doc) => {
-    const storeData = doc.data();
-    const store = {
-      id: doc.id,
-      ...storeData,
-      createTime: storeData.createTime.toDate(),
-      updateTime: storeData.updateTime.toDate(),
-    } as Store;
-    stores.push(store);
-  });
-
-  // * transforming image path to visible url
-  for (let storeData of stores) {
-    const hasImage = storeData?.images?.length > 0;
-    let images: string[] = [];
-    // * get images here
-    if (hasImage) {
-      images = await getImagesByPath(storeData.images);
-      storeData.images = images;
-    }
-  }
-  return stores;
+  const stores = mapDocsToStores(snapshot);
+  return resolveStoreImages(stores);
 };
 
 export const getStoreById = async (storeId: string) => {
@@ -114,35 +117,13 @@ export const getHighlightedStores = async () => {
     .orderBy("createTime", "desc")
     .get();
 
-  const stores: Store[] = []; // TODO: modify the type here
-  snapshot.forEach((doc) => {
-    const storeData = doc.data();
-    const store = {
-      id: doc.id,
-      ...storeData,
-      createTime: storeData.createTime.toDate(),
-      updateTime: storeData.updateTime.toDate(),
-    } as Store;
-    stores.push(store);
-  });
-
   // * limit to 9 approved stores — filter before slicing so unapproved
   // * stores don't eat into the displayed count
-  const approvedStores = stores
+  const approvedStores = mapDocsToStores(snapshot)
     .filter((store) => store.status === STORE_STATUS.APPROVED)
     .slice(0, 9);
 
-  // * transforming image path to visible url
-  for (let storeData of approvedStores) {
-    const hasImage = storeData?.images?.length > 0;
-    let images: string[] = [];
-    // * get images here
-    if (hasImage) {
-      images = await getImagesByPath(storeData.images);
-      storeData.images = images;
-    }
-  }
-  return approvedStores;
+  return resolveStoreImages(approvedStores);
 };
 
 export const getEmergencyStores = async () => {
@@ -153,33 +134,13 @@ export const getEmergencyStores = async () => {
     .orderBy("createTime", "desc")
     .get();
 
-  const stores: Store[] = [];
-  snapshot.forEach((doc) => {
-    const storeData = doc.data();
-    const store = {
-      id: doc.id,
-      ...storeData,
-      createTime: storeData.createTime.toDate(),
-      updateTime: storeData.updateTime.toDate(),
-    } as Store;
-    stores.push(store);
-  });
-
   // * limit to 9 approved stores — filter before slicing so unapproved
   // * stores don't eat into the displayed count
-  const approvedStores = stores
+  const approvedStores = mapDocsToStores(snapshot)
     .filter((store) => store.status === STORE_STATUS.APPROVED)
     .slice(0, 9);
 
-  for (let storeData of approvedStores) {
-    const hasImage = storeData?.images?.length > 0;
-    let images: string[] = [];
-    if (hasImage) {
-      images = await getImagesByPath(storeData.images);
-      storeData.images = images;
-    }
-  }
-  return approvedStores;
+  return resolveStoreImages(approvedStores);
 };
 
 export const getSoldStores = async () => {
@@ -190,33 +151,13 @@ export const getSoldStores = async () => {
     .where("status", "==", STORE_STATUS.SOLD)
     .get();
 
-  const stores: Store[] = [];
-  snapshot.forEach((doc) => {
-    const storeData = doc.data();
-    const store = {
-      id: doc.id,
-      ...storeData,
-      createTime: storeData.createTime.toDate(),
-      updateTime: storeData.updateTime.toDate(),
-    } as Store;
-    stores.push(store);
-  });
-
   // * newest transfers first — updateTime records when the status flipped to
   // * sold (via updateStoreStatus), unlike createTime which is the listing date.
-  const soldStores = stores
+  const soldStores = mapDocsToStores(snapshot)
     .sort((a, b) => b.updateTime.getTime() - a.updateTime.getTime())
     .slice(0, 9);
 
-  for (let storeData of soldStores) {
-    const hasImage = storeData?.images?.length > 0;
-    let images: string[] = [];
-    if (hasImage) {
-      images = await getImagesByPath(storeData.images);
-      storeData.images = images;
-    }
-  }
-  return soldStores;
+  return resolveStoreImages(soldStores);
 };
 
 // TODO: create store
