@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import Button from "@/components/refactored/Button";
 import { cn } from "@/lib/utils";
-import type { Store } from "@/types";
+import { type Store, STORE_STATUS } from "@/types";
 import { STORE_TAG } from "@/types/StoreTags";
 import { EQUIPMENT_LABEL } from "@/constant/storeEquipment";
 import { formatPriceDisplay, formatPriceParts } from "@/utils/store";
@@ -38,7 +38,9 @@ export default function StorePriceCard({
   const { amount: priceAmount, unit: priceUnit } = formatPriceParts(price);
   // * price > 0 + negotiable = 可面議 (de-emphasised marker beside the amount).
   const isNegotiable = price > 0 && !!priceNegotiable;
-  const isUrgent = tags?.includes(STORE_TAG.EMERGENCY);
+  // * sold listings hide all seller contact info + CTAs — only the name shows.
+  const isSold = store.status === STORE_STATUS.SOLD;
+  const isUrgent = !isSold && tags?.includes(STORE_TAG.EMERGENCY);
 
   return (
     <div className={styles.card}>
@@ -70,26 +72,28 @@ export default function StorePriceCard({
               )}
             </div>
           </div>
-          <div className={styles.sellerContact}>
-            {userInfo.phone && (
-              <span>
-                <Phone size={12} strokeWidth={2} />
-                {userInfo.phone}
-              </span>
-            )}
-            {userInfo.lineId && (
-              <span>
-                <MessageCircle size={12} strokeWidth={2} />
-                {userInfo.lineId}
-              </span>
-            )}
-            {userInfo.email && (
-              <span>
-                <Mail size={12} strokeWidth={2} />
-                {userInfo.email}
-              </span>
-            )}
-          </div>
+          {!isSold && (
+            <div className={styles.sellerContact}>
+              {userInfo.phone && (
+                <span>
+                  <Phone size={12} strokeWidth={2} />
+                  {userInfo.phone}
+                </span>
+              )}
+              {userInfo.lineId && (
+                <span>
+                  <MessageCircle size={12} strokeWidth={2} />
+                  {userInfo.lineId}
+                </span>
+              )}
+              {userInfo.email && (
+                <span>
+                  <Mail size={12} strokeWidth={2} />
+                  {userInfo.email}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -134,56 +138,65 @@ export default function StorePriceCard({
         </dl>
       )}
 
-      <span className={styles.label}>頂讓金 ASKING</span>
-      <div className={styles.price}>
-        {priceLabel ?? (
-          <>
-            {priceAmount}
-            <em>{priceUnit}</em>
-            {isNegotiable && (
-              <span className={styles.negotiable}>（可面議）</span>
+      <div className={isSold ? styles.priceRowSold : undefined}>
+        <div>
+          <span className={styles.label}>頂讓金 ASKING</span>
+          <div className={styles.price}>
+            {priceLabel ?? (
+              <>
+                {priceAmount}
+                <em>{priceUnit}</em>
+                {isNegotiable && (
+                  <span className={styles.negotiable}>（可面議）</span>
+                )}
+              </>
             )}
-          </>
+          </div>
+        </div>
+        {isSold && (
+          <div className={styles.soldNotice}>此物件已頂讓，不再開放聯繫</div>
         )}
       </div>
 
-      <div className={styles.cta}>
-        {userInfo?.phone &&
-          (isExample ? (
-            <span title={exampleTitle} className={styles.ctaLink}>
-              <Button className={styles.btn} disabled>
-                <Phone size={15} strokeWidth={2.5} />
-                撥打賣家電話
-              </Button>
-            </span>
-          ) : (
-            <a href={`tel:${userInfo.phone}`} className={styles.ctaLink}>
-              <Button className={styles.btn}>
-                <Phone size={15} strokeWidth={2.5} />
-                撥打賣家電話
-              </Button>
-            </a>
-          ))}
-        {userInfo?.lineId &&
-          (isExample ? (
-            <span title={exampleTitle} className={styles.ctaLink}>
-              <Button variant="sage" className={styles.btn} disabled>
-                <MessageCircle size={15} strokeWidth={2.5} />加 LINE 聯繫
-              </Button>
-            </span>
-          ) : (
-            <a
-              href={`https://line.me/ti/p/~${userInfo.lineId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.ctaLink}
-            >
-              <Button variant="sage" className={styles.btn}>
-                <MessageCircle size={15} strokeWidth={2.5} />加 LINE 聯繫
-              </Button>
-            </a>
-          ))}
-      </div>
+      {!isSold && (
+        <div className={styles.cta}>
+          {userInfo?.phone &&
+            (isExample ? (
+              <span title={exampleTitle} className={styles.ctaLink}>
+                <Button className={styles.btn} disabled>
+                  <Phone size={15} strokeWidth={2.5} />
+                  撥打賣家電話
+                </Button>
+              </span>
+            ) : (
+              <a href={`tel:${userInfo.phone}`} className={styles.ctaLink}>
+                <Button className={styles.btn}>
+                  <Phone size={15} strokeWidth={2.5} />
+                  撥打賣家電話
+                </Button>
+              </a>
+            ))}
+          {userInfo?.lineId &&
+            (isExample ? (
+              <span title={exampleTitle} className={styles.ctaLink}>
+                <Button variant="sage" className={styles.btn} disabled>
+                  <MessageCircle size={15} strokeWidth={2.5} />加 LINE 聯繫
+                </Button>
+              </span>
+            ) : (
+              <a
+                href={`https://line.me/ti/p/~${userInfo.lineId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.ctaLink}
+              >
+                <Button variant="sage" className={styles.btn}>
+                  <MessageCircle size={15} strokeWidth={2.5} />加 LINE 聯繫
+                </Button>
+              </a>
+            ))}
+        </div>
+      )}
 
       <div className={styles.trust}>
         <b>必售！安心提示</b>

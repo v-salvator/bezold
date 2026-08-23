@@ -217,6 +217,29 @@
   padding: 11px 12px;
 }
 
+.priceRowSold {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.soldNotice {
+  flex-shrink: 0;
+  max-width: 100%;
+  padding: 10px 22px;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--display);
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
 /* ── Bottom ── */
 
 .trust {
