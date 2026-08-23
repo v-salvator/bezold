@@ -202,9 +202,10 @@ export const getSoldStores = async () => {
     stores.push(store);
   });
 
-  // * newest transfers first, limit to 9
+  // * newest transfers first — updateTime records when the status flipped to
+  // * sold (via updateStoreStatus), unlike createTime which is the listing date.
   const soldStores = stores
-    .sort((a, b) => b.createTime.getTime() - a.createTime.getTime())
+    .sort((a, b) => b.updateTime.getTime() - a.updateTime.getTime())
     .slice(0, 9);
 
   for (let storeData of soldStores) {
