@@ -94,6 +94,11 @@
   background: var(--accent-2);
   color: #fff;
 }
+.ribbonSold {
+  background: var(--ink);
+  color: #fff;
+  animation: none;
+}
 
 .title {
   font-family: var(--display);

@@ -95,6 +95,20 @@
   display: block;
 }
 
+/* Sold listings read as social proof — muted, but brighten on hover so a
+   curious buyer can still inspect the detail page. */
+.soldCard {
+  opacity: 0.72;
+  filter: grayscale(0.35);
+  transition:
+    opacity 0.2s ease,
+    filter 0.2s ease;
+}
+.soldCard:hover {
+  opacity: 1;
+  filter: grayscale(0);
+}
+
 @media (max-width: 900px) {
   .listings {
     grid-template-columns: repeat(2, 1fr);

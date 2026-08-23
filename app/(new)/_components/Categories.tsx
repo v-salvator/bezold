@@ -42,7 +42,7 @@ const categories: CategoryType[] = [
 export default function Categories() {
   return (
     <Section>
-      <SectionTitle num="03" title="依行業瀏覽" sub="— 從你熟悉的類型開始 —" />
+      <SectionTitle num="04" title="依行業瀏覽" sub="— 從你熟悉的類型開始 —" />
       <div
         className={cn(
           "grid gap-2",

@@ -15,12 +15,14 @@ const STATUS_COLOR: Record<StoreStatus, string> = {
   pending: "orange",
   approved: "green",
   rejected: "red",
+  sold: "default",
 };
 
 const STATUS_LABEL: Record<StoreStatus, string> = {
   pending: "待審核",
   approved: "已上架",
   rejected: "已拒絕",
+  sold: "已頂讓",
 };
 
 export default function List() {
@@ -102,6 +104,7 @@ export default function List() {
         { text: "待審核", value: STORE_STATUS.PENDING },
         { text: "已上架", value: STORE_STATUS.APPROVED },
         { text: "已拒絕", value: STORE_STATUS.REJECTED },
+        { text: "已頂讓", value: STORE_STATUS.SOLD },
       ],
       onFilter: (value, record) => record.status === value,
       render: (_, { status }) => {
@@ -152,6 +155,17 @@ export default function List() {
             onClick={() => handleStatusChange(record.id, STORE_STATUS.REJECTED)}
           >
             拒絕
+          </AntButton>
+          <AntButton
+            size="small"
+            disabled={
+              record.status === STORE_STATUS.SOLD ||
+              updating === record.id + STORE_STATUS.SOLD
+            }
+            loading={updating === record.id + STORE_STATUS.SOLD}
+            onClick={() => handleStatusChange(record.id, STORE_STATUS.SOLD)}
+          >
+            已頂讓
           </AntButton>
         </Space>
       ),

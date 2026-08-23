@@ -20,7 +20,9 @@ import JsonLd from "./_components/JsonLd";
 import {
   getHighlightedStores,
   getEmergencyStores,
+  getSoldStores,
 } from "@/firebase/serverUtils/store";
+import { STORE_STATUS } from "@/types";
 import { SOCIAL_LINKS } from "@/constant/socials";
 
 export const revalidate = 60;
@@ -37,9 +39,10 @@ export const metadata: Metadata = {
 };
 
 export default async function NewHomePage() {
-  const [highlightedStores, emergencyStores] = await Promise.all([
+  const [highlightedStores, emergencyStores, soldStores] = await Promise.all([
     getHighlightedStores(),
     getEmergencyStores(),
+    getSoldStores(),
   ]);
 
   return (
@@ -100,6 +103,14 @@ export default async function NewHomePage() {
           sub="— 限時出售，把握機會 —"
           more="看全部急售 →"
           moreHref="/store-list?tag=EMERGENCY"
+        />
+        <FeaturedListings
+          stores={soldStores}
+          status={STORE_STATUS.SOLD}
+          num="03"
+          title="已頂讓店家"
+          sub="— 這些店家已成功頂讓 —"
+          more=""
         />
         <Categories />
         <Districts />

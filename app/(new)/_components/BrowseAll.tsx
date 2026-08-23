@@ -6,7 +6,7 @@ export default function BrowseAll() {
   return (
     <Section>
       <SectionTitle
-        num="05"
+        num="06"
         title="看所有店面"
         sub="— 不限行業、不限地區，全台即時刊登 —"
       />
