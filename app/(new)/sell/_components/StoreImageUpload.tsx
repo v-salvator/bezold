@@ -32,7 +32,7 @@ export default function StoreImageUpload({
   /** Overrides the default create-flow helper note. */
   note?: string;
   /** Called after any successful upload or delete (used to trigger re-review). */
-  onImagesChanged?: () => void;
+  onImagesChanged?: () => void | Promise<void>;
   /** Section heading; defaults to the create-flow label. */
   heading?: string;
   /** Small pill beside the heading, e.g. flagging that this block saves on its own. */
@@ -62,10 +62,22 @@ export default function StoreImageUpload({
     };
   }, [initialImages]);
 
+  // * the image op has already committed to Firestore; if only the follow-up
+  // * (e.g. resetting an approved listing to re-review) fails, surface that
+  // * distinctly so the seller isn't left thinking nothing changed.
+  async function syncAfterImageChange(failureMessage: string) {
+    try {
+      await onImagesChanged?.();
+    } catch {
+      setError(failureMessage);
+    }
+  }
+
   async function handleUpload() {
     if (!pendingFile) return;
     setUploading(true);
     setError(null);
+    let uploaded = false;
     try {
       const snapshot = await uploadStoreImageByFile(storeId, pendingFile);
       const url = await getImageByPath(snapshot.metadata.fullPath);
@@ -74,24 +86,34 @@ export default function StoreImageUpload({
         { path: snapshot.metadata.fullPath, url },
       ]);
       setPendingFile(null);
-      onImagesChanged?.();
+      uploaded = true;
     } catch {
       setError("上傳失敗，請稍後再試");
-    } finally {
-      setUploading(false);
     }
+    if (uploaded) {
+      await syncAfterImageChange(
+        "照片已上傳，但重新送審狀態更新失敗，請重新整理確認狀態",
+      );
+    }
+    setUploading(false);
   }
 
   async function handleDelete(path: string) {
     setError(null);
+    let deleted = false;
     try {
       await delateStoreImage(storeId, path);
       setUploadedImages((previous) =>
         previous.filter((image) => image.path !== path),
       );
-      onImagesChanged?.();
+      deleted = true;
     } catch {
       setError("刪除失敗，請稍後再試");
+    }
+    if (deleted) {
+      await syncAfterImageChange(
+        "照片已刪除，但重新送審狀態更新失敗，請重新整理確認狀態",
+      );
     }
   }
 
