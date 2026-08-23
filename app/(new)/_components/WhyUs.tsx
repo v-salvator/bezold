@@ -27,7 +27,7 @@ export default function WhyUs() {
   return (
     <Section>
       <SectionTitle
-        num="07"
+        num="08"
         title="為什麼用我們"
         sub="— 不是分類廣告板，是有人陪跑的平台 —"
       />

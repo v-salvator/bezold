@@ -8,7 +8,7 @@ const SPEC_ICONS = {
   package: <Package size={13} strokeWidth={2} />,
 };
 
-export type RibbonVariant = "default" | "mus" | "sage";
+export type RibbonVariant = "default" | "mus" | "sage" | "sold";
 
 export type StoreCard = {
   ribbon?: { label: string; variant: RibbonVariant };
@@ -25,6 +25,7 @@ const ribbonClass: Record<RibbonVariant, string> = {
   default: "",
   mus: styles.ribbonMus,
   sage: styles.ribbonSage,
+  sold: styles.ribbonSold,
 };
 
 export default function StoreCard({ card }: { card: StoreCard }) {

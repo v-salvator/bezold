@@ -2,7 +2,8 @@ import Section from "./Section";
 import SectionTitle from "@/components/refactored/SectionTitle";
 import styles from "./FeaturedListings.module.css";
 import StoreCard from "@/components/refactored/StoreCard";
-import { type Store, STORE_STATUS } from "@/types";
+import { cn } from "@/lib/utils";
+import { type Store, type StoreStatus, STORE_STATUS } from "@/types";
 import { storeToCard } from "@/utils/store";
 
 type Props = {
@@ -12,6 +13,10 @@ type Props = {
   sub?: string;
   more?: string;
   moreHref?: string;
+  /** Which listing status to show; defaults to approved (buyable) listings. */
+  status?: StoreStatus;
+  /** Dim the cards and mark them 已頂讓 — used for the sold-stores section. */
+  sold?: boolean;
 };
 
 export default function FeaturedListings({
@@ -21,12 +26,12 @@ export default function FeaturedListings({
   sub = "— 編輯挑選，含設備、地段佳 —",
   more = "看全部 →",
   moreHref,
+  status = STORE_STATUS.APPROVED,
+  sold = false,
 }: Props) {
-  const approvedStores = stores.filter(
-    (store) => store.status === STORE_STATUS.APPROVED,
-  );
+  const visibleStores = stores.filter((store) => store.status === status);
 
-  if (approvedStores.length === 0) return null;
+  if (visibleStores.length === 0) return null;
 
   return (
     <Section variant="alt">
@@ -38,15 +43,19 @@ export default function FeaturedListings({
         moreHref={moreHref}
       />
       <div className={styles.listings}>
-        {approvedStores.map((store) => (
-          <a
-            key={store.id}
-            href={`/store/${store.id}`}
-            className={styles.cardLink}
-          >
-            <StoreCard card={storeToCard(store)} />
-          </a>
-        ))}
+        {visibleStores.map((store) => {
+          const card = storeToCard(store);
+          if (sold) card.ribbon = { label: "已頂讓", variant: "sold" };
+          return (
+            <a
+              key={store.id}
+              href={`/store/${store.id}`}
+              className={cn(styles.cardLink, sold && styles.soldCard)}
+            >
+              <StoreCard card={card} />
+            </a>
+          );
+        })}
       </div>
     </Section>
   );

@@ -182,4 +182,40 @@ export const getEmergencyStores = async () => {
   return approvedStores;
 };
 
+export const getSoldStores = async () => {
+  const storesRef = db.collection(COLLECTION);
+
+  // * single-field equality query — no composite index needed; sort in memory
+  const snapshot = await storesRef
+    .where("status", "==", STORE_STATUS.SOLD)
+    .get();
+
+  const stores: Store[] = [];
+  snapshot.forEach((doc) => {
+    const storeData = doc.data();
+    const store = {
+      id: doc.id,
+      ...storeData,
+      createTime: storeData.createTime.toDate(),
+      updateTime: storeData.updateTime.toDate(),
+    } as Store;
+    stores.push(store);
+  });
+
+  // * newest transfers first, limit to 9
+  const soldStores = stores
+    .sort((a, b) => b.createTime.getTime() - a.createTime.getTime())
+    .slice(0, 9);
+
+  for (let storeData of soldStores) {
+    const hasImage = storeData?.images?.length > 0;
+    let images: string[] = [];
+    if (hasImage) {
+      images = await getImagesByPath(storeData.images);
+      storeData.images = images;
+    }
+  }
+  return soldStores;
+};
+
 // TODO: create store
