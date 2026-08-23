@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import {
   uploadStoreImageByFile,
@@ -18,9 +18,25 @@ interface UploadedImage {
 export default function StoreImageUpload({
   storeId,
   onDone,
+  initialImages,
+  note,
+  onImagesChanged,
+  heading = "上傳店面照片",
+  headingBadge,
 }: {
   storeId: string;
-  onDone: () => void;
+  /** When provided, renders a final action button. Omit in inline/edit contexts. */
+  onDone?: () => void;
+  /** Existing Storage paths to pre-load as already-uploaded thumbnails. */
+  initialImages?: string[];
+  /** Overrides the default create-flow helper note. */
+  note?: string;
+  /** Called after any successful upload or delete (used to trigger re-review). */
+  onImagesChanged?: () => void | Promise<void>;
+  /** Section heading; defaults to the create-flow label. */
+  heading?: string;
+  /** Small pill beside the heading, e.g. flagging that this block saves on its own. */
+  headingBadge?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const MAX_IMAGES = 5;
@@ -29,10 +45,39 @@ export default function StoreImageUpload({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // * pre-load existing images (edit flow) into the same thumbnail grid
+  useEffect(() => {
+    if (!initialImages || initialImages.length === 0) return;
+    let active = true;
+    Promise.all(
+      initialImages.map(async (path) => ({
+        path,
+        url: await getImageByPath(path),
+      })),
+    ).then((resolved) => {
+      if (active) setUploadedImages(resolved);
+    });
+    return () => {
+      active = false;
+    };
+  }, [initialImages]);
+
+  // * the image op has already committed to Firestore; if only the follow-up
+  // * (e.g. resetting an approved listing to re-review) fails, surface that
+  // * distinctly so the seller isn't left thinking nothing changed.
+  async function syncAfterImageChange(failureMessage: string) {
+    try {
+      await onImagesChanged?.();
+    } catch {
+      setError(failureMessage);
+    }
+  }
+
   async function handleUpload() {
     if (!pendingFile) return;
     setUploading(true);
     setError(null);
+    let uploaded = false;
     try {
       const snapshot = await uploadStoreImageByFile(storeId, pendingFile);
       const url = await getImageByPath(snapshot.metadata.fullPath);
@@ -41,36 +86,52 @@ export default function StoreImageUpload({
         { path: snapshot.metadata.fullPath, url },
       ]);
       setPendingFile(null);
+      uploaded = true;
     } catch {
       setError("上傳失敗，請稍後再試");
-    } finally {
-      setUploading(false);
     }
+    if (uploaded) {
+      await syncAfterImageChange(
+        "照片已上傳，但重新送審狀態更新失敗，請重新整理確認狀態",
+      );
+    }
+    setUploading(false);
   }
 
   async function handleDelete(path: string) {
     setError(null);
+    let deleted = false;
     try {
       await delateStoreImage(storeId, path);
       setUploadedImages((previous) =>
         previous.filter((image) => image.path !== path),
       );
+      deleted = true;
     } catch {
       setError("刪除失敗，請稍後再試");
+    }
+    if (deleted) {
+      await syncAfterImageChange(
+        "照片已刪除，但重新送審狀態更新失敗，請重新整理確認狀態",
+      );
     }
   }
 
   return (
     <div className={styles.wrapper}>
       <h2 className={styles.heading}>
-        上傳店面照片
+        {heading}
+        {headingBadge && (
+          <span className={styles.headingBadge}>{headingBadge}</span>
+        )}
         <span className={styles.imageCount}>
           {uploadedImages.length} / {MAX_IMAGES}
         </span>
       </h2>
 
       <p className={styles.successNote}>
-        店面資料已送出！可上傳照片讓買家更了解您的店面，也可直接略過。
+        {note ??
+          "店面資料已送出！可上傳照片讓買家更了解您的店面，也可直接略過。"}
       </p>
 
       {uploadedImages.length > 0 && (
@@ -144,11 +205,13 @@ export default function StoreImageUpload({
 
       {error && <p className={styles.errorMsg}>{error}</p>}
 
-      <div className={styles.actions}>
-        <Button variant="mus" onClick={onDone}>
-          {uploadedImages.length > 0 ? "完成刊登" : "略過，完成刊登"}
-        </Button>
-      </div>
+      {onDone && (
+        <div className={styles.actions}>
+          <Button variant="mus" onClick={onDone}>
+            {uploadedImages.length > 0 ? "完成刊登" : "略過，完成刊登"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

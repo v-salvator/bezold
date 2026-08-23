@@ -40,6 +40,10 @@ export default function ListingCard({ store }: { store: Store }) {
   const categoryLabel = categoryEntry?.label ?? "";
   const location = [store.city, store.district].filter(Boolean).join(" · ");
   const price = formatPriceDisplay(store.price, store.priceNegotiable);
+  const status = store.status ?? STORE_STATUS.PENDING;
+  // * sellers may edit pending/approved listings; rejected ones are admin-only
+  const canEdit =
+    status === STORE_STATUS.PENDING || status === STORE_STATUS.APPROVED;
 
   return (
     <div className={styles.card}>
@@ -54,7 +58,7 @@ export default function ListingCard({ store }: { store: Store }) {
       <div className={styles.body}>
         <div className={styles.top}>
           <h3 className={styles.name}>{store.storeName}</h3>
-          <StatusBadge status={store.status ?? STORE_STATUS.PENDING} />
+          <StatusBadge status={status} />
         </div>
 
         {(location || categoryLabel) && (
@@ -67,11 +71,21 @@ export default function ListingCard({ store }: { store: Store }) {
 
         <div className={styles.footer}>
           <span className={styles.date}>{formatDate(store.createTime)}</span>
-          {store.status === STORE_STATUS.APPROVED && (
-            <NextLink href={`/store/${store.id}`} className={styles.viewLink}>
-              查看刊登 →
-            </NextLink>
-          )}
+          <div className={styles.links}>
+            {canEdit && (
+              <NextLink
+                href={`/my-listings/edit/${store.id}`}
+                className={styles.editLink}
+              >
+                編輯
+              </NextLink>
+            )}
+            {status === STORE_STATUS.APPROVED && (
+              <NextLink href={`/store/${store.id}`} className={styles.viewLink}>
+                查看刊登 →
+              </NextLink>
+            )}
+          </div>
         </div>
       </div>
     </div>
