@@ -107,7 +107,6 @@ export default async function NewHomePage() {
         <FeaturedListings
           stores={soldStores}
           status={STORE_STATUS.SOLD}
-          sold
           num="03"
           title="已頂讓店家"
           sub="— 這些店家已成功頂讓 —"

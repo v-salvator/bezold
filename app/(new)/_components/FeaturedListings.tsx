@@ -15,8 +15,6 @@ type Props = {
   moreHref?: string;
   /** Which listing status to show; defaults to approved (buyable) listings. */
   status?: StoreStatus;
-  /** Dim the cards and mark them 已頂讓 — used for the sold-stores section. */
-  sold?: boolean;
 };
 
 export default function FeaturedListings({
@@ -27,8 +25,10 @@ export default function FeaturedListings({
   more = "看全部 →",
   moreHref,
   status = STORE_STATUS.APPROVED,
-  sold = false,
 }: Props) {
+  // * sold listings are shown dimmed with a 已頂讓 ribbon — derived from status
+  // * so the two can't drift out of sync at the call site.
+  const sold = status === STORE_STATUS.SOLD;
   const visibleStores = stores.filter((store) => store.status === status);
 
   if (visibleStores.length === 0) return null;
