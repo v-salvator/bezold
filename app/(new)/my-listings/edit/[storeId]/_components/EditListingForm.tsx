@@ -51,7 +51,11 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
       setAuthUser(firebaseUser);
 
       try {
-        const fetchedStore = await getStoreById(storeId);
+        // * independent reads → fetch in parallel to halve the load latency
+        const [fetchedStore, userDoc] = await Promise.all([
+          getStoreById(storeId),
+          getUserById(firebaseUser.uid),
+        ]);
 
         // * not found, not the owner, or rejected → sellers can't edit here
         if (!fetchedStore) {
@@ -88,7 +92,6 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
         setExistingImages(fetchedStore.images ?? []);
         setCurrentStatus(fetchedStore.status ?? STORE_STATUS.PENDING);
 
-        const userDoc = await getUserById(firebaseUser.uid);
         setBoss({
           userName: userDoc?.userName ?? "",
           phone: userDoc?.phone ?? "",
