@@ -78,53 +78,58 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
       }
       setAuthUser(firebaseUser);
 
-      const fetchedStore = await getStoreById(storeId);
+      try {
+        const fetchedStore = await getStoreById(storeId);
 
-      // * not found, not the owner, or rejected → sellers can't edit here
-      if (!fetchedStore) {
-        setLoadError("找不到此刊登");
+        // * not found, not the owner, or rejected → sellers can't edit here
+        if (!fetchedStore) {
+          setLoadError("找不到此刊登");
+          setLoading(false);
+          return;
+        }
+        if (fetchedStore.user !== firebaseUser.uid) {
+          router.push("/my-listings");
+          return;
+        }
+        if (fetchedStore.status === STORE_STATUS.REJECTED) {
+          router.push("/my-listings");
+          return;
+        }
+
+        setStore({
+          storeName: fetchedStore.storeName ?? "",
+          city: fetchedStore.city ?? "",
+          district: fetchedStore.district ?? "",
+          location: fetchedStore.location ?? "",
+          description: fetchedStore.description ?? "",
+          price: fetchedStore.price != null ? String(fetchedStore.price) : "",
+          priceNegotiable: !!fetchedStore.priceNegotiable,
+          category: fetchedStore.category ?? "",
+          areaPing:
+            fetchedStore.areaPing != null ? String(fetchedStore.areaPing) : "",
+          monthlyRent:
+            fetchedStore.monthlyRent != null
+              ? String(fetchedStore.monthlyRent)
+              : "",
+          equipment: fetchedStore.equipment ?? "",
+        });
+        setExistingImages(fetchedStore.images ?? []);
+        setCurrentStatus(fetchedStore.status ?? STORE_STATUS.PENDING);
+
+        const userDoc = await getUserById(firebaseUser.uid);
+        setBoss({
+          userName: userDoc?.userName ?? "",
+          phone: userDoc?.phone ?? "",
+          email: firebaseUser.email ?? "",
+          lineId: userDoc?.lineId ?? "",
+          remark: userDoc?.remark ?? "",
+        });
+
         setLoading(false);
-        return;
+      } catch {
+        setLoadError("載入刊登失敗，請稍後再試");
+        setLoading(false);
       }
-      if (fetchedStore.user !== firebaseUser.uid) {
-        router.push("/my-listings");
-        return;
-      }
-      if (fetchedStore.status === STORE_STATUS.REJECTED) {
-        router.push("/my-listings");
-        return;
-      }
-
-      setStore({
-        storeName: fetchedStore.storeName ?? "",
-        city: fetchedStore.city ?? "",
-        district: fetchedStore.district ?? "",
-        location: fetchedStore.location ?? "",
-        description: fetchedStore.description ?? "",
-        price: fetchedStore.price != null ? String(fetchedStore.price) : "",
-        priceNegotiable: !!fetchedStore.priceNegotiable,
-        category: fetchedStore.category ?? "",
-        areaPing:
-          fetchedStore.areaPing != null ? String(fetchedStore.areaPing) : "",
-        monthlyRent:
-          fetchedStore.monthlyRent != null
-            ? String(fetchedStore.monthlyRent)
-            : "",
-        equipment: fetchedStore.equipment ?? "",
-      });
-      setExistingImages(fetchedStore.images ?? []);
-      setCurrentStatus(fetchedStore.status ?? STORE_STATUS.PENDING);
-
-      const userDoc = await getUserById(firebaseUser.uid);
-      setBoss({
-        userName: userDoc?.userName ?? "",
-        phone: userDoc?.phone ?? "",
-        email: firebaseUser.email ?? "",
-        lineId: userDoc?.lineId ?? "",
-        remark: userDoc?.remark ?? "",
-      });
-
-      setLoading(false);
     });
     return () => unsubscribe();
   }, [router, storeId]);
