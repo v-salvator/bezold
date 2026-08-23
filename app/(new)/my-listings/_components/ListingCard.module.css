@@ -85,11 +85,29 @@
   color: var(--muted);
 }
 
+.links {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .viewLink {
   font-family: var(--hand);
   font-size: 0.8125rem;
   font-weight: 700;
   color: var(--accent-2);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.editLink {
+  font-family: var(--hand);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--ink);
   text-decoration: none;
 
   &:hover {
