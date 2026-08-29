@@ -2,7 +2,6 @@ import * as React from "react";
 import Link from "next/link";
 
 import { AnimatedImage } from "@/components/animated";
-import { SearchBar, SearchDrawer } from "@/components";
 import { cn } from "@/utils";
 
 const LogoLink = ({ className }: { className: string }) => {
@@ -19,11 +18,9 @@ const LogoLink = ({ className }: { className: string }) => {
 };
 
 export default function Header({
-  withSearchBar = true,
   withNavLinks = false,
   rightSlot,
 }: {
-  withSearchBar?: boolean;
   withNavLinks?: boolean;
   rightSlot?: React.ReactNode;
 }) {
@@ -42,12 +39,6 @@ export default function Header({
       )}
     >
       <LogoLink className="max-sm:hidden" />
-      {withSearchBar && (
-        <>
-          <SearchBar className="absolute left-1/2 -translate-x-1/2 max-sm:hidden" />
-          <SearchDrawer className="absolute left-1/2 -translate-x-1/2 w-[80%] sm:hidden" />
-        </>
-      )}
       {rightSlot && <div className="ml-auto">{rightSlot}</div>}
       {withNavLinks && (
         <div>

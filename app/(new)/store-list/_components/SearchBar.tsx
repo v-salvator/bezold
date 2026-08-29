@@ -4,6 +4,7 @@ import styles from "./SearchBar.module.css";
 import { Search } from "lucide-react";
 import Button from "@/components/refactored/Button";
 import Dropdown from "@/components/refactored/Dropdown";
+import MultiDropdown from "@/components/refactored/MultiDropdown";
 import { useAtom } from "jotai";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useTransition } from "react";
@@ -24,7 +25,7 @@ export default function SearchBar() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
-  const [city, setCity] = useAtom(cityAtom);
+  const [cities, setCities] = useAtom(cityAtom);
   const [tag, setTag] = useAtom(tagAtom);
   const [amountFilter, setAmountFilter] = useAtom(amountFilterAtom);
   const [category, setCategory] = useAtom(categoryAtom);
@@ -36,7 +37,10 @@ export default function SearchBar() {
     const amountMinParam = searchParams.get("amountMin");
     const amountMaxParam = searchParams.get("amountMax");
 
-    if (cityParam) setCity(cityItems.find((item) => item.key === cityParam));
+    if (cityParam) {
+      const cityKeys = cityParam.split(",");
+      setCities(cityItems.filter((item) => cityKeys.includes(item.key)));
+    }
     if (tagParam) setTag(STORE_TAGS.find((item) => item.key === tagParam));
     if (categoryParam)
       setCategory(STORE_CATEGORIES.find((item) => item.key === categoryParam));
@@ -56,7 +60,8 @@ export default function SearchBar() {
 
   const handleSearch = () => {
     const params = new URLSearchParams();
-    if (city?.key) params.set("city", city.key);
+    if (cities.length > 0)
+      params.set("city", cities.map((item) => item.key).join(","));
     if (tag?.key && tag.key !== "all") params.set("tag", tag.key);
     if (category?.key) params.set("category", category.key);
     if (amountFilter?.value) {
@@ -77,12 +82,12 @@ export default function SearchBar() {
 
   return (
     <div className={styles.searchbar}>
-      <Dropdown
+      <MultiDropdown
         label="地區"
         options={toOptions(cityItems)}
-        value={city?.key ?? ""}
-        onChange={(value) =>
-          setCity(cityItems.find((item) => item.key === value))
+        value={cities.map((item) => item.key)}
+        onChange={(cityKeys) =>
+          setCities(cityItems.filter((item) => cityKeys.includes(item.key)))
         }
       />
       <Dropdown

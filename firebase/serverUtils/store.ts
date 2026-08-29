@@ -45,8 +45,14 @@ export const getStores = async (searchObj: Record<string, string>) => {
   const storesWithQueryRef = Object.entries(mergedSearchObj).reduce(
     (ref, [searchObjKey, searchValue]) => {
       switch (searchObjKey) {
-        case "city":
-          return ref.where("city", "==", searchValue);
+        case "city": {
+          // * multi-select — "city" is a comma-separated list of city names.
+          // * `in` reuses the same composite index as `==` (Taiwan has ~22
+          // * cities, well under Firestore's 30-value `in` limit).
+          const cityList = String(searchValue).split(",").filter(Boolean);
+          if (cityList.length === 0) return ref;
+          return ref.where("city", "in", cityList);
+        }
         // case "district":
         //   if (searchValue === "all") return ref.where("district", "in", []);
         //   return ref.where("district", "==", searchValue);
