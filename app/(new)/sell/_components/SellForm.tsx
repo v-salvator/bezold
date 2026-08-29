@@ -91,10 +91,12 @@ export default function SellForm() {
       await editUserById(authUser.uid, {
         userName: boss.userName,
         phone: boss.phone,
+        email: boss.email,
         lineId: boss.lineId,
         remark: boss.remark,
       });
     } catch (err) {
+      console.error("????????", err);
       setError("更新聯絡人資料失敗，請稍後再試");
       setSubmitting(false);
       return;

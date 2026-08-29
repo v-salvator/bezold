@@ -5,6 +5,7 @@ import {
   getDocs,
   getDoc,
   updateDoc,
+  setDoc,
   doc,
   Timestamp,
 } from "firebase/firestore";
@@ -53,14 +54,26 @@ export const getUserById = async (userId: User["id"]) => {
 };
 
 export const editUserById = async (
-  storeId: User["id"],
+  userId: User["id"],
   editedUser: Partial<User>,
 ) => {
-  const docRef = doc(db, COLLECTION, storeId);
-  const docSnap = await updateDoc(docRef, {
-    ...editedUser,
-    updateTime: serverTimestamp(),
-  });
+  const docRef = doc(db, COLLECTION, userId);
+  const docSnap = await getDoc(docRef);
+
+  // Accounts created directly in the Firebase Auth console have no user doc yet,
+  // so updateDoc would throw. Upsert: create the doc on first edit.
+  if (docSnap.exists()) {
+    await updateDoc(docRef, {
+      ...editedUser,
+      updateTime: serverTimestamp(),
+    });
+  } else {
+    await setDoc(docRef, {
+      ...editedUser,
+      createTime: serverTimestamp(),
+      updateTime: serverTimestamp(),
+    });
+  }
 };
 
 export const createUserDoc = async (user: User) => {
