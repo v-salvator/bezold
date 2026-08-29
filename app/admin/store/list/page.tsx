@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { getStores } from "@/firebase/clientUtils";
 import { updateStoreStatus } from "@/firebase/clientUtils";
-import { Space, Table, Tag, Button as AntButton } from "antd";
+import { Space, Table, Tag, Button as AntButton, Input } from "antd";
 import dayjs from "dayjs";
 import Link from "next/link";
 
@@ -28,6 +28,16 @@ const STATUS_LABEL: Record<StoreStatus, string> = {
 export default function List() {
   const [stores, setStores] = useState<Store[]>([]);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+
+  const normalizedSearch = search.trim().toLowerCase();
+  const filteredStores = normalizedSearch
+    ? stores.filter(
+        (store) =>
+          store.storeName?.toLowerCase().includes(normalizedSearch) ||
+          store.user?.toLowerCase().includes(normalizedSearch),
+      )
+    : stores;
 
   const fetchStores = async () => {
     const fetchedStores = await getStores();
@@ -175,7 +185,14 @@ export default function List() {
 
   return (
     <div className="p-[16px]">
-      <Table columns={columns} dataSource={stores} rowKey={"id"} />
+      <Input.Search
+        allowClear
+        placeholder="Search by store name or user ID"
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+        className="mb-[16px] max-w-[360px]"
+      />
+      <Table columns={columns} dataSource={filteredStores} rowKey={"id"} />
     </div>
   );
 }
