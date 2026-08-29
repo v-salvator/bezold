@@ -15,7 +15,7 @@ export default function AdminLayout({
 }) {
   return (
     <>
-      <Header withSearchBar={false} rightSlot={<AdminUserBadge />} />
+      <Header rightSlot={<AdminUserBadge />} />
       <div className="pt-header h-screen">
         <AdminAuthGuard>{children}</AdminAuthGuard>
       </div>
