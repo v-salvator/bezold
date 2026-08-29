@@ -15,6 +15,7 @@ import { genDefaultStore, formatPriceDisplay } from "@/utils/store";
 import { genDefaultUser } from "@/utils/user";
 
 import type { Store, User } from "@/types";
+import { STORE_STATUS } from "@/types";
 import { STORE_TAGS } from "@/constant/storeTags";
 import { STORE_CATEGORIES } from "@/constant/storeType";
 import { EQUIPMENT_OPTIONS } from "@/constant/storeEquipment";
@@ -61,6 +62,7 @@ export default function StoreBaseForm() {
         ...store,
         price: Number(store.price) || 0,
         priceNegotiable: !!store.priceNegotiable,
+        status: STORE_STATUS.PENDING,
         user: userId,
       } as Store);
       const storeId = storeRef.id;

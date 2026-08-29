@@ -106,7 +106,8 @@ export default function List() {
         { text: "已拒絕", value: STORE_STATUS.REJECTED },
         { text: "已頂讓", value: STORE_STATUS.SOLD },
       ],
-      onFilter: (value, record) => record.status === value,
+      onFilter: (value, record) =>
+        (record.status ?? STORE_STATUS.PENDING) === value,
       render: (_, { status }) => {
         const resolvedStatus = status ?? STORE_STATUS.PENDING;
         return (
