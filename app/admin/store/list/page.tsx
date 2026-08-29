@@ -2,8 +2,16 @@
 import { useEffect, useState } from "react";
 import { getStores } from "@/firebase/clientUtils";
 import { updateStoreStatus } from "@/firebase/clientUtils";
-import { Space, Table, Tag, Button as AntButton } from "antd";
+import {
+  Space,
+  Table,
+  Tag,
+  Button as AntButton,
+  Input,
+  DatePicker,
+} from "antd";
 import dayjs from "dayjs";
+import type { Dayjs } from "dayjs";
 import Link from "next/link";
 
 import type { TableProps } from "antd";
@@ -28,6 +36,27 @@ const STATUS_LABEL: Record<StoreStatus, string> = {
 export default function List() {
   const [stores, setStores] = useState<Store[]>([]);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [dateRange, setDateRange] = useState<
+    [Dayjs | null, Dayjs | null] | null
+  >(null);
+
+  const normalizedSearch = search.trim().toLowerCase();
+  const [rangeStart, rangeEnd] = dateRange ?? [null, null];
+
+  const filteredStores = stores.filter((store) => {
+    const matchesSearch =
+      !normalizedSearch ||
+      store.storeName?.toLowerCase().includes(normalizedSearch) ||
+      store.user?.toLowerCase().includes(normalizedSearch);
+
+    const createdAt = store.createTime ? dayjs(store.createTime) : null;
+    const matchesDate =
+      (!rangeStart || (createdAt && !createdAt.isBefore(rangeStart, "day"))) &&
+      (!rangeEnd || (createdAt && !createdAt.isAfter(rangeEnd, "day")));
+
+    return matchesSearch && matchesDate;
+  });
 
   const fetchStores = async () => {
     const fetchedStores = await getStores();
@@ -106,7 +135,8 @@ export default function List() {
         { text: "已拒絕", value: STORE_STATUS.REJECTED },
         { text: "已頂讓", value: STORE_STATUS.SOLD },
       ],
-      onFilter: (value, record) => record.status === value,
+      onFilter: (value, record) =>
+        (record.status ?? STORE_STATUS.PENDING) === value,
       render: (_, { status }) => {
         const resolvedStatus = status ?? STORE_STATUS.PENDING;
         return (
@@ -174,7 +204,21 @@ export default function List() {
 
   return (
     <div className="p-[16px]">
-      <Table columns={columns} dataSource={stores} rowKey={"id"} />
+      <Space className="mb-[16px]" wrap>
+        <Input.Search
+          allowClear
+          placeholder="Search by store name or user ID"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          className="w-[360px] max-w-full"
+        />
+        <DatePicker.RangePicker
+          value={dateRange}
+          onChange={(range) => setDateRange(range)}
+          placeholder={["Created from", "Created to"]}
+        />
+      </Space>
+      <Table columns={columns} dataSource={filteredStores} rowKey={"id"} />
     </div>
   );
 }
