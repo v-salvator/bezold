@@ -28,10 +28,10 @@ export const ACCELERATION_PLANS: AccelerationPlan[] = [
     id: "basic",
     icon: "rocket",
     name: "基礎加速包",
-    price: "1,500",
+    price: "1,600",
     rows: [
       { icon: "google", text: "Google 廣告費：NT$1,000" },
-      { icon: "service", text: "建置與優化服務費：NT$500" },
+      { icon: "service", text: "建置與優化服務費：NT$600" },
       { icon: "period", text: "投放期間：14 天" },
       { icon: "views", text: "預估瀏覽店家資料：25–60 人" },
     ],
@@ -42,12 +42,12 @@ export const ACCELERATION_PLANS: AccelerationPlan[] = [
     id: "hot",
     icon: "flame",
     name: "熱門加速包",
-    price: "3,000",
+    price: "3,200",
     featured: true,
     badge: "最多店主選擇",
     rows: [
       { icon: "google", text: "Google 廣告費：NT$2,200" },
-      { icon: "service", text: "建置與優化服務費：NT$800" },
+      { icon: "service", text: "建置與優化服務費：NT$1,000" },
       { icon: "period", text: "投放期間：30 天" },
       { icon: "views", text: "預估瀏覽店家資料：55–130 人" },
     ],
@@ -58,10 +58,10 @@ export const ACCELERATION_PLANS: AccelerationPlan[] = [
     id: "urgent",
     icon: "zap",
     name: "急售加速包",
-    price: "6,000",
+    price: "6,300",
     rows: [
       { icon: "google", text: "Google 廣告費：NT$4,500" },
-      { icon: "service", text: "建置與優化服務費：NT$1,500" },
+      { icon: "service", text: "建置與優化服務費：NT$1,800" },
       { icon: "period", text: "投放期間：30 天" },
       { icon: "views", text: "預估瀏覽店家資料：110–260 人" },
     ],
@@ -73,3 +73,15 @@ export const ACCELERATION_PLANS: AccelerationPlan[] = [
     cta: "選擇急售方案",
   },
 ];
+
+/**
+ * Lowest plan price, formatted (e.g. "1,600"). Derived so the "NT$… 起"
+ * starting price in the My Listings banner never drifts from the plan data.
+ */
+export const ACCELERATION_STARTING_PRICE = ACCELERATION_PLANS.reduce(
+  (cheapest, plan) => {
+    const value = Number(plan.price.replace(/,/g, ""));
+    return value < Number(cheapest.replace(/,/g, "")) ? plan.price : cheapest;
+  },
+  ACCELERATION_PLANS[0].price,
+);

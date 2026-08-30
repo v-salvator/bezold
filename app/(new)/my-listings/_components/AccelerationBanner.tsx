@@ -3,6 +3,7 @@
 import NextLink from "next/link";
 import { Rocket } from "lucide-react";
 import { trackEvent } from "@/firebase/client";
+import { ACCELERATION_STARTING_PRICE } from "@/constant/acceleration";
 import styles from "./AccelerationBanner.module.css";
 
 const chips = ["Google 搜尋曝光", "BEZOLD 站內置頂", "社群曝光・成效報告"];
@@ -33,7 +34,8 @@ export default function AccelerationBanner() {
 
       <div className={styles.action}>
         <span className={styles.price}>
-          NT$1,500 <span className={styles.priceFrom}>起</span>
+          NT${ACCELERATION_STARTING_PRICE}{" "}
+          <span className={styles.priceFrom}>起</span>
         </span>
         <NextLink
           href="/acceleration"
