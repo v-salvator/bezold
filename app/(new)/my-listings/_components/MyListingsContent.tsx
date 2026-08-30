@@ -8,6 +8,7 @@ import { auth, trackEvent } from "@/firebase/client";
 import { getStoresByUserId } from "@/firebase/clientUtils";
 import type { Store } from "@/types";
 import ListingCard from "./ListingCard";
+import AccelerationBanner from "./AccelerationBanner";
 import styles from "./MyListingsContent.module.css";
 
 export default function MyListingsContent() {
@@ -41,26 +42,34 @@ export default function MyListingsContent() {
 
   if (stores.length === 0) {
     return (
-      <div className={styles.empty}>
-        <p className={styles.emptyText}>你還沒有刊登任何店面</p>
-        <NextLink
-          href="/sell"
-          className={styles.emptyLink}
-          onClick={() =>
-            trackEvent("sell_cta_click", { cta_location: "my_listings_empty" })
-          }
-        >
-          立即免費刊登 →
-        </NextLink>
-      </div>
+      <>
+        <AccelerationBanner />
+        <div className={styles.empty}>
+          <p className={styles.emptyText}>你還沒有刊登任何店面</p>
+          <NextLink
+            href="/sell"
+            className={styles.emptyLink}
+            onClick={() =>
+              trackEvent("sell_cta_click", {
+                cta_location: "my_listings_empty",
+              })
+            }
+          >
+            立即免費刊登 →
+          </NextLink>
+        </div>
+      </>
     );
   }
 
   return (
-    <div className={styles.list}>
-      {stores.map((store) => (
-        <ListingCard key={store.id} store={store} />
-      ))}
-    </div>
+    <>
+      <AccelerationBanner />
+      <div className={styles.list}>
+        {stores.map((store) => (
+          <ListingCard key={store.id} store={store} />
+        ))}
+      </div>
+    </>
   );
 }
