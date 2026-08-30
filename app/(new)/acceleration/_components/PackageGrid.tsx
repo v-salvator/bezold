@@ -87,8 +87,11 @@ export default function PackageGrid() {
     <Section>
       <div className={styles.head}>
         <span className={styles.kicker}>頂讓加速包</span>
-        <h2 className={styles.title}>讓更多買家看見你的刊登</h2>
-        <p className={styles.sub}>選擇頂讓加速方案，提升曝光、加快成交</p>
+        <h2 className={styles.title}>頂讓想更快？讓更多買家看見你的刊登</h2>
+        <p className={styles.sub}>
+          Bezold 為你投放 Google
+          關鍵字廣告，主動觸及正在找店的潛在買家。更快被看見，更快找到接手人！
+        </p>
       </div>
       <div className={styles.grid}>
         {ACCELERATION_PLANS.map((plan) => (
