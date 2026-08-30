@@ -44,7 +44,7 @@ export const ACCELERATION_PLANS: AccelerationPlan[] = [
     name: "熱門加速包",
     price: "3,200",
     featured: true,
-    badge: "最多店主選擇",
+    badge: "最推薦的選擇",
     rows: [
       { icon: "google", text: "Google 廣告費：NT$2,200" },
       { icon: "service", text: "建置與優化服務費：NT$1,000" },
