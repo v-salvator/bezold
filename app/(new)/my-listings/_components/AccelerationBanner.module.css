@@ -1,0 +1,128 @@
+.banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  background: var(--paper-2);
+  border: 1.5px solid var(--ink);
+  border-radius: 8px;
+  box-shadow: 3px 3px 0 var(--ink);
+  padding: 20px 22px;
+  margin-bottom: 24px;
+}
+
+.tag {
+  position: absolute;
+  top: -12px;
+  left: 18px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--hand);
+  font-weight: 700;
+  font-size: 0.72rem;
+  padding: 3px 10px;
+  border-radius: 4px;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  color: var(--accent);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+.body {
+  flex: 1;
+  min-width: 220px;
+}
+.heading {
+  font-family: var(--display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: var(--ink);
+}
+.sub {
+  font-family: var(--hand);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--ink-2);
+  margin: 0 0 12px;
+}
+.subAccent {
+  color: var(--accent);
+  font-weight: 700;
+}
+.chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  font-family: var(--hand);
+  font-size: 0.78rem;
+  color: var(--ink-2);
+  background: var(--paper);
+  border: 1.5px solid var(--paper-3);
+  border-radius: 999px;
+  padding: 4px 12px;
+}
+
+.action {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.price {
+  font-family: var(--brand);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+.priceFrom {
+  font-family: var(--hand);
+  font-size: 0.85rem;
+  color: var(--ink-2);
+}
+.cta {
+  font-family: var(--hand);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: var(--paper);
+  background: var(--ink);
+  border: 1.5px solid var(--ink);
+  border-radius: 4px;
+  padding: 9px 18px;
+  box-shadow: 2px 2px 0 var(--accent);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+  white-space: nowrap;
+}
+.cta:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--accent);
+}
+
+@media (max-width: 560px) {
+  .action {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}

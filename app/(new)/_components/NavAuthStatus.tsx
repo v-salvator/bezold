@@ -87,6 +87,13 @@ export default function NavAuthStatus() {
           >
             我的刊登
           </NextLink>
+          <NextLink
+            href="/acceleration"
+            className={styles.dropdownLink}
+            onClick={() => setOpen(false)}
+          >
+            頂讓加速
+          </NextLink>
           {isAdmin && (
             <NextLink
               href="/admin"
