@@ -96,7 +96,7 @@ export default function List() {
       cancelText: "取消",
       content: (
         <span>
-          確定要刪除「{store.storeName}
+          確定要刪除「{store.storeName || `商店 ${store.id}`}
           」嗎？此操作將永久移除商店與其圖片，無法復原。
         </span>
       ),
