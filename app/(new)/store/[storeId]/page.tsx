@@ -8,11 +8,13 @@ import StoreGallery from "./_components/StoreGallery";
 import StoreTitleRow from "./_components/StoreTitleRow";
 import StoreDescription from "./_components/StoreDescription";
 import StorePriceCard from "./_components/StorePriceCard";
+import BuyerClubPopup from "./_components/BuyerClubPopup";
 import JsonLd from "@/app/(new)/_components/JsonLd";
 import styles from "./page.module.css";
 
 interface StorePageProps {
   params: { storeId: string };
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
 export async function generateMetadata(
@@ -58,13 +60,21 @@ export async function generateMetadata(
   };
 }
 
-export default async function StoreDetailPage({ params }: StorePageProps) {
+export default async function StoreDetailPage({
+  params,
+  searchParams,
+}: StorePageProps) {
   const { storeId } = await params;
+  const { modal } = await searchParams;
   const store = await getStoreById(storeId);
 
   if (!store) {
     throw new Error("Store not found");
   }
+
+  // `?modal=buyer-club` force-opens the buyer club popup (used for paid ad
+  // landings) and bypasses the once-per-day suppression.
+  const forceOpenBuyerClub = modal === "buyer-club";
 
   return (
     <>
@@ -101,6 +111,7 @@ export default async function StoreDetailPage({ params }: StorePageProps) {
         </div>
       </main>
       <SiteFooter />
+      <BuyerClubPopup forceOpen={forceOpenBuyerClub} />
     </>
   );
 }
