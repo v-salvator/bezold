@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { onAuthStateChanged, User } from "firebase/auth";
+import { onIdTokenChanged, User } from "firebase/auth";
 import { auth } from "@/firebase/client";
 
 type AdminAuthState = {
@@ -19,7 +19,10 @@ export default function useAdminAuth(): AdminAuthState {
   });
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    // onIdTokenChanged (not onAuthStateChanged) so state re-syncs whenever the
+    // SDK refreshes the ID token — keeps idToken from going stale on long-open
+    // admin sessions, which would otherwise 401 authenticated API calls.
+    const unsubscribe = onIdTokenChanged(auth, async (user) => {
       if (!user) {
         setState({ user: null, isAdmin: false, loading: false, idToken: null });
         return;
