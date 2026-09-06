@@ -35,7 +35,14 @@ const amountOptions = amountItems.map((item) => ({
 }));
 
 function todayKey(): string {
-  return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  // Local YYYY-MM-DD, not UTC — the once-per-day boundary must fall at the
+  // visitor's local midnight. toISOString() would roll over at 00:00 UTC
+  // (08:00 in Taiwan), re-opening the popup mid-morning after a dismiss.
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function suppressedToday(): boolean {
@@ -91,6 +98,11 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
       const shouldOpen = forceOpen || !suppressedToday();
       setOpen(shouldOpen);
       if (shouldOpen) {
+        // An organic auto-open counts as today's one showing — mark it now so
+        // the cap holds even if the visitor navigates away without dismissing
+        // (otherwise every store page would re-open it and re-fire impressions).
+        // A force-open (ad landing) deliberately doesn't consume the cap.
+        if (!forceOpen) markSuppressed();
         trackEvent("buyer_club_popup_impression", {
           source: forceOpen ? "url_force" : "auto",
         });

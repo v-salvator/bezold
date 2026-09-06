@@ -7,20 +7,28 @@ import { verifyAdminToken } from "@/lib/verifyAdminToken";
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
 
-// Opaque cursor = base64("<createTime millis>|<uid>"). Pairs the sort key with
-// the doc id so ties on createTime page deterministically.
-function encodeCursor(millis: number, uid: string): string {
-  return Buffer.from(`${millis}|${uid}`).toString("base64");
+// Opaque cursor = base64("<seconds>.<nanoseconds>|<uid>"). Pairs the sort key
+// with the doc id so ties on createTime page deterministically. The full
+// second+nanosecond Timestamp is encoded (not truncated to millis) so
+// startAfter() lands exactly on the last row's sort position — truncating to
+// millis can place the cursor before the real timestamp and silently skip rows
+// created in the same millisecond at a page boundary.
+function encodeCursor(createTime: Timestamp, uid: string): string {
+  return Buffer.from(
+    `${createTime.seconds}.${createTime.nanoseconds}|${uid}`,
+  ).toString("base64");
 }
 
-function decodeCursor(raw: string): { millis: number; uid: string } | null {
+function decodeCursor(
+  raw: string,
+): { createTime: Timestamp; uid: string } | null {
   try {
-    const [millis, uid] = Buffer.from(raw, "base64")
-      .toString("utf8")
-      .split("|");
-    const ms = Number(millis);
-    if (!Number.isFinite(ms) || !uid) return null;
-    return { millis: ms, uid };
+    const [ts, uid] = Buffer.from(raw, "base64").toString("utf8").split("|");
+    const [seconds, nanoseconds] = (ts ?? "").split(".").map(Number);
+    if (!Number.isFinite(seconds) || !Number.isFinite(nanoseconds) || !uid) {
+      return null;
+    }
+    return { createTime: new Timestamp(seconds, nanoseconds), uid };
   } catch {
     return null;
   }
@@ -50,7 +58,7 @@ export async function GET(req: NextRequest) {
       if (!cursor) {
         return NextResponse.json({ error: "Invalid cursor" }, { status: 400 });
       }
-      query = query.startAfter(Timestamp.fromMillis(cursor.millis), cursor.uid);
+      query = query.startAfter(cursor.createTime, cursor.uid);
     }
 
     const snap = await query.get();
@@ -76,9 +84,10 @@ export async function GET(req: NextRequest) {
 
     // A full page implies there may be more; a short page is the last one.
     const last = snap.docs[snap.docs.length - 1];
+    const lastCreateTime = last?.get("createTime");
     const nextCursor =
-      snap.size === limit && last
-        ? encodeCursor(rows[rows.length - 1].createTime, last.id)
+      snap.size === limit && last && lastCreateTime instanceof Timestamp
+        ? encodeCursor(lastCreateTime, last.id)
         : null;
 
     return NextResponse.json({ rows, nextCursor });
