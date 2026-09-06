@@ -28,7 +28,7 @@ const budgetLabels = new Map(amountItems.map((a) => [a.key, a.label]));
 const dash = (value?: string) => (value ? value : "—");
 
 export default function AdminBuyerProfilesPage() {
-  const { idToken } = useAdminAuth();
+  const { user, idToken } = useAdminAuth();
   const [rows, setRows] = useState<BuyerProfileRow[]>([]);
   const [cursor, setCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -60,10 +60,14 @@ export default function AdminBuyerProfilesPage() {
     [idToken, api],
   );
 
+  // Key the initial load on the (stable) user id, NOT idToken. idToken rotates
+  // on every hourly token refresh (onIdTokenChanged), and re-running fetchPage(null)
+  // replaces rows/cursor — which would snap the admin back to page 1 mid-review.
+  // Refreshed tokens still reach requests through fetchPage's idToken closure.
   useEffect(() => {
-    fetchPage(null);
+    if (user) fetchPage(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [idToken]);
+  }, [user?.uid]);
 
   const columns: ColumnsType<BuyerProfileRow> = [
     { title: "稱呼", dataIndex: "userName", key: "userName", render: dash },
