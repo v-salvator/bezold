@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getStores } from "@/firebase/clientUtils";
 import { updateStoreStatus } from "@/firebase/clientUtils";
 import {
@@ -20,6 +20,7 @@ import type { TableProps } from "antd";
 import type { Store } from "@/types";
 import { STORE_STATUS, type StoreStatus } from "@/types";
 import { formatPriceDisplay } from "@/utils/store";
+import { authedFetch } from "@/lib/authedFetch";
 import { useAdminAuth } from "@/hooks";
 
 const STATUS_COLOR: Record<StoreStatus, string> = {
@@ -43,6 +44,9 @@ export default function List() {
   const [stores, setStores] = useState<Store[]>([]);
   const [updating, setUpdating] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  // guards against opening a second confirm for the same row (e.g. a same-tick
+  // double-click, which the modal mask cannot block until it has mounted).
+  const confirmOpenRef = useRef(false);
   const [search, setSearch] = useState("");
   const [dateRange, setDateRange] = useState<
     [Dayjs | null, Dayjs | null] | null
@@ -89,6 +93,8 @@ export default function List() {
   };
 
   const handleDelete = (store: Store) => {
+    if (confirmOpenRef.current) return;
+    confirmOpenRef.current = true;
     modal.confirm({
       title: "刪除商店",
       okText: "刪除",
@@ -100,24 +106,29 @@ export default function List() {
           」嗎？此操作將永久移除商店與其圖片，無法復原。
         </span>
       ),
+      onCancel: () => {
+        confirmOpenRef.current = false;
+      },
       onOk: async () => {
         if (!idToken) {
           messageApi.error("尚未取得管理員權限，請稍後再試");
+          confirmOpenRef.current = false;
           return Promise.reject();
         }
         setDeleting(store.id);
         try {
-          const res = await fetch(`/api/stores/${store.id}`, {
+          const res = await authedFetch(idToken, `/api/stores/${store.id}`, {
             method: "DELETE",
-            headers: { Authorization: `Bearer ${idToken}` },
           });
           if (!res.ok) throw new Error("Failed to delete store");
           setStores((previous) =>
             previous.filter((item) => item.id !== store.id),
           );
           messageApi.success("商店已刪除");
+          confirmOpenRef.current = false;
         } catch {
           messageApi.error("刪除失敗，請稍後再試");
+          // keep the modal open so the admin can retry; ref stays true.
           return Promise.reject();
         } finally {
           setDeleting(null);
@@ -247,7 +258,6 @@ export default function List() {
             danger
             type="primary"
             loading={deleting === record.id}
-            disabled={deleting === record.id}
             onClick={() => handleDelete(record)}
           >
             刪除

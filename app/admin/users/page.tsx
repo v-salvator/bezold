@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { Table, Tag, Switch, notification, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
+import { authedFetch } from "@/lib/authedFetch";
 import { useAdminAuth } from "@/hooks";
 
 type UserRow = {
@@ -21,9 +22,7 @@ export default function AdminUsersPage() {
     if (!idToken) return;
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/users", {
-        headers: { Authorization: `Bearer ${idToken}` },
-      });
+      const res = await authedFetch(idToken, "/api/admin/users");
       if (!res.ok) throw new Error();
       setUsers(await res.json());
     } catch {
@@ -37,12 +36,9 @@ export default function AdminUsersPage() {
     if (!idToken) return;
     setTogglingUid(uid);
     try {
-      const res = await fetch("/api/admin/set-claim", {
+      const res = await authedFetch(idToken, "/api/admin/set-claim", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ uid, admin: grant }),
       });
       if (!res.ok) throw new Error();
