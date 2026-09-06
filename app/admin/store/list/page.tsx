@@ -9,6 +9,8 @@ import {
   Button as AntButton,
   Input,
   DatePicker,
+  Modal,
+  message,
 } from "antd";
 import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
@@ -18,6 +20,7 @@ import type { TableProps } from "antd";
 import type { Store } from "@/types";
 import { STORE_STATUS, type StoreStatus } from "@/types";
 import { formatPriceDisplay } from "@/utils/store";
+import { useAdminAuth } from "@/hooks";
 
 const STATUS_COLOR: Record<StoreStatus, string> = {
   pending: "orange",
@@ -34,8 +37,12 @@ const STATUS_LABEL: Record<StoreStatus, string> = {
 };
 
 export default function List() {
+  const { idToken } = useAdminAuth();
+  const [modal, modalHolder] = Modal.useModal();
+  const [messageApi, messageHolder] = message.useMessage();
   const [stores, setStores] = useState<Store[]>([]);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [dateRange, setDateRange] = useState<
     [Dayjs | null, Dayjs | null] | null
@@ -79,6 +86,44 @@ export default function List() {
     } finally {
       setUpdating(null);
     }
+  };
+
+  const handleDelete = (store: Store) => {
+    modal.confirm({
+      title: "刪除商店",
+      okText: "刪除",
+      okType: "danger",
+      cancelText: "取消",
+      content: (
+        <span>
+          確定要刪除「{store.storeName}
+          」嗎？此操作將永久移除商店與其圖片，無法復原。
+        </span>
+      ),
+      onOk: async () => {
+        if (!idToken) {
+          messageApi.error("尚未取得管理員權限，請稍後再試");
+          return Promise.reject();
+        }
+        setDeleting(store.id);
+        try {
+          const res = await fetch(`/api/stores/${store.id}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${idToken}` },
+          });
+          if (!res.ok) throw new Error("Failed to delete store");
+          setStores((previous) =>
+            previous.filter((item) => item.id !== store.id),
+          );
+          messageApi.success("商店已刪除");
+        } catch {
+          messageApi.error("刪除失敗，請稍後再試");
+          return Promise.reject();
+        } finally {
+          setDeleting(null);
+        }
+      },
+    });
   };
 
   const columns: TableProps<Store>["columns"] = [
@@ -197,6 +242,16 @@ export default function List() {
           >
             已頂讓
           </AntButton>
+          <AntButton
+            size="small"
+            danger
+            type="primary"
+            loading={deleting === record.id}
+            disabled={deleting === record.id}
+            onClick={() => handleDelete(record)}
+          >
+            刪除
+          </AntButton>
         </Space>
       ),
     },
@@ -204,6 +259,8 @@ export default function List() {
 
   return (
     <div className="p-[16px]">
+      {modalHolder}
+      {messageHolder}
       <Space className="mb-[16px]" wrap>
         <Input.Search
           allowClear
