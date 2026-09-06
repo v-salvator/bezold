@@ -203,6 +203,13 @@
   color: var(--accent);
 }
 
+.hintNote {
+  margin-left: 6px;
+  font-weight: 400;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
 .divider {
   height: 1px;
   background: var(--paper-3);

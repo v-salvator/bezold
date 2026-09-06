@@ -3,6 +3,7 @@ import type { User as FirebaseUser } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db, trackEvent } from "@/firebase/client";
 import { COLLECTIONS } from "@/firebase/constants";
+import { buyerProfileFields } from "@/lib/user/buyerProfile";
 import type { BuyerProfile } from "@/types/User";
 
 // * Shared account-creation logic used by BOTH the /signup page and the buyer
@@ -44,6 +45,10 @@ export interface SignupParams {
   name: string;
   email: string;
   password: string;
+  // Contact channels — written to the top-level user doc (same fields the sell
+  // form uses). Default to "" when the caller supplies none.
+  phone?: string;
+  lineId?: string;
   // Buyer-intent preferences, written as a nested `buyerProfile` map. Omitted
   // from the doc entirely when absent (the /signup page passes none) so
   // `buyerProfile == null` cleanly means "no buyer profile".
@@ -61,6 +66,8 @@ export async function signup({
   name,
   email,
   password,
+  phone = "",
+  lineId = "",
   buyerProfile,
   fromBuyerClub = false,
   source = "signup_page",
@@ -68,10 +75,11 @@ export async function signup({
   const { user } = await createUserWithEmailAndPassword(auth, email, password);
   await setDoc(doc(db, COLLECTIONS.USER, user.uid), {
     userName: name,
-    phone: "",
+    phone,
     email,
-    // Conditional spread avoids writing an empty map for plain signups.
-    ...(buyerProfile ? { buyerProfile } : {}),
+    lineId,
+    // Welds buyerProfile + hasBuyerProfile (or marks hasBuyerProfile:false).
+    ...buyerProfileFields(buyerProfile),
     fromBuyerClub,
     createTime: serverTimestamp(),
     updateTime: serverTimestamp(),

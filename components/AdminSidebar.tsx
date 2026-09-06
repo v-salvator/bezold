@@ -21,7 +21,10 @@ const items: MenuItem[] = [
     key: "user-management",
     label: "User Management",
     type: "group",
-    children: [{ key: "user-list", label: "User List" }],
+    children: [
+      { key: "user-list", label: "User List" },
+      { key: "buyer-profiles", label: "Buyer Profiles" },
+    ],
   },
 ];
 
@@ -42,6 +45,9 @@ export default function AdminSidebar() {
         break;
       case "user-list":
         router.push("/admin/users");
+        break;
+      case "buyer-profiles":
+        router.push("/admin/buyer-profiles");
         break;
     }
   };

@@ -71,7 +71,8 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
   const [category, setCategory] = useState("");
   const [budgetKey, setBudgetKey] = useState("");
   const [city, setCity] = useState("");
-  const [contact, setContact] = useState("");
+  const [phone, setPhone] = useState("");
+  const [lineId, setLineId] = useState("");
   const [terms, setTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -145,8 +146,12 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
       setError("密碼請至少使用 6 個字元");
       return;
     }
-    if (!category || !budgetKey || !city || !contact.trim()) {
-      setError("請完整填寫買家條件（類型、預算、地區、聯繫方式）");
+    if (!category || !budgetKey || !city) {
+      setError("請完整填寫買家條件（類型、預算、地區）");
+      return;
+    }
+    if (!phone.trim() && !lineId.trim()) {
+      setError("請至少填寫一種聯繫方式（電話或 LINE ID）");
       return;
     }
     if (!terms) {
@@ -160,13 +165,14 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
         name,
         email,
         password,
+        phone,
+        lineId,
         source: "buyer_club_popup",
         fromBuyerClub: true,
         buyerProfile: {
           category,
           city,
           budgetKey,
-          contact,
         },
       });
       // onAuthStateChanged fires with the new user → isLoggedIn flips true and
@@ -259,7 +265,7 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
           <h3 id="buyerClubTitle" className={styles.formTitle}>
             建立你的買家條件
           </h3>
-          <p className={styles.formSub}>填寫約 1 分鐘，全部欄位皆為必填。</p>
+          <p className={styles.formSub}>填寫約 1 分鐘，標示 * 為必填。</p>
 
           <form className={styles.form} onSubmit={handleSubmit}>
             <div className={styles.row}>
@@ -284,20 +290,19 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
               </div>
             </div>
 
-            <div className={styles.field}>
-              <span className={styles.fieldLabel}>
-                <RequiredLabel>預算範圍</RequiredLabel>
-              </span>
-              <Dropdown
-                label="預算"
-                options={amountOptions}
-                value={budgetKey}
-                onChange={setBudgetKey}
-                placeholder="請選擇預算範圍"
-              />
-            </div>
-
             <div className={styles.row}>
+              <div className={styles.field}>
+                <span className={styles.fieldLabel}>
+                  <RequiredLabel>預算範圍</RequiredLabel>
+                </span>
+                <Dropdown
+                  label="預算"
+                  options={amountOptions}
+                  value={budgetKey}
+                  onChange={setBudgetKey}
+                  placeholder="請選擇預算範圍"
+                />
+              </div>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>
                   <RequiredLabel>希望地區（縣市）</RequiredLabel>
@@ -310,13 +315,33 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
                   placeholder="請選擇"
                 />
               </div>
-              <FormField
-                id="bc-contact"
-                label={<RequiredLabel>聯繫方式</RequiredLabel>}
-                placeholder="Email、LINE ID 或手機"
-                value={contact}
-                onChange={(event) => setContact(event.target.value)}
-              />
+            </div>
+
+            <div>
+              <span className={styles.fieldLabel}>
+                <RequiredLabel>聯繫方式</RequiredLabel>
+                <span className={styles.hintNote}>
+                  電話與 LINE ID 至少填一項
+                </span>
+              </span>
+              <div className={styles.row}>
+                <FormField
+                  id="bc-phone"
+                  label="電話"
+                  type="text"
+                  placeholder="例：0912345678"
+                  autoComplete="tel"
+                  value={phone}
+                  onChange={(event) => setPhone(event.target.value)}
+                />
+                <FormField
+                  id="bc-line"
+                  label="LINE ID"
+                  placeholder="您的 LINE ID"
+                  value={lineId}
+                  onChange={(event) => setLineId(event.target.value)}
+                />
+              </div>
             </div>
 
             <div className={styles.divider} />

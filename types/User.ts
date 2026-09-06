@@ -9,7 +9,9 @@ export interface BuyerProfile {
   category: string; // STORE_CATEGORIES key
   city: string; // cityItems key
   budgetKey: string; // amountItems key
-  contact: string; // free-text: Email / LINE ID / phone
+  // Contact is NOT here — a buyer's phone/lineId live on the top-level User
+  // fields (same as the sell form's contact section), and email is the account
+  // email. This map holds preferences only.
 }
 
 export interface User {
@@ -21,6 +23,11 @@ export interface User {
   remark?: string;
   // Absent for users who never filled the buyer club form.
   buyerProfile?: BuyerProfile;
+  // Denormalized "buyerProfile is present" flag, so admin can query it (Firestore
+  // can't cheaply test map existence). MUST be written in the same write as
+  // buyerProfile — always via writeBuyerProfile()/buyerProfileFields() in
+  // lib/user/buyerProfile.ts, never by hand, or the two desync.
+  hasBuyerProfile?: boolean;
   // Signup-source attribution — kept flat, it's an account fact not a preference.
   fromBuyerClub?: boolean;
   createTime: Date;
@@ -36,6 +43,7 @@ export interface UserDoc {
   lineId?: string;
   remark?: string;
   buyerProfile?: BuyerProfile;
+  hasBuyerProfile?: boolean;
   fromBuyerClub?: boolean;
   createTime: Timestamp;
   updateTime: Timestamp;
