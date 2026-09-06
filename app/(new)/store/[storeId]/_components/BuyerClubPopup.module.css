@@ -1,0 +1,470 @@
+/* ---- Backdrop + modal shell ---------------------------------------------- */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+  background: color-mix(in srgb, var(--ink) 62%, transparent);
+  backdrop-filter: blur(3px);
+  animation: fade 0.2s ease;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* No overflow:hidden here — it would clip the Dropdown menus. Corners are
+   rounded on the panels themselves instead. */
+.modal {
+  position: relative;
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  width: 100%;
+  max-width: 960px;
+  margin: auto;
+  border-radius: 18px;
+  box-shadow: 0 24px 60px color-mix(in srgb, var(--ink) 45%, transparent);
+  animation: pop 0.22s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.closeBtn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 7px;
+  background: var(--accent);
+  color: var(--paper);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.closeBtn:hover {
+  background: color-mix(in srgb, var(--accent) 82%, var(--ink));
+}
+
+/* ---- Left aside ---------------------------------------------------------- */
+
+.aside {
+  position: relative;
+  overflow: hidden;
+  padding: 40px 36px;
+  border-radius: 18px 0 0 18px;
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.brand {
+  margin: 0 0 28px;
+  font-family: var(--brand);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: var(--accent-3);
+}
+
+.asideTitle {
+  margin: 0 0 18px;
+  font-family: var(--display);
+  font-size: 2.15rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--paper);
+}
+
+.asideLede {
+  margin: 0 0 28px;
+  font-family: var(--hand);
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: color-mix(in srgb, var(--paper) 78%, transparent);
+}
+
+.benefits {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.benefits li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--hand);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.benefitNum {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border: 1.5px solid var(--accent-3);
+  border-radius: 50%;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--accent-3);
+}
+
+.watermark {
+  position: absolute;
+  right: -18px;
+  bottom: -46px;
+  font-family: var(--brand);
+  font-size: 15rem;
+  line-height: 1;
+  color: color-mix(in srgb, var(--paper) 6%, transparent);
+  pointer-events: none;
+}
+
+/* ---- Right form panel ---------------------------------------------------- */
+
+.formPanel {
+  position: relative;
+  padding: 40px 36px;
+  border-radius: 0 18px 18px 0;
+  background: var(--paper);
+}
+
+.formTitle {
+  margin: 0 0 4px;
+  font-family: var(--display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.formSub {
+  margin: 0 0 22px;
+  font-family: var(--hand);
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldLabel {
+  font-family: var(--hand);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+.required {
+  color: var(--accent);
+}
+
+.divider {
+  height: 1px;
+  background: var(--paper-3);
+  margin: 2px 0;
+}
+
+.eyeBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.eyeBtn:hover {
+  color: var(--ink);
+}
+
+.strengthRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: -8px;
+}
+
+.strengthBar {
+  display: flex;
+  flex: 1;
+  gap: 4px;
+}
+
+.strengthSegment {
+  flex: 1;
+  height: 4px;
+  background: var(--paper-3);
+  border-radius: 2px;
+  transition: background 0.2s;
+}
+
+.strengthLabel {
+  font-family: var(--hand);
+  font-size: 0.75rem;
+  font-weight: 700;
+  min-width: 2rem;
+  text-align: right;
+  transition: color 0.2s;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--hand);
+  font-size: 0.82rem;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.checkbox {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.termsLink {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.errorMsg {
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--accent);
+  font-family: var(--hand);
+  font-size: 0.82rem;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.submit {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--paper);
+  font-family: var(--hand);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    transform 0.1s;
+}
+
+.submit:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 88%, var(--ink));
+}
+
+.submit:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.loginHint {
+  margin: 0;
+  font-family: var(--hand);
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.loginLink {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.loginLink:hover {
+  text-decoration: underline;
+}
+
+/* ---- Loading overlay ----------------------------------------------------- */
+
+.loadingOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  border-radius: 0 18px 18px 0;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: blur(2px);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--paper-3);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.loadingText {
+  margin: 0;
+  font-family: var(--hand);
+  font-size: 0.9rem;
+  color: var(--ink-2);
+}
+
+/* ---- Floating action button (dismissed state) ---------------------------- */
+
+.fab {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px 10px 18px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--accent-3);
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--ink) 30%, transparent);
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+  animation: fabIn 0.3s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+@keyframes fabIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px color-mix(in srgb, var(--ink) 38%, transparent);
+}
+
+.fabText {
+  font-family: var(--hand);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.fabBadge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+  font-family: var(--brand);
+  font-size: 1.4rem;
+  color: var(--ink);
+}
+
+/* ---- Responsive ---------------------------------------------------------- */
+
+@media (max-width: 720px) {
+  .modal {
+    grid-template-columns: 1fr;
+    max-width: 460px;
+  }
+
+  .aside {
+    display: none;
+  }
+
+  .formPanel {
+    border-radius: 18px;
+    padding: 44px 22px 28px;
+  }
+
+  .loadingOverlay {
+    border-radius: 18px;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+  }
+
+  .fabText {
+    display: none;
+  }
+
+  .fab {
+    padding: 10px;
+  }
+}

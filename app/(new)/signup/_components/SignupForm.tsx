@@ -3,44 +3,19 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { auth, db, trackEvent } from "@/firebase/client";
-import { COLLECTIONS } from "@/firebase/constants";
 import Button from "@/components/refactored/Button";
 import Card from "@/components/refactored/Card";
 import FormField from "@/components/refactored/FormField";
 import EyeIcon from "@/app/(new)/_components/EyeIcon";
+import {
+  signup,
+  AUTH_ERRORS,
+  getStrength,
+  isValidEmail,
+  strengthColors,
+  strengthLabels,
+} from "@/lib/auth/signup";
 import styles from "./SignupForm.module.css";
-
-const AUTH_ERRORS: Record<string, string> = {
-  "auth/email-already-in-use": "此電子信箱已被註冊",
-  "auth/invalid-email": "電子信箱格式不正確",
-  "auth/weak-password": "密碼強度不足，請至少使用 6 個字元",
-  "auth/too-many-requests": "嘗試次數過多，請稍後再試",
-};
-
-function getStrength(password: string): number {
-  let score = 0;
-  if (password.length >= 8) score++;
-  if (/[A-Z]/.test(password)) score++;
-  if (/[0-9]/.test(password)) score++;
-  if (/[^A-Za-z0-9]/.test(password)) score++;
-  return score;
-}
-
-function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-const strengthColors = [
-  "",
-  "var(--accent)",
-  "var(--accent-3)",
-  "var(--accent-3)",
-  "var(--accent-2)",
-];
-const strengthLabels = ["", "弱", "普通", "良好", "強"];
 
 export default function SignupForm() {
   const router = useRouter();
@@ -68,19 +43,7 @@ export default function SignupForm() {
     setError(null);
     setLoading(true);
     try {
-      const { user } = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password,
-      );
-      await setDoc(doc(db, COLLECTIONS.USER, user.uid), {
-        userName: name,
-        phone: "",
-        email,
-        createTime: serverTimestamp(),
-        updateTime: serverTimestamp(),
-      });
-      trackEvent("sign_up", { method: "email" });
+      await signup({ name, email, password });
       router.push("/store-list");
     } catch (err) {
       const code = (err as { code?: string }).code ?? "";
