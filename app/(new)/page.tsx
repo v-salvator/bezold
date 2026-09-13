@@ -3,7 +3,8 @@ import styles from "./page.module.css";
 import LaunchBanner from "./_components/LaunchBanner";
 import SiteNav from "./_components/SiteNav";
 import HeroSplit from "./_components/HeroSplit";
-import Newsletter from "./_components/Newsletter";
+// import Newsletter from "./_components/Newsletter";
+import AccelerationPromo from "./_components/AccelerationPromo";
 import TrustBar from "./_components/TrustBar";
 import FeaturedListings from "./_components/FeaturedListings";
 import Categories from "./_components/Categories";
@@ -47,15 +48,16 @@ export default async function NewHomePage() {
 
   return (
     <>
-      {/* Warm the beehiiv connection and start downloading the subscribe-form
+      {/* Newsletter section unmounted — beehiiv preconnect/preload disabled with it.
+          Warm the beehiiv connection and start downloading the subscribe-form
           loader during initial HTML parse, so it's cached by the time the
-          Newsletter section mounts it — cuts the first-load lag. */}
+          Newsletter section mounts it — cuts the first-load lag.
       <link rel="preconnect" href="https://subscribe-forms.beehiiv.com" />
       <link
         rel="preload"
         as="script"
         href="https://subscribe-forms.beehiiv.com/v3/loader.js"
-      />
+      /> */}
       <JsonLd
         data={{
           "@context": "https://schema.org",
@@ -90,7 +92,8 @@ export default async function NewHomePage() {
       <SiteNav />
       <div className={styles.frame}>
         <HeroSplit />
-        <Newsletter />
+        {/* <Newsletter /> */}
+        <AccelerationPromo />
         {/* <TrustBar /> */}
         <FeaturedListings
           stores={highlightedStores}
