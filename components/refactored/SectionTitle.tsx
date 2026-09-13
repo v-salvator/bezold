@@ -1,5 +1,6 @@
 import styles from "./SectionTitle.module.css";
 import cn from "classnames";
+import TrackedLink from "./TrackedLink";
 
 export default function SectionTitle({
   num,
@@ -13,8 +14,16 @@ export default function SectionTitle({
   num: string;
   title: string;
   sub?: string;
-  /** Optional inline link rendered right after `sub` (e.g. "如何成為編輯精選？→"). */
-  subLink?: { label: string; href: string };
+  /**
+   * Optional inline link rendered right after `sub` (e.g. "如何成為編輯精選？→").
+   * Pass `event` to fire a GA event on click.
+   */
+  subLink?: {
+    label: string;
+    href: string;
+    event?: string;
+    eventParams?: Record<string, unknown>;
+  };
   more?: string;
   moreHref?: string;
   dark?: boolean;
@@ -27,11 +36,21 @@ export default function SectionTitle({
         {sub && (
           <span className={cn(styles.sub, dark && styles.subDark)}>{sub}</span>
         )}
-        {subLink && (
-          <a className={styles.subLink} href={subLink.href}>
-            {subLink.label}
-          </a>
-        )}
+        {subLink &&
+          (subLink.event ? (
+            <TrackedLink
+              className={styles.subLink}
+              href={subLink.href}
+              event={subLink.event}
+              params={subLink.eventParams}
+            >
+              {subLink.label}
+            </TrackedLink>
+          ) : (
+            <a className={styles.subLink} href={subLink.href}>
+              {subLink.label}
+            </a>
+          ))}
       </div>
       {more && (
         <a className={styles.more} href={moreHref}>

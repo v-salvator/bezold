@@ -1,4 +1,5 @@
 import Section from "../../../_components/Section";
+import TrackedLink from "@/components/refactored/TrackedLink";
 import styles from "./EpExposure.module.css";
 
 export default function EpExposure() {
@@ -24,14 +25,15 @@ export default function EpExposure() {
           <p className={styles.goldNote}>
             可連續展示 14 天，讓更多正在找店的買家看見您的案件。
           </p>
-          <a
+          <TrackedLink
             href="https://line.me/ti/p/~bezoldtw"
             target="_blank"
             rel="noopener noreferrer"
             className={styles.goldBtn}
+            event="editor_pick_extend_click"
           >
             了解延長精選 →
-          </a>
+          </TrackedLink>
         </div>
       </div>
     </Section>

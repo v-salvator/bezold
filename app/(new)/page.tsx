@@ -97,6 +97,8 @@ export default async function NewHomePage() {
           subLink={{
             label: "如何成為編輯精選？→",
             href: "/policy/editor-pick",
+            event: "editor_pick_guide_click",
+            eventParams: { location: "home_featured" },
           }}
           moreHref="/store-list?tag=RECOMMENDED"
         />

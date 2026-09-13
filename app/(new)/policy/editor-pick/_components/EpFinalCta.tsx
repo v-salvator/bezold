@@ -1,5 +1,5 @@
-import Link from "next/link";
 import Section from "../../../_components/Section";
+import TrackedLink from "@/components/refactored/TrackedLink";
 import styles from "./EpFinalCta.module.css";
 
 export default function EpFinalCta() {
@@ -12,9 +12,14 @@ export default function EpFinalCta() {
             立即完善刊登資料，讓您的店被更多適合的買家看見！
           </h2>
         </div>
-        <Link href="/my-listings" className={styles.btn}>
+        <TrackedLink
+          href="/my-listings"
+          className={styles.btn}
+          event="editor_pick_cta_click"
+          params={{ cta_location: "final" }}
+        >
           前往我的刊登 →
-        </Link>
+        </TrackedLink>
       </div>
     </Section>
   );

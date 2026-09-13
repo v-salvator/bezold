@@ -11,7 +11,12 @@ type Props = {
   num?: string;
   title?: string;
   sub?: string;
-  subLink?: { label: string; href: string };
+  subLink?: {
+    label: string;
+    href: string;
+    event?: string;
+    eventParams?: Record<string, unknown>;
+  };
   more?: string;
   moreHref?: string;
   /** Which listing status to show; defaults to approved (buyable) listings. */

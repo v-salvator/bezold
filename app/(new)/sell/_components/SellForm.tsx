@@ -169,7 +169,15 @@ export default function SellForm() {
             <p className={styles.featuredText}>
               上傳至少 5 張清晰照片、完整填寫資料與聯絡方式，即有機會獲選。
             </p>
-            <a href="/policy/editor-pick" className={styles.featuredLink}>
+            <a
+              href="/policy/editor-pick"
+              className={styles.featuredLink}
+              onClick={() =>
+                trackEvent("editor_pick_guide_click", {
+                  location: "sell_form",
+                })
+              }
+            >
               查看完整入選條件 →
             </a>
           </div>
