@@ -7,7 +7,7 @@ export const exampleStore: Store = {
   city: "台北",
   district: "大安",
   category: "餐飲",
-  tags: ["HOT", "RECOMMENDED"],
+  tags: ["RECOMMENDED"],
   price: 1200000,
   currency: "TWD",
   areaPing: 35,

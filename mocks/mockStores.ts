@@ -5,7 +5,7 @@ const mockStores = [
     id: "1q43mSYauZchHnemuVL5",
     storeName: "Ainyx",
     updateTime: "2023-11-26T08:29:54.502Z",
-    tags: ["cheap", "hot"],
+    tags: ["cheap"],
     description:
       "In quis justo. Maecenas rhoncus aliquam lacus. Morbi quis tortor id nulla ultrices aliquet.\n\nMaecenas leo odio, condimentum id, luctus nec, molestie sed, justo. Pellentesque viverra pede ac diam. Cras pellentesque volutpat dui.",
     currency: "TWD",
@@ -15,7 +15,7 @@ const mockStores = [
   },
   {
     id: "3TU0D3BqKmZ3Sp7THVla",
-    tags: ["hot"],
+    tags: [],
     location: "6802 Trailsway Park",
     createTime: "2023-11-26T08:29:54.260Z",
     description:
@@ -35,7 +35,7 @@ const mockStores = [
     currency: "TWD",
     description:
       "Donec diam neque, vestibulum eget, vulputate ut, ultrices vel, augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Donec pharetra, magna vestibulum aliquet ultrices, erat tortor sollicitudin mi, sit amet lobortis sapien sapien non mi. Integer ac neque.\n\nDuis bibendum. Morbi non quam nec dui luctus rutrum. Nulla tellus.\n\nIn sagittis dui vel nisl. Duis ac nibh. Fusce lacus purus, aliquet at, feugiat non, pretium quis, lectus.",
-    tags: ["hot"],
+    tags: [],
   },
   {
     id: "Cl99nLEqWRyX7A929j5b",
@@ -58,7 +58,7 @@ const mockStores = [
     createTime: "2023-11-26T08:29:54.616Z",
     description:
       "Proin leo odio, porttitor id, consequat in, consequat ut, nulla. Sed accumsan felis. Ut at dolor quis odio consequat varius.\n\nInteger ac leo. Pellentesque ultrices mattis odio. Donec vitae nisi.\n\nNam ultrices, libero non mattis pulvinar, nulla pede ullamcorper augue, a suscipit nulla elit ac nulla. Sed vel enim sit amet nunc viverra dapibus. Nulla suscipit ligula in lacus.",
-    tags: ["hot"],
+    tags: [],
     price: 514958,
   },
   {
@@ -136,7 +136,7 @@ const mockStores = [
   {
     id: "VqP6XjErcfz6z7KUd5Ux",
     location: "07 Express Pass",
-    tags: ["hot"],
+    tags: [],
     storeName: "Zoonoodle",
     currency: "TWD",
     price: 789556,
