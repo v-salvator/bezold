@@ -10,10 +10,6 @@ export const STORE_TAGS = [
     key: STORE_TAG.EMERGENCY,
   },
   {
-    label: "熱門",
-    key: STORE_TAG.HOT,
-  },
-  {
     label: "精選",
     key: STORE_TAG.RECOMMENDED,
   },

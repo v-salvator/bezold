@@ -1,17 +1,10 @@
 import * as React from "react";
-import {
-  FireFilled,
-  LikeFilled,
-  AlertFilled,
-  ClockCircleFilled,
-} from "@ant-design/icons";
+import { LikeFilled, AlertFilled, ClockCircleFilled } from "@ant-design/icons";
 
 import { STORE_TAG } from "@/types";
 
 const TagIcon = ({ tag }: { tag: string }) => {
   switch (tag) {
-    case STORE_TAG.HOT:
-      return <FireFilled style={{ color: "rgb(245 158 11)" }} />;
     case STORE_TAG.EMERGENCY:
       return <ClockCircleFilled style={{ color: "rgb(139 92 246)" }} />;
     case STORE_TAG.CHEAP:

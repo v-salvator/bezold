@@ -7,7 +7,6 @@ export const TAG_DISPLAY: Record<
   { label: string; variant: PillVariant }
 > = {
   [STORE_TAG.EMERGENCY]: { label: "急售", variant: "warm" },
-  [STORE_TAG.HOT]: { label: "熱門", variant: "default" },
   [STORE_TAG.CHEAP]: { label: "划算", variant: "default" },
   [STORE_TAG.RECOMMENDED]: { label: "精選", variant: "sage" },
 };
