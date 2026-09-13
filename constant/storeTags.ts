@@ -13,4 +13,8 @@ export const STORE_TAGS = [
     label: "精選",
     key: STORE_TAG.RECOMMENDED,
   },
+  {
+    label: "資料完整",
+    key: STORE_TAG.DETAILED_DATA,
+  },
 ];

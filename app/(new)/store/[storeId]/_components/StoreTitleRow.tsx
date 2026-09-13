@@ -9,6 +9,7 @@ const TAG_VARIANT = {
   [STORE_TAG.EMERGENCY]: "warm",
   [STORE_TAG.RECOMMENDED]: "sage",
   [STORE_TAG.CHEAP]: "mus",
+  [STORE_TAG.DETAILED_DATA]: "solid",
 } as const;
 
 export default function StoreTitleRow({ store }: { store: Store }) {
@@ -33,6 +34,7 @@ export default function StoreTitleRow({ store }: { store: Store }) {
               {tag === STORE_TAG.EMERGENCY && "急售"}
               {tag === STORE_TAG.RECOMMENDED && "推薦"}
               {tag === STORE_TAG.CHEAP && "優惠"}
+              {tag === STORE_TAG.DETAILED_DATA && "資料完整"}
             </Pill>
           ))}
           {category && <Pill>{category}</Pill>}
