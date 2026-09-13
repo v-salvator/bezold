@@ -19,6 +19,7 @@ import Link from "next/link";
 import type { TableProps } from "antd";
 import type { Store } from "@/types";
 import { STORE_STATUS, type StoreStatus } from "@/types";
+import { STORE_TAG, type StoreTag } from "@/types";
 import { formatPriceDisplay } from "@/utils/store";
 import { authedFetch } from "@/lib/authedFetch";
 import { useAdminAuth } from "@/hooks";
@@ -35,6 +36,15 @@ const STATUS_LABEL: Record<StoreStatus, string> = {
   approved: "已上架",
   rejected: "已拒絕",
   sold: "已頂讓",
+};
+
+// Explicit per-tag colours so each tag reads distinctly (the old length-based
+// heuristic collapsed RECOMMENDED and DETAILED_DATA into the same blue).
+const TAG_COLOR: Record<StoreTag, string> = {
+  [STORE_TAG.CHEAP]: "green",
+  [STORE_TAG.EMERGENCY]: "volcano",
+  [STORE_TAG.RECOMMENDED]: "geekblue",
+  [STORE_TAG.DETAILED_DATA]: "purple",
 };
 
 export default function List() {
@@ -170,14 +180,11 @@ export default function List() {
       dataIndex: "tags",
       render: (_, { tags }) => (
         <>
-          {tags?.map((tag) => {
-            const color = tag.length > 5 ? "geekblue" : "green";
-            return (
-              <Tag color={color} key={tag}>
-                {tag.toUpperCase()}
-              </Tag>
-            );
-          })}
+          {tags?.map((tag) => (
+            <Tag color={TAG_COLOR[tag] ?? "default"} key={tag}>
+              {tag.toUpperCase()}
+            </Tag>
+          ))}
         </>
       ),
     },
