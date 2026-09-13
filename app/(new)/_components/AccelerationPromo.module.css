@@ -1,0 +1,87 @@
+.promo {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: center;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--ink-2);
+  text-transform: uppercase;
+}
+.eyebrowLead {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.headline {
+  font-family: var(--display);
+  font-size: 40px;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+}
+.accent {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.lede {
+  font-family: var(--hand);
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  margin: 0;
+  max-width: 30em;
+}
+
+.link {
+  font-family: var(--hand);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-underline-offset: 4px;
+  transition: color 0.12s ease;
+}
+.link:hover {
+  color: var(--accent);
+}
+
+.art {
+  align-self: end;
+}
+.artImg {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+@media (min-width: 820px) {
+  .promo {
+    grid-template-columns: 1fr 1.05fr;
+    gap: 32px;
+  }
+  .headline {
+    font-size: 52px;
+  }
+  /* Let the illustration bleed to the section's right edge. */
+  .art {
+    margin-right: -28px;
+  }
+}
