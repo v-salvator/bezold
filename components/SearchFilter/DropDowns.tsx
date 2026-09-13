@@ -2,8 +2,6 @@
 import * as React from "react";
 import { getTwCities, getTwDistricts } from "@/utils";
 import { STORE_CATEGORIES } from "@/constant/storeType";
-import { STORE_TAGS } from "@/constant/storeTags";
-import TagIcon from "@/components/TagIcon";
 
 export type DropDownItem<T = undefined> = {
   label: string | React.ReactNode;
@@ -28,26 +26,6 @@ export const districtItems = (city?: string) => {
     };
   });
 };
-
-export const tagItems = [
-  {
-    label: "所有",
-    key: "all",
-  },
-  ...STORE_TAGS,
-].map((tag) => {
-  if (tag.key === "all") return tag;
-  return {
-    ...tag,
-    label: (
-      <>
-        <TagIcon tag={tag.key}></TagIcon>
-        <span className="ml-[4px]">{tag.label}</span>
-      </>
-    ),
-    key: tag.key,
-  };
-});
 
 export const typeItems = [
   {
