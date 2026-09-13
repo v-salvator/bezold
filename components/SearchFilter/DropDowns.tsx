@@ -1,7 +1,6 @@
 "use client";
 import * as React from "react";
-import { getTwCities, getTwDistricts } from "@/utils";
-import { STORE_CATEGORIES } from "@/constant/storeType";
+import { getTwCities } from "@/utils";
 
 export type DropDownItem<T = undefined> = {
   label: string | React.ReactNode;
@@ -15,25 +14,6 @@ export const cityItems = getTwCities().map((cityName) => {
     key: cityName,
   };
 });
-
-export const districtItems = (city?: string) => {
-  if (!city) return [];
-  return getTwDistricts(city).map((district) => {
-    return {
-      label: district.name,
-      key: district.name,
-      value: district.zip,
-    };
-  });
-};
-
-export const typeItems = [
-  {
-    label: "所有",
-    key: "all",
-  },
-  ...STORE_CATEGORIES,
-];
 
 export const amountItems = [
   {
