@@ -94,6 +94,10 @@ export default async function NewHomePage() {
         {/* <TrustBar /> */}
         <FeaturedListings
           stores={highlightedStores}
+          subLink={{
+            label: "如何成為編輯精選？→",
+            href: "/policy/editor-pick",
+          }}
           moreHref="/store-list?tag=RECOMMENDED"
         />
         <FeaturedListings

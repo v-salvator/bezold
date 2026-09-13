@@ -1,0 +1,36 @@
+.wrap {
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: center;
+  padding: 24px 0;
+  position: relative;
+}
+.quote {
+  font-family: var(--display);
+  font-size: clamp(24px, 4vw, 34px);
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--ink);
+  margin: 0;
+}
+.markTop,
+.markBottom {
+  display: block;
+  font-family: var(--display);
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 64px;
+  line-height: 0.4;
+}
+.markTop {
+  margin-bottom: 20px;
+}
+.markBottom {
+  margin-top: 16px;
+}
+.cite {
+  font-family: var(--hand);
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 18px;
+}

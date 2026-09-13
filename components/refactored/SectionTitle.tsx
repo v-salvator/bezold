@@ -5,6 +5,7 @@ export default function SectionTitle({
   num,
   title,
   sub,
+  subLink,
   more,
   moreHref,
   dark = false,
@@ -12,6 +13,8 @@ export default function SectionTitle({
   num: string;
   title: string;
   sub?: string;
+  /** Optional inline link rendered right after `sub` (e.g. "如何成為編輯精選？→"). */
+  subLink?: { label: string; href: string };
   more?: string;
   moreHref?: string;
   dark?: boolean;
@@ -23,6 +26,11 @@ export default function SectionTitle({
         <h3 className={styles.h}>{title}</h3>
         {sub && (
           <span className={cn(styles.sub, dark && styles.subDark)}>{sub}</span>
+        )}
+        {subLink && (
+          <a className={styles.subLink} href={subLink.href}>
+            {subLink.label}
+          </a>
         )}
       </div>
       {more && (

@@ -1,0 +1,35 @@
+.band {
+  background: var(--accent);
+  border-bottom: 1.5px solid var(--ink);
+  padding: 52px 28px 56px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 26px;
+}
+.title {
+  font-family: var(--display);
+  font-size: clamp(28px, 5vw, 44px);
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--paper);
+  margin: 0;
+}
+.btn {
+  font-family: var(--hand);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--accent-3);
+  border: 1.5px solid var(--ink);
+  border-radius: 3px;
+  padding: 12px 24px;
+  text-decoration: none;
+  box-shadow: 4px 4px 0 var(--ink);
+
+  &:hover {
+    transform: translate(1px, 1px);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+}
