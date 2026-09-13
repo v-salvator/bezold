@@ -11,6 +11,12 @@ type Props = {
   num?: string;
   title?: string;
   sub?: string;
+  subLink?: {
+    label: string;
+    href: string;
+    event?: string;
+    eventParams?: Record<string, unknown>;
+  };
   more?: string;
   moreHref?: string;
   /** Which listing status to show; defaults to approved (buyable) listings. */
@@ -22,6 +28,7 @@ export default function FeaturedListings({
   num = "01",
   title = "編輯精選",
   sub = "— 編輯挑選，含設備、地段佳 —",
+  subLink,
   more = "看全部 →",
   moreHref,
   status = STORE_STATUS.APPROVED,
@@ -39,6 +46,7 @@ export default function FeaturedListings({
         num={num}
         title={title}
         sub={sub}
+        subLink={subLink}
         more={more}
         moreHref={moreHref}
       />

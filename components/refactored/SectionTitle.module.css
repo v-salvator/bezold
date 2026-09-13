@@ -40,6 +40,18 @@
 .subDark {
   color: #cfc8b8;
 }
+.subLink {
+  font-family: var(--hand);
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: underline wavy var(--accent);
+  text-underline-offset: 3px;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
 .more {
   font-family: var(--hand);
   font-size: 13px;

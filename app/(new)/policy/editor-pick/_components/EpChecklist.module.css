@@ -1,0 +1,98 @@
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 32px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.headLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+}
+.title {
+  font-family: var(--display);
+  font-size: clamp(30px, 5vw, 44px);
+  font-weight: 700;
+  line-height: 1.05;
+  margin: 0;
+  color: var(--ink);
+}
+.note {
+  font-family: var(--hand);
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--muted);
+  max-width: 320px;
+  margin: 0;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.card {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 22px 22px 24px;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: 4px;
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.no {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--paper);
+  background: var(--accent);
+  padding: 6px 9px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cardTitle {
+  font-family: var(--display);
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+  color: var(--ink);
+}
+.desc {
+  font-family: var(--hand);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  margin: 0;
+}
+.example {
+  font-family: var(--note);
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--paper-3);
+  border-left: 3px solid var(--accent-3);
+  padding: 8px 12px;
+  margin-top: 4px;
+  align-self: flex-start;
+}
