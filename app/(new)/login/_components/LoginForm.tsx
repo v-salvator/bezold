@@ -9,6 +9,7 @@ import Button from "@/components/refactored/Button";
 import Card from "@/components/refactored/Card";
 import FormField from "@/components/refactored/FormField";
 import EyeIcon from "@/app/(new)/_components/EyeIcon";
+import ForgotPasswordPanel from "./ForgotPasswordPanel";
 import styles from "./LoginForm.module.css";
 
 const AUTH_ERRORS: Record<string, string> = {
@@ -24,6 +25,8 @@ export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get("redirect") ?? "/store-list";
+  const justReset = searchParams.get("reset") === "done";
+  const [mode, setMode] = useState<"login" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -45,8 +48,23 @@ export default function LoginForm() {
     }
   }
 
+  if (mode === "forgot") {
+    return (
+      <Card className="w-full max-w-[400px]">
+        <ForgotPasswordPanel
+          email={email}
+          onEmailChange={setEmail}
+          onBack={() => setMode("login")}
+        />
+      </Card>
+    );
+  }
+
   return (
     <Card className="w-full max-w-[400px]">
+      {justReset && (
+        <p className={styles.successMsg}>密碼已更新，請使用新密碼登入。</p>
+      )}
       <div className={styles.headingBlock}>
         <h1 className={styles.heading}>
           登入 <strong>Bezold</strong> 會員
@@ -85,6 +103,16 @@ export default function LoginForm() {
         <div className={styles.checkboxRow}>
           <input className={styles.checkbox} id="remember" type="checkbox" />
           <label htmlFor="remember">記住我</label>
+          <button
+            className={styles.forgotBtn}
+            type="button"
+            onClick={() => {
+              setError(null);
+              setMode("forgot");
+            }}
+          >
+            忘記密碼？
+          </button>
         </div>
         {error && <p className={styles.errorMsg}>{error}</p>}
         <Button type="submit" className="w-full mt-2" disabled={loading}>
