@@ -1,18 +1,11 @@
-import {
-  Phone,
-  MessageCircle,
-  Mail,
-  Ruler,
-  Banknote,
-  Package,
-} from "lucide-react";
-import Button from "@/components/refactored/Button";
+import { Ruler, Banknote, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type Store, STORE_STATUS } from "@/types";
 import { STORE_TAG } from "@/types/StoreTags";
 import { EQUIPMENT_LABEL } from "@/constant/storeEquipment";
 import { formatPriceDisplay, formatPriceParts } from "@/utils/store";
 import { isLatinChar } from "@/utils/string";
+import { SellerContactLines, SellerContactCta } from "./SellerContactGate";
 import styles from "./StorePriceCard.module.css";
 
 export default function StorePriceCard({
@@ -31,7 +24,6 @@ export default function StorePriceCard({
     monthlyRent,
     equipment,
   } = store;
-  const exampleTitle = "這是示範頁面，非真實物件";
   // * price 0 has no amount/unit split — reuse the shared label (面議 / 免頂讓金).
   const priceLabel =
     price === 0 ? formatPriceDisplay(price, priceNegotiable) : null;
@@ -40,6 +32,13 @@ export default function StorePriceCard({
   const isNegotiable = price > 0 && !!priceNegotiable;
   // * sold listings hide all seller contact info + CTAs — only the name shows.
   const isSold = store.status === STORE_STATUS.SOLD;
+  // * placeholders for logged-out visitors; SellerContactGate swaps in the real
+  // * values once the viewer is a signed-in member (see maskSellerContact()).
+  const maskedContact = {
+    phone: userInfo?.phone ?? "",
+    lineId: userInfo?.lineId ?? "",
+    email: userInfo?.email ?? "",
+  };
   const isUrgent = !isSold && tags?.includes(STORE_TAG.EMERGENCY);
 
   return (
@@ -73,26 +72,11 @@ export default function StorePriceCard({
             </div>
           </div>
           {!isSold && (
-            <div className={styles.sellerContact}>
-              {userInfo.phone && (
-                <span>
-                  <Phone size={12} strokeWidth={2} />
-                  {userInfo.phone}
-                </span>
-              )}
-              {userInfo.lineId && (
-                <span>
-                  <MessageCircle size={12} strokeWidth={2} />
-                  {userInfo.lineId}
-                </span>
-              )}
-              {userInfo.email && (
-                <span>
-                  <Mail size={12} strokeWidth={2} />
-                  {userInfo.email}
-                </span>
-              )}
-            </div>
+            <SellerContactLines
+              storeId={store.id}
+              masked={maskedContact}
+              isExample={isExample}
+            />
           )}
         </div>
       )}
@@ -159,43 +143,11 @@ export default function StorePriceCard({
       </div>
 
       {!isSold && (
-        <div className={styles.cta}>
-          {userInfo?.phone &&
-            (isExample ? (
-              <span title={exampleTitle} className={styles.ctaLink}>
-                <Button className={styles.btn} disabled>
-                  <Phone size={15} strokeWidth={2.5} />
-                  撥打賣家電話
-                </Button>
-              </span>
-            ) : (
-              <a href={`tel:${userInfo.phone}`} className={styles.ctaLink}>
-                <Button className={styles.btn}>
-                  <Phone size={15} strokeWidth={2.5} />
-                  撥打賣家電話
-                </Button>
-              </a>
-            ))}
-          {userInfo?.lineId &&
-            (isExample ? (
-              <span title={exampleTitle} className={styles.ctaLink}>
-                <Button variant="sage" className={styles.btn} disabled>
-                  <MessageCircle size={15} strokeWidth={2.5} />加 LINE 聯繫
-                </Button>
-              </span>
-            ) : (
-              <a
-                href={`https://line.me/ti/p/~${userInfo.lineId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.ctaLink}
-              >
-                <Button variant="sage" className={styles.btn}>
-                  <MessageCircle size={15} strokeWidth={2.5} />加 LINE 聯繫
-                </Button>
-              </a>
-            ))}
-        </div>
+        <SellerContactCta
+          storeId={store.id}
+          masked={maskedContact}
+          isExample={isExample}
+        />
       )}
 
       <div className={styles.trust}>

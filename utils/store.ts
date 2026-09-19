@@ -1,5 +1,5 @@
 import { type StoreCard } from "@/components/refactored/StoreCard";
-import { type Store } from "@/types";
+import { type Store, type SellerContact } from "@/types";
 import { STORE_CATEGORIES } from "@/constant/storeType";
 import { RIBBON_DISPLAY, RIBBON_PRIORITY } from "@/constant/storeDisplay";
 import { EQUIPMENT_LABEL } from "@/constant/storeEquipment";
@@ -93,3 +93,42 @@ export const genDefaultStore = () => {
     currency: "TWD",
   };
 };
+
+// * ── Seller contact masking ──────────────────────────────────────────────
+// * Real phone / LINE / email never reach a logged-out visitor's HTML. The
+// * public store payload carries placeholders of the same shape instead, so the
+// * blurred contact lines look right and the CTA still knows which channels the
+// * seller offers. An empty field stays empty — "no LINE" is not a secret.
+// * Signed-in members read the real values from GET /api/stores/[id]/contact.
+
+export const MASKED_CONTACT: SellerContact = {
+  phone: "0900-000-000",
+  lineId: "bezold_user",
+  email: "seller@example.com",
+};
+
+const EMPTY_CONTACT: SellerContact = { phone: "", lineId: "", email: "" };
+
+function replaceSellerContact(store: Store, values: SellerContact): Store {
+  if (!store.userInfo) return store;
+  const { phone, lineId, email } = store.userInfo;
+  return {
+    ...store,
+    userInfo: {
+      ...store.userInfo,
+      phone: phone ? values.phone : "",
+      lineId: lineId ? values.lineId : "",
+      email: email ? values.email : "",
+    },
+  };
+}
+
+/** For server-rendered pages — keeps placeholders so the gate can blur them. */
+export function maskSellerContact(store: Store): Store {
+  return replaceSellerContact(store, MASKED_CONTACT);
+}
+
+/** For API responses — blanks the fields outright, no fake values to mistake. */
+export function omitSellerContact(store: Store): Store {
+  return replaceSellerContact(store, EMPTY_CONTACT);
+}

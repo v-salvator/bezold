@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { mockStores } from "@/mocks";
 import { getStoreById } from "@/firebase/serverUtils";
+import { omitSellerContact } from "@/utils/store";
 import { db, bucket } from "@/firebase/server";
 import { COLLECTIONS } from "@/firebase/constants";
 import { verifyAdminToken } from "@/lib/verifyAdminToken";
@@ -24,7 +25,8 @@ export async function GET(request: Request, { params }: StoreProps) {
     );
   }
 
-  return Response.json({ data: storeInfo });
+  // Seller contact is members-only — see GET /api/stores/[storeId]/contact.
+  return Response.json({ data: omitSellerContact(storeInfo) });
 }
 
 export async function DELETE(req: NextRequest, { params }: StoreProps) {

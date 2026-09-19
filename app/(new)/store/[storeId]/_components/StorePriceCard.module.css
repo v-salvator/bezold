@@ -12,22 +12,6 @@
   font-family: var(--mono);
 }
 
-.sellerContact {
-  margin-left: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-
-  & span {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-family: var(--hand);
-    font-size: 16px;
-    color: var(--ink-2);
-  }
-}
-
 .seller {
   display: flex;
   align-items: center;
@@ -196,27 +180,6 @@
   white-space: nowrap;
 }
 
-/* ── CTA buttons ── */
-
-.cta {
-  display: flex;
-  flex-direction: row;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.ctaLink {
-  flex: 1;
-  display: block;
-  text-decoration: none;
-}
-
-.btn {
-  width: 100%;
-  font-size: 15px;
-  padding: 11px 12px;
-}
-
 .priceRowSold {
   display: flex;
   align-items: flex-end;
@@ -282,22 +245,8 @@
 /* ── Mobile ── */
 
 @media (max-width: 480px) {
-  .cta {
-    flex-direction: column;
-  }
-
-  .ctaLink {
-    flex: none;
-  }
-
   .seller {
     flex-wrap: wrap;
-  }
-
-  .sellerContact {
-    flex-basis: 100%;
-    margin-left: 0;
-    margin-top: 12px;
   }
 
   .avatar {
