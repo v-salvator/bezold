@@ -87,3 +87,29 @@
   color: var(--accent);
   background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
+
+.forgotBtn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--hand);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.successMsg {
+  margin: 0 0 1.5rem;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--accent-2);
+  font-family: var(--hand);
+  font-size: 0.875rem;
+  color: var(--accent-2);
+  background: color-mix(in srgb, var(--accent-2) 10%, transparent);
+}
