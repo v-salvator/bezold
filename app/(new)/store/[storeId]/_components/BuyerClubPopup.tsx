@@ -16,10 +16,7 @@ import {
   buyerClubSourceAtom,
   CONTACT_GATE_PREFIX,
 } from "@/atoms/BuyerClubAtom";
-import {
-  BUYER_CLUB_COPY,
-  BUYER_CLUB_SHARED_BENEFITS,
-} from "@/constant/buyerClub";
+import { BUYER_CLUB_COPY as copy } from "@/constant/buyerClub";
 import {
   signup,
   AUTH_ERRORS,
@@ -152,11 +149,11 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // Opened from the locked seller contact block — the copy promises what the
-  // visitor actually clicked for, and the daily cap does not apply.
+  // Opened from the locked seller contact block — the visitor asked for this
+  // one, so the daily auto-open cap does not apply to it.
   const isContactGate = source.startsWith(CONTACT_GATE_PREFIX);
-  const copy = BUYER_CLUB_COPY[isContactGate ? "contactGate" : "default"];
-  const loginHref = isContactGate ? `/login?redirect=${pathname}` : "/login";
+  // Signing in always returns to the listing being read.
+  const loginHref = `/login?redirect=${pathname}`;
 
   function handleDismiss() {
     setOpen(false);
@@ -279,16 +276,14 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
           </h2>
           <p className={styles.asideLede}>{copy.asideLede}</p>
           <ul className={styles.benefits}>
-            {[copy.firstBenefit, ...BUYER_CLUB_SHARED_BENEFITS].map(
-              (benefit, index) => (
-                <li key={benefit}>
-                  <span className={styles.benefitNum}>
-                    {String(index + 1).padStart(2, "0")}
-                  </span>{" "}
-                  {benefit}
-                </li>
-              ),
-            )}
+            {copy.benefits.map((benefit, index) => (
+              <li key={benefit}>
+                <span className={styles.benefitNum}>
+                  {String(index + 1).padStart(2, "0")}
+                </span>{" "}
+                {benefit}
+              </li>
+            ))}
           </ul>
           <span className={styles.watermark} aria-hidden="true">
             B
