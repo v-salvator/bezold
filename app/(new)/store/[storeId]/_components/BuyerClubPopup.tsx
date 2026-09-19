@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useAtom } from "jotai";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, trackEvent } from "@/firebase/client";
 import Dropdown from "@/components/refactored/Dropdown";
@@ -9,6 +11,12 @@ import FormField from "@/components/refactored/FormField";
 import EyeIcon from "@/app/(new)/_components/EyeIcon";
 import { cityItems, amountItems } from "@/components/SearchFilter/DropDowns";
 import { STORE_CATEGORIES } from "@/constant/storeType";
+import {
+  buyerClubOpenAtom,
+  buyerClubSourceAtom,
+  CONTACT_GATE_PREFIX,
+} from "@/atoms/BuyerClubAtom";
+import { BUYER_CLUB_COPY as copy } from "@/constant/buyerClub";
 import {
   signup,
   AUTH_ERRORS,
@@ -67,7 +75,11 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
   // while Firebase restores the persisted session.
   const [authReady, setAuthReady] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [open, setOpen] = useState(false);
+  // Open state + entry point live in atoms so the seller contact gate — a
+  // sibling subtree on the same page — can open this popup.
+  const [open, setOpen] = useAtom(buyerClubOpenAtom);
+  const [source, setSource] = useAtom(buyerClubSourceAtom);
+  const pathname = usePathname();
 
   // Form state
   const [name, setName] = useState("");
@@ -96,6 +108,8 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
       // Logged-out visitor: force-open (paid ad link) bypasses the daily cap;
       // organic visits respect it.
       const shouldOpen = forceOpen || !suppressedToday();
+      const autoSource = forceOpen ? "url_force" : "auto";
+      setSource(autoSource);
       setOpen(shouldOpen);
       if (shouldOpen) {
         // An organic auto-open counts as today's one showing — mark it now so
@@ -103,13 +117,16 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
         // (otherwise every store page would re-open it and re-fire impressions).
         // A force-open (ad landing) deliberately doesn't consume the cap.
         if (!forceOpen) markSuppressed();
-        trackEvent("buyer_club_popup_impression", {
-          source: forceOpen ? "url_force" : "auto",
-        });
+        trackEvent("buyer_club_popup_impression", { source: autoSource });
       }
     });
-    return () => unsubscribe();
-  }, [forceOpen]);
+    return () => {
+      unsubscribe();
+      // The atom outlives this component — leaving it open would flash the
+      // popup on the next store page before auth resolves there.
+      setOpen(false);
+    };
+  }, [forceOpen, setOpen, setSource]);
 
   // Lock body scroll while the popup is open.
   useEffect(() => {
@@ -132,10 +149,18 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
+  // Opened from the locked seller contact block — the visitor asked for this
+  // one, so the daily auto-open cap does not apply to it.
+  const isContactGate = source.startsWith(CONTACT_GATE_PREFIX);
+  // Signing in always returns to the listing being read.
+  const loginHref = `/login?redirect=${pathname}`;
+
   function handleDismiss() {
     setOpen(false);
-    markSuppressed();
-    trackEvent("buyer_club_popup_dismiss", {});
+    // A popup the visitor opened themselves must not consume the day's
+    // auto-open allowance — the cap only governs uninvited interruptions.
+    if (!isContactGate) markSuppressed();
+    trackEvent("buyer_club_popup_dismiss", { source });
   }
 
   const strength = getStrength(password);
@@ -179,7 +204,7 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
         password,
         phone,
         lineId,
-        source: "buyer_club_popup",
+        source: isContactGate ? source : "buyer_club_popup",
         fromBuyerClub: true,
         buyerProfile: {
           category,
@@ -207,6 +232,7 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
         type="button"
         className={styles.fab}
         onClick={() => {
+          setSource("fab");
           setOpen(true);
           trackEvent("buyer_club_popup_impression", { source: "fab" });
         }}
@@ -244,23 +270,20 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
         <aside className={styles.aside}>
           <p className={styles.brand}>✦ BEZOLD BUYER CLUB</p>
           <h2 className={styles.asideTitle}>
-            免費加入
+            {copy.asideTitle[0]}
             <br />
-            BEZOLD 買家俱樂部
+            {copy.asideTitle[1]}
           </h2>
-          <p className={styles.asideLede}>
-            告訴我們你想找的類型、預算與地區。適合的新店上線時，第一時間通知你。
-          </p>
+          <p className={styles.asideLede}>{copy.asideLede}</p>
           <ul className={styles.benefits}>
-            <li>
-              <span className={styles.benefitNum}>01</span> 新案件優先通知
-            </li>
-            <li>
-              <span className={styles.benefitNum}>02</span> 精準配對你的條件
-            </li>
-            <li>
-              <span className={styles.benefitNum}>03</span> 免費加入 · 隨時取消
-            </li>
+            {copy.benefits.map((benefit, index) => (
+              <li key={benefit}>
+                <span className={styles.benefitNum}>
+                  {String(index + 1).padStart(2, "0")}
+                </span>{" "}
+                {benefit}
+              </li>
+            ))}
           </ul>
           <span className={styles.watermark} aria-hidden="true">
             B
@@ -446,12 +469,12 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
             {error && <p className={styles.errorMsg}>{error}</p>}
 
             <button type="submit" className={styles.submit} disabled={loading}>
-              {loading ? "建立中…" : "免費加入買家俱樂部 →"}
+              {loading ? copy.submitLoading : copy.submit}
             </button>
 
             <p className={styles.loginHint}>
               已經有帳號？{" "}
-              <Link className={styles.loginLink} href="/login">
+              <Link className={styles.loginLink} href={loginHref}>
                 由此登入
               </Link>
             </p>

@@ -48,3 +48,12 @@ export interface UserDoc {
   createTime: Timestamp;
   updateTime: Timestamp;
 }
+
+// The three seller channels shown on a store page. Served by
+// GET /api/stores/[storeId]/contact to signed-in members only — the public
+// store payload carries masked placeholders instead (see utils/store.ts).
+export interface SellerContact {
+  phone: string;
+  lineId: string;
+  email: string;
+}

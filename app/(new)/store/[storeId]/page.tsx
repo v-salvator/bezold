@@ -1,5 +1,6 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import { getStoreById } from "@/firebase/serverUtils";
+import { omitSellerContact } from "@/utils/store";
 import LaunchBanner from "@/app/(new)/_components/LaunchBanner";
 import SiteNav from "@/app/(new)/_components/SiteNav";
 import SiteFooter from "@/app/(new)/_components/SiteFooter";
@@ -66,11 +67,15 @@ export default async function StoreDetailPage({
 }: StorePageProps) {
   const { storeId } = await params;
   const { modal } = await searchParams;
-  const store = await getStoreById(storeId);
+  const fetchedStore = await getStoreById(storeId);
 
-  if (!store) {
+  if (!fetchedStore) {
     throw new Error("Store not found");
   }
+
+  // Seller contact never reaches the served HTML — SellerContactGate fetches the
+  // real values client-side once the viewer is a signed-in member.
+  const store = omitSellerContact(fetchedStore);
 
   // `?modal=buyer-club` force-opens the buyer club popup (used for paid ad
   // landings) and bypasses the once-per-day suppression.

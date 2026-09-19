@@ -1,5 +1,5 @@
 import { type StoreCard } from "@/components/refactored/StoreCard";
-import { type Store } from "@/types";
+import { type Store, type SellerContact } from "@/types";
 import { STORE_CATEGORIES } from "@/constant/storeType";
 import { RIBBON_DISPLAY, RIBBON_PRIORITY } from "@/constant/storeDisplay";
 import { EQUIPMENT_LABEL } from "@/constant/storeEquipment";
@@ -93,3 +93,16 @@ export const genDefaultStore = () => {
     currency: "TWD",
   };
 };
+
+// * ── Seller contact ────────────────────────────────────────────────────────
+// * Real phone / LINE / email never reach a logged-out visitor's HTML or the
+// * public store API — the fields are blanked, including whether the seller
+// * filled them in at all. Signed-in members read the real values from
+// * GET /api/stores/[id]/contact (see SellerContactGate).
+
+const EMPTY_CONTACT: SellerContact = { phone: "", lineId: "", email: "" };
+
+export function omitSellerContact(store: Store): Store {
+  if (!store.userInfo) return store;
+  return { ...store, userInfo: { ...store.userInfo, ...EMPTY_CONTACT } };
+}
