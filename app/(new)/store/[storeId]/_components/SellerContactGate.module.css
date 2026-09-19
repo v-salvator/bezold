@@ -2,20 +2,24 @@
    to live in StorePriceCard.module.css — they moved here with the markup when
    the contact details went behind the buyer club gate. */
 
-/* Sits at the far end of the seller row. Fixed width while locked so the lock
-   tag always has a real box to centre in — never overflowing onto the name. */
+/* Third column of the seller row grid (see StorePriceCard.module.css): its
+   dashed left edge lines up with the specs strip's first divider below. Fixed
+   width while locked so the lock tag always has a real box to centre in —
+   never overflowing onto the name. */
 .slot {
   position: relative;
-  margin-left: auto;
-  flex-shrink: 0;
+  justify-self: start;
   display: flex;
   flex-direction: column;
   gap: 5px;
+  padding-left: 16px;
+  border-left: 1px dashed var(--paper-3);
 }
 
 .slotLocked {
-  width: 170px;
-  padding: 4px 0;
+  width: 186px;
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
 
 .lines {
@@ -64,7 +68,8 @@
 .lockTag {
   position: absolute;
   top: 50%;
-  left: 50%;
+  /* Centred over the blurred lines, not the slot's left padding. */
+  left: calc(50% + 8px);
   transform: translate(-50%, -50%);
   display: inline-flex;
   align-items: center;
@@ -182,12 +187,16 @@
 @media (max-width: 480px) {
   .slot {
     flex-basis: 100%;
-    margin-left: 0;
-    margin-top: 12px;
+    padding-left: 0;
+    border-left: none;
   }
 
   .slotLocked {
     width: auto;
+  }
+
+  .lockTag {
+    left: 50%;
   }
 
   .cta {

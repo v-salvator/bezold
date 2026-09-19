@@ -12,10 +12,21 @@
   font-family: var(--mono);
 }
 
+/* Grid so the seller contact block (third column) starts on the same line as
+   the specs strip's first dashed divider below. That divider sits at
+   (width - 64px) / 3 + 16px — flex:1 items whose padding counts toward their
+   size — so the name column is that minus the avatar and two gaps (92px). A
+   longer name widens its column (max-content) rather than overlapping. The
+   position is kept even when a listing has fewer than three specs, so the
+   contact block sits in the same place on every store page. */
 .seller {
-  display: flex;
+  display: grid;
+  grid-template-columns:
+    64px
+    minmax(max-content, calc((100% - 64px) / 3 - 76px))
+    1fr;
   align-items: center;
-  gap: 14px;
+  column-gap: 14px;
   padding-bottom: 16px;
   margin-bottom: 16px;
   border-bottom: 1px dashed var(--paper-3);
@@ -245,8 +256,11 @@
 /* ── Mobile ── */
 
 @media (max-width: 480px) {
+  /* Too narrow for columns — the contact block wraps below the name. */
   .seller {
+    display: flex;
     flex-wrap: wrap;
+    gap: 14px;
   }
 
   .avatar {
