@@ -1042,10 +1042,13 @@
           只會變成兩個彈窗互相打架。
         </p>
         <p>
-          所以整合後只有一個 Modal、一份註冊表單、一組事件，差別只在
-          <code>source</code>：自動彈出是 <code>auto</code> / <code>fab</code> /
-          <code>url_force</code>，從聯絡方式點進來的是
-          <code>contact_gate</code>，並依此切換文案。
+          所以整合後只有一個 Modal、一份註冊表單、一套文案。Popup
+          本來就只出現在物件頁，「加入後立刻看到聯絡方式」對自動彈出也成立，不需要維護兩個版本。<code
+            >source</code
+          >
+          只用來記錄入口（<code>auto</code> / <code>fab</code> /
+          <code>url_force</code> /
+          <code>contact_gate_*</code>），供分析與每日上限規則判斷。
         </p>
       </section>
 
@@ -1070,7 +1073,7 @@
           <span class="flowArrow">→</span>
           <div class="flowStep">
             <b>2 · 點擊任一鎖</b>
-            <span>開 BuyerClubPopup（contact_gate 文案）</span>
+            <span>開既有的 BuyerClubPopup</span>
           </div>
           <span class="flowArrow">→</span>
           <div class="flowStep">
@@ -1246,13 +1249,10 @@
 
       <!-- ───────────── Modal 文案 ───────────── -->
       <section>
-        <h2 class="sectionTitle">
-          State 2 · Buyer Club Popup（contact_gate 版）
-        </h2>
+        <h2 class="sectionTitle">State 2 · Buyer Club Popup</h2>
         <p class="sectionLede">
-          結構、表單、送出流程完全沿用現有的
-          <code>BuyerClubPopup</code>，只有左側深色欄與送出按鈕的文案依
-          <code>source</code> 切換。
+          既有的 <code>BuyerClubPopup</code> 原封不動沿用 ——
+          同一個元件、同一份表單、同一套文案，不分入口。
           <button class="resetBtn" onclick="openBuyerClub('preview')">
             開啟 Modal 預覽
           </button>
@@ -1262,55 +1262,47 @@
           <thead>
             <tr>
               <th>位置</th>
-              <th>自動彈出（auto / fab / url_force）</th>
-              <th>從聯絡方式進來（contact_gate*）</th>
+              <th>文案</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <th>左欄標題</th>
-              <td>免費加入<br />BEZOLD 買家俱樂部</td>
               <td>加入後<br />立刻看到聯絡方式</td>
             </tr>
             <tr>
               <th>左欄說明</th>
-              <td>
-                告訴我們你想找的類型、預算與地區。適合的新店上線時，第一時間通知你。
-              </td>
               <td>
                 為了保護屋主不被騷擾，聯絡方式只開放給買家俱樂部成員。加入是免費的，完成後這一頁的電話與
                 LINE 會立刻顯示。
               </td>
             </tr>
             <tr>
-              <th>好處 01</th>
-              <td>新案件優先通知</td>
-              <td>立即解鎖本物件的電話與 LINE</td>
-            </tr>
-            <tr>
-              <th>好處 02 / 03</th>
-              <td colspan="2" style="text-align: center">
-                不變：精準配對你的條件 · 免費加入 · 隨時取消
+              <th>好處</th>
+              <td>
+                01 立即解鎖本物件的電話與 LINE · 02 精準配對你的條件 · 03
+                免費加入 · 隨時取消
               </td>
             </tr>
             <tr>
               <th>送出按鈕</th>
-              <td>免費加入買家俱樂部 →</td>
               <td>免費加入並查看聯絡方式 →</td>
             </tr>
             <tr>
               <th>底部登入連結</th>
-              <td><code>/login</code></td>
-              <td><code>/login?redirect=/store/{storeId}</code></td>
+              <td>
+                <code>/login?redirect=/store/{storeId}</code>（一律帶 redirect）
+              </td>
             </tr>
           </tbody>
         </table>
 
         <div class="callout">
-          <b>做法：</b>把這幾段字抽成一張 <code>BUYER_CLUB_COPY</code> 表
-          （<code>constant/</code> 底下），以 <code>source</code> 分
-          <code>default</code> / <code>contactGate</code> 兩組，元件只讀表、不寫
-          if-else。表單欄位、驗證、<code>signup()</code> payload 完全不動。
+          <b>為什麼不分兩套：</b>popup 只掛在
+          <code>/store/[storeId]</code>
+          上，讀者眼前就是一個物件，所以「加入後立刻看到聯絡方式」對自動彈出、FAB
+          與廣告落地同樣成立。文案集中在 <code>constant/buyerClub.ts</code>
+          一份，日後要改只改一個地方。
         </div>
       </section>
 
@@ -1444,14 +1436,14 @@
       <!-- ───────────── 實作清單 ───────────── -->
       <section>
         <h2 class="sectionTitle">實作清單</h2>
-        <p class="sectionLede">預計動到 6 個檔案，其中 2 個是新增。</p>
+        <p class="sectionLede">已實作完成 —— 9 個檔案，其中 5 個是新增。</p>
         <div class="files">
           <div class="fileCard">
             <b>app/(new)/store/[storeId]/page.tsx</b>
             <p>
-              未登入時不把真實聯絡方式送進 HTML。因為 Firebase auth 在 server
-              端讀不到，實務上是：server 一律傳佔位值，真值由
-              <code>SellerContactGate</code> 登入後再取。
+              取回 store 後立刻套 <code>maskSellerContact()</code>，真值不進
+              HTML / RSC payload。Firebase auth 在 server 端讀不到，所以 server
+              一律送佔位值，真值由 <code>SellerContactGate</code> 登入後再取。
             </p>
           </div>
           <div class="fileCard">
@@ -1473,9 +1465,11 @@
           <div class="fileCard">
             <b>_components/BuyerClubPopup.tsx</b>
             <p>
-              open 狀態改讀 Jotai atom（保留原本的每日自動彈出邏輯）；依
-              <code>source</code> 取文案表；<code>contact_gate</code> 開啟時跳過
-              <code>markSuppressed()</code>。
+              open 狀態改讀 Jotai
+              atom（保留原本的每日自動彈出邏輯）；文案統一為一套（<code>constant/buyerClub.ts</code>）；<code
+                >contact_gate_*</code
+              >
+              開啟時跳過 <code>markSuppressed()</code>。
             </p>
           </div>
           <div class="fileCard">
@@ -1483,6 +1477,37 @@
             <p>
               <code>buyerClubOpenAtom</code>、<code>buyerClubSourceAtom</code>，
               讓卡片與 popup 跨元件溝通。
+            </p>
+          </div>
+          <div class="fileCard">
+            <b>utils/store.ts</b>
+            <p>
+              <code>maskSellerContact()</code>
+              送佔位值給頁面（保留「哪些管道有值」讓模糊層與 CTA 判斷）；<code
+                >omitSellerContact()</code
+              >
+              把公開 API 的欄位直接清空。
+            </p>
+          </div>
+          <div class="fileCard">
+            <b
+              >api/stores/[storeId]/contact/route.ts<span class="new"
+                >NEW</span
+              ></b
+            >
+            <p>
+              唯一拿得到真值的地方，需帶 idToken；已頂讓物件一律回空值。搭配
+              <code>lib/verifyUserToken.ts</code
+              ><span class="new">NEW</span>（verifyAdminToken 去掉 admin claim
+              的版本）。
+            </p>
+          </div>
+          <div class="fileCard">
+            <b>hooks/useSellerContact.ts<span class="new">NEW</span></b>
+            <p>
+              auth 監聽 + 聯絡方式請求，同一物件只打一次 API（模糊行與 CTA
+              兩個元件共用）。回傳 loading / locked / unlocked / error 四態與
+              <code>justUnlocked</code>。
             </p>
           </div>
           <div class="fileCard">
@@ -1503,8 +1528,8 @@
             第一版提了三個方案：<b>A 模糊遮罩</b>、<b>B 鎖定面板</b
             >（聯絡列整段換成一塊說明 + 登入按鈕的虛線面板）、<b
               >C 點擊觸發 Modal</b
-            >。最後採用 A + C，B 的「說明為什麼要登入」則被吸收進 Modal 左欄的
-            contact_gate 文案裡。
+            >。最後採用 A + C，B 的「說明為什麼要登入」則被吸收進 Modal
+            左欄的文案裡。
           </p>
           <table style="margin-top: 14px">
             <thead>
@@ -1565,19 +1590,13 @@
 
         <aside class="bcAside">
           <p class="bcBrand">✦ BEZOLD BUYER CLUB</p>
-          <h2 class="bcAsideTitle">
-            加入後<br />立刻看到聯絡方式
-            <span class="diffTag">contact_gate</span>
-          </h2>
+          <h2 class="bcAsideTitle">加入後<br />立刻看到聯絡方式</h2>
           <p class="bcAsideLede">
             為了保護屋主不被騷擾，聯絡方式只開放給買家俱樂部成員。加入是免費的，完成後這一頁的電話與
             LINE 會立刻顯示。
           </p>
           <ul class="bcBenefits">
-            <li>
-              <span class="bcNum">01</span> 立即解鎖本物件的電話與 LINE
-              <span class="diffTag">改</span>
-            </li>
+            <li><span class="bcNum">01</span> 立即解鎖本物件的電話與 LINE</li>
             <li><span class="bcNum">02</span> 精準配對你的條件</li>
             <li><span class="bcNum">03</span> 免費加入 · 隨時取消</li>
           </ul>
@@ -1641,7 +1660,7 @@
           </label>
 
           <button class="bcSubmit" onclick="unlock()">
-            免費加入並查看聯絡方式 →<span class="diffTag">改</span>
+            免費加入並查看聯絡方式 →
           </button>
 
           <p class="bcLoginHint">
