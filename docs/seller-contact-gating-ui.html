@@ -1,0 +1,1699 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>未登入隱藏賣家聯絡方式 — 模糊遮罩 × Buyer Club Popup</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Kalam:wght@300;400;700&family=JetBrains+Mono:wght@400;700&family=Rubik+Mono+One&family=Noto+Sans+TC:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #1c1a17;
+        --ink-2: #3a3631;
+        --paper: #f6f2e9;
+        --paper-2: #ece5d3;
+        --paper-3: #e0d6bc;
+        --accent: #d94a2a;
+        --accent-2: #2a6f4d;
+        --accent-3: #e6b833;
+        --muted: #8a8278;
+
+        --hand: "Kalam", "Noto Sans TC", sans-serif;
+        --display: "Caveat", "Noto Sans TC", sans-serif;
+        --mono: "JetBrains Mono", monospace;
+        --brand: "Rubik Mono One", "JetBrains Mono", monospace;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--hand);
+        line-height: 1.6;
+      }
+
+      .page {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 48px 24px 96px;
+      }
+
+      /* ── 文件標題 ───────────────────────────────────────────── */
+
+      .docHead {
+        border-bottom: 2px solid var(--ink);
+        padding-bottom: 24px;
+        margin-bottom: 32px;
+      }
+
+      .kicker {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--ink-2);
+      }
+
+      .docTitle {
+        font-family: var(--display);
+        font-size: 56px;
+        font-weight: 700;
+        line-height: 1;
+        margin: 10px 0 12px;
+      }
+
+      .docSub {
+        font-size: 15px;
+        color: var(--ink-2);
+        max-width: 820px;
+        margin: 0;
+      }
+
+      code {
+        font-family: var(--mono);
+        font-size: 12px;
+        background: var(--paper-3);
+        border-radius: 3px;
+        padding: 1px 5px;
+      }
+
+      .sectionTitle {
+        font-family: var(--display);
+        font-size: 40px;
+        font-weight: 700;
+        line-height: 1;
+        margin: 0 0 6px;
+      }
+
+      .sectionLede {
+        font-size: 14px;
+        color: var(--ink-2);
+        max-width: 820px;
+        margin: 0 0 24px;
+      }
+
+      section {
+        margin-bottom: 60px;
+      }
+
+      /* ── 決策摘要 ───────────────────────────────────────────── */
+
+      .decision {
+        background: var(--accent-3);
+        border: 2px solid var(--ink);
+        border-radius: 6px;
+        box-shadow: 4px 4px 0 var(--ink);
+        padding: 22px 24px;
+        margin-bottom: 52px;
+      }
+
+      .decision h2 {
+        font-family: var(--display);
+        font-size: 30px;
+        font-weight: 700;
+        margin: 0 0 8px;
+        line-height: 1;
+      }
+
+      .decision p {
+        margin: 0 0 12px;
+        font-size: 14px;
+      }
+
+      .decision p:last-child {
+        margin-bottom: 0;
+      }
+
+      /* ── 狀態流程 ───────────────────────────────────────────── */
+
+      .flow {
+        display: flex;
+        align-items: stretch;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 36px;
+      }
+
+      .flowStep {
+        flex: 1;
+        min-width: 170px;
+        border: 1.5px solid var(--ink);
+        border-radius: 6px;
+        background: var(--paper-2);
+        padding: 12px 14px;
+      }
+
+      .flowStep b {
+        display: block;
+        font-family: var(--display);
+        font-size: 22px;
+        line-height: 1.1;
+        margin-bottom: 2px;
+      }
+
+      .flowStep span {
+        font-size: 12px;
+        color: var(--ink-2);
+      }
+
+      .flowStep.now {
+        background: var(--paper);
+        box-shadow: 3px 3px 0 var(--ink);
+      }
+
+      .flowArrow {
+        align-self: center;
+        font-family: var(--mono);
+        color: var(--muted);
+      }
+
+      /* ── 價格卡（複製 StorePriceCard.module.css）────────────── */
+
+      .stage {
+        display: grid;
+        grid-template-columns: 420px 1fr;
+        gap: 32px;
+        align-items: start;
+      }
+
+      @media (max-width: 900px) {
+        .stage {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .mockLabel {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 10px;
+      }
+
+      .card {
+        border: 2px solid var(--ink);
+        background: var(--paper);
+        border-radius: 6px;
+        box-shadow: 4px 4px 0 var(--ink);
+        padding: 20px 18px;
+      }
+
+      .seller {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-bottom: 16px;
+        margin-bottom: 16px;
+        border-bottom: 1px dashed var(--paper-3);
+        flex-wrap: wrap;
+      }
+
+      .avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        border: 1.5px solid var(--ink);
+        background: var(--accent-3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--display);
+        font-size: 28px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      .sellerName {
+        font-family: var(--display);
+        font-size: 26px;
+        font-weight: 700;
+        line-height: 1;
+      }
+
+      .sellerName small {
+        display: block;
+        font-family: var(--hand);
+        font-size: 12px;
+        color: var(--ink-2);
+        margin-top: 4px;
+        font-weight: 400;
+      }
+
+      .badges {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-family: var(--hand);
+        font-size: 11px;
+        border: 1.5px solid var(--ink);
+        background: var(--paper-2);
+        padding: 2px 8px;
+        border-radius: 99px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent-2);
+        flex-shrink: 0;
+      }
+
+      .sellerContact {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .sellerContact span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-family: var(--hand);
+        font-size: 16px;
+        color: var(--ink-2);
+      }
+
+      .specs {
+        display: flex;
+        margin: 0 0 16px;
+        padding: 0 0 16px;
+        border-bottom: 1px dashed var(--paper-3);
+      }
+
+      .specItem {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding-right: 16px;
+        border-right: 1px dashed var(--paper-3);
+        margin-right: 16px;
+      }
+
+      .specItem:last-child {
+        border-right: none;
+        margin-right: 0;
+        padding-right: 0;
+      }
+
+      .specItem dd {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-family: var(--display);
+        font-size: 16px;
+        font-weight: 700;
+        margin: 0;
+        white-space: nowrap;
+      }
+
+      .specItem dt {
+        font-family: var(--hand);
+        font-size: 16px;
+        color: var(--muted);
+      }
+
+      .label {
+        font-family: var(--mono);
+        font-size: 16px;
+        color: var(--ink-2);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        display: block;
+      }
+
+      .price {
+        font-family: var(--display);
+        font-size: 64px;
+        font-weight: 700;
+        line-height: 0.95;
+        margin: 4px 0 0;
+      }
+
+      .price em {
+        font-style: normal;
+        font-family: var(--hand);
+        font-size: 18px;
+        color: var(--ink-2);
+        font-weight: 400;
+        margin-left: 4px;
+      }
+
+      .cta {
+        display: flex;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .btn {
+        flex: 1;
+        font-family: var(--hand);
+        font-weight: 700;
+        font-size: 15px;
+        border: 1.5px solid var(--ink);
+        padding: 11px 12px;
+        border-radius: 4px;
+        background: var(--accent);
+        color: #fff;
+        box-shadow: 2px 2px 0 var(--ink);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        transition:
+          transform 0.12s ease,
+          box-shadow 0.12s ease;
+      }
+
+      .btn:hover {
+        transform: translate(-1px, -1px);
+        box-shadow: 3px 3px 0 var(--ink);
+      }
+
+      .btn.sage {
+        background: var(--accent-2);
+      }
+
+      .btn.ghost {
+        background: #fff;
+        color: var(--ink);
+        box-shadow: none;
+      }
+
+      .trust {
+        background: var(--accent-3);
+        border: 1.5px solid var(--ink);
+        border-radius: 4px;
+        padding: 10px 12px;
+        margin-top: 14px;
+        font-family: var(--hand);
+        font-size: 12px;
+        line-height: 1.5;
+      }
+
+      .trust b {
+        display: block;
+        font-family: var(--display);
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 4px;
+      }
+
+      /* ── 模糊遮罩層（方案 A）──────────────────────────────── */
+
+      .contactSlot {
+        flex-basis: 100%;
+        margin-top: 12px;
+        position: relative;
+      }
+
+      .blurred {
+        filter: blur(5px);
+        user-select: none;
+        pointer-events: none;
+        opacity: 0.85;
+      }
+
+      .blurOverlay {
+        position: absolute;
+        inset: -4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        background: transparent;
+        padding: 0;
+        cursor: pointer;
+      }
+
+      .lockPill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: 1.5px solid var(--ink);
+        background: var(--paper-2);
+        border-radius: 99px;
+        padding: 5px 14px;
+        box-shadow: 2px 2px 0 var(--ink);
+        font-family: var(--display);
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--ink);
+        transition:
+          transform 0.12s ease,
+          box-shadow 0.12s ease;
+      }
+
+      .blurOverlay:hover .lockPill {
+        transform: translate(-1px, -1px);
+        box-shadow: 3px 3px 0 var(--ink);
+      }
+
+      /* 解鎖後：整張卡切成已登入樣貌 */
+
+      .card.unlocked .blurred {
+        filter: none;
+        opacity: 1;
+        pointer-events: auto;
+        animation: reveal 0.45s ease;
+      }
+
+      .card.unlocked .blurOverlay,
+      .card.unlocked .lockedCta {
+        display: none;
+      }
+
+      .card:not(.unlocked) .unlockedCta,
+      .card:not(.unlocked) .welcomeNote {
+        display: none;
+      }
+
+      @keyframes reveal {
+        from {
+          filter: blur(5px);
+          opacity: 0.5;
+        }
+        to {
+          filter: none;
+          opacity: 1;
+        }
+      }
+
+      .welcomeNote {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        border: 1.5px solid var(--accent-2);
+        border-radius: 4px;
+        background: color-mix(in srgb, var(--accent-2) 10%, transparent);
+        padding: 7px 10px;
+        margin-top: 14px;
+        font-size: 12px;
+        color: var(--accent-2);
+        font-weight: 700;
+      }
+
+      /* 觸發點標記 ①②③ */
+
+      .trigger {
+        position: absolute;
+        z-index: 3;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 1.5px solid var(--ink);
+        background: var(--accent);
+        color: #fff;
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .card.unlocked .trigger {
+        display: none;
+      }
+
+      .t1 {
+        top: 6px;
+        right: -11px;
+      }
+
+      .t2 {
+        left: -11px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      .t3 {
+        right: -11px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      .ctaWrap {
+        position: relative;
+      }
+
+      /* Skeleton（auth 未解析） */
+
+      .skeletonLine {
+        height: 14px;
+        border-radius: 3px;
+        background: linear-gradient(
+          90deg,
+          var(--paper-2) 25%,
+          var(--paper-3) 50%,
+          var(--paper-2) 75%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.4s infinite;
+      }
+
+      .skeletonLine + .skeletonLine {
+        margin-top: 7px;
+      }
+
+      .skeletonLine.w60 {
+        width: 60%;
+      }
+
+      .skeletonLine.w45 {
+        width: 45%;
+      }
+
+      .skeletonLine.w75 {
+        width: 75%;
+      }
+
+      @keyframes shimmer {
+        from {
+          background-position: 200% 0;
+        }
+        to {
+          background-position: -200% 0;
+        }
+      }
+
+      /* ── Buyer Club Popup（複製 BuyerClubPopup.module.css）── */
+
+      .bcBackdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        overflow-y: auto;
+        background: color-mix(in srgb, var(--ink) 62%, transparent);
+        backdrop-filter: blur(3px);
+      }
+
+      .bcBackdrop.open {
+        display: flex;
+        animation: fade 0.2s ease;
+      }
+
+      @keyframes fade {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .bcModal {
+        position: relative;
+        display: grid;
+        grid-template-columns: 5fr 7fr;
+        width: 100%;
+        max-width: 940px;
+        margin: auto;
+        border-radius: 18px;
+        box-shadow: 0 24px 60px color-mix(in srgb, var(--ink) 45%, transparent);
+        animation: pop 0.22s cubic-bezier(0.2, 0.8, 0.3, 1);
+      }
+
+      @media (max-width: 780px) {
+        .bcModal {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @keyframes pop {
+        from {
+          opacity: 0;
+          transform: translateY(12px) scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      .bcClose {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        z-index: 3;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        border-radius: 7px;
+        background: var(--accent);
+        color: var(--paper);
+        font-size: 0.9rem;
+        cursor: pointer;
+      }
+
+      .bcAside {
+        position: relative;
+        overflow: hidden;
+        padding: 36px 32px;
+        border-radius: 18px 0 0 18px;
+        background: var(--ink);
+        color: var(--paper);
+      }
+
+      @media (max-width: 780px) {
+        .bcAside {
+          border-radius: 18px 18px 0 0;
+        }
+      }
+
+      .bcBrand {
+        margin: 0 0 24px;
+        font-family: var(--brand);
+        font-size: 0.72rem;
+        letter-spacing: 0.14em;
+        color: var(--accent-3);
+      }
+
+      .bcAsideTitle {
+        margin: 0 0 16px;
+        font-family: var(--display);
+        font-size: 2.15rem;
+        font-weight: 700;
+        line-height: 1.15;
+        color: var(--paper);
+      }
+
+      .bcAsideLede {
+        margin: 0 0 24px;
+        font-size: 0.9rem;
+        line-height: 1.7;
+        color: color-mix(in srgb, var(--paper) 78%, transparent);
+      }
+
+      .bcBenefits {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .bcBenefits li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.9rem;
+        font-weight: 700;
+      }
+
+      .bcNum {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        flex-shrink: 0;
+        border: 1.5px solid var(--accent-3);
+        border-radius: 50%;
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        color: var(--accent-3);
+      }
+
+      .bcWatermark {
+        position: absolute;
+        right: -18px;
+        bottom: -46px;
+        font-family: var(--brand);
+        font-size: 11rem;
+        line-height: 1;
+        color: color-mix(in srgb, var(--paper) 6%, transparent);
+        pointer-events: none;
+      }
+
+      .bcForm {
+        position: relative;
+        padding: 36px 32px;
+        border-radius: 0 18px 18px 0;
+        background: var(--paper);
+      }
+
+      @media (max-width: 780px) {
+        .bcForm {
+          border-radius: 0 0 18px 18px;
+        }
+      }
+
+      .bcFormTitle {
+        margin: 0 0 4px;
+        font-family: var(--display);
+        font-size: 1.6rem;
+        font-weight: 700;
+      }
+
+      .bcFormSub {
+        margin: 0 0 18px;
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+
+      .bcRow {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-bottom: 14px;
+      }
+
+      .bcField {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .bcFieldLabel {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--ink-2);
+      }
+
+      .bcFieldLabel i {
+        font-style: normal;
+        color: var(--accent);
+      }
+
+      .bcInput {
+        border: 1.5px solid var(--paper-3);
+        border-radius: 7px;
+        background: #fff;
+        padding: 9px 11px;
+        font-family: var(--hand);
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      .bcDivider {
+        height: 1px;
+        background: var(--paper-3);
+        margin: 4px 0 14px;
+      }
+
+      .bcCheck {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.82rem;
+        color: var(--ink-2);
+        margin-bottom: 14px;
+      }
+
+      .bcSubmit {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 10px;
+        background: var(--accent);
+        color: var(--paper);
+        font-family: var(--hand);
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .bcLoginHint {
+        margin: 12px 0 0;
+        font-size: 0.82rem;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .bcLoginHint a {
+        color: var(--accent);
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .diffTag {
+        display: inline-block;
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        border-radius: 3px;
+        padding: 1px 6px;
+        background: var(--accent-3);
+        color: var(--ink);
+        margin-left: 8px;
+        vertical-align: middle;
+      }
+
+      /* ── 說明欄 ────────────────────────────────────────────── */
+
+      .notes h3 {
+        font-family: var(--display);
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0 0 8px;
+        line-height: 1;
+      }
+
+      .notes ul {
+        margin: 0 0 20px;
+        padding-left: 20px;
+        font-size: 14px;
+        color: var(--ink-2);
+      }
+
+      .notes li {
+        margin-bottom: 6px;
+      }
+
+      .callout {
+        border-left: 3px solid var(--accent);
+        background: var(--paper-2);
+        padding: 12px 14px;
+        font-size: 13px;
+        color: var(--ink-2);
+        border-radius: 0 4px 4px 0;
+      }
+
+      .callout b {
+        color: var(--ink);
+      }
+
+      /* ── 表格 ──────────────────────────────────────────────── */
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 2px solid var(--ink);
+        background: var(--paper);
+        font-size: 13.5px;
+        margin-bottom: 20px;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--paper-3);
+        padding: 9px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      thead th {
+        background: var(--paper-2);
+        font-family: var(--display);
+        font-size: 20px;
+        font-weight: 700;
+        border-bottom: 2px solid var(--ink);
+      }
+
+      tbody th {
+        font-weight: 700;
+        background: var(--paper-2);
+        white-space: nowrap;
+      }
+
+      /* ── 實作清單 ──────────────────────────────────────────── */
+
+      .files {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 14px;
+      }
+
+      .fileCard {
+        border: 1.5px solid var(--ink);
+        border-radius: 6px;
+        background: var(--paper-2);
+        padding: 14px 16px;
+      }
+
+      .fileCard b {
+        display: block;
+        font-family: var(--mono);
+        font-size: 12px;
+        margin-bottom: 6px;
+        word-break: break-all;
+      }
+
+      .fileCard p {
+        margin: 0;
+        font-size: 13px;
+        color: var(--ink-2);
+      }
+
+      .new {
+        background: var(--accent-2);
+        color: #fff;
+        font-family: var(--mono);
+        font-size: 9px;
+        border-radius: 3px;
+        padding: 1px 5px;
+        margin-left: 6px;
+        letter-spacing: 0.08em;
+        vertical-align: middle;
+      }
+
+      /* ── 附錄 ──────────────────────────────────────────────── */
+
+      details {
+        border: 1.5px dashed var(--ink);
+        border-radius: 6px;
+        padding: 14px 18px;
+        background: var(--paper-2);
+      }
+
+      summary {
+        font-family: var(--display);
+        font-size: 26px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-top: 12px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .resetBtn {
+        font-family: var(--hand);
+        font-size: 12px;
+        font-weight: 700;
+        border: 1.5px solid var(--ink);
+        background: var(--paper-2);
+        border-radius: 99px;
+        padding: 3px 12px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="docHead">
+        <div class="kicker">Bezold · Store Detail · Auth Gating</div>
+        <h1 class="docTitle">未登入隱藏賣家聯絡方式</h1>
+        <p class="docSub">
+          採用方案 <b>A（模糊遮罩）+ C（點擊觸發 Modal）</b>，而 C 的 Modal
+          不另外做 —— 直接復用既有的 <code>BuyerClubPopup</code>。未登入訪客在
+          <code>/store/[storeId]</code>
+          看到的是模糊的聯絡方式與上鎖的 CTA；點任何一個鎖，就開買家俱樂部註冊
+          Modal；註冊完成後<b>原地解鎖</b>，不換頁、不刷新。
+        </p>
+      </header>
+
+      <section class="decision">
+        <h2>為什麼把 C 換成 Buyer Club Popup</h2>
+        <p>
+          原本 C 方案要做一個新的「登入 Modal」，走
+          <code>/login?redirect=…</code> 再導回物件頁。但站上已經有
+          <code>BuyerClubPopup</code
+          >：同一個頁面、同一群未登入訪客、同一個目標（註冊），而且它的
+          <code>signup()</code> 成功後 <code>onAuthStateChanged</code>
+          會直接觸發，<b>不需要換頁就能解鎖</b>。再做一個登入 Modal
+          只會變成兩個彈窗互相打架。
+        </p>
+        <p>
+          所以整合後只有一個 Modal、一份註冊表單、一組事件，差別只在
+          <code>source</code>：自動彈出是 <code>auto</code> / <code>fab</code> /
+          <code>url_force</code>，從聯絡方式點進來的是
+          <code>contact_gate</code>，並依此切換文案。
+        </p>
+      </section>
+
+      <!-- ───────────── 狀態流程 ───────────── -->
+      <section>
+        <h2 class="sectionTitle">四個狀態</h2>
+        <p class="sectionLede">
+          下面的卡片是可以點的：點 ①②③ 任一個鎖會開 Modal，按 Modal
+          裡的「免費加入」就會看到解鎖後的樣子。
+        </p>
+
+        <div class="flow">
+          <div class="flowStep">
+            <b>0 · Auth 載入中</b>
+            <span>onAuthStateChanged 尚未回來 → skeleton</span>
+          </div>
+          <span class="flowArrow">→</span>
+          <div class="flowStep now">
+            <b>1 · 未登入</b>
+            <span>模糊 + 鎖 + 上鎖 CTA（3 個觸發點）</span>
+          </div>
+          <span class="flowArrow">→</span>
+          <div class="flowStep">
+            <b>2 · 點擊任一鎖</b>
+            <span>開 BuyerClubPopup（contact_gate 文案）</span>
+          </div>
+          <span class="flowArrow">→</span>
+          <div class="flowStep">
+            <b>3 · 註冊 / 登入成功</b>
+            <span>原地 unblur，CTA 變成真的可撥打</span>
+          </div>
+        </div>
+
+        <div class="stage">
+          <div>
+            <div class="mockLabel">State 1 → 3 · 可互動</div>
+            <div class="card" id="gateCard">
+              <div class="seller">
+                <div class="avatar">陳</div>
+                <div>
+                  <div class="sellerName">
+                    陳先生<small>屋主直接刊登</small>
+                  </div>
+                  <div class="badges">
+                    <span class="badge"
+                      ><span class="dot"></span>身份已驗證</span
+                    >
+                    <span class="badge"
+                      ><span class="dot"></span>聯絡方式已提供</span
+                    >
+                  </div>
+                </div>
+
+                <div class="contactSlot">
+                  <span class="trigger t1">1</span>
+                  <div class="sellerContact blurred">
+                    <span>📞 0912-345-678</span>
+                    <span>💬 bezoldtw</span>
+                    <span>✉️ seller@example.com</span>
+                  </div>
+                  <button
+                    class="blurOverlay"
+                    onclick="openBuyerClub('contact_gate_blur')"
+                    aria-label="加入買家俱樂部以查看聯絡方式"
+                  >
+                    <span class="lockPill">🔒 加入後顯示</span>
+                  </button>
+                </div>
+              </div>
+
+              <dl class="specs">
+                <div class="specItem">
+                  <dd>18 坪</dd>
+                  <dt>坪數</dt>
+                </div>
+                <div class="specItem">
+                  <dd>NT$ 45,000</dd>
+                  <dt>租金</dt>
+                </div>
+                <div class="specItem">
+                  <dd>全套設備</dd>
+                  <dt>設備</dt>
+                </div>
+              </dl>
+
+              <div>
+                <span class="label">頂讓金 ASKING</span>
+                <div class="price">85<em>萬</em></div>
+              </div>
+
+              <div class="cta ctaWrap lockedCta">
+                <span class="trigger t2">2</span>
+                <button
+                  class="btn"
+                  onclick="openBuyerClub('contact_gate_cta_phone')"
+                >
+                  🔒 撥打賣家電話
+                </button>
+                <button
+                  class="btn sage"
+                  onclick="openBuyerClub('contact_gate_cta_line')"
+                >
+                  🔒 加 LINE 聯繫
+                </button>
+                <span class="trigger t3">3</span>
+              </div>
+
+              <div class="cta unlockedCta">
+                <button class="btn">📞 撥打賣家電話</button>
+                <button class="btn sage">💬 加 LINE 聯繫</button>
+              </div>
+
+              <div class="welcomeNote">✓ 已加入買家俱樂部 — 聯絡方式已解鎖</div>
+
+              <div class="trust">
+                <b>必售！安心提示</b>
+                本物件由賣家直接刊登，Bezold 不收取仲介費，洽談 / 議價 /
+                簽約皆為買賣雙方直接進行。建議現場看過再決定。
+              </div>
+            </div>
+
+            <div class="toolbar">
+              <button class="resetBtn" onclick="relock()">
+                ↺ 重設為未登入
+              </button>
+              <span>觸發點：① 模糊層　② 撥打電話　③ 加 LINE</span>
+            </div>
+
+            <div class="mockLabel" style="margin-top: 28px">
+              State 0 · Auth 載入中
+            </div>
+            <div class="card">
+              <div class="seller">
+                <div class="avatar">陳</div>
+                <div>
+                  <div class="sellerName">
+                    陳先生<small>屋主直接刊登</small>
+                  </div>
+                  <div class="badges">
+                    <span class="badge"
+                      ><span class="dot"></span>身份已驗證</span
+                    >
+                  </div>
+                </div>
+                <div class="contactSlot" aria-busy="true">
+                  <div class="skeletonLine w60"></div>
+                  <div class="skeletonLine w45"></div>
+                  <div class="skeletonLine w75"></div>
+                </div>
+              </div>
+              <div>
+                <span class="label">頂讓金 ASKING</span>
+                <div class="price">85<em>萬</em></div>
+              </div>
+              <div class="cta">
+                <div class="skeletonLine" style="height: 42px; flex: 1"></div>
+                <div class="skeletonLine" style="height: 42px; flex: 1"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="notes">
+            <h3>為什麼是「模糊」而不是整段拿掉</h3>
+            <ul>
+              <li>
+                版面高度與已登入時幾乎一致，登入前後不會跳版；行動版尤其明顯。
+              </li>
+              <li>
+                三行模糊清楚傳達「電話、LINE、Email
+                都有」，比一句「請登入」更有拉力。
+              </li>
+              <li>
+                CTA 兩顆按鈕保留原位、只加上 🔒，點下去的期待落差最小 —— 使用者
+                本來就是想聯絡，Modal 出現在這個時機是合理的。
+              </li>
+            </ul>
+
+            <h3>三個觸發點都開同一個 Modal</h3>
+            <ul>
+              <li>① 模糊層 → <code>source: "contact_gate_blur"</code></li>
+              <li>
+                ② 撥打電話 → <code>source: "contact_gate_cta_phone"</code>
+              </li>
+              <li>③ 加 LINE → <code>source: "contact_gate_cta_line"</code></li>
+            </ul>
+
+            <div class="callout">
+              <b>模糊只是視覺，資料一定要在伺服器端拿掉。</b>
+              <code>page.tsx</code> 是 server component，目前聯絡方式直接進
+              HTML。未登入時要把
+              <code>userInfo.phone / lineId / email</code> 換成固定佔位字串
+              （例如 <code>0000-000-000</code>）再傳進卡片，真值只在登入後由
+              client 端 / API 取得。只做 CSS blur 等於把賣家個資公開在原始碼裡。
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───────────── Modal 文案 ───────────── -->
+      <section>
+        <h2 class="sectionTitle">
+          State 2 · Buyer Club Popup（contact_gate 版）
+        </h2>
+        <p class="sectionLede">
+          結構、表單、送出流程完全沿用現有的
+          <code>BuyerClubPopup</code>，只有左側深色欄與送出按鈕的文案依
+          <code>source</code> 切換。
+          <button class="resetBtn" onclick="openBuyerClub('preview')">
+            開啟 Modal 預覽
+          </button>
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>位置</th>
+              <th>自動彈出（auto / fab / url_force）</th>
+              <th>從聯絡方式進來（contact_gate*）</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>左欄標題</th>
+              <td>免費加入<br />BEZOLD 買家俱樂部</td>
+              <td>加入後<br />立刻看到聯絡方式</td>
+            </tr>
+            <tr>
+              <th>左欄說明</th>
+              <td>
+                告訴我們你想找的類型、預算與地區。適合的新店上線時，第一時間通知你。
+              </td>
+              <td>
+                為了保護屋主不被騷擾，聯絡方式只開放給買家俱樂部成員。加入是免費的，完成後這一頁的電話與
+                LINE 會立刻顯示。
+              </td>
+            </tr>
+            <tr>
+              <th>好處 01</th>
+              <td>新案件優先通知</td>
+              <td>立即解鎖本物件的電話與 LINE</td>
+            </tr>
+            <tr>
+              <th>好處 02 / 03</th>
+              <td colspan="2" style="text-align: center">
+                不變：精準配對你的條件 · 免費加入 · 隨時取消
+              </td>
+            </tr>
+            <tr>
+              <th>送出按鈕</th>
+              <td>免費加入買家俱樂部 →</td>
+              <td>免費加入並查看聯絡方式 →</td>
+            </tr>
+            <tr>
+              <th>底部登入連結</th>
+              <td><code>/login</code></td>
+              <td><code>/login?redirect=/store/{storeId}</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout">
+          <b>做法：</b>把這幾段字抽成一張 <code>BUYER_CLUB_COPY</code> 表
+          （<code>constant/</code> 底下），以 <code>source</code> 分
+          <code>default</code> / <code>contactGate</code> 兩組，元件只讀表、不寫
+          if-else。表單欄位、驗證、<code>signup()</code> payload 完全不動。
+        </div>
+      </section>
+
+      <!-- ───────────── 整合規則 ───────────── -->
+      <section>
+        <h2 class="sectionTitle">和既有 Popup 的整合規則</h2>
+        <p class="sectionLede">
+          現在的 popup 有「每天自動開一次 + 關掉後變
+          FAB」的行為，接上解鎖入口後要處理這幾個衝突。
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>情況</th>
+              <th>行為</th>
+              <th>理由</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>今天已自動彈過、已被關掉</th>
+              <td>
+                點鎖<b>照樣開</b>，不受 <code>buyerClubPopupSeen</code> 限制
+              </td>
+              <td>每日上限是給「打擾」用的；使用者主動點鎖是明確意圖</td>
+            </tr>
+            <tr>
+              <th>點鎖開啟</th>
+              <td>不寫入 <code>markSuppressed()</code></td>
+              <td>
+                主動開啟不該消耗當天的自動彈出額度（與
+                <code>forceOpen</code> 一致）
+              </td>
+            </tr>
+            <tr>
+              <th>自動彈出正開著時點鎖</th>
+              <td>無事發生（Modal 已開）</td>
+              <td>避免重複 impression 事件與重複動畫</td>
+            </tr>
+            <tr>
+              <th>自動彈出 vs 解鎖入口的 impression</th>
+              <td>
+                共用 <code>buyer_club_popup_impression</code>，用
+                <code>source</code> 區分
+              </td>
+              <td>GA4 可直接比較哪個入口帶來的註冊比較多</td>
+            </tr>
+            <tr>
+              <th>從鎖開啟後關掉 Modal</th>
+              <td>卡片回到模糊狀態，FAB 照常顯示</td>
+              <td>入口永遠在，不會因為關過一次就再也找不到</td>
+            </tr>
+            <tr>
+              <th>註冊成功</th>
+              <td>
+                Modal 關閉 → 卡片 unblur（<code>reveal</code> 動畫）＋
+                顯示「已加入買家俱樂部」
+              </td>
+              <td>
+                <code>onAuthStateChanged</code> 一次觸發兩邊，不需要
+                <code>router.refresh()</code> 或換頁
+              </td>
+            </tr>
+            <tr>
+              <th>已售出（<code>isSold</code>）</th>
+              <td>維持現狀：不顯示聯絡方式、也不顯示鎖</td>
+              <td>已頂讓的物件登入了也沒東西可看，不該騙人註冊</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout">
+          <b>狀態放哪裡：</b>popup 的 <code>open</code> 目前是元件內部
+          state，外面的卡片打不開它。建議加一顆 Jotai atom
+          （<code>atoms/BuyerClubAtom.ts</code>：<code>buyerClubOpenAtom</code>
+          + <code>buyerClubSourceAtom</code>）—— 專案已經用 Jotai
+          管篩選狀態，這是最輕的做法，也避免把 popup 整個往上提到 page 層。
+        </div>
+      </section>
+
+      <!-- ───────────── 事件 ───────────── -->
+      <section>
+        <h2 class="sectionTitle">追蹤事件</h2>
+        <p class="sectionLede">
+          沿用 <code>trackEvent()</code>，新增的部分要同步補進
+          <code>docs/analytics-events.md</code> 的事件表。
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>事件</th>
+              <th>時機</th>
+              <th>參數</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>
+                <code>contact_gate_view</code><span class="new">NEW</span>
+              </th>
+              <td>未登入者看到上鎖的聯絡區（每頁一次）</td>
+              <td><code>store_id</code></td>
+            </tr>
+            <tr>
+              <th>
+                <code>contact_gate_click</code><span class="new">NEW</span>
+              </th>
+              <td>點下三個鎖之一</td>
+              <td>
+                <code>store_id</code>, <code>trigger</code>（blur / cta_phone /
+                cta_line）
+              </td>
+            </tr>
+            <tr>
+              <th><code>buyer_club_popup_impression</code></th>
+              <td>既有事件，新增一組 source 值</td>
+              <td><code>source: "contact_gate_*"</code></td>
+            </tr>
+            <tr>
+              <th><code>sign_up</code></th>
+              <td>既有事件（註冊成功）</td>
+              <td>
+                建議補 <code>entry: "contact_gate"</code> 以算解鎖入口的轉換率
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ───────────── 實作清單 ───────────── -->
+      <section>
+        <h2 class="sectionTitle">實作清單</h2>
+        <p class="sectionLede">預計動到 6 個檔案，其中 2 個是新增。</p>
+        <div class="files">
+          <div class="fileCard">
+            <b>app/(new)/store/[storeId]/page.tsx</b>
+            <p>
+              未登入時不把真實聯絡方式送進 HTML。因為 Firebase auth 在 server
+              端讀不到，實務上是：server 一律傳佔位值，真值由
+              <code>SellerContactGate</code> 登入後再取。
+            </p>
+          </div>
+          <div class="fileCard">
+            <b>_components/SellerContactGate.tsx<span class="new">NEW</span></b>
+            <p>
+              client component。跑 <code>onAuthStateChanged</code>，三態渲染：
+              載入中 skeleton / 未登入模糊＋鎖 / 已登入真實聯絡方式。點鎖時寫入
+              <code>buyerClubOpenAtom</code>。
+            </p>
+          </div>
+          <div class="fileCard">
+            <b>_components/StorePriceCard.tsx</b>
+            <p>
+              把 <code>.sellerContact</code> 與 <code>.cta</code> 兩段換成
+              <code>&lt;SellerContactGate&gt;</code>，
+              <code>isSold</code> 的既有分支維持不變。
+            </p>
+          </div>
+          <div class="fileCard">
+            <b>_components/BuyerClubPopup.tsx</b>
+            <p>
+              open 狀態改讀 Jotai atom（保留原本的每日自動彈出邏輯）；依
+              <code>source</code> 取文案表；<code>contact_gate</code> 開啟時跳過
+              <code>markSuppressed()</code>。
+            </p>
+          </div>
+          <div class="fileCard">
+            <b>atoms/BuyerClubAtom.ts<span class="new">NEW</span></b>
+            <p>
+              <code>buyerClubOpenAtom</code>、<code>buyerClubSourceAtom</code>，
+              讓卡片與 popup 跨元件溝通。
+            </p>
+          </div>
+          <div class="fileCard">
+            <b>docs/analytics-events.md</b>
+            <p>
+              補上 <code>contact_gate_view</code> /
+              <code>contact_gate_click</code> 兩個事件與新的 source 值。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ───────────── 附錄 ───────────── -->
+      <section>
+        <details>
+          <summary>附錄 · 原始三方案與比較表</summary>
+          <p style="font-size: 14px; color: var(--ink-2); margin-top: 14px">
+            第一版提了三個方案：<b>A 模糊遮罩</b>、<b>B 鎖定面板</b
+            >（聯絡列整段換成一塊說明 + 登入按鈕的虛線面板）、<b
+              >C 點擊觸發 Modal</b
+            >。最後採用 A + C，B 的「說明為什麼要登入」則被吸收進 Modal 左欄的
+            contact_gate 文案裡。
+          </p>
+          <table style="margin-top: 14px">
+            <thead>
+              <tr>
+                <th>面向</th>
+                <th>A 模糊遮罩</th>
+                <th>B 鎖定面板</th>
+                <th>C 點擊 Modal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>註冊轉換</th>
+                <td>中 — 好奇心驅動</td>
+                <td>中高 — 講清楚價值</td>
+                <td>高 — 抓住意圖那一刻</td>
+              </tr>
+              <tr>
+                <th>信任感</th>
+                <td>偏低（像 paywall）</td>
+                <td>高（說明保護屋主）</td>
+                <td>中（CTA 有點誘導）</td>
+              </tr>
+              <tr>
+                <th>實作成本</th>
+                <td>低</td>
+                <td>低</td>
+                <td>中高（復用 popup 後降為中）</td>
+              </tr>
+              <tr>
+                <th>版面衝擊</th>
+                <td>幾乎為零</td>
+                <td>大（多一塊面板）</td>
+                <td>幾乎為零</td>
+              </tr>
+              <tr>
+                <th>個資風險</th>
+                <td>高（容易只做 CSS）</td>
+                <td>低（根本不 render）</td>
+                <td>低（伺服器端遮罩）</td>
+              </tr>
+            </tbody>
+          </table>
+          <p style="font-size: 13px; color: var(--ink-2)">
+            A 的個資風險靠「伺服器端傳佔位字串」解掉；C 的實作成本靠「復用
+            BuyerClubPopup」解掉 —— 這兩點就是整合版存在的理由。
+          </p>
+        </details>
+      </section>
+    </div>
+
+    <!-- ───────────── Buyer Club Popup ───────────── -->
+    <div class="bcBackdrop" id="bcBackdrop" role="dialog" aria-modal="true">
+      <div class="bcModal" onclick="event.stopPropagation()">
+        <button class="bcClose" onclick="closeBuyerClub()" aria-label="關閉">
+          ✕
+        </button>
+
+        <aside class="bcAside">
+          <p class="bcBrand">✦ BEZOLD BUYER CLUB</p>
+          <h2 class="bcAsideTitle">
+            加入後<br />立刻看到聯絡方式
+            <span class="diffTag">contact_gate</span>
+          </h2>
+          <p class="bcAsideLede">
+            為了保護屋主不被騷擾，聯絡方式只開放給買家俱樂部成員。加入是免費的，完成後這一頁的電話與
+            LINE 會立刻顯示。
+          </p>
+          <ul class="bcBenefits">
+            <li>
+              <span class="bcNum">01</span> 立即解鎖本物件的電話與 LINE
+              <span class="diffTag">改</span>
+            </li>
+            <li><span class="bcNum">02</span> 精準配對你的條件</li>
+            <li><span class="bcNum">03</span> 免費加入 · 隨時取消</li>
+          </ul>
+          <span class="bcWatermark" aria-hidden="true">B</span>
+        </aside>
+
+        <div class="bcForm">
+          <h3 class="bcFormTitle">建立你的買家條件</h3>
+          <p class="bcFormSub">
+            填寫約 1 分鐘，標示 * 為必填。（表單與驗證沿用現況，未改動）
+          </p>
+
+          <div class="bcRow">
+            <div class="bcField">
+              <span class="bcFieldLabel">稱呼 <i>*</i></span>
+              <div class="bcInput">怎麼稱呼您？</div>
+            </div>
+            <div class="bcField">
+              <span class="bcFieldLabel">想找的頂讓類型 <i>*</i></span>
+              <div class="bcInput">請選擇</div>
+            </div>
+          </div>
+
+          <div class="bcRow">
+            <div class="bcField">
+              <span class="bcFieldLabel">預算範圍 <i>*</i></span>
+              <div class="bcInput">請選擇預算範圍</div>
+            </div>
+            <div class="bcField">
+              <span class="bcFieldLabel">希望地區（縣市）<i>*</i></span>
+              <div class="bcInput">請選擇</div>
+            </div>
+          </div>
+
+          <div class="bcRow">
+            <div class="bcField">
+              <span class="bcFieldLabel">電話</span>
+              <div class="bcInput">例：0912345678</div>
+            </div>
+            <div class="bcField">
+              <span class="bcFieldLabel">LINE ID</span>
+              <div class="bcInput">您的 LINE ID</div>
+            </div>
+          </div>
+
+          <div class="bcDivider"></div>
+
+          <div class="bcRow">
+            <div class="bcField">
+              <span class="bcFieldLabel">登入電子信箱 <i>*</i></span>
+              <div class="bcInput">your@email.com</div>
+            </div>
+            <div class="bcField">
+              <span class="bcFieldLabel">設定密碼 <i>*</i></span>
+              <div class="bcInput">至少 6 個字元</div>
+            </div>
+          </div>
+
+          <label class="bcCheck">
+            <input type="checkbox" /> 我同意 服務條款 與 隱私政策
+          </label>
+
+          <button class="bcSubmit" onclick="unlock()">
+            免費加入並查看聯絡方式 →<span class="diffTag">改</span>
+          </button>
+
+          <p class="bcLoginHint">
+            已經有帳號？
+            <a
+              href="#"
+              onclick="
+                unlock();
+                return false;
+              "
+              >由此登入</a
+            >
+            <span class="diffTag">帶 redirect</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const backdrop = document.getElementById("bcBackdrop");
+      const gateCard = document.getElementById("gateCard");
+
+      function openBuyerClub(source) {
+        // 真實實作：setBuyerClubSource(source) + setBuyerClubOpen(true)
+        // 並 trackEvent("contact_gate_click", { trigger: source })
+        backdrop.classList.add("open");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeBuyerClub() {
+        backdrop.classList.remove("open");
+        document.body.style.overflow = "";
+      }
+
+      function unlock() {
+        // 真實實作：signup() 成功 → onAuthStateChanged → 卡片自己重新渲染
+        closeBuyerClub();
+        gateCard.classList.add("unlocked");
+        gateCard.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      function relock() {
+        gateCard.classList.remove("unlocked");
+      }
+
+      backdrop.addEventListener("click", (event) => {
+        if (event.target === backdrop) closeBuyerClub();
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeBuyerClub();
+      });
+    </script>
+  </body>
+</html>
