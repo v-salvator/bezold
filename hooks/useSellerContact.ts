@@ -49,7 +49,7 @@ export function useSellerContact({
   initialContact,
   isExample = false,
 }: UseSellerContactParams) {
-  const { phone, lineId, email } = initialContact;
+  const { phone, lineId, threadsId, email } = initialContact;
   const [status, setStatus] = useState<SellerContactStatus>(
     isExample ? "unlocked" : "loading",
   );
@@ -67,7 +67,7 @@ export function useSellerContact({
       if (!firebaseUser) {
         if (!active) return;
         wasLocked.current = true;
-        setContact({ phone, lineId, email });
+        setContact({ phone, lineId, threadsId, email });
         setStatus("locked");
         return;
       }
@@ -88,7 +88,7 @@ export function useSellerContact({
       active = false;
       unsubscribe();
     };
-  }, [storeId, isExample, phone, lineId, email]);
+  }, [storeId, isExample, phone, lineId, threadsId, email]);
 
   return { status, contact, justUnlocked };
 }

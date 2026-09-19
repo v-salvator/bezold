@@ -95,12 +95,17 @@ export const genDefaultStore = () => {
 };
 
 // * ── Seller contact ────────────────────────────────────────────────────────
-// * Real phone / LINE / email never reach a logged-out visitor's HTML or the
+// * Real phone / LINE / Threads / email never reach a logged-out visitor's HTML or the
 // * public store API — the fields are blanked, including whether the seller
 // * filled them in at all. Signed-in members read the real values from
 // * GET /api/stores/[id]/contact (see SellerContactGate).
 
-const EMPTY_CONTACT: SellerContact = { phone: "", lineId: "", email: "" };
+const EMPTY_CONTACT: SellerContact = {
+  phone: "",
+  lineId: "",
+  threadsId: "",
+  email: "",
+};
 
 export function omitSellerContact(store: Store): Store {
   if (!store.userInfo) return store;

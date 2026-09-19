@@ -150,6 +150,7 @@
 .cta {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 14px;
 }
@@ -159,6 +160,11 @@
   display: block;
   text-decoration: none;
   color: inherit;
+}
+
+/* * secondary channel — drops to its own full-width row under 電話 / LINE */
+.ctaLinkFull {
+  flex-basis: 100%;
 }
 
 .btn {
