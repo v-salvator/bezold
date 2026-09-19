@@ -20,6 +20,7 @@ export interface User {
   phone: string;
   email?: string;
   lineId?: string;
+  threadsId?: string;
   remark?: string;
   // Absent for users who never filled the buyer club form.
   buyerProfile?: BuyerProfile;
@@ -41,6 +42,7 @@ export interface UserDoc {
   phone: string;
   email?: string;
   lineId?: string;
+  threadsId?: string;
   remark?: string;
   buyerProfile?: BuyerProfile;
   hasBuyerProfile?: boolean;
@@ -49,11 +51,12 @@ export interface UserDoc {
   updateTime: Timestamp;
 }
 
-// The three seller channels shown on a store page. Served by
+// The seller channels shown on a store page. Served by
 // GET /api/stores/[storeId]/contact to signed-in members only — the public
 // store payload carries masked placeholders instead (see utils/store.ts).
 export interface SellerContact {
   phone: string;
   lineId: string;
+  threadsId: string;
   email: string;
 }

@@ -21,6 +21,7 @@ export interface BossFields {
   phone: string;
   email: string;
   lineId: string;
+  threadsId: string;
   remark: string;
 }
 
@@ -56,6 +57,7 @@ export function emptyBossFields(): BossFields {
     phone: "",
     email: "",
     lineId: "",
+    threadsId: "",
     remark: "",
   };
 }

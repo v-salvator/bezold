@@ -54,6 +54,14 @@ export default function ContactFieldsSection({
         onChange={(event) => onChange("lineId", event.target.value)}
       />
 
+      <FormField
+        id="threadsId"
+        label="Threads 帳號"
+        placeholder="選填，例：@bezold"
+        value={boss.threadsId}
+        onChange={(event) => onChange("threadsId", event.target.value)}
+      />
+
       <div className={styles.field}>
         <label className={styles.label} htmlFor="remark">
           備註

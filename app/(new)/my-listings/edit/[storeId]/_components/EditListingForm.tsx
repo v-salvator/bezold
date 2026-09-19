@@ -25,6 +25,7 @@ import {
 } from "@/components/storeForm/formTypes";
 import styles from "@/components/storeForm/storeForm.module.css";
 import { type Store, type EquipmentStatus, STORE_STATUS } from "@/types";
+import { normalizeThreadsId } from "@/utils/user";
 
 export default function EditListingForm({ storeId }: { storeId: string }) {
   const router = useRouter();
@@ -97,6 +98,7 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
           phone: userDoc?.phone ?? "",
           email: firebaseUser.email ?? "",
           lineId: userDoc?.lineId ?? "",
+          threadsId: userDoc?.threadsId ?? "",
           remark: userDoc?.remark ?? "",
         });
 
@@ -152,6 +154,7 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
         userName: boss.userName,
         phone: boss.phone,
         lineId: boss.lineId,
+        threadsId: normalizeThreadsId(boss.threadsId),
         remark: boss.remark,
       });
     } catch {

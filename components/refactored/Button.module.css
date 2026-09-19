@@ -29,6 +29,10 @@
     background: var(--accent-2);
     color: #fff;
   }
+  &.ink {
+    background: var(--ink);
+    color: #fff;
+  }
 }
 .btn:hover {
   transform: translate(-1px, -1px);

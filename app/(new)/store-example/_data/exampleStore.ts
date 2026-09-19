@@ -24,6 +24,7 @@ export const exampleStore: Store = {
     phone: "0912-345-678",
     email: "example@example.com",
     lineId: "@example_store",
+    threadsId: "example_store",
     createTime: new Date("2024-01-01"),
     updateTime: new Date("2024-01-01"),
   },

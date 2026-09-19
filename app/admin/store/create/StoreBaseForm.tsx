@@ -12,7 +12,7 @@ import {
 } from "antd";
 import { useRouter, usePathname } from "next/navigation";
 import { genDefaultStore, formatPriceDisplay } from "@/utils/store";
-import { genDefaultUser } from "@/utils/user";
+import { genDefaultUser, normalizeThreadsId } from "@/utils/user";
 
 import type { Store, User } from "@/types";
 import { STORE_STATUS } from "@/types";
@@ -56,7 +56,10 @@ export default function StoreBaseForm() {
 
   const handleCreateStore = async () => {
     if (isValidateStore() && isValidateUser()) {
-      const userRef = await createUserDoc(user as User);
+      const userRef = await createUserDoc({
+        ...user,
+        threadsId: normalizeThreadsId(user.threadsId ?? ""),
+      } as User);
       const userId = userRef.id;
       const storeRef = await createStoreDoc({
         ...store,
@@ -259,6 +262,13 @@ export default function StoreBaseForm() {
       <Input
         defaultValue={user?.lineId}
         onChange={(e) => handleUserFieldChange("lineId", e.target.value)}
+      ></Input>
+      <Typography.Title level={5}>Threads (optional)</Typography.Title>
+      <Input
+        defaultValue={user?.threadsId}
+        onChange={(event) =>
+          handleUserFieldChange("threadsId", event.target.value)
+        }
       ></Input>
       <Typography.Title level={5}>Remark (optional)</Typography.Title>
       <Input

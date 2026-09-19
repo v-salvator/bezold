@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Phone, MessageCircle, Mail, Lock } from "lucide-react";
+import { Phone, Mail, Lock } from "lucide-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import Button from "@/components/refactored/Button";
+import LineIcon from "@/components/icon/LineIcon";
+import ThreadsIcon from "@/components/icon/ThreadsIcon";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/firebase/client";
 import {
@@ -23,6 +25,7 @@ const EXAMPLE_TITLE = "這是示範頁面，非真實物件";
 const LOCKED_PLACEHOLDER: SellerContact = {
   phone: "0900-000-000",
   lineId: "bezold_user",
+  threadsId: "bezold_user",
   email: "seller@example.com",
 };
 
@@ -99,9 +102,9 @@ export function SellerContactLines({
       <div className={cn(styles.slot, styles.slotLocked)}>
         {/* Placeholders carry no information — keep them from screen readers. */}
         <div className={cn(styles.lines, styles.blurred)} aria-hidden="true">
-          <ContactLine icon={Phone} value={LOCKED_PLACEHOLDER.phone} />
-          <ContactLine icon={MessageCircle} value={LOCKED_PLACEHOLDER.lineId} />
-          <ContactLine icon={Mail} value={LOCKED_PLACEHOLDER.email} />
+          <ContactLine icon={phoneIcon} value={LOCKED_PLACEHOLDER.phone} />
+          <ContactLine icon={lineIcon} value={LOCKED_PLACEHOLDER.lineId} />
+          <ContactLine icon={mailIcon} value={LOCKED_PLACEHOLDER.email} />
         </div>
         <button
           type="button"
@@ -116,17 +119,22 @@ export function SellerContactLines({
   }
 
   const hasAnyContact = Boolean(
-    contact.phone || contact.lineId || contact.email,
+    contact.phone || contact.lineId || contact.threadsId || contact.email,
   );
 
   return (
     <div className={styles.slot}>
       <div className={cn(styles.lines, justUnlocked && styles.unblur)}>
-        {contact.phone && <ContactLine icon={Phone} value={contact.phone} />}
-        {contact.lineId && (
-          <ContactLine icon={MessageCircle} value={contact.lineId} />
+        {contact.phone && (
+          <ContactLine icon={phoneIcon} value={contact.phone} />
         )}
-        {contact.email && <ContactLine icon={Mail} value={contact.email} />}
+        {contact.lineId && (
+          <ContactLine icon={lineIcon} value={contact.lineId} />
+        )}
+        {contact.threadsId && (
+          <ContactLine icon={threadsIcon} value={`@${contact.threadsId}`} />
+        )}
+        {contact.email && <ContactLine icon={mailIcon} value={contact.email} />}
         {!hasAnyContact && <p className={styles.empty}>賣家尚未提供聯絡方式</p>}
       </div>
     </div>
@@ -134,8 +142,8 @@ export function SellerContactLines({
 }
 
 /**
- * The price card's two contact CTAs. Locked they open the buyer club popup;
- * unlocked they are the real tel: / LINE links.
+ * The price card's contact CTAs. Locked they open the buyer club popup;
+ * unlocked they are the real tel: / LINE / Threads links.
  */
 export function SellerContactCta({
   storeId,
@@ -207,7 +215,7 @@ export function SellerContactCta({
           (isExample ? (
             <span title={EXAMPLE_TITLE} className={styles.ctaLink}>
               <Button variant="sage" className={styles.btn} disabled>
-                <MessageCircle size={15} strokeWidth={2.5} />加 LINE 聯繫
+                <LineIcon style={{ fontSize: 17 }} />加 LINE 聯繫
               </Button>
             </span>
           ) : (
@@ -218,7 +226,29 @@ export function SellerContactCta({
               className={styles.ctaLink}
             >
               <Button variant="sage" className={styles.btn}>
-                <MessageCircle size={15} strokeWidth={2.5} />加 LINE 聯繫
+                <LineIcon style={{ fontSize: 17 }} />加 LINE 聯繫
+              </Button>
+            </a>
+          ))}
+        {contact.threadsId &&
+          (isExample ? (
+            <span
+              title={EXAMPLE_TITLE}
+              className={cn(styles.ctaLink, styles.ctaLinkFull)}
+            >
+              <Button variant="ink" className={styles.btn} disabled>
+                <ThreadsIcon style={{ fontSize: 17 }} />到 Threads 私訊賣家
+              </Button>
+            </span>
+          ) : (
+            <a
+              href={`https://www.threads.com/@${contact.threadsId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(styles.ctaLink, styles.ctaLinkFull)}
+            >
+              <Button variant="ink" className={styles.btn}>
+                <ThreadsIcon style={{ fontSize: 17 }} />到 Threads 私訊賣家
               </Button>
             </a>
           ))}
@@ -230,16 +260,22 @@ export function SellerContactCta({
   );
 }
 
+// * lucide glyphs for generic channels, official brand marks for LINE / Threads.
+const phoneIcon = <Phone size={12} strokeWidth={2} />;
+const mailIcon = <Mail size={12} strokeWidth={2} />;
+const lineIcon = <LineIcon style={{ fontSize: 16 }} />;
+const threadsIcon = <ThreadsIcon style={{ fontSize: 16 }} />;
+
 function ContactLine({
-  icon: Icon,
+  icon,
   value,
 }: {
-  icon: typeof Phone;
+  icon: React.ReactNode;
   value: string;
 }) {
   return (
     <span>
-      <Icon size={12} strokeWidth={2} />
+      {icon}
       {value}
     </span>
   );

@@ -37,6 +37,7 @@ export default function StorePriceCard({
   const initialContact = {
     phone: userInfo?.phone ?? "",
     lineId: userInfo?.lineId ?? "",
+    threadsId: userInfo?.threadsId ?? "",
     email: userInfo?.email ?? "",
   };
   const isUrgent = !isSold && tags?.includes(STORE_TAG.EMERGENCY);

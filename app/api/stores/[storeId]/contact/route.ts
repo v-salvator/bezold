@@ -7,7 +7,12 @@ interface ContactProps {
   params: { storeId: string };
 }
 
-const EMPTY_CONTACT: SellerContact = { phone: "", lineId: "", email: "" };
+const EMPTY_CONTACT: SellerContact = {
+  phone: "",
+  lineId: "",
+  threadsId: "",
+  email: "",
+};
 
 // Seller contact details are stripped from the public store payload, so this is
 // the only way to read them. Any signed-in member may call it — the gate is
@@ -30,6 +35,7 @@ export async function GET(req: NextRequest, { params }: ContactProps) {
   const contact: SellerContact = {
     phone: userInfo?.phone ?? "",
     lineId: userInfo?.lineId ?? "",
+    threadsId: userInfo?.threadsId ?? "",
     email: userInfo?.email ?? "",
   };
   return NextResponse.json(contact);

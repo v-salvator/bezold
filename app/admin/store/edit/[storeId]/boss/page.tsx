@@ -9,6 +9,7 @@ import { Input, Skeleton, Typography, Button, notification } from "antd";
 import { useRouter, usePathname } from "next/navigation";
 
 import type { Store, User } from "@/types";
+import { normalizeThreadsId } from "@/utils/user";
 
 interface EditStoreBossProps {
   params: { storeId: Store["id"] };
@@ -41,6 +42,7 @@ export default function EditStoreBoss({ params }: EditStoreBossProps) {
         userName: userCloned.userName,
         email: userCloned.email,
         lineId: userCloned.lineId,
+        threadsId: normalizeThreadsId(userCloned.threadsId ?? ""),
         phone: userCloned.phone,
         remark: userCloned.remark,
       });
@@ -89,6 +91,13 @@ export default function EditStoreBoss({ params }: EditStoreBossProps) {
       <Input
         defaultValue={userCloned?.lineId}
         onChange={(e) => handleUserFieldChange("lineId", e.target.value)}
+      ></Input>
+      <Typography.Title level={5}>Threads (optional)</Typography.Title>
+      <Input
+        defaultValue={userCloned?.threadsId}
+        onChange={(event) =>
+          handleUserFieldChange("threadsId", event.target.value)
+        }
       ></Input>
       <Typography.Title level={5}>Remark (optional)</Typography.Title>
       <Input
