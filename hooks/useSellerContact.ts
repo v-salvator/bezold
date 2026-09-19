@@ -37,22 +37,23 @@ async function fetchSellerContact(
 
 interface UseSellerContactParams {
   storeId: string;
-  /** Placeholder values from the server — see maskSellerContact(). */
-  masked: SellerContact;
+  /** Contact from the store payload — blank on real listings, fictional on
+   *  the example listing (which is returned as-is, never gated). */
+  initialContact: SellerContact;
   /** The example listing is fictional data, so it is never gated. */
   isExample?: boolean;
 }
 
 export function useSellerContact({
   storeId,
-  masked,
+  initialContact,
   isExample = false,
 }: UseSellerContactParams) {
-  const { phone, lineId, email } = masked;
+  const { phone, lineId, email } = initialContact;
   const [status, setStatus] = useState<SellerContactStatus>(
     isExample ? "unlocked" : "loading",
   );
-  const [contact, setContact] = useState<SellerContact>(masked);
+  const [contact, setContact] = useState<SellerContact>(initialContact);
   // Tracks the locked → unlocked transition so the card can acknowledge a
   // just-completed signup, without greeting members who arrived signed in.
   const wasLocked = useRef(false);

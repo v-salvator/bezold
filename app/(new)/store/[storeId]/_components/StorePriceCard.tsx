@@ -32,9 +32,9 @@ export default function StorePriceCard({
   const isNegotiable = price > 0 && !!priceNegotiable;
   // * sold listings hide all seller contact info + CTAs — only the name shows.
   const isSold = store.status === STORE_STATUS.SOLD;
-  // * placeholders for logged-out visitors; SellerContactGate swaps in the real
-  // * values once the viewer is a signed-in member (see maskSellerContact()).
-  const maskedContact = {
+  // * blank on real listings (the server strips it — see omitSellerContact());
+  // * SellerContactGate fetches the real values once the viewer is a member.
+  const initialContact = {
     phone: userInfo?.phone ?? "",
     lineId: userInfo?.lineId ?? "",
     email: userInfo?.email ?? "",
@@ -74,7 +74,7 @@ export default function StorePriceCard({
           {!isSold && (
             <SellerContactLines
               storeId={store.id}
-              masked={maskedContact}
+              initialContact={initialContact}
               isExample={isExample}
             />
           )}
@@ -145,7 +145,7 @@ export default function StorePriceCard({
       {!isSold && (
         <SellerContactCta
           storeId={store.id}
-          masked={maskedContact}
+          initialContact={initialContact}
           isExample={isExample}
         />
       )}
