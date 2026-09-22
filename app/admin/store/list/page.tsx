@@ -10,60 +10,66 @@ import {
   Input,
   DatePicker,
   Modal,
+  Select,
   message,
 } from "antd";
 import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
-import Link from "next/link";
 
 import type { TableProps } from "antd";
 import type { Store } from "@/types";
 import { STORE_STATUS, type StoreStatus } from "@/types";
-import { STORE_TAG, type StoreTag } from "@/types";
 import { formatPriceDisplay } from "@/utils/store";
+import { STORE_CATEGORIES } from "@/constant/storeType";
+import { STATUS_COLOR, STATUS_LABEL } from "@/constant/adminStore";
 import { authedFetch } from "@/lib/authedFetch";
 import { useAdminAuth } from "@/hooks";
+import { cn } from "@/lib/utils";
+import StoreDetailDrawer from "./_components/StoreDetailDrawer";
 
-const STATUS_COLOR: Record<StoreStatus, string> = {
-  pending: "orange",
-  approved: "green",
-  rejected: "red",
-  sold: "default",
-};
+type StatusFilter = StoreStatus | "all";
 
-const STATUS_LABEL: Record<StoreStatus, string> = {
-  pending: "待審核",
-  approved: "已上架",
-  rejected: "已拒絕",
-  sold: "已頂讓",
-};
+const STATUS_FILTER_OPTIONS: { label: string; value: StatusFilter }[] = [
+  { label: "所有狀態", value: "all" },
+  ...[
+    STORE_STATUS.PENDING,
+    STORE_STATUS.APPROVED,
+    STORE_STATUS.REJECTED,
+    STORE_STATUS.SOLD,
+  ].map((status) => ({ label: STATUS_LABEL[status], value: status })),
+];
 
-// Explicit per-tag colours so each tag reads distinctly (the old length-based
-// heuristic collapsed RECOMMENDED and DETAILED_DATA into the same blue).
-const TAG_COLOR: Record<StoreTag, string> = {
-  [STORE_TAG.CHEAP]: "green",
-  [STORE_TAG.EMERGENCY]: "volcano",
-  [STORE_TAG.RECOMMENDED]: "geekblue",
-  [STORE_TAG.DETAILED_DATA]: "purple",
-};
+const BULK_STATUS_ACTIONS: { label: string; status: StoreStatus }[] = [
+  { label: "✓ 通過", status: STORE_STATUS.APPROVED },
+  { label: "✕ 拒絕", status: STORE_STATUS.REJECTED },
+  { label: "已頂讓", status: STORE_STATUS.SOLD },
+];
 
 export default function List() {
   const { idToken } = useAdminAuth();
   const [modal, modalHolder] = Modal.useModal();
   const [messageApi, messageHolder] = message.useMessage();
   const [stores, setStores] = useState<Store[]>([]);
+  const [loading, setLoading] = useState(true);
+  // storeId whose status is being written (drawer or bulk).
   const [updating, setUpdating] = useState<string | null>(null);
+  const [bulkUpdating, setBulkUpdating] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [activeStoreId, setActiveStoreId] = useState<string | null>(null);
   // guards against opening a second confirm for the same row (e.g. a same-tick
   // double-click, which the modal mask cannot block until it has mounted).
   const confirmOpenRef = useRef(false);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [dateRange, setDateRange] = useState<
     [Dayjs | null, Dayjs | null] | null
   >(null);
 
   const normalizedSearch = search.trim().toLowerCase();
   const [rangeStart, rangeEnd] = dateRange ?? [null, null];
+  const activeStore =
+    stores.find((store) => store.id === activeStoreId) ?? null;
 
   const filteredStores = stores.filter((store) => {
     const matchesSearch =
@@ -71,34 +77,91 @@ export default function List() {
       store.storeName?.toLowerCase().includes(normalizedSearch) ||
       store.user?.toLowerCase().includes(normalizedSearch);
 
+    const matchesStatus =
+      statusFilter === "all" ||
+      (store.status ?? STORE_STATUS.PENDING) === statusFilter;
+
     const createdAt = store.createTime ? dayjs(store.createTime) : null;
     const matchesDate =
       (!rangeStart || (createdAt && !createdAt.isBefore(rangeStart, "day"))) &&
       (!rangeEnd || (createdAt && !createdAt.isAfter(rangeEnd, "day")));
 
-    return matchesSearch && matchesDate;
+    return matchesSearch && matchesStatus && matchesDate;
   });
 
   const fetchStores = async () => {
-    const fetchedStores = await getStores();
-    setStores(fetchedStores);
+    setLoading(true);
+    try {
+      const fetchedStores = await getStores();
+      setStores(fetchedStores);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchStores();
   }, []);
 
+  // updateStoreStatus also stamps updateTime server-side; mirror it locally so
+  // the 更新 column reflects the change without a refetch.
+  const applyStatus = (storeIds: string[], status: StoreStatus) => {
+    const now = new Date();
+    setStores((previous) =>
+      previous.map((store) =>
+        storeIds.includes(store.id)
+          ? { ...store, status, updateTime: now }
+          : store,
+      ),
+    );
+  };
+
   const handleStatusChange = async (storeId: string, status: StoreStatus) => {
-    setUpdating(storeId + status);
+    setUpdating(storeId);
     try {
       await updateStoreStatus(storeId, status);
-      setStores((previous) =>
-        previous.map((store) =>
-          store.id === storeId ? { ...store, status } : store,
-        ),
-      );
+      applyStatus([storeId], status);
+      messageApi.success(`已更新為「${STATUS_LABEL[status]}」`);
+    } catch {
+      messageApi.error("更新失敗，請稍後再試");
     } finally {
       setUpdating(null);
+    }
+  };
+
+  const handleBulkStatusChange = async (status: StoreStatus) => {
+    setBulkUpdating(true);
+    const results = await Promise.allSettled(
+      selectedIds.map((storeId) => updateStoreStatus(storeId, status)),
+    );
+    const succeededIds = selectedIds.filter(
+      (_, index) => results[index].status === "fulfilled",
+    );
+    const failedIds = selectedIds.filter(
+      (_, index) => results[index].status === "rejected",
+    );
+    applyStatus(succeededIds, status);
+    // Keep only the failures selected so the admin can retry them.
+    setSelectedIds(failedIds);
+    setBulkUpdating(false);
+
+    if (failedIds.length === 0) {
+      messageApi.success(
+        `已將 ${succeededIds.length} 筆更新為「${STATUS_LABEL[status]}」`,
+      );
+    } else {
+      messageApi.error(
+        `${failedIds.length} 筆更新失敗（仍保持選取），${succeededIds.length} 筆成功`,
+      );
+    }
+  };
+
+  const handleCopyLink = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      messageApi.success("已複製連結");
+    } catch {
+      messageApi.error("複製失敗，請手動選取連結");
     }
   };
 
@@ -134,6 +197,12 @@ export default function List() {
           setStores((previous) =>
             previous.filter((item) => item.id !== store.id),
           );
+          setSelectedIds((previous) =>
+            previous.filter((storeId) => storeId !== store.id),
+          );
+          setActiveStoreId((previous) =>
+            previous === store.id ? null : previous,
+          );
           messageApi.success("商店已刪除");
           confirmOpenRef.current = false;
         } catch {
@@ -149,57 +218,17 @@ export default function List() {
 
   const columns: TableProps<Store>["columns"] = [
     {
-      title: "Name",
+      title: "店名",
       dataIndex: "storeName",
       key: "storeName",
-    },
-    {
-      title: "Price",
-      dataIndex: "price",
-      key: "price",
-      render: (_, record) =>
-        formatPriceDisplay(record.price, record.priceNegotiable),
-    },
-    {
-      title: "Location",
-      dataIndex: "location",
-      key: "location",
-      render: (_, record) => (
-        <div>
-          <span>{`${record.city ?? "NoCity"}`}</span>
-          <br />
-          <span>{`${record.district ?? "NoDistrict"}`}</span>
-          <br />
-          <span>{`${record.location}`}</span>
-        </div>
+      render: (_, { storeName }) => (
+        <span className="font-semibold">{storeName || "—"}</span>
       ),
     },
     {
-      title: "Tags",
-      key: "tags",
-      dataIndex: "tags",
-      render: (_, { tags }) => (
-        <>
-          {tags?.map((tag) => (
-            <Tag color={TAG_COLOR[tag] ?? "default"} key={tag}>
-              {tag.toUpperCase()}
-            </Tag>
-          ))}
-        </>
-      ),
-    },
-    {
-      title: "Status",
+      title: "狀態",
       dataIndex: "status",
       key: "status",
-      filters: [
-        { text: "待審核", value: STORE_STATUS.PENDING },
-        { text: "已上架", value: STORE_STATUS.APPROVED },
-        { text: "已拒絕", value: STORE_STATUS.REJECTED },
-        { text: "已頂讓", value: STORE_STATUS.SOLD },
-      ],
-      onFilter: (value, record) =>
-        (record.status ?? STORE_STATUS.PENDING) === value,
       render: (_, { status }) => {
         const resolvedStatus = status ?? STORE_STATUS.PENDING;
         return (
@@ -210,67 +239,78 @@ export default function List() {
       },
     },
     {
-      title: "Created At",
-      dataIndex: "createTime",
-      key: "createTime",
-      render: (_, { createTime }) =>
-        dayjs(createTime).format("YYYY-MM-DD h:mm:ss A"),
+      title: "城市",
+      dataIndex: "city",
+      key: "city",
+      render: (_, { city }) => city || "—",
     },
     {
-      title: "Action",
-      key: "action",
-      render: (_, record) => (
-        <Space size="middle" wrap>
-          <Link href={`/admin/store/edit/${record.id}`}>Edit</Link>
-          <a href={`/store/${record.id}`} target="_blank" rel="noreferrer">
-            View
-          </a>
-          <AntButton
-            size="small"
-            type="primary"
-            disabled={
-              record.status === STORE_STATUS.APPROVED ||
-              updating === record.id + STORE_STATUS.APPROVED
-            }
-            loading={updating === record.id + STORE_STATUS.APPROVED}
-            onClick={() => handleStatusChange(record.id, STORE_STATUS.APPROVED)}
-          >
-            通過
-          </AntButton>
-          <AntButton
-            size="small"
-            danger
-            disabled={
-              record.status === STORE_STATUS.REJECTED ||
-              updating === record.id + STORE_STATUS.REJECTED
-            }
-            loading={updating === record.id + STORE_STATUS.REJECTED}
-            onClick={() => handleStatusChange(record.id, STORE_STATUS.REJECTED)}
-          >
-            拒絕
-          </AntButton>
-          <AntButton
-            size="small"
-            disabled={
-              record.status === STORE_STATUS.SOLD ||
-              updating === record.id + STORE_STATUS.SOLD
-            }
-            loading={updating === record.id + STORE_STATUS.SOLD}
-            onClick={() => handleStatusChange(record.id, STORE_STATUS.SOLD)}
-          >
-            已頂讓
-          </AntButton>
-          <AntButton
-            size="small"
-            danger
-            type="primary"
-            loading={deleting === record.id}
-            onClick={() => handleDelete(record)}
-          >
-            刪除
-          </AntButton>
-        </Space>
+      title: "區域",
+      dataIndex: "district",
+      key: "district",
+      render: (_, { district }) => district || "—",
+    },
+    {
+      title: "類別",
+      dataIndex: "category",
+      key: "category",
+      render: (_, { category }) =>
+        STORE_CATEGORIES.find((item) => item.key === category)?.label ??
+        (category || "—"),
+    },
+    {
+      title: "頂讓金",
+      dataIndex: "price",
+      key: "price",
+      align: "right",
+      sorter: (left, right) => (left.price ?? 0) - (right.price ?? 0),
+      render: (_, record) =>
+        formatPriceDisplay(record.price, record.priceNegotiable),
+    },
+    {
+      title: "坪數",
+      dataIndex: "areaPing",
+      key: "areaPing",
+      align: "right",
+      render: (_, { areaPing }) => areaPing ?? "—",
+    },
+    {
+      title: "月租",
+      dataIndex: "monthlyRent",
+      key: "monthlyRent",
+      align: "right",
+      render: (_, { monthlyRent }) =>
+        monthlyRent ? monthlyRent.toLocaleString() : "—",
+    },
+    {
+      title: "建立",
+      dataIndex: "createTime",
+      key: "createTime",
+      sorter: (left, right) =>
+        dayjs(left.createTime).valueOf() - dayjs(right.createTime).valueOf(),
+      render: (_, { createTime }) => (
+        <span className="whitespace-nowrap text-black/45">
+          {dayjs(createTime).format("YYYY-MM-DD")}
+        </span>
       ),
+    },
+    {
+      title: "更新",
+      dataIndex: "updateTime",
+      key: "updateTime",
+      defaultSortOrder: "descend",
+      // dayjs(undefined) is "now" — sort stores missing updateTime last instead.
+      sorter: (left, right) =>
+        (left.updateTime ? dayjs(left.updateTime).valueOf() : 0) -
+        (right.updateTime ? dayjs(right.updateTime).valueOf() : 0),
+      render: (_, { updateTime }) =>
+        updateTime ? (
+          <span className="whitespace-nowrap text-black/45">
+            {dayjs(updateTime).format("YYYY-MM-DD HH:mm")}
+          </span>
+        ) : (
+          "—"
+        ),
     },
   ];
 
@@ -278,13 +318,19 @@ export default function List() {
     <div className="p-[16px]">
       {modalHolder}
       {messageHolder}
-      <Space className="mb-[16px]" wrap>
+      <Space className="mb-[12px]" wrap>
         <Input.Search
           allowClear
           placeholder="Search by store name or user ID"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          className="w-[360px] max-w-full"
+          className="w-[320px] max-w-full"
+        />
+        <Select
+          value={statusFilter}
+          onChange={setStatusFilter}
+          options={STATUS_FILTER_OPTIONS}
+          className="w-[128px]"
         />
         <DatePicker.RangePicker
           value={dateRange}
@@ -292,7 +338,67 @@ export default function List() {
           placeholder={["Created from", "Created to"]}
         />
       </Space>
-      <Table columns={columns} dataSource={filteredStores} rowKey={"id"} />
+
+      {selectedIds.length > 0 && (
+        <div className="mb-[12px] flex flex-wrap items-center gap-[8px] rounded-[8px] border border-solid border-[#ffd8d1] bg-[#fff1ee] px-[12px] py-[8px]">
+          <span className="font-semibold">已選取 {selectedIds.length} 筆</span>
+          {BULK_STATUS_ACTIONS.map((action) => (
+            <AntButton
+              key={action.status}
+              size="small"
+              disabled={bulkUpdating}
+              onClick={() => handleBulkStatusChange(action.status)}
+            >
+              {action.label}
+            </AntButton>
+          ))}
+          <AntButton
+            size="small"
+            type="text"
+            disabled={bulkUpdating}
+            onClick={() => setSelectedIds([])}
+          >
+            取消選取
+          </AntButton>
+        </div>
+      )}
+
+      <Table
+        size="small"
+        columns={columns}
+        dataSource={filteredStores}
+        rowKey="id"
+        loading={loading || bulkUpdating}
+        scroll={{ x: 1040 }}
+        rowSelection={{
+          selectedRowKeys: selectedIds,
+          onChange: (keys) => setSelectedIds(keys as string[]),
+        }}
+        onRow={(record) => ({
+          onClick: (event) => {
+            // Ticking a checkbox selects the row; it shouldn't open the drawer.
+            const target = event.target as HTMLElement;
+            if (target.closest(".ant-table-selection-column")) return;
+            setActiveStoreId(record.id);
+          },
+        })}
+        rowClassName={(record) =>
+          cn(
+            "cursor-pointer",
+            record.id === activeStoreId && "[&>td]:!bg-[#fff1ee]",
+          )
+        }
+      />
+
+      <StoreDetailDrawer
+        store={activeStore}
+        statusUpdating={updating === activeStoreId}
+        deleting={deleting === activeStoreId}
+        onClose={() => setActiveStoreId(null)}
+        onStatusChange={handleStatusChange}
+        onDelete={handleDelete}
+        onCopyLink={handleCopyLink}
+      />
     </div>
   );
 }
