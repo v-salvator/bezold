@@ -1,6 +1,5 @@
 import { type StoreCard } from "@/components/refactored/StoreCard";
 import { type Store, type SellerContact } from "@/types";
-import { STORE_CATEGORIES } from "@/constant/storeType";
 import { RIBBON_DISPLAY, RIBBON_PRIORITY } from "@/constant/storeDisplay";
 import { EQUIPMENT_LABEL } from "@/constant/storeEquipment";
 
@@ -40,16 +39,9 @@ export function storeToCard(store: Store): StoreCard {
   const ribbonTag = RIBBON_PRIORITY.find((tag) => tags.includes(tag));
   const ribbon = ribbonTag ? RIBBON_DISPLAY[ribbonTag] : undefined;
 
-  const categoryEntry = STORE_CATEGORIES.find(
-    (cat) => cat.key === store.category,
+  const locationParts = [store.city, store.location || store.district].filter(
+    Boolean,
   );
-  const categoryLabel = categoryEntry?.label ?? store.category;
-
-  const locationParts = [
-    categoryLabel,
-    store.city,
-    store.location || store.district,
-  ].filter(Boolean);
   const location =
     locationParts.length > 0 ? locationParts.join(" · ") : undefined;
 
