@@ -16,7 +16,6 @@ export type StoreCard = {
   image?: string;
   photoLabel?: string;
   title: string;
-  category?: string;
   location?: string;
   description?: string;
   specs?: { iconName: keyof typeof SPEC_ICONS; label: string }[];
@@ -50,9 +49,6 @@ export default function StoreCard({ card }: { card: StoreCard }) {
           <span className={cn(styles.ribbon, ribbonClass[card.ribbon.variant])}>
             {card.ribbon.label}
           </span>
-        )}
-        {card.category && (
-          <span className={styles.categoryChip}>{card.category}</span>
         )}
         {!card.image && (
           <span className={styles.photoLabel}>

@@ -1,6 +1,5 @@
 import { type StoreCard } from "@/components/refactored/StoreCard";
 import { type Store, type SellerContact } from "@/types";
-import { STORE_CATEGORIES } from "@/constant/storeType";
 import { RIBBON_DISPLAY, RIBBON_PRIORITY } from "@/constant/storeDisplay";
 import { EQUIPMENT_LABEL } from "@/constant/storeEquipment";
 
@@ -40,12 +39,6 @@ export function storeToCard(store: Store): StoreCard {
   const ribbonTag = RIBBON_PRIORITY.find((tag) => tags.includes(tag));
   const ribbon = ribbonTag ? RIBBON_DISPLAY[ribbonTag] : undefined;
 
-  const categoryEntry = STORE_CATEGORIES.find(
-    (cat) => cat.key === store.category,
-  );
-  const categoryLabel = categoryEntry?.label ?? store.category;
-
-  // * category renders as a chip on the photo, so it stays out of the location line
   const locationParts = [store.city, store.location || store.district].filter(
     Boolean,
   );
@@ -76,7 +69,6 @@ export function storeToCard(store: Store): StoreCard {
     ribbon,
     image: store.images?.[0],
     title: store.storeName,
-    category: categoryLabel || undefined,
     location,
     description: store.description || undefined,
     specs,
