@@ -45,11 +45,10 @@ export function storeToCard(store: Store): StoreCard {
   );
   const categoryLabel = categoryEntry?.label ?? store.category;
 
-  const locationParts = [
-    categoryLabel,
-    store.city,
-    store.location || store.district,
-  ].filter(Boolean);
+  // * category renders as a chip on the photo, so it stays out of the location line
+  const locationParts = [store.city, store.location || store.district].filter(
+    Boolean,
+  );
   const location =
     locationParts.length > 0 ? locationParts.join(" · ") : undefined;
 
@@ -77,6 +76,7 @@ export function storeToCard(store: Store): StoreCard {
     ribbon,
     image: store.images?.[0],
     title: store.storeName,
+    category: categoryLabel || undefined,
     location,
     description: store.description || undefined,
     specs,

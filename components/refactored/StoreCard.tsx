@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { MapPin, Ruler, Banknote, Package } from "lucide-react";
+import { cn } from "@/lib/utils";
 import styles from "./StoreCard.module.css";
 
 const SPEC_ICONS = {
@@ -15,6 +16,7 @@ export type StoreCard = {
   image?: string;
   photoLabel?: string;
   title: string;
+  category?: string;
   location?: string;
   description?: string;
   specs?: { iconName: keyof typeof SPEC_ICONS; label: string }[];
@@ -28,6 +30,9 @@ const ribbonClass: Record<RibbonVariant, string> = {
   sold: styles.ribbonSold,
 };
 
+// * Every text slot has a fixed line budget (title 2, location 1, description 2,
+// * specs 1) and the price is pinned to the bottom, so all cards in a grid share
+// * one height regardless of content length.
 export default function StoreCard({ card }: { card: StoreCard }) {
   return (
     <div className={styles.card}>
@@ -42,11 +47,12 @@ export default function StoreCard({ card }: { card: StoreCard }) {
           />
         )}
         {card.ribbon && (
-          <span
-            className={`${styles.ribbon} ${ribbonClass[card.ribbon.variant]}`}
-          >
+          <span className={cn(styles.ribbon, ribbonClass[card.ribbon.variant])}>
             {card.ribbon.label}
           </span>
+        )}
+        {card.category && (
+          <span className={styles.categoryChip}>{card.category}</span>
         )}
         {!card.image && (
           <span className={styles.photoLabel}>
@@ -54,17 +60,15 @@ export default function StoreCard({ card }: { card: StoreCard }) {
           </span>
         )}
       </div>
-      <div className={"p-3.5 flex flex-col gap-2"}>
-        <h4 className={styles.title}>{card.title}</h4>
-        {card.location && (
-          <div className={styles.location}>
-            <MapPin size={13} strokeWidth={2} />
-            {card.location}
-          </div>
-        )}
-        {card.description && (
-          <p className={styles.description}>{card.description}</p>
-        )}
+      <div className={"p-3.5 flex flex-1 flex-col gap-2"}>
+        <h4 className={styles.title} title={card.title}>
+          {card.title}
+        </h4>
+        <div className={styles.location}>
+          <MapPin size={13} strokeWidth={2} />
+          <span>{card.location ?? "—"}</span>
+        </div>
+        <p className={styles.description}>{card.description}</p>
         {card.specs && card.specs.length > 0 && (
           <div className={styles.specs}>
             {card.specs.map((spec, index) => (
@@ -77,6 +81,7 @@ export default function StoreCard({ card }: { card: StoreCard }) {
         )}
         <div className={styles.price}>
           <b>{card.price}</b>
+          <span className={styles.priceCta}>查看 →</span>
         </div>
       </div>
     </div>

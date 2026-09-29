@@ -93,6 +93,8 @@
   text-decoration: none;
   color: inherit;
   display: block;
+  /* let single-line ellipsis text shrink instead of widening the grid column */
+  min-width: 0;
 }
 
 /* Sold listings read as social proof — muted, but brighten on hover so a
