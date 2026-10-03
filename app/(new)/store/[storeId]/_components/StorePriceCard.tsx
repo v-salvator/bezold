@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Ruler, Banknote, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type Store, STORE_STATUS } from "@/types";
@@ -7,6 +8,10 @@ import { formatPriceDisplay, formatPriceParts } from "@/utils/store";
 import { isLatinChar } from "@/utils/string";
 import { SellerContactLines, SellerContactCta } from "./SellerContactGate";
 import styles from "./StorePriceCard.module.css";
+
+// Reports and support both go to the LINE 客服 account — the channel the
+// disclaimer (§07) names for flagging suspicious listings.
+const LINE_SUPPORT_URL = "https://line.me/ti/p/~bezoldtw";
 
 export default function StorePriceCard({
   store,
@@ -152,13 +157,26 @@ export default function StorePriceCard({
       )}
 
       <div className={styles.trust}>
-        <b>必售！安心提示</b>
-        本物件由賣家直接刊登，Bezold 不收取仲介費，洽談 / 議價 /
-        簽約皆為買賣雙方直接進行。建議現場看過再決定。
+        <b>資訊與交易提醒</b>
+        <p>
+          Bezold
+          提供頂讓資訊刊登與媒合服務；除另有書面約定外，非交易當事人或履約保證人。刊登資訊可能因資料來源或更新時間與實際情況不同；確認、精選、評分及估值標示僅限所揭露之範圍，不代表全面查核或成交、獲利保證。
+        </p>
+        <p>
+          請於付款或簽約前，查證賣方身分與轉讓權限、租約及房東同意、設備與財務資料，並以書面確認交易及交接條件。平台依法或依約應負之責任不因本提醒而免除。詳見
+          <Link href="/disclaimer">完整免責聲明</Link>。
+        </p>
       </div>
 
       <div className={styles.report}>
-        資訊有疑慮？ <a>檢舉此物件</a> · <a>聯絡客服</a>
+        資訊有疑慮？{" "}
+        <a href={LINE_SUPPORT_URL} target="_blank" rel="noopener noreferrer">
+          檢舉此物件
+        </a>{" "}
+        ·{" "}
+        <a href={LINE_SUPPORT_URL} target="_blank" rel="noopener noreferrer">
+          聯絡客服
+        </a>
       </div>
     </div>
   );

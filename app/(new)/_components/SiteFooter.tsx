@@ -146,6 +146,9 @@ export default function SiteFooter() {
           <li>
             <a href="/privacy">隱私政策</a>
           </li>
+          <li>
+            <a href="/disclaimer">免責聲明</a>
+          </li>
         </ul>
       </div>
       <div className={styles.legal}>
