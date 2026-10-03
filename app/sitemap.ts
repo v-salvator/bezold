@@ -30,6 +30,7 @@ const STATIC_ROUTES: MetadataRoute.Sitemap = [
   route("/blog", "weekly", 0.6),
   route("/privacy", "yearly", 0.3),
   route("/terms", "yearly", 0.3),
+  route("/disclaimer", "yearly", 0.3),
   route("/login", "yearly", 0.2),
   route("/signup", "yearly", 0.2),
 ];

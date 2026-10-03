@@ -1,0 +1,31 @@
+.prose {
+  font-family: var(--hand);
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--ink-2);
+  max-width: 720px;
+
+  & p {
+    margin: 8px 0;
+  }
+
+  & b {
+    color: var(--ink);
+  }
+
+  & ol {
+    margin: 8px 0;
+    padding-left: 1.6em;
+    list-style: decimal;
+  }
+
+  & li {
+    margin: 4px 0;
+  }
+
+  & a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}

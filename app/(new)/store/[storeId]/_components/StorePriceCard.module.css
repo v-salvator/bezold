@@ -235,6 +235,16 @@
     line-height: 1;
     margin-bottom: 4px;
   }
+
+  & p + p {
+    margin-top: 6px;
+  }
+
+  & a {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
 }
 
 .report {
