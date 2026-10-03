@@ -10,7 +10,7 @@ npm run build   # production build
 npm run lint    # ESLint via next/core-web-vitals
 ```
 
-No test runner is configured.
+No test runner is configured. Node version is pinned in `.nvmrc` (24) — run `nvm use` first.
 
 ## Environment
 
