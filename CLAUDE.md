@@ -12,6 +12,10 @@ npm run lint    # ESLint via next/core-web-vitals
 
 No test runner is configured.
 
+## Environment
+
+`.env` / `.env.development` (gitignored). `NEXT_PUBLIC_ENV_VERSION=dev` points at the mock collections; anything else uses prod. Client SDK reads `NEXT_PUBLIC_FIREBASE_*`; Admin SDK reads `FIREBASE_SERVER_*`. `NEXT_PUBLIC_APP_URL` builds absolute URLs (sitemap, robots, metadata, JSON-LD).
+
 ## Architecture
 
 **Bezold** is a Next.js 14 (App Router) marketplace for buying/selling startup businesses, targeting Taiwan. TypeScript throughout.
@@ -20,28 +24,30 @@ No test runner is configured.
 
 ### Route groups
 
-| Group        | Purpose                                                                                       |
-| ------------ | --------------------------------------------------------------------------------------------- |
-| `app/(new)/` | Primary public-facing site (root `/`) — home, browse, store detail, auth, sell, legal, guide  |
-| `app/admin/` | Admin dashboard (Firebase custom-claims gating)                                               |
-| `app/api/`   | Route handlers (admin auth, stores)                                                           |
-| `app/old/`   | Archived previous site — old route groups preserved at `/old/*` for reference, not production |
+| Group        | Purpose                                                                                      |
+| ------------ | -------------------------------------------------------------------------------------------- |
+| `app/(new)/` | Primary public-facing site (root `/`) — home, browse, store detail, auth, sell, legal, guide |
+| `app/admin/` | Admin dashboard (Firebase custom-claims gating)                                              |
+| `app/api/`   | Route handlers (admin auth, stores)                                                          |
 
 ### Key directories
 
-- `atoms/` — Jotai atoms. `SearchFilterAtom.ts` owns all filter state (`cityAtom`, `tagAtom`, `amountFilterAtom`, `categoryAtom`, composed `filtersAtom`, `activeDrawerCardAtom`).
-- `components/refactored/` — Shared design-system primitives (Button, Pill, Card, FormField, StoreCard, SectionTitle, Category, Link, Dropdown). Each has a co-located `*.module.css`. **Before building any UI for a new route, check here first for reusable primitives.** When a new component built inside a route is generic enough (no route-specific logic or data), extract it here so future routes can reuse it.
-- `components/home/`, `components/animated/`, `components/SearchFilter/` — Feature-specific component groups.
+- `atoms/` — Jotai atoms. `SearchFilterAtom.ts` owns filter state (`cityAtom`, `tagAtom`, `amountFilterAtom`, `categoryAtom`); `BuyerClubAtom.ts` owns the buyer-club popup (`buyerClubOpenAtom`, `buyerClubSourceAtom`).
+- `components/refactored/` — Shared design-system primitives (Button, Pill, Card, FormField, StoreCard, SectionTitle, Category, Link, Dropdown, MultiDropdown, TrackedLink). Each has a co-located `*.module.css`. **Before building any UI for a new route, check here first for reusable primitives.** When a new component built inside a route is generic enough (no route-specific logic or data), extract it here so future routes can reuse it.
+- `app/(new)/_components/` — Site-wide sections and page-shell pieces (`SiteNav`, `SiteFooter`, `LaunchBanner`, `Section`, legal page parts).
+- `components/animated/`, `components/SearchFilter/` — Feature-specific component groups.
+- `content/blog/*.mdx` — Blog posts, read server-only by `lib/blog.ts`. `draft: true` posts are hidden only in production.
+- `docs/analytics-events.md` — GA4 event reference; custom events go through `trackEvent()` from `firebase/client.ts`.
 - `firebase/client.ts` — exports `db`, `storage`, `auth` (browser SDK).
 - `firebase/server.ts` — exports `db`, `bucket`, `adminAuth` (Admin SDK, server-only).
 - `hooks/` — `useAdminAuth` (Firebase auth + admin token), `useCategoryKey`, `useAdminMenuKey`.
 - `types/` — `Store`, `StoreDoc`, `User`, `StoreTag`, `StoreCategory`, `StoreStatus` interfaces.
-- `utils/className.ts` and `lib/utils.ts` — both export `cn()` (clsx + tailwind-merge). Prefer `@/lib/utils`.
+- `lib/utils.ts` — exports `cn()` (clsx + tailwind-merge). `utils/className.ts` is a legacy duplicate with no importers; don't use it.
 - `mocks/` — Mockaroo-generated mock data for development.
 
 ### Firebase collections
 
-Environment variables switch between dev and prod Firestore collections (`mockStore`/`mockUser` vs `prodStore`/`prodUser`). Never hardcode collection names — use the env-driven constants.
+Environment variables switch between dev and prod Firestore collections (`mockStore`/`mockUser` vs `prodStore`/`prodUser`). Never hardcode collection names — use `COLLECTIONS.STORE` / `COLLECTIONS.USER` from `firebase/constants.ts`.
 
 Queries that combine `where("field", "==", value)` with `orderBy("otherField")` require a **composite Firestore index**. If one is missing, Firestore logs an error with a direct link to create it in the console.
 
@@ -49,12 +55,17 @@ Queries that combine `where("field", "==", value)` with `orderBy("otherField")` 
 
 Images in Firestore are stored as raw Storage paths (e.g. `mockStore/{storeId}/1.png`), **not** download URLs.
 
-- **Client components**: resolve with `getDownloadURL(ref(storage, path))` from `firebase/storage` before passing to `<Image src>`. Passing the raw path directly causes a `next/image` parse error.
+- **Client components**: resolve with `getImageByPath()` / `getImagesByPath()` from `firebase/clientUtils/image.ts` (wraps `getDownloadURL`) before passing to `<Image src>`. Passing the raw path directly causes a `next/image` parse error. On failure these return the string `"no-image"`, not a URL — guard before rendering.
 - **Server components**: use `getImagesByPath()` from `firebase/serverUtils/image.ts`, which resolves via Admin SDK signed URLs.
 
 ### Firestore write constraints
 
 `updateDoc` rejects `undefined` values — Firestore will throw at runtime if any field is `undefined`. Always pass `""` for optional string fields that are empty, never `field || undefined`.
+
+### API auth & seller contact
+
+- Admin routes: client calls `authedFetch(idToken, …)` (`lib/authedFetch.ts`); server checks with `verifyAdminToken`. Member-only routes use `verifyUserToken` (any signed-in user).
+- Seller contact (`userInfo` phone/LINE/Threads/email) must never reach the public payload — pass stores through `omitSellerContact()` (`utils/store.ts`) in any public page or endpoint. The only read path is `GET /api/stores/[storeId]/contact` (member-gated, returns empty for sold listings).
 
 ## Styling rules
 
