@@ -1,6 +1,12 @@
 import { Card, Statistic } from "antd";
 import type { ReactNode } from "react";
-import { changeRatio, type StoreAnalyticsRow } from "@/utils/storeAnalytics";
+import { SELLER_CONTACT_LABEL } from "@/constant/storeAnalytics";
+import type { SellerContactChannel } from "@/types";
+import {
+  changeRatio,
+  memberContactTotal,
+  type StoreAnalyticsRow,
+} from "@/utils/storeAnalytics";
 import ChangeIndicator from "./ChangeIndicator";
 
 interface AnalyticsKpiRowProps {
@@ -21,6 +27,22 @@ export default function AnalyticsKpiRow({
   const previousViews = sumOf((row) => row.analytics.previous.views);
   const clicks = sumOf((row) => row.analytics.current.gateClicks);
   const previousClicks = sumOf((row) => row.analytics.previous.gateClicks);
+  const memberContacts = sumOf((row) =>
+    memberContactTotal(row.analytics.current),
+  );
+  const previousMemberContacts = sumOf((row) =>
+    memberContactTotal(row.analytics.previous),
+  );
+  const contactsByChannel = (
+    Object.keys(SELLER_CONTACT_LABEL) as SellerContactChannel[]
+  )
+    .map(
+      (channel) =>
+        `${SELLER_CONTACT_LABEL[channel]} ${sumOf(
+          (row) => row.analytics.current.memberContacts[channel],
+        ).toLocaleString()}`,
+    )
+    .join(" · ");
 
   // Spelled out rather than a bare ▲/▼/—, so "no data to compare" reads as
   // such instead of a stray dash.
@@ -34,7 +56,7 @@ export default function AnalyticsKpiRow({
     );
 
   return (
-    <div className="mb-[16px] grid grid-cols-2 gap-[12px] lg:grid-cols-4">
+    <div className="mb-[16px] grid grid-cols-2 gap-[12px] md:grid-cols-3 xl:grid-cols-5">
       <KpiCard
         title="總頁面瀏覽"
         value={views}
@@ -64,6 +86,18 @@ export default function AnalyticsKpiRow({
         unit="次"
         loading={loading}
         caption={comparison(clicks, previousClicks)}
+      />
+      <KpiCard
+        title="會員聯絡"
+        value={memberContacts}
+        unit="次"
+        loading={loading}
+        caption={
+          <>
+            <div>{contactsByChannel}</div>
+            <div>{comparison(memberContacts, previousMemberContacts)}</div>
+          </>
+        }
       />
     </div>
   );
