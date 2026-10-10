@@ -121,8 +121,8 @@ export default function StoreAnalyticsTable({
     },
     {
       title: headerLabel(
-        "聯絡點擊率",
-        "未登入訪客看到鎖住的聯絡區後，點擊解鎖的比例（以次數計，已登入會員不計入）",
+        "解鎖聯絡點擊率",
+        "未登入訪客打開店家頁看到鎖住的聯絡區後，點擊解鎖的比例（以開頁次數計，不是人數；已登入會員不計入）",
       ),
       key: "clickRate",
       align: "right",

@@ -37,8 +37,8 @@ export default function ClickRate({
   );
 
   if (!showCounts) return content;
-  // Gate views are counts of locked contact blocks, not people, so spell out
-  // why they can be far below the visitor count.
+  // Gate views count page opens, not people, so they can sit above or below
+  // the unique-visitor count; spell that out.
   return (
     <Tooltip
       title={
@@ -48,7 +48,8 @@ export default function ClickRate({
             {gateClicks.toLocaleString()} 次
           </div>
           <div className="text-[12px] opacity-75">
-            已登入會員不計入；自 {CONTACT_GATE_TRACKING_START} 開始記錄
+            每開一次頁面算 1 次（同一人可算多次）；已登入會員不計入；自{" "}
+            {CONTACT_GATE_TRACKING_START} 開始記錄
           </div>
         </>
       }

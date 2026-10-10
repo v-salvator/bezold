@@ -147,7 +147,7 @@ only). No code or env changes are required for this.
 
 The admin reads these events back per store through the GA4 Data API:
 
-- **Store List** (`/admin/store/list`): 總瀏覽數 and 累計聯絡點擊率 columns.
+- **Store List** (`/admin/store/list`): 總瀏覽數 and 累計解鎖聯絡點擊率 columns.
 - **Store Analytics** (`/admin/store/analytics`): 7 / 30 / 90-day KPIs,
   ranking and per-store trend.
 
@@ -164,7 +164,7 @@ Both call `GET /api/admin/store-analytics?range=7|30|90`:
 | Metric                     | Source                                                           | Window                                                     |
 | -------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------- |
 | 總瀏覽數                   | `screenPageViews` on `/store/{storeId}`                          | `2026-07-04` (page-view tracking start) → yesterday        |
-| 累計聯絡點擊率             | `contact_gate_click` ÷ `contact_gate_view` on `/store/{storeId}` | `2026-09-19` (contact-gate tracking start) → yesterday     |
+| 累計解鎖聯絡點擊率         | `contact_gate_click` ÷ `contact_gate_view` on `/store/{storeId}` | `2026-09-19` (contact-gate tracking start) → yesterday     |
 | 瀏覽 / 不重複訪客 (period) | `screenPageViews` / `activeUsers`                                | last 7 / 30 / 90 full days, ending yesterday (Asia/Taipei) |
 | 較前期                     | current vs previous same-length window                           | `—` when the previous window has 0                         |
 
