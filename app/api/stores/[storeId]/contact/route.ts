@@ -15,8 +15,8 @@ const EMPTY_CONTACT: SellerContact = {
 };
 
 // Seller contact details are stripped from the public store payload, so this is
-// the only way to read them. Any signed-in member may call it — the gate is
-// "has an account", not "is an admin".
+// the only way to read them. Any signed-in member with a verified email may
+// call it — the gate is "has a verified account", not "is an admin".
 export async function GET(req: NextRequest, { params }: ContactProps) {
   const { error } = await verifyUserToken(req);
   if (error) return error;

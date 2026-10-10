@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import SiteNav from "@/app/(new)/_components/SiteNav";
 import SiteFooter from "@/app/(new)/_components/SiteFooter";
+import EmailVerifiedGate from "@/app/(new)/_components/EmailVerifiedGate";
 import SellForm from "./_components/SellForm";
 import styles from "./page.module.css";
 
@@ -20,7 +21,14 @@ export default function SellPage() {
         <p className={styles.subheading}>
           填寫以下資料，審核後即可上架。完全免費，沒有中間人。
         </p>
-        <SellForm />
+        <EmailVerifiedGate
+          source="sell_gate"
+          redirectPath="/sell"
+          title="刊登前請先驗證信箱"
+          context="驗證完成後就能刊登你的店面"
+        >
+          <SellForm />
+        </EmailVerifiedGate>
       </main>
       <SiteFooter />
     </>

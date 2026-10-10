@@ -43,8 +43,9 @@ export default function SignupForm() {
     setError(null);
     setLoading(true);
     try {
-      await signup({ name, email, password });
-      router.push("/store-list");
+      const { verificationSent } = await signup({ name, email, password });
+      // ?sent=1 starts the resend cooldown — an email went out just now.
+      router.push(verificationSent ? "/verify-email?sent=1" : "/verify-email");
     } catch (err) {
       const code = (err as { code?: string }).code ?? "";
       setError(AUTH_ERRORS[code] ?? "發生未知錯誤，請再試一次");

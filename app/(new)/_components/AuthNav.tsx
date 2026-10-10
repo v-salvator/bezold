@@ -3,7 +3,7 @@ import Logo from "./Logo";
 import styles from "./AuthNav.module.css";
 import { cn } from "@/lib/utils";
 
-type AuthNavVariant = "login" | "signup";
+type AuthNavVariant = "login" | "signup" | "verify";
 
 const contextLinks: Record<
   AuthNavVariant,
@@ -18,6 +18,11 @@ const contextLinks: Record<
     prompt: "已有帳號？",
     label: "登入",
     href: "/login",
+  },
+  verify: {
+    prompt: "想先逛逛？",
+    label: "回到找店面",
+    href: "/store-list",
   },
 };
 

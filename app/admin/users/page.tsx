@@ -8,6 +8,7 @@ import { useAdminAuth } from "@/hooks";
 type UserRow = {
   uid: string;
   email: string;
+  emailVerified: boolean;
   isAdmin: boolean;
 };
 
@@ -62,6 +63,22 @@ export default function AdminUsersPage() {
       title: "Email",
       dataIndex: "email",
       key: "email",
+    },
+    {
+      title: "Email Verified",
+      dataIndex: "emailVerified",
+      key: "emailVerified",
+      filters: [
+        { text: "Verified", value: true },
+        { text: "Unverified", value: false },
+      ],
+      onFilter: (value, record) => record.emailVerified === value,
+      render: (emailVerified) =>
+        emailVerified ? (
+          <Tag color="green">Verified</Tag>
+        ) : (
+          <Tag color="orange">Unverified</Tag>
+        ),
     },
     {
       title: "UID",

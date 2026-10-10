@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import LaunchBanner from "@/app/(new)/_components/LaunchBanner";
 import SiteNav from "@/app/(new)/_components/SiteNav";
 import SiteFooter from "@/app/(new)/_components/SiteFooter";
+import EmailVerifiedGate from "@/app/(new)/_components/EmailVerifiedGate";
 import EditListingForm from "./_components/EditListingForm";
 import styles from "./page.module.css";
 
@@ -24,7 +25,14 @@ export default function EditListingPage({
         <p className={styles.subheading}>
           修改店面資料後將重新送審，審核通過後更新內容才會公開。
         </p>
-        <EditListingForm storeId={params.storeId} />
+        <EmailVerifiedGate
+          source="edit_listing_gate"
+          redirectPath={`/my-listings/edit/${params.storeId}`}
+          title="請先驗證信箱"
+          context="驗證完成後就能編輯你的刊登"
+        >
+          <EditListingForm storeId={params.storeId} />
+        </EmailVerifiedGate>
       </main>
       <SiteFooter />
     </>

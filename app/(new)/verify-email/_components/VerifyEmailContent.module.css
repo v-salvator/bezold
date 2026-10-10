@@ -1,0 +1,59 @@
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 2.5px solid var(--paper-3);
+  border-top-color: var(--ink);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.okBadge {
+  width: 3.5rem;
+  height: 3.5rem;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--accent-2);
+  color: #fff;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.heading {
+  font-family: var(--display);
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.text {
+  margin: 0;
+  max-width: 22rem;
+  font-family: var(--hand);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+.fullLink {
+  width: 100%;
+  text-decoration: none;
+  color: inherit;
+}

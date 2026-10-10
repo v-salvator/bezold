@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
     const result = users.map((u) => ({
       uid: u.uid,
       email: u.email ?? "",
+      emailVerified: u.emailVerified,
       isAdmin: u.customClaims?.admin === true,
     }));
     return NextResponse.json(result);

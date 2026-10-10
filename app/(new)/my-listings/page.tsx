@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import LaunchBanner from "@/app/(new)/_components/LaunchBanner";
 import SiteNav from "@/app/(new)/_components/SiteNav";
 import SiteFooter from "@/app/(new)/_components/SiteFooter";
+import EmailVerifiedGate from "@/app/(new)/_components/EmailVerifiedGate";
 import MyListingsContent from "./_components/MyListingsContent";
 import NewListingButton from "./_components/NewListingButton";
 import styles from "./page.module.css";
@@ -24,7 +25,14 @@ export default function MyListingsPage() {
           </div>
           <NewListingButton />
         </div>
-        <MyListingsContent />
+        <EmailVerifiedGate
+          source="my_listings_gate"
+          redirectPath="/my-listings"
+          title="請先驗證信箱"
+          context="驗證完成後就能管理你的刊登"
+        >
+          <MyListingsContent />
+        </EmailVerifiedGate>
       </main>
       <SiteFooter />
     </>
