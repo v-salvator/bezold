@@ -1,360 +1,275 @@
-# Tasks: Admin Store Analytics
+# Tasks: Email 註冊信箱驗證
 
 Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
-Every task is done only when:
+每個任務都要先滿足以下條件才算完成：
 
-- Prettier has run on the changed files.
-- `npm run lint` is clean.
-- The conventions in `CLAUDE.md` and the spec Boundaries are followed.
-
-No commits until the user reviews.
+- 修改過的檔案都跑過 `npx prettier --write`
+- `npm run lint` 和 `npm run build` 沒有錯誤
+- 遵守 CLAUDE.md（CSS Module 和 Tailwind 不混用在同一個元素、`cn()`、URL 不含 `/new/`、變數命名完整）
+- 手動測試編號對應 SPEC 的 Testing Strategy 表
 
 ---
 
-## Phase 1: Data path
+## Phase 1: 註冊到驗證的主流程
 
-### Task 1: Constants, types and the pure transform
+### Task 1: `/verify-email` 頁（待驗證狀態）、驗證工具、共用 hook 和收信卡片
 
-**Description:** Define the shared contract and the logic that turns raw GA4
-rows into `StoreAnalyticsResponse`. No network calls yet.
+**Description:** 建立驗證的基礎元件，並用 `/verify-email` 頁把它們串起來。登入中、未驗證的使用者打開這個頁面，可以重寄驗證信，也可以按「我已完成驗證」確認。
 
 **Acceptance criteria:**
 
-- [x] `constant/storeAnalytics.ts` defines:
-  - `RANGE_OPTIONS = [7, 30, 90]` and `RangeDays`
-  - `PAGE_VIEW_TRACKING_START = "2026-07-04"`
-  - `CONTACT_GATE_TRACKING_START = "2026-09-19"`
-  - `CONTACT_GATE_EVENTS`
-  - `ANALYTICS_CACHE_SECONDS = 3600`
-- [x] `types/StoreAnalytics.ts` matches the spec's API contract and is
-      re-exported from `types/index.ts`.
-- [x] `lib/analytics/storeAnalyticsTransform.ts`:
-  - parses store IDs with `^/store/([^/]+)/?$` and ignores other paths
-  - sums duplicate paths (e.g. with and without a trailing slash)
-  - zero-fills `daily` to exactly `days` entries, oldest → newest
-  - fills `allTime`, `current` and `previous` from the five report row sets
+- [ ] `lib/auth/verification.ts` 匯出 `sendVerification()`（設定 zh-TW、`continueUrl` 帶 `redirect`、送 `verification_email_sent`）、`refreshVerification()`、`safeRedirectPath()`，以及錯誤訊息表 `VERIFY_ERRORS`
+- [ ] `useEmailVerification()` 回傳 `{ user, authReady, isVerified, cooldown, checking, notYetVerified, error, resend, checkNow }`，監聽 `onIdTokenChanged`，未驗證時在 `visibilitychange` 自動檢查
+- [ ] 未驗證時打開 `/verify-email`，會看到步驟列、收件信箱、兩顆按鈕；重寄後倒數 60 秒；尚未驗證時按確認，顯示「還沒偵測到驗證完成」
 
 **Verification:**
 
-- [x] `npm run build` passes (type-check).
-- [x] A throwaway scratchpad script feeds sample rows and prints the result.
-      Check trailing-slash merge, the zero-filled `daily`, missing-event stores
-      and an ignored `/store-list` path. The script is not committed.
+- [ ] lint、build 通過
+- [ ] 手動：T2、T3（先用現有帳號登入，直接打開 `/verify-email`）
 
 **Dependencies:** None
 
-**Files:** `constant/storeAnalytics.ts`, `types/StoreAnalytics.ts`,
-`types/index.ts`, `lib/analytics/storeAnalyticsTransform.ts`
+**Files likely touched:**
 
-**Scope:** M
+- `lib/auth/verification.ts` ★
+- `hooks/useEmailVerification.ts` ★
+- `app/(new)/_components/VerifyEmailPanel.tsx` + `.module.css` ★
+- `app/(new)/_components/AuthNav.tsx`（新增 `verify` variant）
+- `app/(new)/verify-email/page.tsx` + `page.module.css` + `_components/VerifyEmailContent.tsx` ★
+
+**Estimated scope:** M（新檔案多但每個都小）
 
 ---
 
-### Task 2: GA4 client, cached fetch and the admin route
+### Task 2: `/signup` 註冊後寄驗證信，並導到 `/verify-email`
 
-**Description:** Install the SDK, build the five-report batch request, cache it
-for one hour per range, and expose it at
-`GET /api/admin/store-analytics?range=` behind `verifyAdminToken`.
+**Description:** `signup()` 建立帳號、寫入 user 文件後呼叫 `sendVerification()`。`SignupForm` 改為導到 `/verify-email`。寄信失敗不應該讓註冊失敗：帳號已經建好，使用者可以在 `/verify-email` 重寄。
 
 **Acceptance criteria:**
 
-- [x] `@google-analytics/data` is added to `package.json`. The client uses
-      `serverServiceAccountConfig` credentials with the REST fallback.
-- [x] The route returns:
-  - 200 with the documented shape for 7 / 30 / 90
-  - 400 for an invalid range
-  - 401 / 403 via `verifyAdminToken`
-  - 503 when `GA4_PROPERTY_ID` is unset
-  - 502 on a GA4 error, logged server-side
-- [x] The hostname filter is derived from `NEXT_PUBLIC_APP_URL`. A repeat
-      request within an hour does not hit GA4.
+- [ ] 註冊成功後收到驗證信，畫面導到 `/verify-email`
+- [ ] 寄信失敗時（例如 too-many-requests）仍然導到 `/verify-email`，頁面上可以重寄
+- [ ] `verification_email_sent` 帶 `trigger: "signup"` 和 `signup()` 的 `source`；`docs/analytics-events.md` 已記錄兩個新事件
 
 **Verification:**
 
-- [x] `npm run build` passes and the GA4 package bundles. If it doesn't,
-      **stop and ask** before touching `next.config.js`.
-- [x] Dev server plus browser pane, signed in as admin, calling `authedFetch`:
-  - `range=30` → 200, with localhost store IDs present
-  - `range=5` → 400
-  - no token → 401
-- [x] Temporarily unset `GA4_PROPERTY_ID` → 503, then restore it.
-- [x] The server log shows one GA4 call for two consecutive requests.
+- [ ] lint、build 通過
+- [ ] 手動：T1（用 plus 地址註冊，並記錄信件語言）
 
 **Dependencies:** Task 1
 
-**Files:** `package.json` / `package-lock.json`, `lib/analytics/ga4Client.ts`,
-`lib/analytics/fetchStoreAnalytics.ts`,
-`app/api/admin/store-analytics/route.ts`
+**Files likely touched:**
 
-**Scope:** M
+- `lib/auth/signup.ts`
+- `app/(new)/signup/_components/SignupForm.tsx`
+- `docs/analytics-events.md`
 
----
-
-### ✅ Checkpoint A: Data path
-
-- [x] `npm run lint` and `npm run build` are clean.
-- [x] The API returns real localhost data in the spec shape, and every status
-      code is verified.
-- [x] **Review with the user before starting the UI.**
+**Estimated scope:** S
 
 ---
 
-## Phase 2: Store List
+### Task 3: `/verify-email` 的成功狀態、未登入狀態、自動跳轉和 `email_verified` 事件
 
-### Task 3: Hook, ClickRate and the Store List columns
-
-**Description:** Fetch analytics on the Store List and add the 總瀏覽數 and
-累計聯絡點擊率 columns. The deep link comes later, in Task 6.
+**Description:** 補上 `/verify-email` 另外兩種狀態。從 Firebase 處理頁回來時偵測到已驗證，就顯示成功畫面，3 秒後跳轉到安全的 `redirect`。在沒有登入的瀏覽器打開時，顯示「驗證完成，請登入」並附上登入連結（保留 `redirect`）。
 
 **Acceptance criteria:**
 
-- [x] `hooks/useStoreAnalytics.ts` returns `{ data, loading, error, refetch }`
-      and is exported from `hooks/index.ts`.
-- [x] `ClickRate` renders a bar + 1-decimal %, with an optional `Tooltip`
-      showing `點擊 X / 看到 Y 次`, or `—` when there are no gate views.
-- [x] Both columns are sortable, right-aligned and have the header tooltips from
-      the spec. Stores without data show `0` / `—`.
-- [x] While loading, the cells show a skeleton. On error, the cells show `—`
-      plus one `message.warning`. The table, drawer, bulk actions and delete all
-      still work.
+- [ ] 已驗證時顯示成功畫面，3 秒後 `router.replace(safeRedirectPath(redirect))`，也提供「立即前往」按鈕
+- [ ] 未登入時顯示登入提示，連到 `/login?redirect=<原本的 redirect>`
+- [ ] `email_verified` 在 session 中第一次從 false 變 true 時送一次，帶 `detected_by`；已經驗證過的人重新打開頁面不會再送
 
 **Verification:**
 
-- [x] `npm run build` passes.
-- [x] Browser check on `/admin/store/list`:
-  - real numbers appear
-  - sorting works on both columns
-  - the tooltip shows the counts
-  - row click still opens the drawer
-- [x] Simulate an API failure (temporarily unset `GA4_PROPERTY_ID`): the list
-      still renders and a warning appears.
+- [ ] lint、build 通過
+- [ ] 手動：T4、T10、T12；`redirect=https://evil.com` 和 `redirect=//evil.com` 都會改成 `/store-list`
 
-**Dependencies:** Task 2
+**Dependencies:** Task 1、Task 2
 
-**Files:** `hooks/useStoreAnalytics.ts`, `hooks/index.ts`,
-`app/admin/store/analytics/_components/ClickRate.tsx` (+ `.module.css`),
-`app/admin/store/list/page.tsx`
+**Files likely touched:**
 
-**Scope:** M
+- `app/(new)/verify-email/_components/VerifyEmailContent.tsx`
+- `hooks/useEmailVerification.ts`
+- `app/(new)/_components/VerifyEmailPanel.tsx` + `.module.css`（成功樣式）
+
+**Estimated scope:** S
 
 ---
 
-### ✅ Checkpoint B: Store List
+## Checkpoint A：主流程
 
-- [x] Lint and build are clean.
-- [x] The Store List shows correct numbers, and a GA4 failure doesn't block it.
-- [x] Screenshot for the user.
+- [ ] lint、build 通過
+- [ ] T1–T4、T10、T12 通過
+- [ ] 回報驗證信的語言，和你一起 review 再繼續
 
 ---
 
-## Phase 3: Store Analytics page
+## Phase 2: 限制與入口
 
-### Task 4: Page shell (sidebar, URL-driven toolbar, KPI row)
+### Task 4: 未驗證時擋下賣家聯絡方式（API 403 + 鎖頭 UI）
 
-**Description:** Create `/admin/store/analytics` with the sidebar entry, the
-filters, the range switch backed by `?range=`, and the four KPI cards.
+**Description:** `verifyUserToken` 檢查 `email_verified`，未驗證回 403 `email_unverified`。`useSellerContact` 新增 `"unverified"` 狀態：有登入但未驗證時不打 API；遇到 403 但 `user.emailVerified` 已經是 true 時，刷新 token 後重試一次。`SellerContactGate` 的鎖頭和兩顆 CTA 在 `unverified` 狀態下，顯示「驗證信箱後顯示」並連到 `/verify-email?redirect=/store/{id}`。
 
 **Acceptance criteria:**
 
-- [x] "Store Analytics" appears under Store Management, is highlighted on this
-      route, and navigates correctly.
-- [x] The range `Segmented` (7 / 30 / 90) reads and writes `?range=` with
-      `router.replace`. The default is 30, and invalid values fall back to 30.
-- [x] The status filter (default 已上架) and city filter change the KPI cards:
-  - 總頁面瀏覽 + 較前期
-  - 刊登數
-  - 平均每間瀏覽
-  - 聯絡解鎖點擊 + 較前期
+- [ ] 用未驗證的 token 呼叫 contact API 回 403 `{ error: "email_unverified" }`；已驗證的 token 照常回傳資料
+- [ ] 未驗證的會員看到「驗證信箱後顯示」，點擊後帶著 `redirect` 前往 `/verify-email`；未登入的訪客維持原本的「免費加入會員後顯示」
+- [ ] 剛驗證完回到店面頁，即使 token 是舊的，也能看到聯絡方式
 
 **Verification:**
 
-- [x] `npm run build` passes.
-- [x] Browser check:
-  - switching the range updates the URL and refetches
-  - a reload keeps the range
-  - filters change the KPIs
-  - the sidebar highlight is correct
+- [ ] lint、build 通過
+- [ ] 手動：T6、T7（curl 帶 `Authorization: Bearer <未驗證帳號的 token>`）、T9
 
-**Dependencies:** Task 3 (hook)
+**Dependencies:** None（UI 文案連到 Task 1 的頁面）
 
-**Files:** `components/AdminSidebar.tsx`, `app/admin/store/analytics/page.tsx`,
-`app/admin/store/analytics/_components/AnalyticsKpiRow.tsx`
+**Files likely touched:**
 
-**Scope:** M
+- `lib/verifyUserToken.ts`
+- `hooks/useSellerContact.ts`
+- `app/(new)/store/[storeId]/_components/SellerContactGate.tsx` + `.module.css`
+
+**Estimated scope:** M
 
 ---
 
-### Task 5: Ranking card and table with sparklines
+### Task 5: Buyer Club 彈窗註冊後顯示收信步驟
 
-**Description:** Add the top-10 瀏覽數排行 bars and the 各商店成效 table.
+**Description:** 在彈窗註冊成功後，不立刻關閉，改為顯示 `VerifyEmailPanel`（標題「差一步就完成」，加一顆「先逛逛」按鈕）。按「先逛逛」或關閉後，彈窗才卸載。重寄的 `source` 是 `buyer_club_popup`。
 
 **Acceptance criteria:**
 
-- [x] The ranking shows the top 10 filtered stores by period views. Bars are
-      scaled to the top store, and full values appear on hover.
-- [x] The table columns are:
-  - 店名 with `城市 · 類別` underneath
-  - 近 N 天趨勢 sparkline
-  - 瀏覽
-  - 較前期 (▲ / ▼ / `—`)
-  - 不重複訪客
-  - 聯絡點擊率
-- [x] 瀏覽, 較前期 and 聯絡點擊率 are sortable, with 瀏覽 descending by default.
-- [x] The ranking and table respond to the same filters and range as the KPIs.
+- [ ] 在彈窗註冊後看到收信步驟，不會閃一下就消失
+- [ ] 按「先逛逛」後彈窗關閉，頁面可以繼續瀏覽，聯絡資訊顯示 Task 4 的未驗證鎖頭
+- [ ] 已登入的會員進入店面頁，彈窗仍然不會出現（維持現有行為）
 
 **Verification:**
 
-- [x] `npm run build` passes.
-- [x] Browser check:
-  - the numbers match the KPI totals
-  - sorting works
-  - the sparkline length matches the range (7 / 30 / 90 points)
+- [ ] lint、build 通過
+- [ ] 手動：T8
 
-**Dependencies:** Task 4
+**Dependencies:** Task 1、Task 2
 
-**Files:** `_components/ViewsRanking.tsx` (+ `.module.css`),
-`_components/StoreAnalyticsTable.tsx`, `_components/Sparkline.tsx`,
-`app/admin/store/analytics/page.tsx`
+**Files likely touched:**
 
-**Scope:** M
+- `app/(new)/store/[storeId]/_components/BuyerClubPopup.tsx` + `.module.css`
+
+**Estimated scope:** S
 
 ---
 
-### Task 6: Expandable trend row and deep link
+### Task 6: `/sell`、`/my-listings`、編輯頁的驗證閘門
 
-**Description:** Expanding a row (one at a time) shows the daily line chart and
-the side stats. `?store={id}` expands, highlights and scrolls to that row. The
-Store List 總瀏覽數 links there.
+**Description:** 這三個頁面在已登入但未驗證時，不顯示表單或列表，改顯示放在 `Card` 裡的 `VerifyEmailPanel`（情境文案：「驗證信箱後就能刊登你的店面」），`redirect` 指回目前頁面。驗證完成後（`onIdTokenChanged`）自動顯示原本的內容。
 
 **Acceptance criteria:**
 
-- [x] The expanded row shows the line chart, with a crosshair and a
-      `M/D · N 次瀏覽` tooltip, plus:
-  - 總瀏覽數
-  - 本期瀏覽 + 較前期
-  - 本期聯絡 看到 → 點擊
-  - 上架日
-- [x] `?store={id}` expands that row, highlights it and scrolls it into view. If
-      the store is outside the current status filter, the filter switches to
-      所有狀態.
-- [x] On the Store List, 總瀏覽數 is a link for `approved` stores with views > 0,
-      and clicking it does **not** open the drawer.
+- [ ] 未驗證時進入三個頁面都看到閘門卡片，不會讀取或寫入店面資料
+- [ ] 在閘門上完成驗證後，不用重新整理就會顯示原本的表單或列表
+- [ ] 已驗證的帳號完全沒有變化；未登入時仍然導到 `/login?redirect=...`
 
 **Verification:**
 
-- [x] `npm run build` passes.
-- [x] Browser check:
-  - click a list link → the analytics page shows the right row expanded
-  - hovering the chart works
-  - switching the range redraws the chart
-  - a sold store's link (if any) switches the filter
+- [ ] lint、build 通過
+- [ ] 手動：T5、T9
 
-**Dependencies:** Task 5
+**Dependencies:** Task 1
 
-**Files:** `_components/ViewsLineChart.tsx` (+ `.module.css`),
-`_components/StoreAnalyticsTable.tsx`, `app/admin/store/analytics/page.tsx`,
-`app/admin/store/list/page.tsx`
+**Files likely touched:**
 
-**Scope:** M
+- `app/(new)/sell/_components/SellForm.tsx`
+- `app/(new)/my-listings/_components/MyListingsContent.tsx`
+- `app/(new)/my-listings/edit/[storeId]/_components/EditListingForm.tsx`
+
+**Estimated scope:** M
 
 ---
 
-### ✅ Checkpoint C: Option D end to end
+### Task 7: 頭像選單的「信箱未驗證」列
 
-- [x] Lint and build are clean.
-- [x] Full flow in the browser: list → link → expanded trend → range switch →
-      filters.
-- [x] Screenshots for the user. **Review before hardening.**
-
----
-
-## Phase 4: Hardening and docs
-
-### Task 7: Loading, error and empty states
-
-**Description:** Make both pages behave well when data is slow, missing or
-failing.
+**Description:** `NavAuthStatus` 在未驗證時，於選單 email 下方加一列「信箱未驗證・點此完成驗證」，連到 `/verify-email?redirect=<目前頁面>`。
 
 **Acceptance criteria:**
 
-- [x] Store Analytics shows skeleton cards while loading.
-- [x] On an error, it shows an `Alert` with the server message and a 重試 button
-      that calls `refetch`.
-- [x] When the filters leave no stores, it shows an `Empty` state.
-- [x] The footer caption shows `資料來自 GA4，約延遲 24–48 小時 · 更新於 {relative generatedAt}`.
+- [ ] 未驗證時看得到這一列，已驗證時看不到
+- [ ] 點擊後前往 `/verify-email`，並帶上目前頁面當 `redirect`
+- [ ] 這一列是 `<a>`（NextLink），CSS class 包含 `text-decoration: none; color: inherit`
 
 **Verification:**
 
-- [x] Browser check with the dev server:
-  - throttle the network → skeletons appear
-  - unset `GA4_PROPERTY_ID` → error alert, and 重試 recovers after restoring it
-  - filter to a city with no stores → empty state
+- [ ] lint、build 通過
+- [ ] 手動：未驗證和已驗證帳號各開一次選單
 
-**Dependencies:** Task 6
+**Dependencies:** Task 1
 
-**Files:** `app/admin/store/analytics/page.tsx`, the components touched above
-as needed
+**Files likely touched:**
 
-**Scope:** S
+- `app/(new)/_components/NavAuthStatus.tsx` + `.module.css`
+
+**Estimated scope:** S
 
 ---
 
-### Task 8: Documentation
+## Checkpoint B：限制
 
-**Description:** Record the new env var, the setup steps and the metric
-definitions.
+- [ ] lint、build 通過
+- [ ] T5–T9 通過；已驗證帳號在所有頁面看不到驗證提示
+- [ ] 和你一起 review 再繼續
+
+---
+
+## Phase 3: 上線準備
+
+### Task 8: 既有會員腳本
+
+**Description:** `scripts/mark-existing-users-verified.mjs` 用 firebase-admin 分頁讀取所有使用者，篩出「有 password provider、`emailVerified` 為 false、`creationTime` 早於 `--before`」的帳號。dry run 印出數量和 uid / 建立時間 / 遮罩過的 email；加 `--apply` 才呼叫 `updateUser(uid, { emailVerified: true })`。
 
 **Acceptance criteria:**
 
-- [x] `docs/analytics-events.md` has an "Admin reporting" section covering:
-  - the endpoint and caching
-  - metric definitions and tracking start dates
-  - the hostname filter
-  - the GA4 / Cloud setup steps
-- [x] The `CLAUDE.md` Environment section mentions `GA4_PROPERTY_ID` (server
-      only).
+- [ ] 沒有 `--before` 時直接報錯結束；預設不寫入任何資料
+- [ ] dry run 的名單只包含 `--before` 之前建立的未驗證帳號，email 有遮罩（例如 `yo***@gmail.com`）
+- [ ] 不新增 npm 依賴，用 `node --env-file=.env` 可以直接執行
 
 **Verification:**
 
-- [x] Read-through: the definitions match `SPEC.md` and the code constants.
+- [ ] 手動：T11（只跑 dry run；`--apply` 要等部署後你同意才執行）
 
-**Dependencies:** Task 2 (can run alongside Task 7)
+**Dependencies:** None
 
-**Files:** `docs/analytics-events.md`, `CLAUDE.md`
+**Files likely touched:**
 
-**Scope:** S
+- `scripts/mark-existing-users-verified.mjs` ★
+
+**Estimated scope:** S
 
 ---
 
-### Task 9: Number spot-check and PR preparation
+### Task 9: Firestore / Storage Rules 文件
 
-**Description:** Confirm that the numbers match GA4, then prepare the PR.
+**Description:** 整理成一份文件，讓你貼到 Console：寫入店面文件（`COLLECTIONS.STORE` 對應的 mock 和 prod collection）和上傳店面圖片時，要求 `request.auth.token.email_verified == true`；寫入 user 文件不加這個條件。附上套用後的檢查步驟。
 
 **Acceptance criteria:**
 
-- [x] For 2–3 localhost stores, the period views and the gate counts match GA4
-      (Reports → Pages and screens / Events, filtered to the same path,
-      hostname and dates).
-- [ ] Before/after screenshots are ready for the PR. The PR description links
-      SPEC.md and notes the Vercel env step (`GA4_PROPERTY_ID` for Production).
+- [ ] 文件寫明要加的條件、要套用的 collection 和 path，以及不能擋 user 文件的原因
+- [ ] 附上套用後的檢查方式：未驗證帳號刊登會被拒，已驗證帳號正常
 
 **Verification:**
 
-- [x] The comparison table is recorded in the PR description.
-- [x] `npm run lint` and `npm run build` pass one final time.
+- [ ] 你套用 Rules 後，未驗證帳號用 devtools 直接呼叫 `createStoreDoc` 會收到 permission-denied
 
-**Dependencies:** Tasks 7, 8
+**Dependencies:** None
 
-**Files:** none (PR only)
+**Files likely touched:**
 
-**Scope:** S
+- `docs/firebase-rules-email-verification.md` ★
+
+**Estimated scope:** XS
 
 ---
 
-### ✅ Checkpoint D: Complete
+## Checkpoint C：完成
 
-- [ ] Every Success Criterion in `SPEC.md` is ticked.
-- [x] **Stop for user review.** Commit and push only when the user says so.
-- [ ] Before merge, the user adds `GA4_PROPERTY_ID=416623451` to Vercel
-      Production.
+- [ ] T1–T12 全部通過
+- [ ] SPEC 的 Success Criteria 全部成立
+- [ ] 等你 review 後才 commit、開 PR（PR 描述附上 before/after 截圖）
+- [ ] 上線後：部署 → 腳本 dry run → 你確認 → `--apply` → 你套用 Rules

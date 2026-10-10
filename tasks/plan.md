@@ -1,128 +1,97 @@
-# Implementation Plan: Admin Store Analytics
+# Implementation Plan: Email 註冊信箱驗證
 
-Source of truth: [`SPEC.md`](../SPEC.md). Approved UI: mockup option D.
-Tasks are tracked in [`tasks/todo.md`](todo.md).
+Spec: [`SPEC.md`](../SPEC.md) · Tasks: [`tasks/todo.md`](todo.md)
 
 ## Overview
 
-Add per-store GA4 metrics to the admin in two places:
+用 email + 密碼註冊後要點擊驗證信才算完成註冊（Firebase 原生驗證連結，連結處理沿用 Firebase 預設頁）。UI 採 A 版（頁面式）：新增 `/verify-email` 頁，未驗證的帳號在「查看聯絡方式」和「刊登 / 編輯店面」被擋下，其他地方照常瀏覽。伺服器端的 contact API 也會檢查。另外提供一支一次性腳本，把既有會員標成已驗證。
 
-- **Store List** gets two cumulative columns: 總瀏覽數 and 累計聯絡點擊率.
-- **Store Analytics** is a new page with period KPIs, a ranking, and a sortable
-  table whose rows expand into a daily trend chart.
+## Architecture Decisions
 
-Both read one admin-only endpoint, `GET /api/admin/store-analytics?range=7|30|90`.
-That endpoint makes one cached GA4 `batchRunReports` call.
+- **一個共用的 hook 管所有驗證狀態**：`hooks/useEmailVerification.ts` 負責目前使用者、`emailVerified`、重寄冷卻、手動確認和錯誤訊息。`/verify-email`、`/sell`、`/my-listings`、編輯頁和 Buyer Club 都用它，行為才會一致。
+- **監聽 `onIdTokenChanged`，不用 `onAuthStateChanged`**：`user.reload()` 不會觸發 `onAuthStateChanged`，所以驗證完成後畫面不會更新。`refreshVerification()` 會呼叫 `getIdToken(true)`，這會觸發 `onIdTokenChanged`，所有監聽它的元件就會同步更新。
+- **回到分頁時自動重新檢查**：使用者通常在另一個分頁點開驗證信，所以 hook 在還沒驗證時監聽 `visibilitychange`，分頁重新被看到就靜默檢查一次。
+- **token 過期的保險**：已驗證但手上還是舊 token 時，contact API 會回 403 `email_unverified`。`useSellerContact` 遇到這種情況，如果 `user.emailVerified` 已經是 true，就用 `getIdToken(true)` 重試一次。
+- **一個共用的收信卡片**：`app/(new)/_components/VerifyEmailPanel.tsx` 只負責畫面（信箱、按鈕、錯誤訊息、可選的步驟列和情境文案），狀態從 hook 傳進來。各頁面只把它放進自己的 `Card`。
+- **`/verify-email` 沿用驗證頁外殼**：和 `/signup`、`/login` 一樣用 `AuthNav` 加點點背景，`AuthNav` 新增 `verify` variant。這部分已經寫回 SPEC。
+- **`redirect` 只接受站內路徑**：用 `safeRedirectPath()` 檢查，只接受以 `/` 開頭、但不是 `//` 開頭的值，否則改用 `/store-list`，避免 open redirect。
+- **聯絡資訊的新狀態**：`useSellerContact` 新增 `"unverified"`。有登入但未驗證時不打 API，直接回這個狀態。`SellerContactGate` 的鎖頭和兩顆 CTA 在這個狀態下都連到 `/verify-email?redirect=/store/{id}`。
+- **Buyer Club 註冊後留在彈窗**：彈窗現在一偵測到登入就自動關閉並卸載。改成加一個 `justSignedUp` 狀態，註冊成功後先顯示收信步驟，按「先逛逛」才關閉。
+- **腳本不依賴新套件**：`scripts/mark-existing-users-verified.mjs` 是純 ESM，用 `node --env-file=.env` 執行，讀取和 `firebase/configs.ts` 相同的 `FIREBASE_SERVER_*` 環境變數。預設 dry run，加 `--apply` 才寫入，必須帶 `--before`。
 
 ## Dependency Graph
 
 ```
-@google-analytics/data (npm)
+lib/auth/verification.ts (sendVerification, refreshVerification, safeRedirectPath)
         │
-constant/storeAnalytics.ts ── types/StoreAnalytics.ts
-        │                          │
-        └──── lib/analytics/storeAnalyticsTransform.ts (pure)
-                         │
-          lib/analytics/ga4Client.ts + fetchStoreAnalytics.ts (cached)
-                         │
-          app/api/admin/store-analytics/route.ts
-                         │
-                hooks/useStoreAnalytics.ts
-                    │                 │
-     ClickRate component      Store Analytics page shell (sidebar, toolbar, KPIs)
-          │                           │
-   Store List columns          ViewsRanking + StoreAnalyticsTable + Sparkline
-          │                           │
-          └──── deep link ──── expandable row + ViewsLineChart (?store=)
+        ├── hooks/useEmailVerification.ts
+        │        │
+        │        ├── VerifyEmailPanel ──┬── /verify-email page (T1, T3)
+        │        │                      ├── Buyer Club 收信步驟 (T5)
+        │        │                      └── /sell, /my-listings, edit 閘門 (T6)
+        │        └── NavAuthStatus 選單列 (T7)
+        │
+        └── lib/auth/signup.ts 寄信 (T2)
+
+lib/verifyUserToken.ts (403) ── useSellerContact "unverified" ── SellerContactGate (T4)
+
+scripts/mark-existing-users-verified.mjs (T8)   docs/rules (T9)   ← 獨立
 ```
 
-## Architecture Decisions
+## Task List
 
-- **REST transport for the GA4 client** (`new BetaAnalyticsDataClient({ fallback: true })`).
-  The default gRPC transport keeps a socket open. The connection test showed
-  this: the script printed its results and then never exited. gRPC also brings
-  protobuf/bundling friction in Next.js serverless functions, and REST avoids
-  both. If the build still fails to bundle the package, add it to
-  `experimental.serverComponentsExternalPackages` in `next.config.js`. That is a
-  one-line config change, and I will report it before making it.
-- **Pure transform layer.** `storeAnalyticsTransform.ts` takes plain row arrays
-  (`{ dimensions: string[]; metrics: number[] }`) and returns
-  `StoreAnalyticsResponse`. The SDK types stay inside `fetchStoreAnalytics.ts`.
-  There is no test runner, so the transform is checked once with a throwaway
-  scratchpad script that feeds it sample rows (nothing is committed for this).
-- **Cache at the fetch layer.** `unstable_cache(fetchFn, ["store-analytics"], { revalidate: 3600 })`,
-  keyed by `range`. Only successful results are cached: thrown errors are not
-  cached, so a GA4 outage recovers on the next request.
-- **One hook, two pages.** `useStoreAnalytics(range)` wraps `authedFetch` with
-  `useAdminAuth().idToken`. It returns `{ data, loading, error, refetch }`, which
-  matches the page-level `useState` style already used in `store/list`.
-- **Store Analytics lives under `app/admin/store/analytics/`.** It inherits the
-  existing sidebar layout, and `useAdminMenuKey` resolves it to `store-analytics`
-  without changes.
-- **Store metadata comes from `getStores()`** (client Firestore), the same source
-  as Store List. Analytics are joined by `store.id`. Stores without GA4 rows show
-  0 / `—`.
-- **The deep link is built last.** The Store List link to `?store={id}` is added
-  only once the target page can expand that row, so no task ships a link to a
-  missing page.
+### Phase 1: 註冊到驗證的主流程
 
-## Phases
+- [ ] Task 1: `/verify-email` 頁（待驗證狀態）、驗證工具、共用 hook 和收信卡片
+- [ ] Task 2: `/signup` 註冊後寄驗證信，並導到 `/verify-email`
+- [ ] Task 3: `/verify-email` 的成功狀態、未登入狀態、自動跳轉和 `email_verified` 事件
 
-### Phase 1: Data path (highest risk first)
+### Checkpoint A：主流程
 
-GA4 bundling, credentials in a serverless route, and report shape are where this
-can fail. They are proven before any UI.
+- [ ] lint、build 通過
+- [ ] T1–T4、T10、T12 手動通過（註冊 → 收信 → 點連結 → 回到站內成功跳轉）
+- [ ] 確認驗證信的語言，並和你一起 review
 
-1. Constants, types and the pure transform
-2. GA4 client, cached fetch and the admin route
+### Phase 2: 限制與入口
 
-**Checkpoint A:** the API returns the real shape from localhost data. Every
-status code behaves as specified. The build is clean.
+- [ ] Task 4: 未驗證時擋下賣家聯絡方式（API 403 + 鎖頭 UI）
+- [ ] Task 5: Buyer Club 彈窗註冊後顯示收信步驟
+- [ ] Task 6: `/sell`、`/my-listings`、編輯頁的驗證閘門
+- [ ] Task 7: 頭像選單的「信箱未驗證」列
 
-### Phase 2: Store List
+### Checkpoint B：限制
 
-3. `useStoreAnalytics` hook, `ClickRate`, and the two Store List columns
+- [ ] lint、build 通過
+- [ ] T5–T9 手動通過，已驗證帳號看不到任何差異
+- [ ] 和你一起 review
 
-**Checkpoint B:** the Store List shows real numbers, degrades gracefully when the
-API fails, and the drawer and bulk actions still work.
+### Phase 3: 上線準備
 
-### Phase 3: Store Analytics page
+- [ ] Task 8: 既有會員腳本（dry run 為預設）
+- [ ] Task 9: Firestore / Storage Rules 文件
 
-4. Page shell: sidebar item, URL-driven toolbar, KPI row
-5. Ranking card and table with sparklines
-6. Expandable row with line chart, plus the `?store=` deep link from Store List
+### Checkpoint C：完成
 
-**Checkpoint C:** the full flow of option D works end to end in the browser.
-
-### Phase 4: Hardening and docs
-
-7. Loading, error and empty states on both pages
-8. Docs: `docs/analytics-events.md`, `CLAUDE.md`
-9. Spot-check numbers against the GA4 console, then prepare the PR (screenshots)
-
-**Checkpoint D:** every SPEC success criterion is ticked, and the work is ready
-for your review. Nothing is committed until you say so.
-
-## Risks and Mitigations
-
-| Risk                                                                                                              | Impact | Mitigation                                                                                                                |
-| ----------------------------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------- |
-| `@google-analytics/data` fails to bundle in Next 14 route handlers                                                | High   | REST fallback transport. If still broken, `serverComponentsExternalPackages` (ask first). Proven in Task 2 before any UI. |
-| `FIREBASE_SERVER_PRIVATE_KEY` newline format differs between local `.env` and Vercel                              | Med    | Normalise with `.replace(/\\n/g, "\n")` (same as the connection test). Verify on a Vercel preview before merge.           |
-| GA4 row limit or quota surprises with 90-day daily rows (~124 stores × 90 days ≈ 11k rows)                        | Low    | `limit: 100000` per report. One batch call per range per hour.                                                            |
-| `pagePath` variants (trailing slash, encoded IDs) split one store into two rows                                   | Med    | Normalise in the transform with the `^/store/([^/]+)/?$` regex and sum duplicates. Check in Task 1 with sample rows.      |
-| Local dev reads **prod** collections (`.env.development` has `ENV_VERSION=prod`) while GA4 filters to `localhost` | Low    | Expected: localhost traffic was on real store pages. Documented in SPEC. Numbers will be small but real.                  |
-| `unstable_cache` serialises the result; non-JSON values break it                                                  | Low    | The response is plain JSON (numbers, strings, arrays) by design.                                                          |
-| Store List gets slower                                                                                            | Med    | Analytics load in parallel after the list renders. The columns show a skeleton and never block the table.                 |
+- [ ] T1–T12 全部通過，SPEC 的 Success Criteria 全部成立
+- [ ] 等你 review 後才 commit、開 PR
 
 ## Parallelization
 
-This is a single-agent, sequential plan. Tasks 4–6 share one page and table, and
-Task 3 depends on the hook, so splitting across agents would only add
-coordination. Task 8 (docs) could run alongside Task 7 if wanted.
+T4、T8、T9 不依賴 Phase 1，可以平行做。T5–T7 依賴 T1 的 hook 和卡片。實際上會照順序一個一個做，每個 checkpoint 停下來給你看。
+
+## Risks and Mitigations
+
+| Risk                                                           | Impact | Mitigation                                                                                      |
+| -------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------- |
+| dev 和 prod 共用 Firebase 專案，測試會建立真的帳號、寄出真的信 | Med    | 用 `you+verify1@gmail.com` 這種 plus 地址測試。測試帳號在 Console 刪除由你操作                  |
+| 驗證後 ID token 仍是舊的，API 回 403                           | High   | `refreshVerification()` 強制刷新 token；`useSellerContact` 遇到 403 會刷新後重試一次（T6 測試） |
+| `reload()` 不會觸發 `onAuthStateChanged`，畫面停在未驗證       | High   | hook 改用 `onIdTokenChanged`，回到分頁時重新檢查                                                |
+| Buyer Club 彈窗在登入後自動卸載，收信步驟顯示不出來            | Med    | 用 `justSignedUp` 狀態覆蓋「已登入就隱藏」的判斷（T8 測試）                                     |
+| 驗證信是英文                                                   | Low    | T1 確認。如果是英文，再決定要不要在 Console 加繁中範本                                          |
+| Rules 不在 repo，可能和 code 的預期不一致                      | Med    | T9 整理要加的條件和原因，由你貼到 Console 後再跑一次刊登測試                                    |
+| 部署到執行腳本之間，舊會員被當成未驗證                         | Low    | 部署後立刻執行，或排在離峰時段                                                                  |
+| `continueUrl` 的網域不在授權網域內，寄信失敗                   | Low    | localhost 預設已授權；正式網域在重設密碼信已經在用                                              |
 
 ## Open Questions
 
-None. The spec's open questions are resolved. The one thing to watch is the
-`next.config.js` change (see Architecture Decisions), which I will raise if
-Task 2 needs it.
+目前沒有。
