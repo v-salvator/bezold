@@ -198,7 +198,7 @@ filters, the range switch backed by `?range=`, and the four KPI cards.
   - 近 N 天趨勢 sparkline
   - 瀏覽
   - 較前期 (▲ / ▼ / `—`)
-  - 訪客
+  - 不重複訪客
   - 聯絡點擊率
 - [x] 瀏覽, 較前期 and 聯絡點擊率 are sortable, with 瀏覽 descending by default.
 - [x] The ranking and table respond to the same filters and range as the KPIs.

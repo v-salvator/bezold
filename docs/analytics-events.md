@@ -161,12 +161,12 @@ Both call `GET /api/admin/store-analytics?range=7|30|90`:
 
 ### Metric definitions
 
-| Metric               | Source                                                           | Window                                                     |
-| -------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------- |
-| 總瀏覽數             | `screenPageViews` on `/store/{storeId}`                          | `2026-07-04` (page-view tracking start) → yesterday        |
-| 累計聯絡點擊率       | `contact_gate_click` ÷ `contact_gate_view` on `/store/{storeId}` | `2026-09-19` (contact-gate tracking start) → yesterday     |
-| 瀏覽 / 訪客 (period) | `screenPageViews` / `activeUsers`                                | last 7 / 30 / 90 full days, ending yesterday (Asia/Taipei) |
-| 較前期               | current vs previous same-length window                           | `—` when the previous window has 0                         |
+| Metric                     | Source                                                           | Window                                                     |
+| -------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------- |
+| 總瀏覽數                   | `screenPageViews` on `/store/{storeId}`                          | `2026-07-04` (page-view tracking start) → yesterday        |
+| 累計聯絡點擊率             | `contact_gate_click` ÷ `contact_gate_view` on `/store/{storeId}` | `2026-09-19` (contact-gate tracking start) → yesterday     |
+| 瀏覽 / 不重複訪客 (period) | `screenPageViews` / `activeUsers`                                | last 7 / 30 / 90 full days, ending yesterday (Asia/Taipei) |
+| 較前期                     | current vs previous same-length window                           | `—` when the previous window has 0                         |
 
 - Stores are matched by `pagePath`, so no `store_id` custom dimension is
   needed.

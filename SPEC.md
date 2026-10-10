@@ -30,7 +30,7 @@ which listings get attention and which don't, without opening the GA4 console.
 | 總瀏覽數            | `screenPageViews` on `/store/{storeId}`                                       | `2026-07-04` (page-view tracking start) → yesterday    |
 | 累計聯絡點擊率      | `contact_gate_click` ÷ `contact_gate_view` event counts on `/store/{storeId}` | `2026-09-19` (contact-gate tracking start) → yesterday |
 | 瀏覽 (period)       | `screenPageViews`                                                             | last N full days (N = 7 / 30 / 90), ending yesterday   |
-| 訪客 (period)       | `activeUsers`                                                                 | same                                                   |
+| 不重複訪客 (period) | `activeUsers`                                                                 | same                                                   |
 | 較前期              | `(current − previous) ÷ previous` views; `—` when previous is 0               | previous N days immediately before                     |
 | 聯絡點擊率 (period) | period `contact_gate_click` ÷ period `contact_gate_view`                      | same                                                   |
 | 近 N 天趨勢         | daily `screenPageViews`, zero-filled, oldest → newest                         | same                                                   |
@@ -192,7 +192,7 @@ testable later.
   - 近 N 天趨勢 (sparkline)
   - 瀏覽
   - 較前期 (▲ green / ▼ red / `—`)
-  - 訪客
+  - 不重複訪客
   - 聯絡點擊率 (period)
 
   The 瀏覽, 較前期 and 聯絡點擊率 columns are sortable. Default sort: 瀏覽 descending.

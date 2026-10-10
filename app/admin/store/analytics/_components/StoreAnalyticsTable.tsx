@@ -1,4 +1,4 @@
-import { Card, Empty, Table } from "antd";
+import { Card, Empty, Table, Tooltip } from "antd";
 import type { TableProps } from "antd";
 import dayjs from "dayjs";
 import { STORE_CATEGORIES } from "@/constant/storeType";
@@ -26,9 +26,10 @@ const NO_PREVIOUS_DATA = -2;
 const changeSortKey = ({ current, previous }: StoreAnalyticsRow["analytics"]) =>
   changeRatio(current.views, previous.views) ?? NO_PREVIOUS_DATA;
 
-const headerLabel = (label: string) => (
-  <span className="whitespace-nowrap">{label}</span>
-);
+const headerLabel = (label: string, hint?: string) => {
+  const content = <span className="whitespace-nowrap">{label}</span>;
+  return hint ? <Tooltip title={hint}>{content}</Tooltip> : content;
+};
 
 const updatedAgo = (generatedAt: string) => {
   const minutes = Math.floor((Date.now() - Date.parse(generatedAt)) / 60000);
@@ -76,9 +77,13 @@ export default function StoreAnalyticsTable({
       ),
     },
     {
-      title: headerLabel("瀏覽"),
+      title: headerLabel(
+        "瀏覽",
+        "每開啟一次頁面算一次，同一人重新整理也會重複計算",
+      ),
       key: "views",
       align: "right",
+      showSorterTooltip: false,
       defaultSortOrder: "descend",
       sorter: (left, right) =>
         left.analytics.current.views - right.analytics.current.views,
@@ -102,7 +107,10 @@ export default function StoreAnalyticsTable({
       ),
     },
     {
-      title: headerLabel("訪客"),
+      title: headerLabel(
+        "不重複訪客",
+        "期間內看過這間店的人數，同一瀏覽器來多次只算 1 人",
+      ),
       key: "visitors",
       align: "right",
       render: (_, { analytics }) => (
