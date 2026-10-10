@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAtom } from "jotai";
@@ -25,6 +25,9 @@ import {
   strengthColors,
   strengthLabels,
 } from "@/lib/auth/signup";
+import { RESEND_COOLDOWN_SECONDS } from "@/lib/auth/verification";
+import { useEmailVerification } from "@/hooks/useEmailVerification";
+import VerifyEmailPanel from "@/app/(new)/_components/VerifyEmailPanel";
 import styles from "./BuyerClubPopup.module.css";
 
 const SUPPRESS_KEY = "buyerClubPopupSeen";
@@ -95,6 +98,14 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
   const [terms, setTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Set once an account is created here: the popup stays open on a "check
+  // your inbox" step instead of closing the moment the visitor is signed in.
+  const [signedUp, setSignedUp] = useState<{
+    verificationSent: boolean;
+  } | null>(null);
+  // The auth listener below fires mid-signup (before signup() resolves) and
+  // would otherwise close the popup; a ref because that closure is stale.
+  const keepOpenAfterSignup = useRef(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
@@ -102,7 +113,7 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
       setIsLoggedIn(loggedIn);
       setAuthReady(true);
       if (loggedIn) {
-        setOpen(false);
+        if (!keepOpenAfterSignup.current) setOpen(false);
         return;
       }
       // Logged-out visitor: force-open (paid ad link) bypasses the daily cap;
@@ -147,7 +158,7 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, signedUp]);
 
   // Opened from the locked seller contact block — the visitor asked for this
   // one, so the daily auto-open cap does not apply to it.
@@ -155,7 +166,19 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
   // Signing in always returns to the listing being read.
   const loginHref = `/login?redirect=${pathname}`;
 
+  // Leaving the "check your inbox" step — the visitor keeps browsing as a
+  // signed-in, not-yet-verified member.
+  function finishVerifyStep() {
+    keepOpenAfterSignup.current = false;
+    setSignedUp(null);
+    setOpen(false);
+  }
+
   function handleDismiss() {
+    if (signedUp) {
+      finishVerifyStep();
+      return;
+    }
     setOpen(false);
     // A popup the visitor opened themselves must not consume the day's
     // auto-open allowance — the cap only governs uninvited interruptions.
@@ -197,8 +220,9 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
     }
     setError(null);
     setLoading(true);
+    keepOpenAfterSignup.current = true;
     try {
-      await signup({
+      const { verificationSent } = await signup({
         name,
         email,
         password,
@@ -211,11 +235,12 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
           city,
           budgetKey,
         },
+        // The verification link brings the visitor back to this listing.
+        redirectPath: pathname,
       });
-      // onAuthStateChanged fires with the new user → isLoggedIn flips true and
-      // the popup unmounts. Close immediately so there's no lingering frame.
-      setOpen(false);
+      setSignedUp({ verificationSent });
     } catch (err) {
+      keepOpenAfterSignup.current = false;
       const code = (err as { code?: string }).code ?? "";
       setError(AUTH_ERRORS[code] ?? "發生未知錯誤，請再試一次");
     } finally {
@@ -223,8 +248,9 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
     }
   }
 
-  // Nothing until auth resolves, and never for logged-in members.
-  if (!authReady || isLoggedIn) return null;
+  // Nothing until auth resolves, and never for logged-in members — except the
+  // visitor who is signing up right here (loading) or was just signed up.
+  if (!authReady || (isLoggedIn && !loading && !signedUp)) return null;
 
   if (!open) {
     return (
@@ -297,191 +323,241 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
               <p className={styles.loadingText}>建立帳號中，請稍候...</p>
             </div>
           )}
-          <h3 id="buyerClubTitle" className={styles.formTitle}>
-            建立你的買家條件
-          </h3>
-          <p className={styles.formSub}>填寫約 1 分鐘，標示 * 為必填。</p>
+          {signedUp ? (
+            <VerifyStep
+              redirectPath={pathname}
+              verificationSent={signedUp.verificationSent}
+              onDone={finishVerifyStep}
+            />
+          ) : (
+            <>
+              <h3 id="buyerClubTitle" className={styles.formTitle}>
+                建立你的買家條件
+              </h3>
+              <p className={styles.formSub}>填寫約 1 分鐘，標示 * 為必填。</p>
 
-          <form className={styles.form} onSubmit={handleSubmit}>
-            <div className={styles.row}>
-              <FormField
-                id="bc-name"
-                label={<RequiredLabel>稱呼</RequiredLabel>}
-                placeholder="怎麼稱呼您？"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-              />
-              <div className={styles.field}>
-                <span className={styles.fieldLabel}>
-                  <RequiredLabel>想找的頂讓類型</RequiredLabel>
-                </span>
-                <Dropdown
-                  label="類型"
-                  options={categoryOptions}
-                  value={category}
-                  onChange={setCategory}
-                  placeholder="請選擇"
-                />
-              </div>
-            </div>
-
-            <div className={styles.row}>
-              <div className={styles.field}>
-                <span className={styles.fieldLabel}>
-                  <RequiredLabel>預算範圍</RequiredLabel>
-                </span>
-                <Dropdown
-                  label="預算"
-                  options={amountOptions}
-                  value={budgetKey}
-                  onChange={setBudgetKey}
-                  placeholder="請選擇預算範圍"
-                />
-              </div>
-              <div className={styles.field}>
-                <span className={styles.fieldLabel}>
-                  <RequiredLabel>希望地區（縣市）</RequiredLabel>
-                </span>
-                <Dropdown
-                  label="地區"
-                  options={cityOptions}
-                  value={city}
-                  onChange={setCity}
-                  placeholder="請選擇"
-                />
-              </div>
-            </div>
-
-            <div>
-              <span className={styles.fieldLabel}>
-                <RequiredLabel>聯繫方式</RequiredLabel>
-                <span className={styles.hintNote}>
-                  電話與 LINE ID 至少填一項
-                </span>
-              </span>
-              <div className={styles.row}>
-                <FormField
-                  id="bc-phone"
-                  label="電話"
-                  type="text"
-                  placeholder="例：0912345678"
-                  autoComplete="tel"
-                  value={phone}
-                  onChange={(event) => setPhone(event.target.value)}
-                />
-                <FormField
-                  id="bc-line"
-                  label="LINE ID"
-                  placeholder="您的 LINE ID"
-                  value={lineId}
-                  onChange={(event) => setLineId(event.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className={styles.divider} />
-
-            <div className={styles.row}>
-              <FormField
-                id="bc-email"
-                label={<RequiredLabel>登入電子信箱</RequiredLabel>}
-                type="email"
-                placeholder="your@email.com"
-                autoComplete="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                onBlur={() => setEmailTouched(true)}
-                hint={emailHint}
-              />
-              <FormField
-                id="bc-password"
-                label={<RequiredLabel>設定密碼</RequiredLabel>}
-                type={showPassword ? "text" : "password"}
-                placeholder="至少 6 個字元"
-                autoComplete="new-password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                suffix={
-                  <button
-                    className={styles.eyeBtn}
-                    type="button"
-                    aria-label={showPassword ? "隱藏密碼" : "顯示密碼"}
-                    onClick={() => setShowPassword((previous) => !previous)}
-                  >
-                    <EyeIcon visible={showPassword} />
-                  </button>
-                }
-              />
-            </div>
-
-            {password.length > 0 && (
-              <div className={styles.strengthRow}>
-                <div className={styles.strengthBar}>
-                  {[0, 1, 2, 3].map((index) => (
-                    <span
-                      key={index}
-                      className={styles.strengthSegment}
-                      style={{
-                        background:
-                          index < strength
-                            ? strengthColors[strength]
-                            : undefined,
-                      }}
+              <form className={styles.form} onSubmit={handleSubmit}>
+                <div className={styles.row}>
+                  <FormField
+                    id="bc-name"
+                    label={<RequiredLabel>稱呼</RequiredLabel>}
+                    placeholder="怎麼稱呼您？"
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                  />
+                  <div className={styles.field}>
+                    <span className={styles.fieldLabel}>
+                      <RequiredLabel>想找的頂讓類型</RequiredLabel>
+                    </span>
+                    <Dropdown
+                      label="類型"
+                      options={categoryOptions}
+                      value={category}
+                      onChange={setCategory}
+                      placeholder="請選擇"
                     />
-                  ))}
+                  </div>
                 </div>
-                <span
-                  className={styles.strengthLabel}
-                  style={{ color: strengthColors[strength] }}
+
+                <div className={styles.row}>
+                  <div className={styles.field}>
+                    <span className={styles.fieldLabel}>
+                      <RequiredLabel>預算範圍</RequiredLabel>
+                    </span>
+                    <Dropdown
+                      label="預算"
+                      options={amountOptions}
+                      value={budgetKey}
+                      onChange={setBudgetKey}
+                      placeholder="請選擇預算範圍"
+                    />
+                  </div>
+                  <div className={styles.field}>
+                    <span className={styles.fieldLabel}>
+                      <RequiredLabel>希望地區（縣市）</RequiredLabel>
+                    </span>
+                    <Dropdown
+                      label="地區"
+                      options={cityOptions}
+                      value={city}
+                      onChange={setCity}
+                      placeholder="請選擇"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <span className={styles.fieldLabel}>
+                    <RequiredLabel>聯繫方式</RequiredLabel>
+                    <span className={styles.hintNote}>
+                      電話與 LINE ID 至少填一項
+                    </span>
+                  </span>
+                  <div className={styles.row}>
+                    <FormField
+                      id="bc-phone"
+                      label="電話"
+                      type="text"
+                      placeholder="例：0912345678"
+                      autoComplete="tel"
+                      value={phone}
+                      onChange={(event) => setPhone(event.target.value)}
+                    />
+                    <FormField
+                      id="bc-line"
+                      label="LINE ID"
+                      placeholder="您的 LINE ID"
+                      value={lineId}
+                      onChange={(event) => setLineId(event.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className={styles.divider} />
+
+                <div className={styles.row}>
+                  <FormField
+                    id="bc-email"
+                    label={<RequiredLabel>登入電子信箱</RequiredLabel>}
+                    type="email"
+                    placeholder="your@email.com"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    onBlur={() => setEmailTouched(true)}
+                    hint={emailHint}
+                  />
+                  <FormField
+                    id="bc-password"
+                    label={<RequiredLabel>設定密碼</RequiredLabel>}
+                    type={showPassword ? "text" : "password"}
+                    placeholder="至少 6 個字元"
+                    autoComplete="new-password"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    suffix={
+                      <button
+                        className={styles.eyeBtn}
+                        type="button"
+                        aria-label={showPassword ? "隱藏密碼" : "顯示密碼"}
+                        onClick={() => setShowPassword((previous) => !previous)}
+                      >
+                        <EyeIcon visible={showPassword} />
+                      </button>
+                    }
+                  />
+                </div>
+
+                {password.length > 0 && (
+                  <div className={styles.strengthRow}>
+                    <div className={styles.strengthBar}>
+                      {[0, 1, 2, 3].map((index) => (
+                        <span
+                          key={index}
+                          className={styles.strengthSegment}
+                          style={{
+                            background:
+                              index < strength
+                                ? strengthColors[strength]
+                                : undefined,
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <span
+                      className={styles.strengthLabel}
+                      style={{ color: strengthColors[strength] }}
+                    >
+                      {strengthLabels[strength]}
+                    </span>
+                  </div>
+                )}
+
+                <label className={styles.checkboxRow}>
+                  <input
+                    className={styles.checkbox}
+                    type="checkbox"
+                    checked={terms}
+                    onChange={(event) => setTerms(event.target.checked)}
+                  />
+                  <span>
+                    我同意{" "}
+                    <Link
+                      className={styles.termsLink}
+                      href="/terms"
+                      target="_blank"
+                    >
+                      服務條款
+                    </Link>{" "}
+                    與{" "}
+                    <Link
+                      className={styles.termsLink}
+                      href="/privacy"
+                      target="_blank"
+                    >
+                      隱私政策
+                    </Link>
+                  </span>
+                </label>
+
+                {error && <p className={styles.errorMsg}>{error}</p>}
+
+                <button
+                  type="submit"
+                  className={styles.submit}
+                  disabled={loading}
                 >
-                  {strengthLabels[strength]}
-                </span>
-              </div>
-            )}
+                  {loading ? copy.submitLoading : copy.submit}
+                </button>
 
-            <label className={styles.checkboxRow}>
-              <input
-                className={styles.checkbox}
-                type="checkbox"
-                checked={terms}
-                onChange={(event) => setTerms(event.target.checked)}
-              />
-              <span>
-                我同意{" "}
-                <Link
-                  className={styles.termsLink}
-                  href="/terms"
-                  target="_blank"
-                >
-                  服務條款
-                </Link>{" "}
-                與{" "}
-                <Link
-                  className={styles.termsLink}
-                  href="/privacy"
-                  target="_blank"
-                >
-                  隱私政策
-                </Link>
-              </span>
-            </label>
-
-            {error && <p className={styles.errorMsg}>{error}</p>}
-
-            <button type="submit" className={styles.submit} disabled={loading}>
-              {loading ? copy.submitLoading : copy.submit}
-            </button>
-
-            <p className={styles.loginHint}>
-              已經有帳號？{" "}
-              <Link className={styles.loginLink} href={loginHref}>
-                由此登入
-              </Link>
-            </p>
-          </form>
+                <p className={styles.loginHint}>
+                  已經有帳號？{" "}
+                  <Link className={styles.loginLink} href={loginHref}>
+                    由此登入
+                  </Link>
+                </p>
+              </form>
+            </>
+          )}
         </div>
       </div>
     </div>
+  );
+}
+
+function VerifyStep({
+  redirectPath,
+  verificationSent,
+  onDone,
+}: {
+  redirectPath: string;
+  verificationSent: boolean;
+  onDone: () => void;
+}) {
+  const verification = useEmailVerification({
+    source: "buyer_club_popup",
+    redirectPath,
+    initialCooldown: verificationSent ? RESEND_COOLDOWN_SECONDS : 0,
+  });
+  const { isVerified } = verification;
+
+  // Verified in another tab while this step is open — nothing left to do
+  // here; the contact block unlocks on its own.
+  useEffect(() => {
+    if (isVerified) onDone();
+  }, [isVerified, onDone]);
+
+  return (
+    <VerifyEmailPanel
+      verification={verification}
+      title="差一步就完成"
+      context="驗證信箱後就能看到賣家的聯絡方式"
+      headingId="buyerClubTitle"
+    >
+      <button type="button" className={styles.browseBtn} onClick={onDone}>
+        先逛逛
+      </button>
+    </VerifyEmailPanel>
   );
 }
 

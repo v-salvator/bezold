@@ -19,6 +19,7 @@ export default function VerifyEmailPanel({
   context,
   showSteps = false,
   headingAs: Heading = "h2",
+  headingId,
   children,
 }: {
   verification: EmailVerificationState;
@@ -27,6 +28,8 @@ export default function VerifyEmailPanel({
   context?: string;
   showSteps?: boolean;
   headingAs?: "h1" | "h2";
+  // For a dialog's aria-labelledby.
+  headingId?: string;
   // Extra actions under the buttons (e.g. the popup's 「先逛逛」).
   children?: React.ReactNode;
 }) {
@@ -67,7 +70,9 @@ export default function VerifyEmailPanel({
         <Mail size={26} strokeWidth={2} />
       </div>
 
-      <Heading className={styles.heading}>{title}</Heading>
+      <Heading id={headingId} className={styles.heading}>
+        {title}
+      </Heading>
       {context && <p className={styles.context}>{context}</p>}
 
       <p className={styles.text}>
