@@ -229,22 +229,22 @@ Store List 總瀏覽數 links there.
 
 **Acceptance criteria:**
 
-- [ ] The expanded row shows the line chart, with a crosshair and a
+- [x] The expanded row shows the line chart, with a crosshair and a
       `M/D · N 次瀏覽` tooltip, plus:
   - 總瀏覽數
   - 本期瀏覽 + 較前期
   - 本期聯絡 看到 → 點擊
   - 上架日
-- [ ] `?store={id}` expands that row, highlights it and scrolls it into view. If
+- [x] `?store={id}` expands that row, highlights it and scrolls it into view. If
       the store is outside the current status filter, the filter switches to
       所有狀態.
-- [ ] On the Store List, 總瀏覽數 is a link for `approved` stores with views > 0,
+- [x] On the Store List, 總瀏覽數 is a link for `approved` stores with views > 0,
       and clicking it does **not** open the drawer.
 
 **Verification:**
 
-- [ ] `npm run build` passes.
-- [ ] Browser check:
+- [x] `npm run build` passes.
+- [x] Browser check:
   - click a list link → the analytics page shows the right row expanded
   - hovering the chart works
   - switching the range redraws the chart
@@ -262,10 +262,10 @@ Store List 總瀏覽數 links there.
 
 ### ✅ Checkpoint C: Option D end to end
 
-- [ ] Lint and build are clean.
-- [ ] Full flow in the browser: list → link → expanded trend → range switch →
+- [x] Lint and build are clean.
+- [x] Full flow in the browser: list → link → expanded trend → range switch →
       filters.
-- [ ] Screenshots for the user. **Review before hardening.**
+- [x] Screenshots for the user. **Review before hardening.**
 
 ---
 

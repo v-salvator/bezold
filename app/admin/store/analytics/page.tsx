@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Segmented, Select, Space, Spin } from "antd";
 import { getStores } from "@/firebase/clientUtils";
@@ -61,6 +61,10 @@ function StoreAnalyticsContent() {
   const searchParams = useSearchParams();
   // URL params are the source of truth so links and reloads keep the view.
   const range = parseRange(searchParams.get("range"));
+  const expandedStoreId = searchParams.get("store");
+  // Set only when arriving with ?store= (e.g. from Store List): that row gets
+  // revealed once. Expanding rows on this page doesn't scroll.
+  const revealStoreIdRef = useRef(expandedStoreId);
 
   const [stores, setStores] = useState<Store[]>([]);
   const [storesLoading, setStoresLoading] = useState(true);
@@ -77,11 +81,41 @@ function StoreAnalyticsContent() {
       .finally(() => setStoresLoading(false));
   }, []);
 
-  const handleRangeChange = (days: StoreAnalyticsRange) => {
+  const replaceParams = (changes: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set("range", String(days));
-    router.replace(`${pathname}?${params.toString()}`);
+    Object.entries(changes).forEach(([key, value]) => {
+      if (value === null) params.delete(key);
+      else params.set(key, value);
+    });
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
+
+  const handleRangeChange = (days: StoreAnalyticsRange) =>
+    replaceParams({ range: String(days) });
+
+  const handleExpandedChange = (storeId: string | null) =>
+    replaceParams({ store: storeId });
+
+  // Widen the filters if the linked store would otherwise be hidden (e.g. it
+  // is sold, or in another city).
+  useEffect(() => {
+    const storeId = revealStoreIdRef.current;
+    if (!storeId || storesLoading) return;
+    const target = stores.find((store) => store.id === storeId);
+    if (!target) {
+      revealStoreIdRef.current = null;
+      return;
+    }
+    if (
+      statusFilter !== "all" &&
+      (target.status ?? STORE_STATUS.PENDING) !== statusFilter
+    ) {
+      setStatusFilter("all");
+    }
+    if (cityFilter !== ALL_CITIES && target.city !== cityFilter) {
+      setCityFilter(ALL_CITIES);
+    }
+  }, [stores, storesLoading, statusFilter, cityFilter]);
 
   const cityOptions = [
     { label: "所有城市", value: ALL_CITIES },
@@ -105,6 +139,17 @@ function StoreAnalyticsContent() {
     }));
 
   const loading = storesLoading || (analyticsLoading && !analytics);
+
+  useEffect(() => {
+    const storeId = revealStoreIdRef.current;
+    if (!storeId || loading) return;
+    const rowElement = document.querySelector(
+      `tr[data-row-key="${CSS.escape(storeId)}"]`,
+    );
+    if (!rowElement) return;
+    rowElement.scrollIntoView({ block: "center", behavior: "smooth" });
+    revealStoreIdRef.current = null;
+  }, [loading, rows.length]);
 
   return (
     // contain:inline-size stops the wide table from stretching the admin
@@ -139,7 +184,14 @@ function StoreAnalyticsContent() {
 
       <div className="grid grid-cols-[minmax(0,1fr)] gap-[16px] xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] xl:items-start">
         <ViewsRanking rows={rows} days={range} loading={loading} />
-        <StoreAnalyticsTable rows={rows} days={range} loading={loading} />
+        <StoreAnalyticsTable
+          rows={rows}
+          days={range}
+          startDate={analytics?.range.startDate ?? ""}
+          loading={loading}
+          expandedStoreId={expandedStoreId}
+          onExpandedChange={handleExpandedChange}
+        />
       </div>
     </div>
   );

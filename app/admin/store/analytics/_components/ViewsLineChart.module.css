@@ -1,0 +1,62 @@
+.chart {
+  position: relative;
+  width: 100%;
+  min-height: 160px;
+
+  & svg {
+    display: block;
+  }
+
+  & .gridLine {
+    stroke: #f0f0f0;
+  }
+
+  & .axisLabel {
+    font-size: 11px;
+    fill: rgba(0, 0, 0, 0.45);
+  }
+
+  & .area {
+    fill: var(--accent);
+    opacity: 0.08;
+  }
+
+  & .line {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+
+  & .crosshair {
+    stroke: rgba(0, 0, 0, 0.25);
+    stroke-dasharray: 3 3;
+  }
+
+  & .dot {
+    fill: var(--accent);
+    stroke: #fff;
+    stroke-width: 2;
+  }
+
+  & .hitArea {
+    fill: transparent;
+    cursor: crosshair;
+  }
+
+  & .tooltip {
+    position: absolute;
+    pointer-events: none;
+    white-space: nowrap;
+    padding: 4px 8px;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+    font-size: 12px;
+
+    & b {
+      font-variant-numeric: tabular-nums;
+    }
+  }
+}

@@ -17,6 +17,7 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
+import Link from "next/link";
 
 import type { TableProps } from "antd";
 import type { Store } from "@/types";
@@ -329,10 +330,18 @@ export default function List() {
           );
         }
         if (!analytics) return "—";
+        const { views } = allTimeOf(id);
+        if (!views) return <span className="tabular-nums">0</span>;
         return (
-          <span className="tabular-nums">
-            {allTimeOf(id).views.toLocaleString()}
-          </span>
+          // Opens this store's trend on Store Analytics; the click must not
+          // also open the row drawer.
+          <Link
+            href={`/admin/store/analytics?store=${id}`}
+            onClick={(event) => event.stopPropagation()}
+            className="tabular-nums"
+          >
+            {views.toLocaleString()}
+          </Link>
         );
       },
     },
