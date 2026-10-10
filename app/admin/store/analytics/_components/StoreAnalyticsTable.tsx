@@ -2,7 +2,11 @@ import { Card, Empty, Table, Tooltip } from "antd";
 import type { TableProps } from "antd";
 import dayjs from "dayjs";
 import { STORE_CATEGORIES } from "@/constant/storeType";
-import { SELLER_CONTACT_LABEL } from "@/constant/storeAnalytics";
+import {
+  CONTACT_GATE_TRACKING_START,
+  MEMBER_CONTACT_TRACKING_START,
+  SELLER_CONTACT_LABEL,
+} from "@/constant/storeAnalytics";
 import type { SellerContactChannel } from "@/types";
 import {
   changeRatio,
@@ -132,7 +136,7 @@ export default function StoreAnalyticsTable({
     {
       title: headerLabel(
         "解鎖聯絡點擊率",
-        "未登入訪客打開店家頁看到鎖住的聯絡區後，點擊解鎖的比例（以開頁次數計，不是人數；已登入會員不計入）",
+        `未登入訪客打開店家頁看到鎖住的聯絡區後，點擊解鎖的比例（以開頁次數計，不是人數；已登入會員不計入）。自 ${CONTACT_GATE_TRACKING_START} 開始記錄，之前沒有資料。`,
       ),
       key: "clickRate",
       align: "right",
@@ -147,7 +151,7 @@ export default function StoreAnalyticsTable({
     {
       title: headerLabel(
         "會員聯絡",
-        "已登入會員點擊「撥打電話」、「加 LINE」、「Threads 私訊」按鈕的次數",
+        `已登入會員點擊「撥打電話」、「加 LINE」、「Threads 私訊」按鈕的次數；自 ${MEMBER_CONTACT_TRACKING_START} 開始記錄`,
       ),
       key: "memberContacts",
       align: "right",

@@ -1,6 +1,11 @@
-import { Card, Statistic } from "antd";
+import { Card, Statistic, Tooltip } from "antd";
+import { Info } from "lucide-react";
 import type { ReactNode } from "react";
-import { SELLER_CONTACT_LABEL } from "@/constant/storeAnalytics";
+import {
+  CONTACT_GATE_TRACKING_START,
+  MEMBER_CONTACT_TRACKING_START,
+  SELLER_CONTACT_LABEL,
+} from "@/constant/storeAnalytics";
 import type { SellerContactChannel } from "@/types";
 import {
   changeRatio,
@@ -82,6 +87,7 @@ export default function AnalyticsKpiRow({
       />
       <KpiCard
         title="解鎖聯絡點擊"
+        hint={`未登入訪客點擊鎖住的聯絡區、解鎖聯絡方式的次數。自 ${CONTACT_GATE_TRACKING_START} 開始記錄，之前沒有資料。`}
         value={clicks}
         unit="次"
         loading={loading}
@@ -89,6 +95,7 @@ export default function AnalyticsKpiRow({
       />
       <KpiCard
         title="會員聯絡"
+        hint={`已登入會員點擊「撥打賣家電話」、「加 LINE 聯繫」、「到 Threads 私訊賣家」的次數。自 ${MEMBER_CONTACT_TRACKING_START} 開始記錄，之前沒有資料。`}
         value={memberContacts}
         unit="次"
         loading={loading}
@@ -105,6 +112,7 @@ export default function AnalyticsKpiRow({
 
 function KpiCard({
   title,
+  hint,
   value,
   unit,
   precision,
@@ -112,6 +120,8 @@ function KpiCard({
   caption,
 }: {
   title: string;
+  /** Shown on hover over the title, marked with an info icon. */
+  hint?: string;
   value: number;
   unit: string;
   precision?: number;
@@ -121,7 +131,18 @@ function KpiCard({
   return (
     <Card size="small" loading={loading}>
       <Statistic
-        title={title}
+        title={
+          hint ? (
+            <Tooltip title={hint}>
+              <span className="inline-flex cursor-help items-center gap-[4px]">
+                {title}
+                <Info size={13} strokeWidth={2} />
+              </span>
+            </Tooltip>
+          ) : (
+            title
+          )
+        }
         value={value}
         precision={precision}
         suffix={<span className="text-[14px] text-black/45">{unit}</span>}

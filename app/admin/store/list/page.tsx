@@ -348,7 +348,7 @@ export default function List() {
     {
       title: (
         <Tooltip
-          title={`累計點擊解鎖 ÷ 累計看到聯絡區（僅未登入訪客），自 ${CONTACT_GATE_TRACKING_START} 開始追蹤起累計`}
+          title={`累計點擊解鎖 ÷ 累計看到聯絡區（僅未登入訪客）。自 ${CONTACT_GATE_TRACKING_START} 開始記錄，之前沒有資料。`}
         >
           <span className="whitespace-nowrap">累計解鎖聯絡點擊率</span>
         </Tooltip>
