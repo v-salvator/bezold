@@ -43,7 +43,7 @@ scripts/mark-existing-users-verified.mjs (T8)   docs/rules (T9)   ← 獨立
 ### Phase 1: 註冊到驗證的主流程
 
 - [x] Task 1: `/verify-email` 頁（待驗證狀態）、驗證工具、共用 hook 和收信卡片
-- [ ] Task 2: `/signup` 註冊後寄驗證信，並導到 `/verify-email`
+- [x] Task 2: `/signup` 註冊後寄驗證信，並導到 `/verify-email`
 - [ ] Task 3: `/verify-email` 的成功狀態、未登入狀態、自動跳轉和 `email_verified` 事件
 
 ### Checkpoint A：主流程

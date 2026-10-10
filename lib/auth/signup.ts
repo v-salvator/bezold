@@ -4,6 +4,7 @@ import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db, trackEvent } from "@/firebase/client";
 import { COLLECTIONS } from "@/firebase/constants";
 import { buyerProfileFields } from "@/lib/user/buyerProfile";
+import { sendVerification } from "@/lib/auth/verification";
 import type { BuyerProfile } from "@/types/User";
 
 // * Shared account-creation logic used by BOTH the /signup page and the buyer
@@ -57,11 +58,22 @@ export interface SignupParams {
   fromBuyerClub?: boolean;
   // Analytics attribution — which surface created the account.
   source?: string;
+  // Where the verification link should land the user once verified.
+  redirectPath?: string;
 }
 
-// Creates the Firebase Auth account, writes the user doc, and fires the
-// sign_up event. Throws on failure (callers map err.code via AUTH_ERRORS).
-// Does NOT navigate — the caller decides whether to redirect or stay put.
+export interface SignupResult {
+  user: FirebaseUser;
+  // False when the account was created but the verification email failed to
+  // send — the caller should still continue; /verify-email offers a resend.
+  verificationSent: boolean;
+}
+
+// Creates the Firebase Auth account, writes the user doc, fires the sign_up
+// event, then sends the verification email. Throws on account-creation failure
+// (callers map err.code via AUTH_ERRORS); a failed verification email does not
+// throw, since the account already exists. Does NOT navigate — the caller
+// decides whether to redirect or stay put.
 export async function signup({
   name,
   email,
@@ -71,7 +83,8 @@ export async function signup({
   buyerProfile,
   fromBuyerClub = false,
   source = "signup_page",
-}: SignupParams): Promise<FirebaseUser> {
+  redirectPath,
+}: SignupParams): Promise<SignupResult> {
   const { user } = await createUserWithEmailAndPassword(auth, email, password);
   await setDoc(doc(db, COLLECTIONS.USER, user.uid), {
     userName: name,
@@ -85,5 +98,12 @@ export async function signup({
     updateTime: serverTimestamp(),
   });
   trackEvent("sign_up", { method: "email", source });
-  return user;
+
+  let verificationSent = true;
+  try {
+    await sendVerification(user, { redirectPath, trigger: "signup", source });
+  } catch {
+    verificationSent = false;
+  }
+  return { user, verificationSent };
 }
