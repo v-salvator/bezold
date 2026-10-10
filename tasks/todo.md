@@ -59,27 +59,27 @@ for one hour per range, and expose it at
 
 **Acceptance criteria:**
 
-- [ ] `@google-analytics/data` is added to `package.json`. The client uses
+- [x] `@google-analytics/data` is added to `package.json`. The client uses
       `serverServiceAccountConfig` credentials with the REST fallback.
-- [ ] The route returns:
+- [x] The route returns:
   - 200 with the documented shape for 7 / 30 / 90
   - 400 for an invalid range
   - 401 / 403 via `verifyAdminToken`
   - 503 when `GA4_PROPERTY_ID` is unset
   - 502 on a GA4 error, logged server-side
-- [ ] The hostname filter is derived from `NEXT_PUBLIC_APP_URL`. A repeat
+- [x] The hostname filter is derived from `NEXT_PUBLIC_APP_URL`. A repeat
       request within an hour does not hit GA4.
 
 **Verification:**
 
-- [ ] `npm run build` passes and the GA4 package bundles. If it doesn't,
+- [x] `npm run build` passes and the GA4 package bundles. If it doesn't,
       **stop and ask** before touching `next.config.js`.
-- [ ] Dev server plus browser pane, signed in as admin, calling `authedFetch`:
+- [x] Dev server plus browser pane, signed in as admin, calling `authedFetch`:
   - `range=30` → 200, with localhost store IDs present
   - `range=5` → 400
   - no token → 401
-- [ ] Temporarily unset `GA4_PROPERTY_ID` → 503, then restore it.
-- [ ] The server log shows one GA4 call for two consecutive requests.
+- [x] Temporarily unset `GA4_PROPERTY_ID` → 503, then restore it.
+- [x] The server log shows one GA4 call for two consecutive requests.
 
 **Dependencies:** Task 1
 
@@ -93,10 +93,10 @@ for one hour per range, and expose it at
 
 ### ✅ Checkpoint A: Data path
 
-- [ ] `npm run lint` and `npm run build` are clean.
-- [ ] The API returns real localhost data in the spec shape, and every status
+- [x] `npm run lint` and `npm run build` are clean.
+- [x] The API returns real localhost data in the spec shape, and every status
       code is verified.
-- [ ] **Review with the user before starting the UI.**
+- [x] **Review with the user before starting the UI.**
 
 ---
 
