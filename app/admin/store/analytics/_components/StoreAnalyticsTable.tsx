@@ -120,9 +120,13 @@ export default function StoreAnalyticsTable({
       ),
     },
     {
-      title: headerLabel("聯絡點擊率"),
+      title: headerLabel(
+        "聯絡點擊率",
+        "未登入訪客看到鎖住的聯絡區後，點擊解鎖的比例（以次數計，已登入會員不計入）",
+      ),
       key: "clickRate",
       align: "right",
+      showSorterTooltip: false,
       sorter: (left, right) =>
         (clickRateOf(left.analytics.current) ?? -1) -
         (clickRateOf(right.analytics.current) ?? -1),
