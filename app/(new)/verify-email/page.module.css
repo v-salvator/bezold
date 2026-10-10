@@ -1,0 +1,14 @@
+.wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  background-color: var(--paper-2);
+  background-image: radial-gradient(
+    circle,
+    var(--paper-3) 1.5px,
+    transparent 1.5px
+  );
+  background-size: 24px 24px;
+}
