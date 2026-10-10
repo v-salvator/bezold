@@ -14,7 +14,8 @@ import {
   type BuyerClubSource,
 } from "@/atoms/BuyerClubAtom";
 import { useSellerContact } from "@/hooks/useSellerContact";
-import type { SellerContact } from "@/types";
+import { SELLER_CONTACT_EVENTS } from "@/constant/storeAnalytics";
+import type { SellerContact, SellerContactChannel } from "@/types";
 import styles from "./SellerContactGate.module.css";
 
 const EXAMPLE_TITLE = "這是示範頁面，非真實物件";
@@ -156,6 +157,9 @@ export function SellerContactCta({
     isExample,
   });
   const openBuyerClub = useBuyerClubOpener(storeId);
+  // Unlocked taps = a signed-in member actually reaching out to the seller.
+  const trackSellerContact = (channel: SellerContactChannel) =>
+    trackEvent(SELLER_CONTACT_EVENTS[channel], { store_id: storeId });
 
   if (status === "loading") {
     return (
@@ -204,7 +208,11 @@ export function SellerContactCta({
               </Button>
             </span>
           ) : (
-            <a href={`tel:${contact.phone}`} className={styles.ctaLink}>
+            <a
+              href={`tel:${contact.phone}`}
+              className={styles.ctaLink}
+              onClick={() => trackSellerContact("phone")}
+            >
               <Button className={styles.btn}>
                 <Phone size={15} strokeWidth={2.5} />
                 撥打賣家電話
@@ -224,6 +232,7 @@ export function SellerContactCta({
               target="_blank"
               rel="noopener noreferrer"
               className={styles.ctaLink}
+              onClick={() => trackSellerContact("line")}
             >
               <Button variant="sage" className={styles.btn}>
                 <LineIcon style={{ fontSize: 17 }} />加 LINE 聯繫
@@ -246,6 +255,7 @@ export function SellerContactCta({
               target="_blank"
               rel="noopener noreferrer"
               className={cn(styles.ctaLink, styles.ctaLinkFull)}
+              onClick={() => trackSellerContact("threads")}
             >
               <Button variant="ink" className={styles.btn}>
                 <ThreadsIcon style={{ fontSize: 17 }} />到 Threads 私訊賣家

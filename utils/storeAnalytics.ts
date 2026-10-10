@@ -11,19 +11,27 @@ export interface StoreAnalyticsRow {
   analytics: StoreAnalyticsEntry;
 }
 
-const emptyCounts = (): StoreAnalyticsCounts => ({
+export const emptyStoreAnalyticsCounts = (): StoreAnalyticsCounts => ({
   views: 0,
   gateViews: 0,
   gateClicks: 0,
+  memberContacts: { phone: 0, line: 0, threads: 0 },
 });
+
+export const memberContactTotal = ({ memberContacts }: StoreAnalyticsCounts) =>
+  memberContacts.phone + memberContacts.line + memberContacts.threads;
 
 // Stores with no GA4 traffic are absent from the API response.
 export const emptyStoreAnalytics = (
   days: StoreAnalyticsRange,
 ): StoreAnalyticsEntry => ({
-  allTime: emptyCounts(),
-  current: { ...emptyCounts(), visitors: 0, daily: Array(days).fill(0) },
-  previous: emptyCounts(),
+  allTime: emptyStoreAnalyticsCounts(),
+  current: {
+    ...emptyStoreAnalyticsCounts(),
+    visitors: 0,
+    daily: Array(days).fill(0),
+  },
+  previous: emptyStoreAnalyticsCounts(),
 });
 
 /** Relative change vs the previous period; null when there is nothing to compare. */

@@ -62,8 +62,9 @@ function StoreAnalyticsContent() {
   // URL params are the source of truth so links and reloads keep the view.
   const range = parseRange(searchParams.get("range"));
   const expandedStoreId = searchParams.get("store");
-  // Set only when arriving with ?store= (e.g. from Store List): that row gets
-  // revealed once. Expanding rows on this page doesn't scroll.
+  // Set when a row should be scrolled into view once: arriving with ?store=
+  // (e.g. from Store List) or picking a store in the ranking. Expanding rows
+  // in the table itself doesn't scroll.
   const revealStoreIdRef = useRef(expandedStoreId);
 
   const [stores, setStores] = useState<Store[]>([]);
@@ -99,6 +100,11 @@ function StoreAnalyticsContent() {
 
   const handleExpandedChange = (storeId: string | null) =>
     replaceParams({ store: storeId });
+
+  const handleRankingSelect = (storeId: string) => {
+    revealStoreIdRef.current = storeId;
+    replaceParams({ store: storeId });
+  };
 
   // Widen the filters if the linked store would otherwise be hidden (e.g. it
   // is sold, or in another city).
@@ -153,7 +159,7 @@ function StoreAnalyticsContent() {
     if (!rowElement) return;
     rowElement.scrollIntoView({ block: "center", behavior: "smooth" });
     revealStoreIdRef.current = null;
-  }, [loading, rows.length]);
+  }, [loading, rows.length, expandedStoreId]);
 
   return (
     // contain:inline-size stops the wide table from stretching the admin
@@ -198,10 +204,15 @@ function StoreAnalyticsContent() {
         />
       ) : (
         <>
-          <AnalyticsKpiRow rows={rows} loading={loading} />
+          <AnalyticsKpiRow rows={rows} days={range} loading={loading} />
 
-          <div className="grid grid-cols-[minmax(0,1fr)] gap-[16px] xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] xl:items-start">
-            <ViewsRanking rows={rows} days={range} loading={loading} />
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-[16px]">
+            <ViewsRanking
+              rows={rows}
+              days={range}
+              loading={loading}
+              onSelect={handleRankingSelect}
+            />
             <StoreAnalyticsTable
               rows={rows}
               days={range}

@@ -2,7 +2,13 @@ import { Card, Empty, Table, Tooltip } from "antd";
 import type { TableProps } from "antd";
 import dayjs from "dayjs";
 import { STORE_CATEGORIES } from "@/constant/storeType";
-import { changeRatio, type StoreAnalyticsRow } from "@/utils/storeAnalytics";
+import { SELLER_CONTACT_LABEL } from "@/constant/storeAnalytics";
+import type { SellerContactChannel } from "@/types";
+import {
+  changeRatio,
+  memberContactTotal,
+  type StoreAnalyticsRow,
+} from "@/utils/storeAnalytics";
 import ChangeIndicator from "./ChangeIndicator";
 import ClickRate, { clickRateOf } from "./ClickRate";
 import Sparkline from "./Sparkline";
@@ -94,7 +100,11 @@ export default function StoreAnalyticsTable({
       ),
     },
     {
-      title: headerLabel("較前期"),
+      title: headerLabel(
+        "較前期",
+        "與前一段相同天數比較瀏覽；— 表示前一段沒有瀏覽，無法比較",
+      ),
+      showSorterTooltip: false,
       key: "change",
       align: "right",
       sorter: (left, right) =>
@@ -120,14 +130,35 @@ export default function StoreAnalyticsTable({
       ),
     },
     {
-      title: headerLabel("聯絡點擊率"),
+      title: headerLabel(
+        "解鎖聯絡點擊率",
+        "未登入訪客打開店家頁看到鎖住的聯絡區後，點擊解鎖的比例（以開頁次數計，不是人數；已登入會員不計入）",
+      ),
       key: "clickRate",
       align: "right",
+      showSorterTooltip: false,
       sorter: (left, right) =>
         (clickRateOf(left.analytics.current) ?? -1) -
         (clickRateOf(right.analytics.current) ?? -1),
       render: (_, { analytics }) => (
         <ClickRate {...analytics.current} showCounts />
+      ),
+    },
+    {
+      title: headerLabel(
+        "會員聯絡",
+        "已登入會員點擊「撥打電話」、「加 LINE」、「Threads 私訊」按鈕的次數",
+      ),
+      key: "memberContacts",
+      align: "right",
+      showSorterTooltip: false,
+      sorter: (left, right) =>
+        memberContactTotal(left.analytics.current) -
+        memberContactTotal(right.analytics.current),
+      render: (_, { analytics }) => (
+        <span className="tabular-nums">
+          {memberContactTotal(analytics.current).toLocaleString()}
+        </span>
       ),
     },
   ];
@@ -151,7 +182,7 @@ export default function StoreAnalyticsTable({
         dataSource={rows}
         loading={loading}
         pagination={false}
-        scroll={{ x: 720 }}
+        scroll={{ x: 800 }}
         locale={{
           emptyText: (
             <Empty
@@ -202,10 +233,20 @@ function StoreTrendDetail({
           </span>
           <ChangeIndicator current={current.views} previous={previous.views} />
         </DetailStat>
-        <DetailStat label="本期聯絡">
+        <DetailStat label="本期聯絡區（未登入）">
           <span className="tabular-nums">
-            看到 {current.gateViews.toLocaleString()} → 點擊{" "}
+            看到 {current.gateViews.toLocaleString()} → 點擊解鎖{" "}
             {current.gateClicks.toLocaleString()}
+          </span>
+        </DetailStat>
+        <DetailStat label="本期會員聯絡">
+          <span className="tabular-nums">
+            {(Object.keys(SELLER_CONTACT_LABEL) as SellerContactChannel[])
+              .map(
+                (channel) =>
+                  `${SELLER_CONTACT_LABEL[channel]} ${current.memberContacts[channel].toLocaleString()}`,
+              )
+              .join(" · ")}
           </span>
         </DetailStat>
         <DetailStat label="上架日">
