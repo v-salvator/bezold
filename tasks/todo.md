@@ -21,15 +21,15 @@ rows into `StoreAnalyticsResponse`. No network calls yet.
 
 **Acceptance criteria:**
 
-- [ ] `constant/storeAnalytics.ts` defines:
+- [x] `constant/storeAnalytics.ts` defines:
   - `RANGE_OPTIONS = [7, 30, 90]` and `RangeDays`
   - `PAGE_VIEW_TRACKING_START = "2026-07-04"`
   - `CONTACT_GATE_TRACKING_START = "2026-09-19"`
   - `CONTACT_GATE_EVENTS`
   - `ANALYTICS_CACHE_SECONDS = 3600`
-- [ ] `types/StoreAnalytics.ts` matches the spec's API contract and is
+- [x] `types/StoreAnalytics.ts` matches the spec's API contract and is
       re-exported from `types/index.ts`.
-- [ ] `lib/analytics/storeAnalyticsTransform.ts`:
+- [x] `lib/analytics/storeAnalyticsTransform.ts`:
   - parses store IDs with `^/store/([^/]+)/?$` and ignores other paths
   - sums duplicate paths (e.g. with and without a trailing slash)
   - zero-fills `daily` to exactly `days` entries, oldest → newest
@@ -37,8 +37,8 @@ rows into `StoreAnalyticsResponse`. No network calls yet.
 
 **Verification:**
 
-- [ ] `npm run build` passes (type-check).
-- [ ] A throwaway scratchpad script feeds sample rows and prints the result.
+- [x] `npm run build` passes (type-check).
+- [x] A throwaway scratchpad script feeds sample rows and prints the result.
       Check trailing-slash merge, the zero-filled `daily`, missing-event stores
       and an ignored `/store-list` path. The script is not committed.
 

@@ -4,3 +4,4 @@ export * from "./User";
 export * from "./StoreTags";
 export * from "./StoreCategory";
 export * from "./StoreStatus";
+export * from "./StoreAnalytics";
