@@ -177,9 +177,10 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Files likely touched:**
 
-- `app/(new)/sell/_components/SellForm.tsx`
-- `app/(new)/my-listings/_components/MyListingsContent.tsx`
-- `app/(new)/my-listings/edit/[storeId]/_components/EditListingForm.tsx`
+- `app/(new)/_components/EmailVerifiedGate.tsx` ★（實作時改為包住頁面的閘門元件，表單本身不用改）
+- `app/(new)/sell/page.tsx`
+- `app/(new)/my-listings/page.tsx`
+- `app/(new)/my-listings/edit/[storeId]/page.tsx`
 
 **Estimated scope:** M
 
