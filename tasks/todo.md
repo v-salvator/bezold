@@ -109,25 +109,25 @@ for one hour per range, and expose it at
 
 **Acceptance criteria:**
 
-- [ ] `hooks/useStoreAnalytics.ts` returns `{ data, loading, error, refetch }`
+- [x] `hooks/useStoreAnalytics.ts` returns `{ data, loading, error, refetch }`
       and is exported from `hooks/index.ts`.
-- [ ] `ClickRate` renders a bar + 1-decimal %, with an optional `Tooltip`
+- [x] `ClickRate` renders a bar + 1-decimal %, with an optional `Tooltip`
       showing `點擊 X / 看到 Y 次`, or `—` when there are no gate views.
-- [ ] Both columns are sortable, right-aligned and have the header tooltips from
+- [x] Both columns are sortable, right-aligned and have the header tooltips from
       the spec. Stores without data show `0` / `—`.
-- [ ] While loading, the cells show a skeleton. On error, the cells show `—`
+- [x] While loading, the cells show a skeleton. On error, the cells show `—`
       plus one `message.warning`. The table, drawer, bulk actions and delete all
       still work.
 
 **Verification:**
 
-- [ ] `npm run build` passes.
-- [ ] Browser check on `/admin/store/list`:
+- [x] `npm run build` passes.
+- [x] Browser check on `/admin/store/list`:
   - real numbers appear
   - sorting works on both columns
   - the tooltip shows the counts
   - row click still opens the drawer
-- [ ] Simulate an API failure (temporarily unset `GA4_PROPERTY_ID`): the list
+- [x] Simulate an API failure (temporarily unset `GA4_PROPERTY_ID`): the list
       still renders and a warning appears.
 
 **Dependencies:** Task 2
@@ -142,9 +142,9 @@ for one hour per range, and expose it at
 
 ### ✅ Checkpoint B: Store List
 
-- [ ] Lint and build are clean.
-- [ ] The Store List shows correct numbers, and a GA4 failure doesn't block it.
-- [ ] Screenshot for the user.
+- [x] Lint and build are clean.
+- [x] The Store List shows correct numbers, and a GA4 failure doesn't block it.
+- [x] Screenshot for the user.
 
 ---
 
