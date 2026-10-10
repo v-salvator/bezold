@@ -29,6 +29,9 @@ which safely no-ops on the server and on unsupported browsers.
 | `buyer_club_popup_dismiss`    | The popup is closed without signing up                                         | `source`                                   | [`BuyerClubPopup.tsx`](<../app/(new)/store/[storeId]/_components/BuyerClubPopup.tsx>)              |
 | `contact_gate_view`           | A logged-out visitor sees the locked seller contact block (once per page view) | `store_id`                                 | [`SellerContactGate.tsx`](<../app/(new)/store/[storeId]/_components/SellerContactGate.tsx>)        |
 | `contact_gate_click`          | One of the three locks on the seller contact block is clicked                  | `store_id`, `trigger`                      | [`SellerContactGate.tsx`](<../app/(new)/store/[storeId]/_components/SellerContactGate.tsx>)        |
+| `seller_contact_phone`        | A **signed-in** member taps 「撥打賣家電話」 (unlocked)                        | `store_id`                                 | [`SellerContactGate.tsx`](<../app/(new)/store/[storeId]/_components/SellerContactGate.tsx>)        |
+| `seller_contact_line`         | A **signed-in** member taps 「加 LINE 聯繫」 (unlocked)                        | `store_id`                                 | [`SellerContactGate.tsx`](<../app/(new)/store/[storeId]/_components/SellerContactGate.tsx>)        |
+| `seller_contact_threads`      | A **signed-in** member taps 「到 Threads 私訊賣家」 (unlocked)                 | `store_id`                                 | [`SellerContactGate.tsx`](<../app/(new)/store/[storeId]/_components/SellerContactGate.tsx>)        |
 
 > Conversion events (`store_listing_submit`, `sign_up`) fire **only on success**,
 > so failed or invalid attempts are not counted.
@@ -161,15 +164,20 @@ Both call `GET /api/admin/store-analytics?range=7|30|90`:
 
 ### Metric definitions
 
-| Metric                     | Source                                                           | Window                                                     |
-| -------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------- |
-| 總瀏覽數                   | `screenPageViews` on `/store/{storeId}`                          | `2026-07-04` (page-view tracking start) → yesterday        |
-| 累計聯絡點擊率             | `contact_gate_click` ÷ `contact_gate_view` on `/store/{storeId}` | `2026-09-19` (contact-gate tracking start) → yesterday     |
-| 瀏覽 / 不重複訪客 (period) | `screenPageViews` / `activeUsers`                                | last 7 / 30 / 90 full days, ending yesterday (Asia/Taipei) |
-| 較前期                     | current vs previous same-length window                           | `—` when the previous window has 0                         |
+| Metric                     | Source                                                                                          | Window                                                        |
+| -------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| 總瀏覽數                   | `screenPageViews` on `/store/{storeId}`                                                         | `2026-07-04` (page-view tracking start) → yesterday           |
+| 累計聯絡點擊率             | `contact_gate_click` ÷ `contact_gate_view` on `/store/{storeId}`                                | `2026-09-19` (contact-gate tracking start) → yesterday        |
+| 瀏覽 / 不重複訪客 (period) | `screenPageViews` / `activeUsers`                                                               | last 7 / 30 / 90 full days, ending yesterday (Asia/Taipei)    |
+| 較前期                     | current vs previous same-length window                                                          | `—` when the previous window has 0                            |
+| 會員聯絡                   | `seller_contact_phone` + `seller_contact_line` + `seller_contact_threads` on `/store/{storeId}` | same period window; counted from the day these events shipped |
 
 - Stores are matched by `pagePath`, so no `store_id` custom dimension is
   needed.
+- Member contact taps use one event per channel (instead of a `channel`
+  param), so the admin can split by channel without registering a GA4 custom
+  dimension. Copying a number shown as plain text in the contact block is not
+  tracked; only the buttons are.
 - The contact gate only shows to logged-out visitors, so the click rate covers
   logged-out visitors only.
 - GA4 data lags 24–48 hours.

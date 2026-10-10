@@ -2,10 +2,15 @@
 
 export type StoreAnalyticsRange = 7 | 30 | 90;
 
+/** Contact buttons a signed-in member can tap on a store page. */
+export type SellerContactChannel = "phone" | "line" | "threads";
+
 export interface StoreAnalyticsCounts {
   views: number;
   gateViews: number;
   gateClicks: number;
+  /** Signed-in members tapping each seller contact button. */
+  memberContacts: Record<SellerContactChannel, number>;
 }
 
 export interface StoreAnalyticsEntry {

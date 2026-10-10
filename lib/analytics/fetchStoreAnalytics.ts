@@ -6,6 +6,7 @@ import {
   CONTACT_GATE_EVENTS,
   CONTACT_GATE_TRACKING_START,
   PAGE_VIEW_TRACKING_START,
+  SELLER_CONTACT_EVENTS,
 } from "@/constant/storeAnalytics";
 import type { StoreAnalyticsRange, StoreAnalyticsResponse } from "@/types";
 import { getGa4Client } from "./ga4Client";
@@ -56,11 +57,17 @@ const storePageFilter = (
   },
 });
 
-const gateEventFilter: FilterExpression = {
+// Locked-gate events (logged-out visitors) and contact-button taps
+// (signed-in members) share one report per window.
+const contactEventFilter: FilterExpression = {
   filter: {
     fieldName: "eventName",
     inListFilter: {
-      values: [CONTACT_GATE_EVENTS.VIEW, CONTACT_GATE_EVENTS.CLICK],
+      values: [
+        CONTACT_GATE_EVENTS.VIEW,
+        CONTACT_GATE_EVENTS.CLICK,
+        ...Object.values(SELLER_CONTACT_EVENTS),
+      ],
     },
   },
 };
@@ -117,7 +124,7 @@ async function fetchStoreAnalytics(
       dateRanges: periodDateRanges,
       dimensions: [{ name: "pagePath" }, { name: "eventName" }],
       metrics: [{ name: "eventCount" }],
-      dimensionFilter: storePageFilter(hostname, gateEventFilter),
+      dimensionFilter: storePageFilter(hostname, contactEventFilter),
     },
     {
       dateRanges: [{ startDate: PAGE_VIEW_TRACKING_START, endDate: yesterday }],
@@ -131,7 +138,7 @@ async function fetchStoreAnalytics(
       ],
       dimensions: [{ name: "pagePath" }, { name: "eventName" }],
       metrics: [{ name: "eventCount" }],
-      dimensionFilter: storePageFilter(hostname, gateEventFilter),
+      dimensionFilter: storePageFilter(hostname, contactEventFilter),
     },
   ];
 
@@ -142,18 +149,18 @@ async function fetchStoreAnalytics(
   const [
     dailyViews,
     periodViews,
-    periodGateEvents,
+    periodContactEvents,
     allTimeViews,
-    allTimeGateEvents,
+    allTimeContactEvents,
   ] = (response.reports ?? []).map(toReportRows);
 
   return buildStoreAnalytics({
     reports: {
       dailyViews: dailyViews ?? [],
       periodViews: periodViews ?? [],
-      periodGateEvents: periodGateEvents ?? [],
+      periodContactEvents: periodContactEvents ?? [],
       allTimeViews: allTimeViews ?? [],
-      allTimeGateEvents: allTimeGateEvents ?? [],
+      allTimeContactEvents: allTimeContactEvents ?? [],
     },
     days,
     dateRanges,

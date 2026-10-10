@@ -25,15 +25,16 @@ which listings get attention and which don't, without opening the GA4 console.
 
 ### Data definitions
 
-| Metric              | Definition                                                                    | Window                                                 |
-| ------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------ |
-| 總瀏覽數            | `screenPageViews` on `/store/{storeId}`                                       | `2026-07-04` (page-view tracking start) → yesterday    |
-| 累計聯絡點擊率      | `contact_gate_click` ÷ `contact_gate_view` event counts on `/store/{storeId}` | `2026-09-19` (contact-gate tracking start) → yesterday |
-| 瀏覽 (period)       | `screenPageViews`                                                             | last N full days (N = 7 / 30 / 90), ending yesterday   |
-| 不重複訪客 (period) | `activeUsers`                                                                 | same                                                   |
-| 較前期              | `(current − previous) ÷ previous` views; `—` when previous is 0               | previous N days immediately before                     |
-| 聯絡點擊率 (period) | period `contact_gate_click` ÷ period `contact_gate_view`                      | same                                                   |
-| 近 N 天趨勢         | daily `screenPageViews`, zero-filled, oldest → newest                         | same                                                   |
+| Metric              | Definition                                                                                                      | Window                                                 |
+| ------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| 總瀏覽數            | `screenPageViews` on `/store/{storeId}`                                                                         | `2026-07-04` (page-view tracking start) → yesterday    |
+| 累計聯絡點擊率      | `contact_gate_click` ÷ `contact_gate_view` event counts on `/store/{storeId}`                                   | `2026-09-19` (contact-gate tracking start) → yesterday |
+| 瀏覽 (period)       | `screenPageViews`                                                                                               | last N full days (N = 7 / 30 / 90), ending yesterday   |
+| 不重複訪客 (period) | `activeUsers`                                                                                                   | same                                                   |
+| 較前期              | `(current − previous) ÷ previous` views; `—` when previous is 0                                                 | previous N days immediately before                     |
+| 會員聯絡 (period)   | `seller_contact_phone` / `_line` / `_threads` event counts (signed-in members tapping unlocked contact buttons) | same; counted from the day the events shipped          |
+| 聯絡點擊率 (period) | period `contact_gate_click` ÷ period `contact_gate_view`                                                        | same                                                   |
+| 近 N 天趨勢         | daily `screenPageViews`, zero-filled, oldest → newest                                                           | same                                                   |
 
 - The contact gate is shown only to **logged-out** visitors, so both rates cover
   logged-out visitors only. The UI says so in tooltips.

@@ -1,7 +1,12 @@
 // Pure GA4-rows → StoreAnalyticsResponse conversion. No SDK types here: the
 // fetch layer flattens each GA4 row into header-keyed records first.
-import { CONTACT_GATE_EVENTS } from "@/constant/storeAnalytics";
+import {
+  CONTACT_GATE_EVENTS,
+  SELLER_CONTACT_EVENTS,
+} from "@/constant/storeAnalytics";
+import { emptyStoreAnalyticsCounts } from "@/utils/storeAnalytics";
 import type {
+  SellerContactChannel,
   StoreAnalyticsCounts,
   StoreAnalyticsEntry,
   StoreAnalyticsRange,
@@ -20,12 +25,12 @@ export interface StoreAnalyticsReports {
   dailyViews: AnalyticsReportRow[];
   /** pagePath + dateRange → screenPageViews, activeUsers */
   periodViews: AnalyticsReportRow[];
-  /** pagePath + eventName + dateRange → eventCount */
-  periodGateEvents: AnalyticsReportRow[];
+  /** pagePath + eventName + dateRange → eventCount (gate + member contact events) */
+  periodContactEvents: AnalyticsReportRow[];
   /** pagePath → screenPageViews since page-view tracking started */
   allTimeViews: AnalyticsReportRow[];
   /** pagePath + eventName → eventCount since contact-gate tracking started */
-  allTimeGateEvents: AnalyticsReportRow[];
+  allTimeContactEvents: AnalyticsReportRow[];
 }
 
 export interface DateRange {
@@ -76,19 +81,22 @@ export function buildDateRanges(
   };
 }
 
-const emptyCounts = (): StoreAnalyticsCounts => ({
-  views: 0,
-  gateViews: 0,
-  gateClicks: 0,
-});
+const SELLER_CONTACT_CHANNEL_BY_EVENT = Object.fromEntries(
+  Object.entries(SELLER_CONTACT_EVENTS).map(([channel, eventName]) => [
+    eventName,
+    channel as SellerContactChannel,
+  ]),
+);
 
-const addGateEvent = (
+const addContactEvent = (
   counts: StoreAnalyticsCounts,
   eventName: string,
   eventCount: number,
 ) => {
   if (eventName === CONTACT_GATE_EVENTS.VIEW) counts.gateViews += eventCount;
   if (eventName === CONTACT_GATE_EVENTS.CLICK) counts.gateClicks += eventCount;
+  const channel = SELLER_CONTACT_CHANNEL_BY_EVENT[eventName];
+  if (channel) counts.memberContacts[channel] += eventCount;
 };
 
 export function buildStoreAnalytics({
@@ -111,9 +119,13 @@ export function buildStoreAnalytics({
     const storeId = storeIdFromPath(pagePath);
     if (!storeId) return null;
     stores[storeId] ??= {
-      allTime: emptyCounts(),
-      current: { ...emptyCounts(), visitors: 0, daily: Array(days).fill(0) },
-      previous: emptyCounts(),
+      allTime: emptyStoreAnalyticsCounts(),
+      current: {
+        ...emptyStoreAnalyticsCounts(),
+        visitors: 0,
+        daily: Array(days).fill(0),
+      },
+      previous: emptyStoreAnalyticsCounts(),
     };
     return stores[storeId];
   };
@@ -145,10 +157,10 @@ export function buildStoreAnalytics({
     }
   });
 
-  reports.periodGateEvents.forEach(({ dimensions, metrics }) => {
+  reports.periodContactEvents.forEach(({ dimensions, metrics }) => {
     const entry = entryFor(dimensions.pagePath);
     if (!entry) return;
-    addGateEvent(
+    addContactEvent(
       periodOf(entry, dimensions.dateRange),
       dimensions.eventName,
       metrics.eventCount ?? 0,
@@ -161,10 +173,14 @@ export function buildStoreAnalytics({
     entry.allTime.views += metrics.screenPageViews ?? 0;
   });
 
-  reports.allTimeGateEvents.forEach(({ dimensions, metrics }) => {
+  reports.allTimeContactEvents.forEach(({ dimensions, metrics }) => {
     const entry = entryFor(dimensions.pagePath);
     if (!entry) return;
-    addGateEvent(entry.allTime, dimensions.eventName, metrics.eventCount ?? 0);
+    addContactEvent(
+      entry.allTime,
+      dimensions.eventName,
+      metrics.eventCount ?? 0,
+    );
   });
 
   return {
