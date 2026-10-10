@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@ant-design/nextjs-registry": "^1.0.0",
+    "@google-analytics/data": "^7.2.1",
     "@radix-ui/react-dialog": "^1.1.15",
     "@types/node": "20.6.3",
     "@types/react": "18.2.22",

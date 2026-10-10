@@ -11,10 +11,13 @@ import {
   DatePicker,
   Modal,
   Select,
+  Skeleton,
+  Tooltip,
   message,
 } from "antd";
 import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
+import Link from "next/link";
 
 import type { TableProps } from "antd";
 import type { Store } from "@/types";
@@ -23,8 +26,14 @@ import { formatPriceDisplay } from "@/utils/store";
 import { STORE_CATEGORIES } from "@/constant/storeType";
 import { STATUS_COLOR, STATUS_LABEL } from "@/constant/adminStore";
 import { authedFetch } from "@/lib/authedFetch";
-import { useAdminAuth } from "@/hooks";
+import { useAdminAuth, useStoreAnalytics } from "@/hooks";
 import { cn } from "@/lib/utils";
+import {
+  CONTACT_GATE_TRACKING_START,
+  DEFAULT_RANGE,
+  PAGE_VIEW_TRACKING_START,
+} from "@/constant/storeAnalytics";
+import ClickRate, { clickRateOf } from "../analytics/_components/ClickRate";
 import StoreDetailDrawer from "./_components/StoreDetailDrawer";
 
 type StatusFilter = StoreStatus | "all";
@@ -65,6 +74,23 @@ export default function List() {
   const [dateRange, setDateRange] = useState<
     [Dayjs | null, Dayjs | null] | null
   >(null);
+
+  // Only the all-time counts are shown here; any range returns them.
+  const {
+    data: analytics,
+    loading: analyticsLoading,
+    error: analyticsError,
+  } = useStoreAnalytics(DEFAULT_RANGE);
+  const allTimeOf = (storeId: string) =>
+    analytics?.stores[storeId]?.allTime ?? {
+      views: 0,
+      gateViews: 0,
+      gateClicks: 0,
+    };
+
+  useEffect(() => {
+    if (analyticsError) messageApi.warning("成效資料暫時無法載入");
+  }, [analyticsError, messageApi]);
 
   const normalizedSearch = search.trim().toLowerCase();
   const [rangeStart, rangeEnd] = dateRange ?? [null, null];
@@ -283,6 +309,72 @@ export default function List() {
         monthlyRent ? monthlyRent.toLocaleString() : "—",
     },
     {
+      title: (
+        <Tooltip title={`自 ${PAGE_VIEW_TRACKING_START} 開始追蹤起累計`}>
+          <span className="whitespace-nowrap">總瀏覽數</span>
+        </Tooltip>
+      ),
+      key: "totalViews",
+      align: "right",
+      showSorterTooltip: false,
+      sorter: (left, right) =>
+        allTimeOf(left.id).views - allTimeOf(right.id).views,
+      render: (_, { id }) => {
+        if (analyticsLoading && !analytics) {
+          return (
+            <Skeleton.Input
+              active
+              size="small"
+              className="!w-[48px] !min-w-0"
+            />
+          );
+        }
+        if (!analytics) return "—";
+        const { views } = allTimeOf(id);
+        if (!views) return <span className="tabular-nums">0</span>;
+        return (
+          // Opens this store's trend on Store Analytics; the click must not
+          // also open the row drawer.
+          <Link
+            href={`/admin/store/analytics?store=${id}`}
+            onClick={(event) => event.stopPropagation()}
+            className="tabular-nums"
+          >
+            {views.toLocaleString()}
+          </Link>
+        );
+      },
+    },
+    {
+      title: (
+        <Tooltip
+          title={`累計點擊解鎖 ÷ 累計看到聯絡區（僅未登入訪客），自 ${CONTACT_GATE_TRACKING_START} 開始追蹤起累計`}
+        >
+          <span className="whitespace-nowrap">累計聯絡點擊率</span>
+        </Tooltip>
+      ),
+      key: "totalClickRate",
+      align: "right",
+      showSorterTooltip: false,
+      // Stores without contact-gate views sort below a 0% rate.
+      sorter: (left, right) =>
+        (clickRateOf(allTimeOf(left.id)) ?? -1) -
+        (clickRateOf(allTimeOf(right.id)) ?? -1),
+      render: (_, { id }) => {
+        if (analyticsLoading && !analytics) {
+          return (
+            <Skeleton.Input
+              active
+              size="small"
+              className="!w-[72px] !min-w-0"
+            />
+          );
+        }
+        if (!analytics) return "—";
+        return <ClickRate {...allTimeOf(id)} showCounts />;
+      },
+    },
+    {
       title: "建立",
       dataIndex: "createTime",
       key: "createTime",
@@ -369,7 +461,7 @@ export default function List() {
         dataSource={filteredStores}
         rowKey="id"
         loading={loading || bulkUpdating}
-        scroll={{ x: 1040 }}
+        scroll={{ x: 1280 }}
         rowSelection={{
           selectedRowKeys: selectedIds,
           onChange: (keys) => setSelectedIds(keys as string[]),

@@ -140,3 +140,53 @@ only). No code or env changes are required for this.
   just won't be available as report dimensions until registered.
 - **DebugView:** use Admin → DebugView (or the Realtime report) to confirm event
   names and parameters arrive exactly as expected.
+
+---
+
+## Admin reporting
+
+The admin reads these events back per store through the GA4 Data API:
+
+- **Store List** (`/admin/store/list`): 總瀏覽數 and 累計聯絡點擊率 columns.
+- **Store Analytics** (`/admin/store/analytics`): 7 / 30 / 90-day KPIs,
+  ranking and per-store trend.
+
+Both call `GET /api/admin/store-analytics?range=7|30|90`:
+
+- The endpoint is admin-only (`verifyAdminToken`).
+- It makes one `batchRunReports` call, cached for 1 hour per range
+  (`unstable_cache`).
+- Code: [`lib/analytics/`](../lib/analytics) (constants in
+  [`constant/storeAnalytics.ts`](../constant/storeAnalytics.ts)).
+
+### Metric definitions
+
+| Metric                     | Source                                                           | Window                                                     |
+| -------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------- |
+| 總瀏覽數                   | `screenPageViews` on `/store/{storeId}`                          | `2026-07-04` (page-view tracking start) → yesterday        |
+| 累計聯絡點擊率             | `contact_gate_click` ÷ `contact_gate_view` on `/store/{storeId}` | `2026-09-19` (contact-gate tracking start) → yesterday     |
+| 瀏覽 / 不重複訪客 (period) | `screenPageViews` / `activeUsers`                                | last 7 / 30 / 90 full days, ending yesterday (Asia/Taipei) |
+| 較前期                     | current vs previous same-length window                           | `—` when the previous window has 0                         |
+
+- Stores are matched by `pagePath`, so no `store_id` custom dimension is
+  needed.
+- The contact gate only shows to logged-out visitors, so the click rate covers
+  logged-out visitors only.
+- GA4 data lags 24–48 hours.
+
+### Hostname filter
+
+Every report is filtered to the hostname of `NEXT_PUBLIC_APP_URL`:
+
+- `npm run dev` → `localhost`
+- Vercel production → `www.bezold.com.tw`
+- Staging (`dev.bezold.com.tw`) shows little or no data, which is expected.
+
+### Setup
+
+1. **Google Cloud** (project `bezold`): enable **Google Analytics Data API**.
+2. **GA4** → Admin → Property access management: add the service account in
+   `FIREBASE_SERVER_CLIENT_EMAIL` as **Viewer**.
+3. Set `GA4_PROPERTY_ID` (numeric property ID, server-only) in `.env`,
+   `.env.development` and Vercel. Without it the endpoint returns 503 and the
+   admin shows `—` / an error alert.

@@ -15,6 +15,7 @@ const items: MenuItem[] = [
       { key: "store-create", label: "Store Create" },
       { key: "store-list", label: "Store List" },
       { key: "store-batch", label: "Batch Stores" },
+      { key: "store-analytics", label: "Store Analytics" },
     ],
   },
   {
@@ -42,6 +43,9 @@ export default function AdminSidebar() {
         break;
       case "store-batch":
         router.push("/admin/store/batch");
+        break;
+      case "store-analytics":
+        router.push("/admin/store/analytics");
         break;
       case "user-list":
         router.push("/admin/users");

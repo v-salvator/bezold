@@ -14,7 +14,7 @@ No test runner is configured. Node version is pinned in `.nvmrc` (24) — run `n
 
 ## Environment
 
-`.env` / `.env.development` (gitignored). `NEXT_PUBLIC_ENV_VERSION=dev` points at the mock collections; anything else uses prod. Client SDK reads `NEXT_PUBLIC_FIREBASE_*`; Admin SDK reads `FIREBASE_SERVER_*`. `NEXT_PUBLIC_APP_URL` builds absolute URLs (sitemap, robots, metadata, JSON-LD).
+`.env` / `.env.development` (gitignored). `NEXT_PUBLIC_ENV_VERSION=dev` points at the mock collections; anything else uses prod. Client SDK reads `NEXT_PUBLIC_FIREBASE_*`; Admin SDK reads `FIREBASE_SERVER_*`. `NEXT_PUBLIC_APP_URL` builds absolute URLs (sitemap, robots, metadata, JSON-LD), and its hostname is the GA4 hostname filter for admin store analytics. `GA4_PROPERTY_ID` (server-only) enables `/api/admin/store-analytics`, which reads GA4 with the Admin SDK service account — see `docs/analytics-events.md` → Admin reporting.
 
 ## Architecture
 
@@ -40,7 +40,7 @@ No test runner is configured. Node version is pinned in `.nvmrc` (24) — run `n
 - `docs/analytics-events.md` — GA4 event reference; custom events go through `trackEvent()` from `firebase/client.ts`.
 - `firebase/client.ts` — exports `db`, `storage`, `auth` (browser SDK).
 - `firebase/server.ts` — exports `db`, `bucket`, `adminAuth` (Admin SDK, server-only).
-- `hooks/` — `useAdminAuth` (Firebase auth + admin token), `useCategoryKey`, `useAdminMenuKey`.
+- `hooks/` — `useAdminAuth` (Firebase auth + admin token), `useStoreAnalytics` (admin GA4 store metrics), `useCategoryKey`, `useAdminMenuKey`.
 - `types/` — `Store`, `StoreDoc`, `User`, `StoreTag`, `StoreCategory`, `StoreStatus` interfaces.
 - `lib/utils.ts` — exports `cn()` (clsx + tailwind-merge). `utils/className.ts` is a legacy duplicate with no importers; don't use it.
 - `mocks/` — Mockaroo-generated mock data for development.

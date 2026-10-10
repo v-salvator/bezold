@@ -1,0 +1,26 @@
+.clickRate {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+
+  & .track {
+    width: 44px;
+    height: 6px;
+    border-radius: 3px;
+    background: #f0f0f0;
+    overflow: hidden;
+  }
+
+  & .fill {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+    background: var(--accent);
+  }
+}
+
+.empty {
+  color: rgba(0, 0, 0, 0.45);
+}
