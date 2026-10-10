@@ -157,11 +157,11 @@ filters, the range switch backed by `?range=`, and the four KPI cards.
 
 **Acceptance criteria:**
 
-- [ ] "Store Analytics" appears under Store Management, is highlighted on this
+- [x] "Store Analytics" appears under Store Management, is highlighted on this
       route, and navigates correctly.
-- [ ] The range `Segmented` (7 / 30 / 90) reads and writes `?range=` with
+- [x] The range `Segmented` (7 / 30 / 90) reads and writes `?range=` with
       `router.replace`. The default is 30, and invalid values fall back to 30.
-- [ ] The status filter (default 已上架) and city filter change the KPI cards:
+- [x] The status filter (default 已上架) and city filter change the KPI cards:
   - 總頁面瀏覽 + 較前期
   - 刊登數
   - 平均每間瀏覽
@@ -169,8 +169,8 @@ filters, the range switch backed by `?range=`, and the four KPI cards.
 
 **Verification:**
 
-- [ ] `npm run build` passes.
-- [ ] Browser check:
+- [x] `npm run build` passes.
+- [x] Browser check:
   - switching the range updates the URL and refetches
   - a reload keeps the range
   - filters change the KPIs
