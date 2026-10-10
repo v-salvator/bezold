@@ -17,6 +17,8 @@ import {
   type StoreAnalyticsRow,
 } from "@/utils/storeAnalytics";
 import AnalyticsKpiRow from "./_components/AnalyticsKpiRow";
+import StoreAnalyticsTable from "./_components/StoreAnalyticsTable";
+import ViewsRanking from "./_components/ViewsRanking";
 
 type StatusFilter = StoreStatus | "all";
 
@@ -105,7 +107,9 @@ function StoreAnalyticsContent() {
   const loading = storesLoading || (analyticsLoading && !analytics);
 
   return (
-    <div className="p-[16px]">
+    // contain:inline-size stops the wide table from stretching the admin
+    // layout's flex column; the table scrolls inside its card instead.
+    <div className="p-[16px] [contain:inline-size]">
       <div className="mb-[12px] flex flex-wrap items-center gap-[8px]">
         <Space wrap>
           <Select
@@ -132,6 +136,11 @@ function StoreAnalyticsContent() {
       </div>
 
       <AnalyticsKpiRow rows={rows} loading={loading} />
+
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-[16px] xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] xl:items-start">
+        <ViewsRanking rows={rows} days={range} loading={loading} />
+        <StoreAnalyticsTable rows={rows} days={range} loading={loading} />
+      </div>
     </div>
   );
 }

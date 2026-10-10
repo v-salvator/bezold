@@ -191,22 +191,22 @@ filters, the range switch backed by `?range=`, and the four KPI cards.
 
 **Acceptance criteria:**
 
-- [ ] The ranking shows the top 10 filtered stores by period views. Bars are
+- [x] The ranking shows the top 10 filtered stores by period views. Bars are
       scaled to the top store, and full values appear on hover.
-- [ ] The table columns are:
+- [x] The table columns are:
   - 店名 with `城市 · 類別` underneath
   - 近 N 天趨勢 sparkline
   - 瀏覽
   - 較前期 (▲ / ▼ / `—`)
   - 訪客
   - 聯絡點擊率
-- [ ] 瀏覽, 較前期 and 聯絡點擊率 are sortable, with 瀏覽 descending by default.
-- [ ] The ranking and table respond to the same filters and range as the KPIs.
+- [x] 瀏覽, 較前期 and 聯絡點擊率 are sortable, with 瀏覽 descending by default.
+- [x] The ranking and table respond to the same filters and range as the KPIs.
 
 **Verification:**
 
-- [ ] `npm run build` passes.
-- [ ] Browser check:
+- [x] `npm run build` passes.
+- [x] Browser check:
   - the numbers match the KPI totals
   - sorting works
   - the sparkline length matches the range (7 / 30 / 90 points)

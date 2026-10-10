@@ -1,0 +1,17 @@
+.sparkline {
+  display: block;
+  overflow: visible;
+
+  & polyline {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  /* No traffic in range: a grey baseline, so it doesn't read as data. */
+  &.empty polyline {
+    stroke: #d9d9d9;
+  }
+}
