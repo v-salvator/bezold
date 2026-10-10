@@ -278,15 +278,15 @@ failing.
 
 **Acceptance criteria:**
 
-- [ ] Store Analytics shows skeleton cards while loading.
-- [ ] On an error, it shows an `Alert` with the server message and a 重試 button
+- [x] Store Analytics shows skeleton cards while loading.
+- [x] On an error, it shows an `Alert` with the server message and a 重試 button
       that calls `refetch`.
-- [ ] When the filters leave no stores, it shows an `Empty` state.
-- [ ] The footer caption shows `資料來自 GA4，約延遲 24–48 小時 · 更新於 {relative generatedAt}`.
+- [x] When the filters leave no stores, it shows an `Empty` state.
+- [x] The footer caption shows `資料來自 GA4，約延遲 24–48 小時 · 更新於 {relative generatedAt}`.
 
 **Verification:**
 
-- [ ] Browser check with the dev server:
+- [x] Browser check with the dev server:
   - throttle the network → skeletons appear
   - unset `GA4_PROPERTY_ID` → error alert, and 重試 recovers after restoring it
   - filter to a city with no stores → empty state

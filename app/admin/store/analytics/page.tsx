@@ -1,7 +1,7 @@
 "use client";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Segmented, Select, Space, Spin } from "antd";
+import { Alert, Button, Segmented, Select, Space, Spin } from "antd";
 import { getStores } from "@/firebase/clientUtils";
 import { useStoreAnalytics } from "@/hooks";
 import {
@@ -72,8 +72,12 @@ function StoreAnalyticsContent() {
     STORE_STATUS.APPROVED,
   );
   const [cityFilter, setCityFilter] = useState(ALL_CITIES);
-  const { data: analytics, loading: analyticsLoading } =
-    useStoreAnalytics(range);
+  const {
+    data: analytics,
+    loading: analyticsLoading,
+    error: analyticsError,
+    refetch,
+  } = useStoreAnalytics(range);
 
   useEffect(() => {
     getStores()
@@ -180,19 +184,36 @@ function StoreAnalyticsContent() {
         />
       </div>
 
-      <AnalyticsKpiRow rows={rows} loading={loading} />
-
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-[16px] xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] xl:items-start">
-        <ViewsRanking rows={rows} days={range} loading={loading} />
-        <StoreAnalyticsTable
-          rows={rows}
-          days={range}
-          startDate={analytics?.range.startDate ?? ""}
-          loading={loading}
-          expandedStoreId={expandedStoreId}
-          onExpandedChange={handleExpandedChange}
+      {analyticsError ? (
+        <Alert
+          type="error"
+          showIcon
+          message="成效資料無法載入"
+          description={analyticsError}
+          action={
+            <Button size="small" onClick={refetch} loading={analyticsLoading}>
+              重試
+            </Button>
+          }
         />
-      </div>
+      ) : (
+        <>
+          <AnalyticsKpiRow rows={rows} loading={loading} />
+
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-[16px] xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] xl:items-start">
+            <ViewsRanking rows={rows} days={range} loading={loading} />
+            <StoreAnalyticsTable
+              rows={rows}
+              days={range}
+              startDate={analytics?.range.startDate ?? ""}
+              generatedAt={analytics?.generatedAt ?? null}
+              loading={loading}
+              expandedStoreId={expandedStoreId}
+              onExpandedChange={handleExpandedChange}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }

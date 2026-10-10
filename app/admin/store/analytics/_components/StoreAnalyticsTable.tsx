@@ -1,4 +1,4 @@
-import { Card, Table } from "antd";
+import { Card, Empty, Table } from "antd";
 import type { TableProps } from "antd";
 import dayjs from "dayjs";
 import { STORE_CATEGORIES } from "@/constant/storeType";
@@ -13,6 +13,8 @@ interface StoreAnalyticsTableProps {
   days: number;
   /** YYYY-MM-DD of the first day in the current period. */
   startDate: string;
+  /** ISO time GA4 was last queried (the API caches for an hour). */
+  generatedAt: string | null;
   loading: boolean;
   expandedStoreId: string | null;
   onExpandedChange: (storeId: string | null) => void;
@@ -28,6 +30,13 @@ const headerLabel = (label: string) => (
   <span className="whitespace-nowrap">{label}</span>
 );
 
+const updatedAgo = (generatedAt: string) => {
+  const minutes = Math.floor((Date.now() - Date.parse(generatedAt)) / 60000);
+  if (minutes < 1) return "剛剛";
+  if (minutes < 60) return `${minutes} 分鐘前`;
+  return `${Math.floor(minutes / 60)} 小時前`;
+};
+
 const categoryLabel = (category?: string) =>
   STORE_CATEGORIES.find((item) => item.key === category)?.label ??
   (category || "—");
@@ -36,6 +45,7 @@ export default function StoreAnalyticsTable({
   rows,
   days,
   startDate,
+  generatedAt,
   loading,
   expandedStoreId,
   onExpandedChange,
@@ -115,7 +125,17 @@ export default function StoreAnalyticsTable({
   ];
 
   return (
-    <Card size="small" title="各商店成效" styles={{ body: { padding: 0 } }}>
+    <Card
+      size="small"
+      title="各商店成效"
+      extra={
+        <span className="text-[12px] text-black/45">
+          資料來自 GA4，約延遲 24–48 小時
+          {generatedAt && ` · 更新於 ${updatedAgo(generatedAt)}`}
+        </span>
+      }
+      styles={{ body: { padding: 0 } }}
+    >
       <Table
         size="small"
         rowKey={({ store }) => store.id}
@@ -124,6 +144,14 @@ export default function StoreAnalyticsTable({
         loading={loading}
         pagination={false}
         scroll={{ x: 720 }}
+        locale={{
+          emptyText: (
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description="沒有符合篩選條件的商店"
+            />
+          ),
+        }}
         rowClassName={({ store }) =>
           store.id === expandedStoreId ? "[&>td]:!bg-[#fff1ee]" : ""
         }
