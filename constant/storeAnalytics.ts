@@ -7,6 +7,8 @@ export const DEFAULT_RANGE: StoreAnalyticsRange = 30;
 // contact gate). All-time totals start here — earlier dates hold no data.
 export const PAGE_VIEW_TRACKING_START = "2026-07-04";
 export const CONTACT_GATE_TRACKING_START = "2026-09-19";
+// seller_contact_* events shipped with PR #78 (merged 2026-10-10).
+export const MEMBER_CONTACT_TRACKING_START = "2026-10-10";
 
 export const CONTACT_GATE_EVENTS = {
   VIEW: "contact_gate_view",

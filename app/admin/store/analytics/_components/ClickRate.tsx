@@ -49,7 +49,7 @@ export default function ClickRate({
           </div>
           <div className="text-[12px] opacity-75">
             每開一次頁面算 1 次（同一人可算多次）；已登入會員不計入；自{" "}
-            {CONTACT_GATE_TRACKING_START} 開始記錄
+            {CONTACT_GATE_TRACKING_START} 開始記錄，之前沒有資料
           </div>
         </>
       }

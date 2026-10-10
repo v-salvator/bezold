@@ -1,6 +1,17 @@
-import { Card, Statistic } from "antd";
+import { Card, Statistic, Tooltip } from "antd";
+import { Info } from "lucide-react";
 import type { ReactNode } from "react";
-import { changeRatio, type StoreAnalyticsRow } from "@/utils/storeAnalytics";
+import {
+  CONTACT_GATE_TRACKING_START,
+  MEMBER_CONTACT_TRACKING_START,
+  SELLER_CONTACT_LABEL,
+} from "@/constant/storeAnalytics";
+import type { SellerContactChannel } from "@/types";
+import {
+  changeRatio,
+  memberContactTotal,
+  type StoreAnalyticsRow,
+} from "@/utils/storeAnalytics";
 import ChangeIndicator from "./ChangeIndicator";
 
 interface AnalyticsKpiRowProps {
@@ -21,6 +32,22 @@ export default function AnalyticsKpiRow({
   const previousViews = sumOf((row) => row.analytics.previous.views);
   const clicks = sumOf((row) => row.analytics.current.gateClicks);
   const previousClicks = sumOf((row) => row.analytics.previous.gateClicks);
+  const memberContacts = sumOf((row) =>
+    memberContactTotal(row.analytics.current),
+  );
+  const previousMemberContacts = sumOf((row) =>
+    memberContactTotal(row.analytics.previous),
+  );
+  const contactsByChannel = (
+    Object.keys(SELLER_CONTACT_LABEL) as SellerContactChannel[]
+  )
+    .map(
+      (channel) =>
+        `${SELLER_CONTACT_LABEL[channel]} ${sumOf(
+          (row) => row.analytics.current.memberContacts[channel],
+        ).toLocaleString()}`,
+    )
+    .join(" · ");
 
   // Spelled out rather than a bare ▲/▼/—, so "no data to compare" reads as
   // such instead of a stray dash.
@@ -34,7 +61,7 @@ export default function AnalyticsKpiRow({
     );
 
   return (
-    <div className="mb-[16px] grid grid-cols-2 gap-[12px] lg:grid-cols-4">
+    <div className="mb-[16px] grid grid-cols-2 gap-[12px] md:grid-cols-3 xl:grid-cols-5">
       <KpiCard
         title="總頁面瀏覽"
         value={views}
@@ -60,10 +87,24 @@ export default function AnalyticsKpiRow({
       />
       <KpiCard
         title="解鎖聯絡點擊"
+        hint={`未登入訪客點擊鎖住的聯絡區、解鎖聯絡方式的次數。自 ${CONTACT_GATE_TRACKING_START} 開始記錄，之前沒有資料。`}
         value={clicks}
         unit="次"
         loading={loading}
         caption={comparison(clicks, previousClicks)}
+      />
+      <KpiCard
+        title="會員聯絡"
+        hint={`已登入會員點擊「撥打賣家電話」、「加 LINE 聯繫」、「到 Threads 私訊賣家」的次數。自 ${MEMBER_CONTACT_TRACKING_START} 開始記錄，之前沒有資料。`}
+        value={memberContacts}
+        unit="次"
+        loading={loading}
+        caption={
+          <>
+            <div>{contactsByChannel}</div>
+            <div>{comparison(memberContacts, previousMemberContacts)}</div>
+          </>
+        }
       />
     </div>
   );
@@ -71,6 +112,7 @@ export default function AnalyticsKpiRow({
 
 function KpiCard({
   title,
+  hint,
   value,
   unit,
   precision,
@@ -78,6 +120,8 @@ function KpiCard({
   caption,
 }: {
   title: string;
+  /** Shown on hover over the title, marked with an info icon. */
+  hint?: string;
   value: number;
   unit: string;
   precision?: number;
@@ -87,7 +131,18 @@ function KpiCard({
   return (
     <Card size="small" loading={loading}>
       <Statistic
-        title={title}
+        title={
+          hint ? (
+            <Tooltip title={hint}>
+              <span className="inline-flex cursor-help items-center gap-[4px]">
+                {title}
+                <Info size={13} strokeWidth={2} />
+              </span>
+            </Tooltip>
+          ) : (
+            title
+          )
+        }
         value={value}
         precision={precision}
         suffix={<span className="text-[14px] text-black/45">{unit}</span>}
