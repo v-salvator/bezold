@@ -100,7 +100,11 @@ export default function StoreAnalyticsTable({
       ),
     },
     {
-      title: headerLabel("較前期"),
+      title: headerLabel(
+        "較前期",
+        "與前一段相同天數比較瀏覽；— 表示前一段沒有瀏覽，無法比較",
+      ),
+      showSorterTooltip: false,
       key: "change",
       align: "right",
       sorter: (left, right) =>
