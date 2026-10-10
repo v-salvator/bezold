@@ -67,7 +67,7 @@ scripts/mark-existing-users-verified.mjs (T8)   docs/rules (T9)   ← 獨立
 
 ### Phase 3: 上線準備
 
-- [ ] Task 8: 既有會員腳本（dry run 為預設）
+- [x] Task 8: 既有會員腳本（dry run 為預設）
 - [ ] Task 9: Firestore / Storage Rules 文件
 
 ### Checkpoint C：完成
