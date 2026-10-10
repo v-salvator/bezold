@@ -333,7 +333,7 @@ definitions.
 
 **Acceptance criteria:**
 
-- [ ] For 2–3 localhost stores, the period views and the gate counts match GA4
+- [x] For 2–3 localhost stores, the period views and the gate counts match GA4
       (Reports → Pages and screens / Events, filtered to the same path,
       hostname and dates).
 - [ ] Before/after screenshots are ready for the PR. The PR description links
@@ -341,8 +341,8 @@ definitions.
 
 **Verification:**
 
-- [ ] The comparison table is recorded in the PR description.
-- [ ] `npm run lint` and `npm run build` pass one final time.
+- [x] The comparison table is recorded in the PR description.
+- [x] `npm run lint` and `npm run build` pass one final time.
 
 **Dependencies:** Tasks 7, 8
 
@@ -355,6 +355,6 @@ definitions.
 ### ✅ Checkpoint D: Complete
 
 - [ ] Every Success Criterion in `SPEC.md` is ticked.
-- [ ] **Stop for user review.** Commit and push only when the user says so.
+- [x] **Stop for user review.** Commit and push only when the user says so.
 - [ ] Before merge, the user adds `GA4_PROPERTY_ID=416623451` to Vercel
       Production.

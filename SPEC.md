@@ -346,24 +346,34 @@ Verification is:
 
 - [ ] `GET /api/admin/store-analytics` returns the documented shape for `range`
       7 / 30 / 90. It returns 400 / 401 / 403 / 502 / 503 exactly as specified.
-- [ ] Repeat requests within an hour reuse the cached result (one GA4 batch call
+- [x] Repeat requests within an hour reuse the cached result (one GA4 batch call
       per range per hour).
-- [ ] Store List shows 總瀏覽數 and 累計聯絡點擊率 for every store, with
+- [x] Store List shows 總瀏覽數 and 累計聯絡點擊率 for every store, with
       `0` / `—` for stores without traffic.
-- [ ] The rate cell shows `點擊 X / 看到 Y 次` on hover. Sorting works on both
+- [x] The rate cell shows `點擊 X / 看到 Y 次` on hover. Sorting works on both
       new columns.
-- [ ] Clicking 總瀏覽數 on a live store opens `/admin/store/analytics?store={id}`
+- [x] Clicking 總瀏覽數 on a live store opens `/admin/store/analytics?store={id}`
       with that row expanded and in view, and does not open the drawer.
-- [ ] A GA4 failure never blocks the Store List.
-- [ ] Store Analytics shows KPI cards, a top-10 ranking and a sortable table
+- [x] A GA4 failure never blocks the Store List.
+- [x] Store Analytics shows KPI cards, a top-10 ranking and a sortable table
       with sparklines. Each row can expand to a line chart with a hover tooltip.
-- [ ] The range switch updates the URL, the data and the 較前期 values. Status
+- [x] The range switch updates the URL, the data and the 較前期 values. Status
       and city filters update the KPIs, ranking and table together.
 - [ ] Numbers for 2–3 spot-checked stores match the GA4 console for the same
       range and hostname.
-- [ ] `npm run lint` and `npm run build` pass.
-- [ ] `docs/analytics-events.md` and `CLAUDE.md` document the new env var,
+- [x] `npm run lint` and `npm run build` pass.
+- [x] `docs/analytics-events.md` and `CLAUDE.md` document the new env var,
       setup steps and metric definitions.
+
+> Verification notes (2026-10-10):
+>
+> - Shape and 200 / 400 / 401 / 503 were verified live. 403 (signed in, not an
+>   admin) and 502 (GA4 error) were only reviewed in code: 403 comes from the
+>   existing `verifyAdminToken`, and 502 couldn't be triggered because all
+>   three ranges were already cached.
+> - Numbers were cross-checked with independent per-store GA4 `runReport`
+>   queries, which matched exactly. They were not compared in the GA4 console
+>   UI.
 
 ## Resolved Decisions
 
