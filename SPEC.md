@@ -15,7 +15,7 @@ which listings get attention and which don't, without opening the GA4 console.
 ### User stories
 
 - As an admin scanning the store list, I see each store's **總瀏覽數** and
-  **累計聯絡點擊率**, so I can spot strong and weak listings at a glance.
+  **累計解鎖聯絡點擊率**, so I can spot strong and weak listings at a glance.
 - As an admin, I hover a click rate and see the raw counts (`點擊 47 / 看到 316 次`),
   so I can tell whether the sample is large enough to trust.
 - As an admin, I click a live store's 總瀏覽數 and land on Store Analytics with
@@ -25,16 +25,16 @@ which listings get attention and which don't, without opening the GA4 console.
 
 ### Data definitions
 
-| Metric              | Definition                                                                                                      | Window                                                 |
-| ------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| 總瀏覽數            | `screenPageViews` on `/store/{storeId}`                                                                         | `2026-07-04` (page-view tracking start) → yesterday    |
-| 累計聯絡點擊率      | `contact_gate_click` ÷ `contact_gate_view` event counts on `/store/{storeId}`                                   | `2026-09-19` (contact-gate tracking start) → yesterday |
-| 瀏覽 (period)       | `screenPageViews`                                                                                               | last N full days (N = 7 / 30 / 90), ending yesterday   |
-| 不重複訪客 (period) | `activeUsers`                                                                                                   | same                                                   |
-| 較前期              | `(current − previous) ÷ previous` views; `—` when previous is 0                                                 | previous N days immediately before                     |
-| 會員聯絡 (period)   | `seller_contact_phone` / `_line` / `_threads` event counts (signed-in members tapping unlocked contact buttons) | same; counted from the day the events shipped          |
-| 聯絡點擊率 (period) | period `contact_gate_click` ÷ period `contact_gate_view`                                                        | same                                                   |
-| 近 N 天趨勢         | daily `screenPageViews`, zero-filled, oldest → newest                                                           | same                                                   |
+| Metric                  | Definition                                                                                                      | Window                                                 |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| 總瀏覽數                | `screenPageViews` on `/store/{storeId}`                                                                         | `2026-07-04` (page-view tracking start) → yesterday    |
+| 累計解鎖聯絡點擊率      | `contact_gate_click` ÷ `contact_gate_view` event counts on `/store/{storeId}`                                   | `2026-09-19` (contact-gate tracking start) → yesterday |
+| 瀏覽 (period)           | `screenPageViews`                                                                                               | last N full days (N = 7 / 30 / 90), ending yesterday   |
+| 不重複訪客 (period)     | `activeUsers`                                                                                                   | same                                                   |
+| 較前期                  | `(current − previous) ÷ previous` views; `—` when previous is 0                                                 | previous N days immediately before                     |
+| 會員聯絡 (period)       | `seller_contact_phone` / `_line` / `_threads` event counts (signed-in members tapping unlocked contact buttons) | same; counted from the day the events shipped          |
+| 解鎖聯絡點擊率 (period) | period `contact_gate_click` ÷ period `contact_gate_view`                                                        | same                                                   |
+| 近 N 天趨勢             | daily `screenPageViews`, zero-filled, oldest → newest                                                           | same                                                   |
 
 - The contact gate is shown only to **logged-out** visitors, so both rates cover
   logged-out visitors only. The UI says so in tooltips.
@@ -156,7 +156,7 @@ testable later.
     `/admin/store/analytics?store={id}`. The click must **not** open the row
     drawer (`stopPropagation`).
   - Header tooltip: `自 2026-07-04 開始追蹤起累計`.
-- **累計聯絡點擊率** column (right-aligned, sortable by rate):
+- **累計解鎖聯絡點擊率** column (right-aligned, sortable by rate):
   - Small bar + percentage (1 decimal).
   - antd `Tooltip` on the cell: `點擊 {clicks} / 看到 {views} 次`.
   - Header tooltip: `累計點擊解鎖 ÷ 累計看到聯絡區（僅未登入訪客），自 2026-09-19 起累計`.
@@ -194,9 +194,9 @@ testable later.
   - 瀏覽
   - 較前期 (▲ green / ▼ red / `—`)
   - 不重複訪客
-  - 聯絡點擊率 (period)
+  - 解鎖聯絡點擊率 (period)
 
-  The 瀏覽, 較前期 and 聯絡點擊率 columns are sortable. Default sort: 瀏覽 descending.
+  The 瀏覽, 較前期 and 解鎖聯絡點擊率 columns are sortable. Default sort: 瀏覽 descending.
 
 - **Expandable rows** (antd `expandable`, one row open at a time):
   - Left side: daily-views line chart for the selected range. It has a hover
@@ -349,7 +349,7 @@ Verification is:
       7 / 30 / 90. It returns 400 / 401 / 403 / 502 / 503 exactly as specified.
 - [x] Repeat requests within an hour reuse the cached result (one GA4 batch call
       per range per hour).
-- [x] Store List shows 總瀏覽數 and 累計聯絡點擊率 for every store, with
+- [x] Store List shows 總瀏覽數 and 累計解鎖聯絡點擊率 for every store, with
       `0` / `—` for stores without traffic.
 - [x] The rate cell shows `點擊 X / 看到 Y 次` on hover. Sorting works on both
       new columns.
