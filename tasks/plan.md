@@ -57,7 +57,7 @@ scripts/mark-existing-users-verified.mjs (T8)   docs/rules (T9)   ← 獨立
 - [x] Task 4: 未驗證時擋下賣家聯絡方式（API 403 + 鎖頭 UI）
 - [x] Task 5: Buyer Club 彈窗註冊後顯示收信步驟
 - [x] Task 6: `/sell`、`/my-listings`、編輯頁的驗證閘門
-- [ ] Task 7: 頭像選單的「信箱未驗證」列
+- [x] Task 7: 頭像選單的「信箱未驗證」列
 
 ### Checkpoint B：限制
 

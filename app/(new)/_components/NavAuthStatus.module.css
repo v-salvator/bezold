@@ -70,6 +70,30 @@
   }
 }
 
+.dropdownVerify {
+  font-family: var(--hand);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 0.625rem 0.875rem;
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in srgb, var(--accent-3) 22%, var(--paper));
+  border-bottom: 1px solid var(--paper-3);
+  transition: background 0.15s;
+
+  &:hover {
+    background: color-mix(in srgb, var(--accent-3) 38%, var(--paper));
+  }
+}
+
+.dropdownVerifyHint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--ink-2);
+}
+
 .logoutBtn {
   font-family: var(--hand);
   font-size: 0.875rem;

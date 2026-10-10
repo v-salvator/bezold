@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { onIdTokenChanged, signOut } from "firebase/auth";
 import type { User } from "firebase/auth";
 import NextLink from "next/link";
+import { usePathname } from "next/navigation";
 import { auth } from "@/firebase/client";
 import Pill from "@/components/refactored/Pill";
 import { cn } from "@/lib/utils";
 import { isLatinChar } from "@/utils/string";
+import { verifyEmailHref } from "@/lib/auth/verification";
 import styles from "./NavAuthStatus.module.css";
 
 function getInitial(user: User): string {
@@ -18,13 +20,18 @@ function getInitial(user: User): string {
 
 export default function NavAuthStatus() {
   const [user, setUser] = useState<User | null>(null);
+  const [isVerified, setIsVerified] = useState(true);
+  const pathname = usePathname();
   const [isAdmin, setIsAdmin] = useState(false);
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    // onIdTokenChanged so the row disappears as soon as a verification
+    // elsewhere on the page force-refreshes the token.
+    const unsubscribe = onIdTokenChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
+      setIsVerified(firebaseUser?.emailVerified ?? true);
       if (firebaseUser) {
         const token = await firebaseUser.getIdTokenResult();
         setIsAdmin(token.claims.admin === true);
@@ -80,6 +87,16 @@ export default function NavAuthStatus() {
           <span className={styles.dropdownEmail}>
             {user.displayName ?? user.email}
           </span>
+          {!isVerified && (
+            <NextLink
+              href={verifyEmailHref(pathname)}
+              className={styles.dropdownVerify}
+              onClick={() => setOpen(false)}
+            >
+              信箱未驗證
+              <span className={styles.dropdownVerifyHint}>點此完成驗證</span>
+            </NextLink>
+          )}
           <NextLink
             href="/my-listings"
             className={styles.dropdownLink}
