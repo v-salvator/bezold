@@ -8,12 +8,15 @@ interface ViewsRankingProps {
   rows: StoreAnalyticsRow[];
   days: number;
   loading: boolean;
+  /** Jump to this store's row in the table below. */
+  onSelect: (storeId: string) => void;
 }
 
 export default function ViewsRanking({
   rows,
   days,
   loading,
+  onSelect,
 }: ViewsRankingProps) {
   const ranked = rows
     .filter((row) => row.analytics.current.views > 0)
@@ -43,23 +46,26 @@ export default function ViewsRanking({
       ) : (
         <ol className={styles.ranking}>
           {ranked.map(({ store, analytics }) => (
-            <li
-              key={store.id}
-              className={styles.item}
-              title={`${store.storeName}：${analytics.current.views.toLocaleString()} 次瀏覽`}
-            >
-              <span className={styles.name}>{store.storeName || "—"}</span>
-              <span className={styles.track}>
-                <span
-                  className={styles.bar}
-                  style={{
-                    width: `${(analytics.current.views / topViews) * 100}%`,
-                  }}
-                />
-              </span>
-              <span className={styles.value}>
-                {analytics.current.views.toLocaleString()}
-              </span>
+            <li key={store.id}>
+              <button
+                type="button"
+                className={styles.item}
+                title={`${store.storeName}：${analytics.current.views.toLocaleString()} 次瀏覽 · 點擊查看明細`}
+                onClick={() => onSelect(store.id)}
+              >
+                <span className={styles.name}>{store.storeName || "—"}</span>
+                <span className={styles.track}>
+                  <span
+                    className={styles.bar}
+                    style={{
+                      width: `${(analytics.current.views / topViews) * 100}%`,
+                    }}
+                  />
+                </span>
+                <span className={styles.value}>
+                  {analytics.current.views.toLocaleString()}
+                </span>
+              </button>
             </li>
           ))}
         </ol>
