@@ -307,17 +307,17 @@ definitions.
 
 **Acceptance criteria:**
 
-- [ ] `docs/analytics-events.md` has an "Admin reporting" section covering:
+- [x] `docs/analytics-events.md` has an "Admin reporting" section covering:
   - the endpoint and caching
   - metric definitions and tracking start dates
   - the hostname filter
   - the GA4 / Cloud setup steps
-- [ ] The `CLAUDE.md` Environment section mentions `GA4_PROPERTY_ID` (server
+- [x] The `CLAUDE.md` Environment section mentions `GA4_PROPERTY_ID` (server
       only).
 
 **Verification:**
 
-- [ ] Read-through: the definitions match `SPEC.md` and the code constants.
+- [x] Read-through: the definitions match `SPEC.md` and the code constants.
 
 **Dependencies:** Task 2 (can run alongside Task 7)
 
