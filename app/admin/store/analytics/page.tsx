@@ -200,7 +200,7 @@ function StoreAnalyticsContent() {
         <>
           <AnalyticsKpiRow rows={rows} loading={loading} />
 
-          <div className="grid grid-cols-[minmax(0,1fr)] gap-[16px] xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] xl:items-start">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-[16px]">
             <ViewsRanking rows={rows} days={range} loading={loading} />
             <StoreAnalyticsTable
               rows={rows}
