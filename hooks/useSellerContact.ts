@@ -1,11 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
+import { onIdTokenChanged } from "firebase/auth";
 import { auth } from "@/firebase/client";
 import type { SellerContact } from "@/types";
 
-export type SellerContactStatus = "loading" | "locked" | "unlocked" | "error";
+export type SellerContactStatus =
+  "loading" | "locked" | "unverified" | "unlocked" | "error";
+
+class SellerContactError extends Error {
+  constructor(readonly status: number) {
+    super(`Seller contact request failed: ${status}`);
+  }
+}
 
 // Both halves of the gate (the contact lines and the CTA buttons) call this
 // hook, and they mount together — dedupe the request per store so one page view
@@ -22,9 +29,7 @@ async function fetchSellerContact(
   const request = fetch(`/api/stores/${storeId}/contact`, {
     headers: { authorization: `Bearer ${idToken}` },
   }).then(async (response) => {
-    if (!response.ok) {
-      throw new Error(`Seller contact request failed: ${response.status}`);
-    }
+    if (!response.ok) throw new SellerContactError(response.status);
     return (await response.json()) as SellerContact;
   });
 
@@ -55,20 +60,27 @@ export function useSellerContact({
   );
   const [contact, setContact] = useState<SellerContact>(initialContact);
   // Tracks the locked → unlocked transition so the card can acknowledge a
-  // just-completed signup, without greeting members who arrived signed in.
+  // just-completed signup or verification, without greeting members who
+  // arrived signed in.
   const wasLocked = useRef(false);
+  // A just-verified member may still hold an ID token minted before the
+  // email_verified claim flipped; force one refresh, never loop.
+  const forcedRefresh = useRef(false);
   const [justUnlocked, setJustUnlocked] = useState(false);
 
   useEffect(() => {
     if (isExample) return;
     let active = true;
 
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser) {
+    // onIdTokenChanged (not onAuthStateChanged) so a verification finished
+    // elsewhere on the page — which force-refreshes the token — unlocks the
+    // contact without a reload.
+    const unsubscribe = onIdTokenChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser || !firebaseUser.emailVerified) {
         if (!active) return;
         wasLocked.current = true;
         setContact({ phone, lineId, threadsId, email });
-        setStatus("locked");
+        setStatus(firebaseUser ? "unverified" : "locked");
         return;
       }
       try {
@@ -78,8 +90,18 @@ export function useSellerContact({
         setContact(revealed);
         setStatus("unlocked");
         setJustUnlocked(wasLocked.current);
-      } catch {
+      } catch (err) {
         if (!active) return;
+        const staleToken =
+          err instanceof SellerContactError &&
+          err.status === 403 &&
+          !forcedRefresh.current;
+        if (staleToken) {
+          // The refreshed token re-fires this listener and retries the fetch.
+          forcedRefresh.current = true;
+          firebaseUser.getIdToken(true).catch(() => setStatus("error"));
+          return;
+        }
         setStatus("error");
       }
     });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import NextLink from "next/link";
 import { Phone, Mail, Lock } from "lucide-react";
 import { useAtomValue, useSetAtom } from "jotai";
 import Button from "@/components/refactored/Button";
@@ -8,6 +9,7 @@ import LineIcon from "@/components/icon/LineIcon";
 import ThreadsIcon from "@/components/icon/ThreadsIcon";
 import { cn } from "@/lib/utils";
 import { trackEvent } from "@/firebase/client";
+import { verifyEmailHref } from "@/lib/auth/verification";
 import {
   buyerClubOpenAtom,
   buyerClubSourceAtom,
@@ -98,7 +100,9 @@ export function SellerContactLines({
     );
   }
 
-  if (status === "locked") {
+  // Logged out → the lock opens the buyer club popup. Signed in but not yet
+  // verified → it leads to /verify-email, which returns here once verified.
+  if (status === "locked" || status === "unverified") {
     return (
       <div className={cn(styles.slot, styles.slotLocked)}>
         {/* Placeholders carry no information — keep them from screen readers. */}
@@ -107,14 +111,24 @@ export function SellerContactLines({
           <ContactLine icon={lineIcon} value={LOCKED_PLACEHOLDER.lineId} />
           <ContactLine icon={mailIcon} value={LOCKED_PLACEHOLDER.email} />
         </div>
-        <button
-          type="button"
-          className={styles.lockTag}
-          onClick={() => openBuyerClub("contact_gate_blur")}
-        >
-          <Lock size={12} strokeWidth={2.5} />
-          免費加入會員後顯示
-        </button>
+        {status === "locked" ? (
+          <button
+            type="button"
+            className={styles.lockTag}
+            onClick={() => openBuyerClub("contact_gate_blur")}
+          >
+            <Lock size={12} strokeWidth={2.5} />
+            免費加入會員後顯示
+          </button>
+        ) : (
+          <NextLink
+            href={verifyEmailHref(`/store/${storeId}`)}
+            className={styles.lockTag}
+          >
+            <Mail size={12} strokeWidth={2.5} />
+            驗證信箱後顯示
+          </NextLink>
+        )}
       </div>
     );
   }
@@ -172,6 +186,26 @@ export function SellerContactCta({
 
   // The contact lines already explain the failure — don't repeat it here.
   if (status === "error") return null;
+
+  // Signed in but unverified: same locked buttons, leading to /verify-email.
+  if (status === "unverified") {
+    const href = verifyEmailHref(`/store/${storeId}`);
+    return (
+      <div className={styles.cta}>
+        <NextLink href={href} className={styles.ctaLink}>
+          <Button className={styles.btn}>
+            <Lock size={15} strokeWidth={2.5} />
+            撥打賣家電話
+          </Button>
+        </NextLink>
+        <NextLink href={href} className={styles.ctaLink}>
+          <Button variant="sage" className={styles.btn}>
+            <Lock size={15} strokeWidth={2.5} />加 LINE 聯繫
+          </Button>
+        </NextLink>
+      </div>
+    );
+  }
 
   // Both locked CTAs always show — like the lines above, the locked state
   // doesn't reveal which channels the seller offers.
