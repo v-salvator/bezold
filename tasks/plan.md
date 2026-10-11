@@ -45,7 +45,7 @@ T6、T7 只依賴 T1，可以和 Phase 2 平行進行；但照順序做比較好
 
 ### Phase 1: 狀態與轉為草稿
 
-- [ ] Task 1: 新增 `draft` 狀態與所有對照表
+- [x] Task 1: 新增 `draft` 狀態與所有對照表
 - [ ] Task 2: Store List 轉為草稿（drawer＋批次），Store List／Analytics 排除草稿
 
 ### Checkpoint A

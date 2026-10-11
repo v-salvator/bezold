@@ -19,14 +19,14 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] `STORE_STATUS.DRAFT === "draft"`，`StoreStatus` 型別包含它
-- [ ] `STATUS_LABEL.draft === "草稿"`；`STATUS_COLOR.draft` 為紫色（Ant Design `"purple"`）
-- [ ] `StatusBadge` 對 draft 顯示「整理中」，樣式和其他四種狀態有明顯區別
-- [ ] 用 grep 確認所有讀取 store 狀態的地方都檢查過，清單寫在 PR 描述裡
+- [x] `STORE_STATUS.DRAFT === "draft"`，`StoreStatus` 型別包含它
+- [x] `STATUS_LABEL.draft === "草稿"`；`STATUS_COLOR.draft` 為紫色（Ant Design `"purple"`）
+- [x] `StatusBadge` 對 draft 顯示「整理中」，樣式和其他四種狀態有明顯區別
+- [x] 用 grep 確認所有讀取 store 狀態的地方都檢查過，清單寫在 PR 描述裡
 
 **Verification:**
 
-- [ ] lint、build 通過（型別檢查會擋下漏掉的對照表）
+- [x] lint、build 通過（型別檢查會擋下漏掉的對照表）
 
 **Dependencies:** None
 

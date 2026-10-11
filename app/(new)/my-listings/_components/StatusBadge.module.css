@@ -34,3 +34,10 @@
   color: var(--paper);
   border-color: var(--ink);
 }
+
+.draft {
+  background: var(--paper-2);
+  color: var(--muted);
+  border-color: var(--muted);
+  border-style: dashed;
+}
