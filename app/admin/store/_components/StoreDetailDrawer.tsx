@@ -34,20 +34,20 @@ const STATUS_OPTIONS = [
 
 interface StoreDetailDrawerProps {
   store: Store | null;
-  statusUpdating: boolean;
   deleting: boolean;
+  /** The 狀態 section — each admin list supplies its own controls. */
+  statusSection: React.ReactNode;
   onClose: () => void;
-  onStatusChange: (storeId: string, status: StoreStatus) => void;
   onDelete: (store: Store) => void;
   onCopyLink: (url: string) => void;
 }
 
+// Shared by Store List and Draft Stores.
 export default function StoreDetailDrawer({
   store,
-  statusUpdating,
   deleting,
+  statusSection,
   onClose,
-  onStatusChange,
   onDelete,
   onCopyLink,
 }: StoreDetailDrawerProps) {
@@ -87,15 +87,7 @@ export default function StoreDetailDrawer({
         <div className="flex flex-col gap-[20px]">
           <CoverImage imagePath={store.images?.[0]} />
 
-          <DrawerSection title="狀態">
-            <Segmented
-              block
-              options={STATUS_OPTIONS}
-              value={store.status ?? STORE_STATUS.PENDING}
-              disabled={statusUpdating}
-              onChange={(status) => onStatusChange(store.id, status)}
-            />
-          </DrawerSection>
+          <DrawerSection title="狀態">{statusSection}</DrawerSection>
 
           <DrawerSection title="資料">
             <Descriptions
@@ -112,6 +104,38 @@ export default function StoreDetailDrawer({
         </div>
       )}
     </Drawer>
+  );
+}
+
+/** Store List's 狀態 controls: switch between the published statuses, or pull back to draft. */
+export function StoreStatusControls({
+  store,
+  statusUpdating,
+  onStatusChange,
+  onConvertToDraft,
+}: {
+  store: Store;
+  statusUpdating: boolean;
+  onStatusChange: (storeId: string, status: StoreStatus) => void;
+  onConvertToDraft: (store: Store) => void;
+}) {
+  return (
+    <>
+      <Segmented
+        block
+        options={STATUS_OPTIONS}
+        value={store.status ?? STORE_STATUS.PENDING}
+        disabled={statusUpdating}
+        onChange={(status) => onStatusChange(store.id, status)}
+      />
+      <AntButton
+        block
+        disabled={statusUpdating}
+        onClick={() => onConvertToDraft(store)}
+      >
+        ↩ 轉為草稿
+      </AntButton>
+    </>
   );
 }
 

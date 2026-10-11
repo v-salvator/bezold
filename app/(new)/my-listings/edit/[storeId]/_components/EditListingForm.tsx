@@ -58,7 +58,8 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
           getUserById(firebaseUser.uid),
         ]);
 
-        // * not found, not the owner, or rejected → sellers can't edit here
+        // * not found, not the owner, rejected or a draft (an admin is reworking
+        // * it) → sellers can't edit here
         if (!fetchedStore) {
           setLoadError("找不到此刊登");
           setLoading(false);
@@ -68,7 +69,10 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
           router.push("/my-listings");
           return;
         }
-        if (fetchedStore.status === STORE_STATUS.REJECTED) {
+        if (
+          fetchedStore.status === STORE_STATUS.REJECTED ||
+          fetchedStore.status === STORE_STATUS.DRAFT
+        ) {
           router.push("/my-listings");
           return;
         }

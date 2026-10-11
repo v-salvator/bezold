@@ -6,6 +6,7 @@ export const STATUS_COLOR: Record<StoreStatus, string> = {
   approved: "green",
   rejected: "red",
   sold: "default",
+  draft: "purple",
 };
 
 export const STATUS_LABEL: Record<StoreStatus, string> = {
@@ -13,6 +14,7 @@ export const STATUS_LABEL: Record<StoreStatus, string> = {
   approved: "已上架",
   rejected: "已拒絕",
   sold: "已頂讓",
+  draft: "草稿",
 };
 
 // Explicit per-tag colours so each tag reads distinctly (the old length-based

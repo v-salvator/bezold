@@ -1,5 +1,6 @@
 import type { Metadata, ResolvingMetadata } from "next";
 import { getStoreById } from "@/firebase/serverUtils";
+import { STORE_STATUS } from "@/types";
 import { omitSellerContact } from "@/utils/store";
 import LaunchBanner from "@/app/(new)/_components/LaunchBanner";
 import SiteNav from "@/app/(new)/_components/SiteNav";
@@ -46,6 +47,10 @@ export async function generateMetadata(
 
   return {
     title: `Bezold 頂讓必售 — ${store.storeName}`,
+    // * drafts are shared with the seller for approval — keep them out of search
+    ...(store.status === STORE_STATUS.DRAFT
+      ? { robots: { index: false, follow: false } }
+      : {}),
     alternates: {
       canonical: canonicalUrl,
     },

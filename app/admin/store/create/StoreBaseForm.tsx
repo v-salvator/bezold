@@ -15,7 +15,7 @@ import { genDefaultStore, formatPriceDisplay } from "@/utils/store";
 import { genDefaultUser, normalizeThreadsId } from "@/utils/user";
 
 import type { Store, User } from "@/types";
-import { STORE_STATUS } from "@/types";
+import { STORE_STATUS, type StoreStatus } from "@/types";
 import { STORE_TAGS } from "@/constant/storeTags";
 import { STORE_CATEGORIES } from "@/constant/storeType";
 import { EQUIPMENT_OPTIONS } from "@/constant/storeEquipment";
@@ -54,33 +54,54 @@ export default function StoreBaseForm() {
     return allFilled;
   };
 
+  // * writes the seller doc, then the store doc pointing at it; returns the store id
+  const createStoreWithSeller = async (status: StoreStatus) => {
+    const userRef = await createUserDoc({
+      ...user,
+      threadsId: normalizeThreadsId(user.threadsId ?? ""),
+    } as User);
+    // * addDoc rejects undefined values — e.g. a Select cleared back to empty
+    const definedStoreFields = Object.fromEntries(
+      Object.entries(store).filter(([, value]) => value !== undefined),
+    );
+    const storeRef = await createStoreDoc({
+      ...definedStoreFields,
+      price: Number(store.price) || 0,
+      priceNegotiable: !!store.priceNegotiable,
+      status,
+      user: userRef.id,
+    } as Store);
+    return storeRef.id;
+  };
+
+  const goToImageUpload = (storeId: string) =>
+    router.push(`/admin/store/edit/${storeId}/image`);
+
   const handleCreateStore = async () => {
     if (isValidateStore() && isValidateUser()) {
-      const userRef = await createUserDoc({
-        ...user,
-        threadsId: normalizeThreadsId(user.threadsId ?? ""),
-      } as User);
-      const userId = userRef.id;
-      const storeRef = await createStoreDoc({
-        ...store,
-        price: Number(store.price) || 0,
-        priceNegotiable: !!store.priceNegotiable,
-        status: STORE_STATUS.PENDING,
-        user: userId,
-      } as Store);
-      const storeId = storeRef.id;
+      const storeId = await createStoreWithSeller(STORE_STATUS.PENDING);
       api.success({
         message: "Successfuly create store",
         description: `Successfuly create store ${store?.storeName}, Now can go to upload image`,
-        onClick: () => {
-          // * edit image
-          router.push(`/admin/store/edit/${storeId}/image`);
-        },
-        onClose: () => {
-          // * edit image
-          router.push(`/admin/store/edit/${storeId}/image`);
-        },
+        // * edit image
+        onClick: () => goToImageUpload(storeId),
+        onClose: () => goToImageUpload(storeId),
       });
+    }
+  };
+
+  // * drafts skip every required-field check — they're finished later
+  const handleSaveDraft = async () => {
+    try {
+      const storeId = await createStoreWithSeller(STORE_STATUS.DRAFT);
+      api.success({
+        message: "已儲存草稿",
+        description: `「${store.storeName || "（未命名）"}」已存成草稿，接著可以上傳圖片`,
+        onClick: () => goToImageUpload(storeId),
+        onClose: () => goToImageUpload(storeId),
+      });
+    } catch {
+      api.error({ message: "儲存草稿失敗，請稍後再試" });
     }
   };
 
@@ -277,10 +298,11 @@ export default function StoreBaseForm() {
       ></Input>
 
       <div className="flex justify-end gap-[8px] mt-[16px]">
+        <Button onClick={() => router.push("/admin/store/list")}>Cancel</Button>
+        <Button onClick={handleSaveDraft}>儲存草稿</Button>
         <Button type="primary" onClick={handleCreateStore}>
           Create
         </Button>
-        <Button onClick={() => router.push("/admin/store/list")}>Cancel</Button>
       </div>
       {contextHolder}
     </div>
