@@ -81,8 +81,13 @@ function StoreAnalyticsContent() {
   } = useStoreAnalytics(range);
 
   useEffect(() => {
+    // Drafts are admin work in progress — they have no place in reporting.
     getStores()
-      .then(setStores)
+      .then((fetchedStores) =>
+        setStores(
+          fetchedStores.filter((store) => store.status !== STORE_STATUS.DRAFT),
+        ),
+      )
       .finally(() => setStoresLoading(false));
   }, []);
 

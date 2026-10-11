@@ -38,6 +38,7 @@ interface StoreDetailDrawerProps {
   deleting: boolean;
   onClose: () => void;
   onStatusChange: (storeId: string, status: StoreStatus) => void;
+  onConvertToDraft: (store: Store) => void;
   onDelete: (store: Store) => void;
   onCopyLink: (url: string) => void;
 }
@@ -48,6 +49,7 @@ export default function StoreDetailDrawer({
   deleting,
   onClose,
   onStatusChange,
+  onConvertToDraft,
   onDelete,
   onCopyLink,
 }: StoreDetailDrawerProps) {
@@ -95,6 +97,13 @@ export default function StoreDetailDrawer({
               disabled={statusUpdating}
               onChange={(status) => onStatusChange(store.id, status)}
             />
+            <AntButton
+              block
+              disabled={statusUpdating}
+              onClick={() => onConvertToDraft(store)}
+            >
+              ↩ 轉為草稿
+            </AntButton>
           </DrawerSection>
 
           <DrawerSection title="資料">

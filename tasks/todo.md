@@ -47,14 +47,14 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] Drawer 與批次的「轉為草稿」都會先確認，確認後只改 `status` 和 `updateTime`，該列從表格消失
-- [ ] 批次中有失敗的列時，失敗的列保持勾選並顯示失敗數量（與現有批次行為相同）
-- [ ] Store List、Store Analytics 的狀態篩選沒有「草稿」選項，「所有狀態」也不含草稿
+- [x] Drawer 與批次的「轉為草稿」都會先確認，確認後只改 `status` 和 `updateTime`，該列從表格消失
+- [x] 批次中有失敗的列時，失敗的列保持勾選並顯示失敗數量（與現有批次行為相同）
+- [x] Store List、Store Analytics 的狀態篩選沒有「草稿」選項，「所有狀態」也不含草稿
 
 **Verification:**
 
-- [ ] lint、build 通過
-- [ ] 手動：SPEC T7、T8、T9（dev 環境，用 mockStore 的資料）
+- [x] lint、build 通過
+- [x] 手動：SPEC T7、T8、T9（dev 環境，用 mockStore 的資料）
 
 **Dependencies:** Task 1
 
@@ -70,9 +70,9 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 ## Checkpoint A
 
-- [ ] lint、build 通過
-- [ ] 手動：SPEC T7、T8、T9
-- [ ] 和你 review 後再進 Phase 2
+- [x] lint、build 通過
+- [x] 手動：SPEC T7、T8、T9
+- [x] 和你 review 後再進 Phase 2
 
 ---
 

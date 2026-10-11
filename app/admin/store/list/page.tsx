@@ -48,6 +48,12 @@ const STATUS_FILTER_OPTIONS: { label: string; value: StatusFilter }[] = [
   ].map((status) => ({ label: STATUS_LABEL[status], value: status })),
 ];
 
+// Statuses whose stores a buyer can currently see on the public site.
+const PUBLIC_STATUSES: StoreStatus[] = [
+  STORE_STATUS.APPROVED,
+  STORE_STATUS.SOLD,
+];
+
 const BULK_STATUS_ACTIONS: { label: string; status: StoreStatus }[] = [
   { label: "✓ 通過", status: STORE_STATUS.APPROVED },
   { label: "✕ 拒絕", status: STORE_STATUS.REJECTED },
@@ -98,6 +104,9 @@ export default function List() {
     stores.find((store) => store.id === activeStoreId) ?? null;
 
   const filteredStores = stores.filter((store) => {
+    // Drafts live on their own page (/admin/store/drafts).
+    if (store.status === STORE_STATUS.DRAFT) return false;
+
     const matchesSearch =
       !normalizedSearch ||
       store.storeName?.toLowerCase().includes(normalizedSearch) ||
@@ -140,6 +149,12 @@ export default function List() {
           : store,
       ),
     );
+    // A store turned into a draft leaves this list, so its drawer goes too.
+    if (status === STORE_STATUS.DRAFT) {
+      setActiveStoreId((previous) =>
+        previous && storeIds.includes(previous) ? null : previous,
+      );
+    }
   };
 
   const handleStatusChange = async (storeId: string, status: StoreStatus) => {
@@ -180,6 +195,51 @@ export default function List() {
         `${failedIds.length} 筆更新失敗（仍保持選取），${succeededIds.length} 筆成功`,
       );
     }
+  };
+
+  const confirmConvertToDraft = (storeIds: string[]) => {
+    if (confirmOpenRef.current || storeIds.length === 0) return;
+    confirmOpenRef.current = true;
+    const targets = stores.filter((store) => storeIds.includes(store.id));
+    const publicCount = targets.filter((store) =>
+      PUBLIC_STATUSES.includes(store.status ?? STORE_STATUS.PENDING),
+    ).length;
+    const isSingle = storeIds.length === 1;
+    const subject = isSingle
+      ? `「${targets[0]?.storeName || `商店 ${storeIds[0]}`}」`
+      : `${storeIds.length} 間商店`;
+
+    modal.confirm({
+      title: "轉為草稿",
+      okText: "轉為草稿",
+      cancelText: "取消",
+      content: (
+        <div className="flex flex-col gap-[8px]">
+          <span>確定要將{subject}轉為草稿嗎？</span>
+          {publicCount > 0 && (
+            <span className="font-semibold text-[#d4380d]">
+              {isSingle
+                ? "這間店目前在前台看得到，轉為草稿後會從前台列表下架。"
+                : `其中 ${publicCount} 間目前在前台看得到，轉為草稿後會從前台列表下架。`}
+            </span>
+          )}
+          <span className="text-black/45">
+            資料、圖片與瀏覽數都會保留，之後可以在 Draft Stores 送審。
+          </span>
+        </div>
+      ),
+      onCancel: () => {
+        confirmOpenRef.current = false;
+      },
+      onOk: async () => {
+        if (isSingle) {
+          await handleStatusChange(storeIds[0], STORE_STATUS.DRAFT);
+        } else {
+          await handleBulkStatusChange(STORE_STATUS.DRAFT);
+        }
+        confirmOpenRef.current = false;
+      },
+    });
   };
 
   const handleCopyLink = async (url: string) => {
@@ -446,6 +506,13 @@ export default function List() {
           ))}
           <AntButton
             size="small"
+            disabled={bulkUpdating}
+            onClick={() => confirmConvertToDraft(selectedIds)}
+          >
+            ↩ 轉為草稿
+          </AntButton>
+          <AntButton
+            size="small"
             type="text"
             disabled={bulkUpdating}
             onClick={() => setSelectedIds([])}
@@ -488,6 +555,7 @@ export default function List() {
         deleting={deleting === activeStoreId}
         onClose={() => setActiveStoreId(null)}
         onStatusChange={handleStatusChange}
+        onConvertToDraft={(store) => confirmConvertToDraft([store.id])}
         onDelete={handleDelete}
         onCopyLink={handleCopyLink}
       />
