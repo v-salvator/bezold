@@ -73,7 +73,7 @@ T6、T7 只依賴 T1，可以和 Phase 2 平行進行；但照順序做比較好
 
 ### Checkpoint C: 完成
 
-- [ ] lint、build 通過
+- [x] lint、build 通過
 - [ ] 手動：SPEC T1–T17 全部重跑一次
 - [ ] 現有流程不受影響（Create、狀態切換、批次通過／拒絕／已頂讓、刪除、賣家標記已頂讓）
 - [ ] 和你 review，之後才 commit、開 PR

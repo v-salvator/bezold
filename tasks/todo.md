@@ -220,7 +220,7 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 ## Checkpoint C: 完成
 
-- [ ] lint、build 通過
+- [x] lint、build 通過
 - [ ] 手動：SPEC T1–T17 全部重跑一次
 - [ ] 現有流程不受影響：Create、drawer 狀態切換、批次通過／拒絕／已頂讓、刪除、賣家標記已頂讓
 - [ ] 和你 review，之後才 commit、開 PR
