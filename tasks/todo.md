@@ -198,14 +198,14 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 草稿在「我的刊登」顯示「整理中」，沒有任何操作按鈕
-- [ ] 直接打開草稿的 `/my-listings/edit/{storeId}` 會被導回 `/my-listings`
-- [ ] 草稿送審後，「我的刊登」顯示「審核中」，編輯按鈕恢復
+- [x] 草稿在「我的刊登」顯示「整理中」，沒有任何操作按鈕
+- [x] 直接打開草稿的 `/my-listings/edit/{storeId}` 會被導回 `/my-listings`
+- [x] 草稿送審後，「我的刊登」顯示「審核中」，編輯按鈕恢復
 
 **Verification:**
 
-- [ ] lint、build 通過
-- [ ] 手動：SPEC T11、T12（需要一個在 dev 環境刊登過店面的賣家帳號）
+- [x] lint、build 通過
+- [x] 手動：SPEC T11、T12（需要一個在 dev 環境刊登過店面的賣家帳號）
 
 **Dependencies:** Task 1
 
