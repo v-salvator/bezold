@@ -84,14 +84,14 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 頁面只列出 `status === "draft"` 的店，預設依建立時間新到舊排序；有「建立」和「最後編輯」兩欄
-- [ ] 完成度百分比 = 已填項目 ÷ 9，賣家欄位讀自 `getUserById(store.user)`，賣家文件不存在時視為未填
-- [ ] 側邊欄「Draft Stores」可導到此頁，且在此頁時呈現選取狀態；「＋ 新增草稿」導到 `/admin/store/create`
+- [x] 頁面只列出 `status === "draft"` 的店，預設依建立時間新到舊排序；有「建立」和「最後編輯」兩欄
+- [x] 完成度百分比 = 已填項目 ÷ 9，賣家欄位讀自 `getUserById(store.user)`，賣家文件不存在時視為未填
+- [x] 側邊欄「Draft Stores」可導到此頁，且在此頁時呈現選取狀態；「＋ 新增草稿」導到 `/admin/store/create`
 
 **Verification:**
 
-- [ ] lint、build 通過
-- [ ] 手動：把一間資料齊全的店和一間缺圖片的店轉為草稿，確認兩者的完成度（賣家資料齊全時分別是 100% 和 89%）和排序正確
+- [x] lint、build 通過
+- [x] 手動：把一間資料齊全的店和一間缺圖片的店轉為草稿，確認兩者的完成度（賣家資料齊全時分別是 100% 和 89%）和排序正確
 
 **Dependencies:** Task 2（需要草稿資料才能驗證）
 

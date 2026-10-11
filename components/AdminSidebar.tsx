@@ -14,6 +14,7 @@ const items: MenuItem[] = [
     children: [
       { key: "store-create", label: "Store Create" },
       { key: "store-list", label: "Store List" },
+      { key: "store-drafts", label: "Draft Stores" },
       { key: "store-batch", label: "Batch Stores" },
       { key: "store-analytics", label: "Store Analytics" },
     ],
@@ -40,6 +41,9 @@ export default function AdminSidebar() {
         break;
       case "store-list":
         router.push("/admin/store/list");
+        break;
+      case "store-drafts":
+        router.push("/admin/store/drafts");
         break;
       case "store-batch":
         router.push("/admin/store/batch");
