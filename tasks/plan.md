@@ -68,7 +68,7 @@ T6、T7 只依賴 T1，可以和 Phase 2 平行進行；但照順序做比較好
 
 ### Phase 3: 前台與賣家端
 
-- [ ] Task 6: 草稿的 contact API 回空值，前台頁加 noindex
+- [x] Task 6: 草稿的 contact API 回空值，前台頁加 noindex
 - [ ] Task 7: 賣家「我的刊登」對草稿不提供操作
 
 ### Checkpoint C: 完成

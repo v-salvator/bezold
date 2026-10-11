@@ -172,14 +172,14 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 會員 token 呼叫草稿的 contact API，四個欄位都是空字串；送審並通過後恢復正常
-- [ ] 草稿頁的 HTML 有 `<meta name="robots" content="noindex, nofollow">`，已上架的店面頁沒有
-- [ ] 未登入看草稿頁，聯絡區與一般店面相同（模糊＋鎖頭＋上鎖的 CTA）；已驗證的會員看到「賣家尚未提供聯絡方式」
+- [x] 會員 token 呼叫草稿的 contact API，四個欄位都是空字串；送審並通過後恢復正常
+- [x] 草稿頁的 HTML 有 `<meta name="robots" content="noindex, nofollow">`，已上架的店面頁沒有
+- [x] 未登入看草稿頁，聯絡區與一般店面相同（模糊＋鎖頭＋上鎖的 CTA）；已驗證的會員看到「賣家尚未提供聯絡方式」
 
 **Verification:**
 
-- [ ] lint、build 通過
-- [ ] 手動：SPEC T13–T17
+- [x] lint、build 通過
+- [x] 手動：SPEC T13–T17
 
 **Dependencies:** Task 1
 

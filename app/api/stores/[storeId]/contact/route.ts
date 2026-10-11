@@ -26,8 +26,12 @@ export async function GET(req: NextRequest, { params }: ContactProps) {
     return NextResponse.json({ error: "Store not found" }, { status: 404 });
   }
 
-  // Sold listings are closed to enquiries — members get nothing either.
-  if (store.status === STORE_STATUS.SOLD) {
+  // Sold listings are closed to enquiries, and drafts are only shown to the
+  // seller for approval — members get nothing for either.
+  if (
+    store.status === STORE_STATUS.SOLD ||
+    store.status === STORE_STATUS.DRAFT
+  ) {
     return NextResponse.json(EMPTY_CONTACT);
   }
 
