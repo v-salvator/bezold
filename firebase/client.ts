@@ -3,7 +3,7 @@ import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getAuth } from "firebase/auth";
 import {
-  getAnalytics,
+  initializeAnalytics,
   isSupported,
   logEvent,
   type Analytics,
@@ -23,7 +23,9 @@ export const getAnalyticsClient = async (): Promise<Analytics | null> => {
   if (typeof window === "undefined") return null;
   if (analytics) return analytics;
   if (!(await isSupported())) return null;
-  analytics = getAnalytics(app);
+  // AnalyticsTracker sends every page_view itself (and skips /admin), so turn
+  // off gtag's automatic page_view on init — otherwise the landing page counts twice.
+  analytics = initializeAnalytics(app, { config: { send_page_view: false } });
   return analytics;
 };
 

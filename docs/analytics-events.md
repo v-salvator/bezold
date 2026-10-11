@@ -9,6 +9,11 @@ lazy — see [`firebase/client.ts`](../firebase/client.ts) (`getAnalyticsClient`
 once in the root layout. All custom events go through the `trackEvent()` helper,
 which safely no-ops on the server and on unsupported browsers.
 
+`AnalyticsTracker` is the **only** source of `page_view`. Analytics is initialized
+with `send_page_view: false` so gtag doesn't also send one on load. In the GA4
+console, keep Enhanced measurement → Page views → "Page changes based on browser
+history events" **off**, or every client-side navigation is counted twice.
+
 ---
 
 ## Event reference
