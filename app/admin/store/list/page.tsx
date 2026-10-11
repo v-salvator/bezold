@@ -34,7 +34,9 @@ import {
   PAGE_VIEW_TRACKING_START,
 } from "@/constant/storeAnalytics";
 import ClickRate, { clickRateOf } from "../analytics/_components/ClickRate";
-import StoreDetailDrawer from "./_components/StoreDetailDrawer";
+import StoreDetailDrawer, {
+  StoreStatusControls,
+} from "../_components/StoreDetailDrawer";
 
 type StatusFilter = StoreStatus | "all";
 
@@ -551,11 +553,18 @@ export default function List() {
 
       <StoreDetailDrawer
         store={activeStore}
-        statusUpdating={updating === activeStoreId}
         deleting={deleting === activeStoreId}
+        statusSection={
+          activeStore && (
+            <StoreStatusControls
+              store={activeStore}
+              statusUpdating={updating === activeStoreId}
+              onStatusChange={handleStatusChange}
+              onConvertToDraft={(store) => confirmConvertToDraft([store.id])}
+            />
+          )
+        }
         onClose={() => setActiveStoreId(null)}
-        onStatusChange={handleStatusChange}
-        onConvertToDraft={(store) => confirmConvertToDraft([store.id])}
         onDelete={handleDelete}
         onCopyLink={handleCopyLink}
       />

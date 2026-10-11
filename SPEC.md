@@ -38,6 +38,7 @@ UI 參考：[`mockups/admin-draft-stores.html`](mockups/admin-draft-stores.html)
    - 欄位：勾選、店名（空白顯示「（未命名）」）、完成度（進度條＋百分比）、城市／區域、頂讓金、建立、最後編輯、操作（編輯、送審）。
    - 可依店名搜尋。
    - 點「編輯」前往現有的 `/admin/store/edit/{storeId}`。
+   - 點選任一列會開啟和 Store List 相同的詳情側欄（封面、資料、店家連結、刪除／查看／編輯）；狀態區改為草稿標籤、完成度、送審前還缺的欄位與「送審」按鈕。
    - 右上角「＋ 新增草稿」前往 `/admin/store/create`。
 4. **完成度**：檢查清單共 9 項。
    - **必填（擋送審）**：店名、地址 `location`、描述、賣家姓名 `userName`、賣家電話 `phone`。與現有 Create 的必填一致。

@@ -1,12 +1,14 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Alert,
   Button as AntButton,
   Input,
   Modal,
   Progress,
   Space,
   Table,
+  Tag,
   Tooltip,
   message,
 } from "antd";
@@ -25,6 +27,9 @@ import { authedFetch } from "@/lib/authedFetch";
 import { useAdminAuth } from "@/hooks";
 import { formatPriceDisplay } from "@/utils/store";
 import { getDraftChecklist, type DraftChecklist } from "@/utils/storeDraft";
+import { STATUS_COLOR, STATUS_LABEL } from "@/constant/adminStore";
+import { cn } from "@/lib/utils";
+import StoreDetailDrawer from "../_components/StoreDetailDrawer";
 
 type DraftRow = Store & { checklist: DraftChecklist };
 
@@ -41,6 +46,8 @@ const loadDrafts = async (): Promise<DraftRow[]> => {
   );
   return drafts.map((draft, index) => ({
     ...draft,
+    // the drawer's 刊登者 row reads the seller name from userInfo
+    userInfo: sellers[index],
     checklist: getDraftChecklist(draft, sellers[index]),
   }));
 };
@@ -59,6 +66,8 @@ export default function DraftStores() {
   // storeId being sent for review from its row.
   const [submittingId, setSubmittingId] = useState<string | null>(null);
   const [bulkUpdating, setBulkUpdating] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [activeDraftId, setActiveDraftId] = useState<string | null>(null);
   // guards against opening a second confirm (e.g. a same-tick double-click).
   const confirmOpenRef = useRef(false);
 
@@ -82,6 +91,9 @@ export default function DraftStores() {
     );
     setSelectedIds((previous) =>
       previous.filter((storeId) => !storeIds.includes(storeId)),
+    );
+    setActiveDraftId((previous) =>
+      previous && storeIds.includes(previous) ? null : previous,
     );
   };
 
@@ -177,9 +189,11 @@ export default function DraftStores() {
         confirmOpenRef.current = false;
       },
       onOk: async () => {
-        if (!isSingle) setBulkUpdating(true);
+        if (isSingle) setDeletingId(storeIds[0]);
+        else setBulkUpdating(true);
         const deletedIds = await deleteDrafts(storeIds);
-        if (!isSingle) setBulkUpdating(false);
+        setDeletingId(null);
+        setBulkUpdating(false);
         confirmOpenRef.current = false;
 
         const failedCount = storeIds.length - deletedIds.length;
@@ -197,6 +211,18 @@ export default function DraftStores() {
       },
     });
   };
+
+  const handleCopyLink = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      messageApi.success("已複製連結");
+    } catch {
+      messageApi.error("複製失敗，請手動選取連結");
+    }
+  };
+
+  const activeDraft =
+    drafts.find((draft) => draft.id === activeDraftId) ?? null;
 
   const normalizedSearch = search.trim().toLowerCase();
   const filteredDrafts = drafts.filter(
@@ -374,8 +400,90 @@ export default function DraftStores() {
           selectedRowKeys: selectedIds,
           onChange: (keys) => setSelectedIds(keys as string[]),
         }}
+        onRow={(record) => ({
+          onClick: (event) => {
+            // Checkboxes and the row's own buttons/links keep their own job.
+            const target = event.target as HTMLElement;
+            if (
+              target.closest(".ant-table-selection-column") ||
+              target.closest("button, a")
+            ) {
+              return;
+            }
+            setActiveDraftId(record.id);
+          },
+        })}
+        rowClassName={(record) =>
+          cn(
+            "cursor-pointer",
+            record.id === activeDraftId && "[&>td]:!bg-[#fff1ee]",
+          )
+        }
         locale={{ emptyText: "目前沒有草稿" }}
       />
+
+      <StoreDetailDrawer
+        store={activeDraft}
+        deleting={deletingId === activeDraftId}
+        statusSection={
+          activeDraft && (
+            <DraftStatusSection
+              draft={activeDraft}
+              submitting={submittingId === activeDraft.id}
+              onSubmit={() => handleSubmit(activeDraft.id)}
+            />
+          )
+        }
+        onClose={() => setActiveDraftId(null)}
+        onDelete={(store) => confirmDelete([store.id])}
+        onCopyLink={handleCopyLink}
+      />
     </div>
+  );
+}
+
+// The drawer's 狀態 section for a draft: how complete it is, what blocks 送審.
+function DraftStatusSection({
+  draft,
+  submitting,
+  onSubmit,
+}: {
+  draft: DraftRow;
+  submitting: boolean;
+  onSubmit: () => void;
+}) {
+  const { checklist } = draft;
+  const ready = isReady(draft);
+
+  return (
+    <>
+      <div className="flex items-center gap-[8px]">
+        <Tag color={STATUS_COLOR.draft} className="!m-0">
+          {STATUS_LABEL.draft}
+        </Tag>
+        <Progress
+          percent={checklist.percent}
+          size="small"
+          className="!m-0 flex-1"
+          format={() => `${checklist.done}/${checklist.total}`}
+        />
+      </div>
+      {!ready && (
+        <Alert
+          type="warning"
+          showIcon
+          message={`送審前還缺：${checklist.missingRequired.join("、")}`}
+        />
+      )}
+      <AntButton
+        block
+        type="primary"
+        disabled={!ready}
+        loading={submitting}
+        onClick={onSubmit}
+      >
+        送審
+      </AntButton>
+    </>
   );
 }
