@@ -112,14 +112,14 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 送審成功後該列從草稿頁消失，Store List 出現該店且狀態為「待審核」
-- [ ] 必填未齊時「送審」停用，tooltip 列出缺少的必填欄位
-- [ ] 批次送審與批次刪除都正確處理部分失敗或部分不符條件的情況，相關列保持勾選
+- [x] 送審成功後該列從草稿頁消失，Store List 出現該店且狀態為「待審核」
+- [x] 必填未齊時「送審」停用，tooltip 列出缺少的必填欄位
+- [x] 批次送審與批次刪除都正確處理部分失敗或部分不符條件的情況，相關列保持勾選
 
 **Verification:**
 
-- [ ] lint、build 通過
-- [ ] 手動：SPEC T3、T4、T5、T6
+- [x] lint、build 通過
+- [x] 手動：SPEC T3、T4、T5、T6
 
 **Dependencies:** Task 3
 

@@ -1,13 +1,28 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
-import { Button as AntButton, Input, Progress, Space, Table } from "antd";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Button as AntButton,
+  Input,
+  Modal,
+  Progress,
+  Space,
+  Table,
+  Tooltip,
+  message,
+} from "antd";
 import dayjs from "dayjs";
 import Link from "next/link";
 
 import type { TableProps } from "antd";
 import type { Store } from "@/types";
 import { STORE_STATUS } from "@/types";
-import { getStores, getUserById } from "@/firebase/clientUtils";
+import {
+  getStores,
+  getUserById,
+  updateStoreStatus,
+} from "@/firebase/clientUtils";
+import { authedFetch } from "@/lib/authedFetch";
+import { useAdminAuth } from "@/hooks";
 import { formatPriceDisplay } from "@/utils/store";
 import { getDraftChecklist, type DraftChecklist } from "@/utils/storeDraft";
 
@@ -30,10 +45,22 @@ const loadDrafts = async (): Promise<DraftRow[]> => {
   }));
 };
 
+const isReady = (draft: DraftRow) =>
+  draft.checklist.missingRequired.length === 0;
+
 export default function DraftStores() {
+  const { idToken } = useAdminAuth();
+  const [modal, modalHolder] = Modal.useModal();
+  const [messageApi, messageHolder] = message.useMessage();
   const [drafts, setDrafts] = useState<DraftRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  // storeId being sent for review from its row.
+  const [submittingId, setSubmittingId] = useState<string | null>(null);
+  const [bulkUpdating, setBulkUpdating] = useState(false);
+  // guards against opening a second confirm (e.g. a same-tick double-click).
+  const confirmOpenRef = useRef(false);
 
   const fetchDrafts = useCallback(async () => {
     setLoading(true);
@@ -47,6 +74,129 @@ export default function DraftStores() {
   useEffect(() => {
     fetchDrafts();
   }, [fetchDrafts]);
+
+  // Sent-for-review and deleted drafts both simply leave this page.
+  const removeDrafts = (storeIds: string[]) => {
+    setDrafts((previous) =>
+      previous.filter((draft) => !storeIds.includes(draft.id)),
+    );
+    setSelectedIds((previous) =>
+      previous.filter((storeId) => !storeIds.includes(storeId)),
+    );
+  };
+
+  const handleSubmit = async (storeId: string) => {
+    setSubmittingId(storeId);
+    try {
+      await updateStoreStatus(storeId, STORE_STATUS.PENDING);
+      removeDrafts([storeId]);
+      messageApi.success("已送審");
+    } catch {
+      messageApi.error("送審失敗，請稍後再試");
+    } finally {
+      setSubmittingId(null);
+    }
+  };
+
+  const handleBulkSubmit = async () => {
+    const selected = drafts.filter((draft) => selectedIds.includes(draft.id));
+    const readyIds = selected.filter(isReady).map((draft) => draft.id);
+    const notReadyIds = selected
+      .filter((draft) => !isReady(draft))
+      .map((draft) => draft.id);
+
+    setBulkUpdating(true);
+    const results = await Promise.allSettled(
+      readyIds.map((storeId) =>
+        updateStoreStatus(storeId, STORE_STATUS.PENDING),
+      ),
+    );
+    const succeededIds = readyIds.filter(
+      (_, index) => results[index].status === "fulfilled",
+    );
+    const failedIds = readyIds.filter(
+      (_, index) => results[index].status === "rejected",
+    );
+    removeDrafts(succeededIds);
+    // Keep whatever wasn't sent selected so the admin can fix and retry.
+    setSelectedIds([...notReadyIds, ...failedIds]);
+    setBulkUpdating(false);
+
+    if (succeededIds.length > 0) {
+      messageApi.success(`已送審 ${succeededIds.length} 筆`);
+    }
+    if (notReadyIds.length > 0) {
+      messageApi.warning(`${notReadyIds.length} 筆缺少必填，未送審`);
+    }
+    if (failedIds.length > 0) {
+      messageApi.error(`${failedIds.length} 筆送審失敗（仍保持選取）`);
+    }
+  };
+
+  // Resolves to the ids that were deleted; failures are left in place.
+  const deleteDrafts = async (storeIds: string[]) => {
+    if (!idToken) {
+      messageApi.error("尚未取得管理員權限，請稍後再試");
+      return [];
+    }
+    const results = await Promise.allSettled(
+      storeIds.map(async (storeId) => {
+        const res = await authedFetch(idToken, `/api/stores/${storeId}`, {
+          method: "DELETE",
+        });
+        if (!res.ok) throw new Error("Failed to delete store");
+      }),
+    );
+    const deletedIds = storeIds.filter(
+      (_, index) => results[index].status === "fulfilled",
+    );
+    removeDrafts(deletedIds);
+    return deletedIds;
+  };
+
+  const confirmDelete = (storeIds: string[]) => {
+    if (confirmOpenRef.current || storeIds.length === 0) return;
+    confirmOpenRef.current = true;
+    const isSingle = storeIds.length === 1;
+    const draft = drafts.find((item) => item.id === storeIds[0]);
+    const subject = isSingle
+      ? `「${draft?.storeName || "（未命名）"}」`
+      : `${storeIds.length} 筆草稿`;
+
+    modal.confirm({
+      title: "刪除草稿",
+      okText: "刪除",
+      okType: "danger",
+      cancelText: "取消",
+      content: (
+        <span>
+          確定要刪除{subject}嗎？此操作將永久移除商店與其圖片，無法復原。
+        </span>
+      ),
+      onCancel: () => {
+        confirmOpenRef.current = false;
+      },
+      onOk: async () => {
+        if (!isSingle) setBulkUpdating(true);
+        const deletedIds = await deleteDrafts(storeIds);
+        if (!isSingle) setBulkUpdating(false);
+        confirmOpenRef.current = false;
+
+        const failedCount = storeIds.length - deletedIds.length;
+        if (failedCount === 0) {
+          messageApi.success(
+            isSingle ? "草稿已刪除" : `已刪除 ${deletedIds.length} 筆草稿`,
+          );
+        } else {
+          messageApi.error(
+            isSingle
+              ? "刪除失敗，請稍後再試"
+              : `${failedCount} 筆刪除失敗（仍保持選取），${deletedIds.length} 筆成功`,
+          );
+        }
+      },
+    });
+  };
 
   const normalizedSearch = search.trim().toLowerCase();
   const filteredDrafts = drafts.filter(
@@ -126,13 +276,42 @@ export default function DraftStores() {
     {
       title: "操作",
       key: "actions",
-      render: (_, { id }) => (
+      render: (_, draft) => (
         <Space size={4}>
-          <Link href={`/admin/store/edit/${id}`}>
+          <Link href={`/admin/store/edit/${draft.id}`}>
             <AntButton size="small" type="link">
               編輯
             </AntButton>
           </Link>
+          <Tooltip
+            title={
+              isReady(draft)
+                ? null
+                : `缺少：${draft.checklist.missingRequired.join("、")}`
+            }
+          >
+            {/* span keeps the tooltip working while the button is disabled */}
+            <span>
+              <AntButton
+                size="small"
+                type="primary"
+                disabled={!isReady(draft) || bulkUpdating}
+                loading={submittingId === draft.id}
+                onClick={() => handleSubmit(draft.id)}
+              >
+                送審
+              </AntButton>
+            </span>
+          </Tooltip>
+          <AntButton
+            size="small"
+            type="text"
+            danger
+            disabled={bulkUpdating}
+            onClick={() => confirmDelete([draft.id])}
+          >
+            刪除
+          </AntButton>
         </Space>
       ),
     },
@@ -140,6 +319,8 @@ export default function DraftStores() {
 
   return (
     <div className="p-[16px]">
+      {modalHolder}
+      {messageHolder}
       <Space className="mb-[12px]" wrap>
         <Input.Search
           allowClear
@@ -153,13 +334,46 @@ export default function DraftStores() {
         </Link>
       </Space>
 
+      {selectedIds.length > 0 && (
+        <div className="mb-[12px] flex flex-wrap items-center gap-[8px] rounded-[8px] border border-solid border-[#ffd8d1] bg-[#fff1ee] px-[12px] py-[8px]">
+          <span className="font-semibold">已選取 {selectedIds.length} 筆</span>
+          <AntButton
+            size="small"
+            disabled={bulkUpdating}
+            onClick={handleBulkSubmit}
+          >
+            送審
+          </AntButton>
+          <AntButton
+            size="small"
+            danger
+            disabled={bulkUpdating}
+            onClick={() => confirmDelete(selectedIds)}
+          >
+            刪除
+          </AntButton>
+          <AntButton
+            size="small"
+            type="text"
+            disabled={bulkUpdating}
+            onClick={() => setSelectedIds([])}
+          >
+            取消選取
+          </AntButton>
+        </div>
+      )}
+
       <Table
         size="small"
         columns={columns}
         dataSource={filteredDrafts}
         rowKey="id"
-        loading={loading}
-        scroll={{ x: 960 }}
+        loading={loading || bulkUpdating}
+        scroll={{ x: 1080 }}
+        rowSelection={{
+          selectedRowKeys: selectedIds,
+          onChange: (keys) => setSelectedIds(keys as string[]),
+        }}
         locale={{ emptyText: "目前沒有草稿" }}
       />
     </div>

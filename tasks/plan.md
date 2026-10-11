@@ -57,7 +57,7 @@ T6、T7 只依賴 T1，可以和 Phase 2 平行進行；但照順序做比較好
 ### Phase 2: Draft Stores 頁
 
 - [x] Task 3: `/admin/store/drafts` 列表、完成度、側邊欄項目
-- [ ] Task 4: 草稿頁的送審與刪除（單筆＋批次）
+- [x] Task 4: 草稿頁的送審與刪除（單筆＋批次）
 - [ ] Task 5: Store Create「儲存草稿」
 
 ### Checkpoint B
