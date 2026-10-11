@@ -137,14 +137,14 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 完全空白的表單可以儲存草稿，Firestore 沒有 `undefined` 錯誤，文件的空字串欄位為 `""`
-- [ ] 儲存後導到 `/admin/store/edit/{storeId}/image`，Draft Stores 出現該筆，店名顯示「（未命名）」
-- [ ] 「Create」仍然檢查必填並建立為 `pending`，不出現在 Draft Stores
+- [x] 完全空白的表單可以儲存草稿，Firestore 沒有 `undefined` 錯誤，文件的空字串欄位為 `""`
+- [x] 儲存後導到 `/admin/store/edit/{storeId}/image`，Draft Stores 出現該筆，店名顯示「（未命名）」
+- [x] 「Create」仍然檢查必填並建立為 `pending`，不出現在 Draft Stores
 
 **Verification:**
 
-- [ ] lint、build 通過
-- [ ] 手動：SPEC T1、T2
+- [x] lint、build 通過
+- [x] 手動：SPEC T1、T2
 
 **Dependencies:** Task 1（Task 3 完成後才看得到列表結果）
 
@@ -158,9 +158,9 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 ## Checkpoint B
 
-- [ ] lint、build 通過
-- [ ] 手動：SPEC T1–T6
-- [ ] 和你 review 後再進 Phase 3
+- [x] lint、build 通過
+- [x] 手動：SPEC T1–T6
+- [x] 和你 review 後再進 Phase 3
 
 ---
 
