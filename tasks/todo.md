@@ -45,14 +45,14 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 首頁 canonical 仍是 `https://www.bezold.com.tw`
-- [ ] `/faq`、`/sell` 的 canonical、og:url 指向自己；og:title 是頁面自己的標題
-- [ ] 標題為「常見問題｜頂讓網 Bezold」、「免費刊登頂讓店面｜頂讓網 Bezold」
+- [x] 首頁 canonical 仍是 `https://www.bezold.com.tw`
+- [x] `/faq`、`/sell` 的 canonical、og:url 指向自己；og:title 是頁面自己的標題
+- [x] 標題為「常見問題｜頂讓網 Bezold」、「免費刊登頂讓店面｜頂讓網 Bezold」
 
 **Verification:**
 
-- [ ] 本機 `npm run build && npm run start` 後執行 `seo:audit -- --skip h1,status`：`/faq`、`/sell` 的 canonical 與 OG 檢查通過
-- [ ] curl 首頁確認 canonical、og 標籤和改前相同
+- [x] 本機 `npm run build && npm run start` 後執行 `seo:audit -- --skip h1,status`：`/faq`、`/sell` 的 canonical 與 OG 檢查通過
+- [x] curl 首頁確認 canonical、og 標籤和改前相同
 
 **Dependencies:** Task 1
 

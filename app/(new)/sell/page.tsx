@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/utils/seo";
 import SiteNav from "@/app/(new)/_components/SiteNav";
 import SiteFooter from "@/app/(new)/_components/SiteFooter";
 import EmailVerifiedGate from "@/app/(new)/_components/EmailVerifiedGate";
 import SellForm from "./_components/SellForm";
 import styles from "./page.module.css";
 
-export const metadata: Metadata = {
-  title: "Bezold 頂讓必售 — 限時免費刊登",
+export const metadata: Metadata = pageMetadata({
+  title: "免費刊登頂讓店面",
   description: "在 Bezold 頂讓必售 免費刊登您的頂讓店面，快速找到合適買家。",
-};
+  path: "/sell",
+});
 
 export default function SellPage() {
   return (

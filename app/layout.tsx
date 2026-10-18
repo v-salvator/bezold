@@ -6,6 +6,7 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ConfigProvider } from "antd";
 import { Provider } from "jotai";
 import AnalyticsTracker from "@/components/AnalyticsTracker";
+import { BASE_OPEN_GRAPH, SITE_DESCRIPTION, SITE_TITLE } from "@/constant/seo";
 
 const notoSansMono = Noto_Sans_Mono({
   subsets: ["latin"],
@@ -17,9 +18,6 @@ const notoSansTC = Noto_Sans_TC({
   variable: "--font-noto-sans-tc",
 });
 
-const SITE_TITLE = "頂讓網｜全台店面頂讓平台 - Bezold 頂讓必售";
-const SITE_DESCRIPTION =
-  "頂讓網 Bezold — 全台店面頂讓平台。買家直接接手已有客群、設備、營運的店面；賣家把心血交給合適的人。店面頂讓、生意頂讓真實刊登，早鳥前 3 個月免費刊登，永久不抽成。";
 const SITE_KEYWORDS = [
   "頂讓網",
   "頂讓",
@@ -41,20 +39,14 @@ export const metadata: Metadata = {
   },
   description: SITE_DESCRIPTION,
   keywords: SITE_KEYWORDS,
-  alternates: {
-    canonical: "/",
-  },
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    siteName: "Bezold 頂讓必售",
-    type: "website",
-    locale: "zh_TW",
+    ...BASE_OPEN_GRAPH,
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: ["/bezold-og.png"],
   },
 };
 

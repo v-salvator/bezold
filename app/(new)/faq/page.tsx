@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/utils/seo";
 import LaunchBanner from "../_components/LaunchBanner";
 import SiteNav from "../_components/SiteNav";
 import SiteFooter from "../_components/SiteFooter";
@@ -8,11 +9,12 @@ import FaqCta from "./_components/FaqCta";
 import type { FaqItem } from "./_components/FaqCategory";
 import styles from "./page.module.css";
 
-export const metadata: Metadata = {
-  title: "常見問題 — Bezold 頂讓必售",
+export const metadata: Metadata = pageMetadata({
+  title: "常見問題",
   description:
     "關於頂讓平台的刊登、買賣流程、費用、安全保障等常見問題一次解答。",
-};
+  path: "/faq",
+});
 
 const platform: FaqItem[] = [
   {

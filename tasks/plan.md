@@ -55,7 +55,7 @@ scripts/seo-audit.mjs ───────────────────�
 ### Phase 1: `seo-metadata`（PR 1）
 
 - [x] Task 1: SEO 驗證腳本 `npm run seo:audit`
-- [ ] Task 2: metadata helper，修正 `/faq`、`/sell` 的 canonical 與 OG
+- [x] Task 2: metadata helper，修正 `/faq`、`/sell` 的 canonical 與 OG
 - [ ] Task 3: `/store-guide`、`/store-list`、`/blog` 改用 `pageMetadata()`
 - [ ] Task 4: 法律頁與 `/policy/editor-pick` 改用 `pageMetadata()` / `BASE_OPEN_GRAPH`
 - [ ] Task 5: 店家頁 description、標題、索引規則、404
