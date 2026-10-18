@@ -49,7 +49,7 @@ function PitfallItem({
     <div className={styles.item}>
       <span className={styles.icon}>⚠</span>
       <div>
-        <h5 className={styles.title}>{title}</h5>
+        <h3 className={styles.title}>{title}</h3>
         <p className={styles.desc}>{desc}</p>
       </div>
     </div>

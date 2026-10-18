@@ -331,13 +331,13 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] Lighthouse（手機）無障礙：首頁、店家頁、`/faq` 都 ≥ 95，而且 heading-order、landmark-one-main、list 三項通過（SPEC #T14）
-- [ ] 390px 和 1280px 截圖：排版與字級不變（SPEC #T13）
+- [x] Lighthouse（手機）無障礙：首頁、店家頁、`/faq` 都 ≥ 95，而且 heading-order、landmark-one-main、list 三項通過（SPEC #T14）
+- [x] 390px 和 1280px 截圖：排版與字級不變（SPEC #T13）
 
 **Verification:**
 
-- [ ] 本機跑 Lighthouse（Chrome DevTools MCP）
-- [ ] 改前改後截圖比對
+- [x] 本機跑 Lighthouse（Chrome DevTools MCP）
+- [x] 改前改後截圖比對
 
 **Dependencies:** None
 
@@ -353,7 +353,7 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 **進度（/build auto）：**
 
 - [x] 13a landmark + nav：首頁、`/faq` 外框改 `<main>`，`SiteNav` 手機版 `<a>` 包 `<li>`。Lighthouse（手機）無障礙：首頁 98、店家頁 98、`/faq` 98；landmark-one-main、list 通過
-- [ ] 13b heading 層級：待確認。h2 → h1 之後，heading-order 還會被 `StoreDescription`（h3）、`StoreCard`（h4）、`SectionTitle`（h3，共用元件）、`GlossaryGrid` / `GuideSteps` / `PitfallsList`（h5）擋住，這些都不在檔案清單裡，而且模組總檔案數會超過 10 個
+- [x] 13b heading 層級：SectionTitle、StoreDescription → h2；HowItWorks、WhyUs、GlossaryGrid、GuideSteps、PitfallsList、StoreCard → h3（`/store-list` 的 StoreCard 用 `titleTag="h2"`）；SiteFooter h6 → h2。5 頁 heading-order 通過，Lighthouse（手機）無障礙：首頁、店家頁、`/store-list`、`/faq` 100，`/store-guide` 98（缺 `<main>`，不在範圍內）。390px／1280px 每個標題的字級、行高、粗細、邊距、顏色、位置都和改前相同
 
 ### Checkpoint C: `headings-a11y` 完成
 

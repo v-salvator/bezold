@@ -32,7 +32,7 @@ export default function SectionTitle({
     <div className={styles.wrap}>
       <div className={styles.left}>
         <span className={cn(styles.num, dark && styles.numDark)}>{num}</span>
-        <h3 className={styles.h}>{title}</h3>
+        <h2 className={styles.h}>{title}</h2>
         {sub && (
           <span className={cn(styles.sub, dark && styles.subDark)}>{sub}</span>
         )}
