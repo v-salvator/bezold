@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BASE_OPEN_GRAPH } from "@/constant/seo";
 import LaunchBanner from "../../_components/LaunchBanner";
 import SiteNav from "../../_components/SiteNav";
 import SiteFooter from "../../_components/SiteFooter";
@@ -17,12 +18,13 @@ const PAGE_DESCRIPTION =
   "首頁「編輯精選」如何入選？完成 6 項刊登條件——上傳清晰照片、寫清楚標題、完整填寫欄位、留下有效聯絡方式、補充店家優勢並確認案件仍在頂讓中，讓您的頂讓案件獲得更多曝光，也更有機會被編輯選中。";
 
 export const metadata: Metadata = {
-  title: "如何被選為編輯精選 — Bezold 頂讓必售",
+  title: "如何被選為編輯精選",
   description: PAGE_DESCRIPTION,
   alternates: {
     canonical: PAGE_PATH,
   },
   openGraph: {
+    ...BASE_OPEN_GRAPH,
     type: "article",
     url: PAGE_PATH,
     title: PAGE_TITLE,

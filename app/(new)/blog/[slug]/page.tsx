@@ -35,14 +35,14 @@ export async function generateMetadata({
 
   if (!post) {
     return {
-      title: "Bezold 頂讓必售 — 找不到文章",
+      title: "找不到文章",
       alternates: { canonical: canonicalUrl },
     };
   }
 
   const { meta } = post;
   return {
-    title: `${meta.title} — Bezold 頂讓必售`,
+    title: meta.title,
     description: meta.description,
     keywords: meta.keywords,
     alternates: { canonical: canonicalUrl },

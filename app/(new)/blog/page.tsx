@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/utils/seo";
 import LaunchBanner from "../_components/LaunchBanner";
 import SiteNav from "../_components/SiteNav";
 import SiteFooter from "../_components/SiteFooter";
@@ -8,12 +9,12 @@ import styles from "./page.module.css";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: "創業部落格 — Bezold 頂讓必售",
+export const metadata: Metadata = pageMetadata({
+  title: "創業部落格",
   description:
     "第一次創業、店面頂讓、接手成熟店的完整指南與實戰知識，幫助新手降低創業風險。",
-  alternates: { canonical: `${process.env.NEXT_PUBLIC_APP_URL}/blog` },
-};
+  path: "/blog",
+});
 
 export default function BlogIndexPage() {
   const posts = getAllPostsMeta();
