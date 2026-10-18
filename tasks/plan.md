@@ -82,7 +82,7 @@ scripts/seo-audit.mjs ───────────────────�
 
 ### Phase 3: `headings-a11y`（PR 3，可與 Phase 1、2 並行）
 
-- [ ] Task 11: 店家頁與 `/store-list` 的 h1
+- [x] Task 11: 店家頁與 `/store-list` 的 h1
 - [ ] Task 12: 對比度 token、深色區塊 accent、「04」標籤
 - [ ] Task 13: `<main>`、nav `<li>`、heading 層級
 

@@ -283,13 +283,13 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 店家頁與 `/store-list` 都恰好有 1 個 h1
-- [ ] 390px 和 1280px 的截圖和改前相同
+- [x] 店家頁與 `/store-list` 都恰好有 1 個 h1
+- [x] 390px 和 1280px 的截圖和改前相同
 
 **Verification:**
 
-- [ ] 本機 `seo:audit -- --skip status`：店家頁與 `/store-list` 的 h1 檢查通過（SPEC #T11）
-- [ ] 改前改後截圖比對（SPEC #T13）
+- [x] 本機 `seo:audit -- --skip status`：店家頁與 `/store-list` 的 h1 檢查通過（SPEC #T11）
+- [x] 改前改後截圖比對（SPEC #T13）
 
 **Dependencies:** None
 
