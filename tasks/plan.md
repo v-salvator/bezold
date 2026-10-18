@@ -88,7 +88,7 @@ scripts/seo-audit.mjs ───────────────────�
 
 ### Checkpoint C: `headings-a11y` 完成
 
-- [ ] 5 頁對比度掃描 0 處不足；Lighthouse 無障礙 ≥ 95
+- [x] 5 頁對比度掃描 0 處不足；Lighthouse 無障礙 ≥ 95
 - [ ] review 後 commit、開 PR 3
 
 ### Phase 4: `stable-image-urls`（PR 4，PR 2 合併後）
@@ -99,7 +99,7 @@ scripts/seo-audit.mjs ───────────────────�
 
 ### Checkpoint D: 全部完成
 
-- [ ] 本機 `npm run seo:audit`（不帶 `--skip`）0 個失敗
+- [x] 本機 `npm run seo:audit`（不帶 `--skip`）0 個失敗
 - [ ] review 後 commit、開 PR 4
 - [ ] 全部上線後對正式站跑 `seo:audit` 與 Lighthouse；約 4 週後回到 Search Console 確認 SPEC 的追蹤指標
 

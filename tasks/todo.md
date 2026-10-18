@@ -357,8 +357,8 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 ### Checkpoint C: `headings-a11y` 完成
 
-- [ ] SPEC #T11–#T14 通過
-- [ ] prettier、eslint、build 通過
+- [x] SPEC #T11–#T14 通過
+- [x] prettier、eslint、build 通過
 - [ ] 和你 review；通過後 commit、開 PR 3
 
 ---
@@ -438,8 +438,8 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 ### Checkpoint D: 全部完成
 
-- [ ] 本機 `npm run seo:audit`（不帶 `--skip`）0 個失敗
-- [ ] prettier、eslint、build 通過
-- [ ] 和你 review；通過後 commit、開 PR 4
+- [x] 本機 `npm run seo:audit`（不帶 `--skip`）0 個失敗（rebase 到 main 之後，4 個模組一起驗）
+- [x] prettier、eslint、build 通過
+- [x] 和你 review；通過後 commit、開 PR 4
 - [ ] 全部上線後：對正式站跑 `seo:audit` 與 Lighthouse（SPEC Success Criteria）
 - [ ] 上線約 4 週後：回到 Search Console 確認 sitemap 狀態、blog 與 `/faq` 的索引、產品摘要無效項目為 0
