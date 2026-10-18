@@ -1,6 +1,9 @@
 import type { Metadata, ResolvingMetadata } from "next";
+import { notFound } from "next/navigation";
 import { getStoreById } from "@/firebase/serverUtils";
-import { STORE_STATUS } from "@/types";
+import { STORE_STATUS, type StoreStatus } from "@/types";
+import { BASE_OPEN_GRAPH } from "@/constant/seo";
+import { toMetaDescription } from "@/utils/seo";
 import { omitSellerContact } from "@/utils/store";
 import LaunchBanner from "@/app/(new)/_components/LaunchBanner";
 import SiteNav from "@/app/(new)/_components/SiteNav";
@@ -19,49 +22,47 @@ interface StorePageProps {
   searchParams: { [key: string]: string | string[] | undefined };
 }
 
+// * only live and sold listings belong in search — drafts, pending and
+// * rejected pages stay reachable by direct link but are noindexed
+const INDEXABLE_STATUSES: (StoreStatus | undefined)[] = [
+  STORE_STATUS.APPROVED,
+  STORE_STATUS.SOLD,
+];
+
+// * Firestore throws INVALID_ARGUMENT on reserved ids like "__foo__", which
+// * would surface as a 500 — treat them as missing so the page 404s instead
+const RESERVED_DOC_ID = /^__.*__$/;
+
+const findStore = (storeId: string) =>
+  RESERVED_DOC_ID.test(storeId) ? null : getStoreById(storeId);
+
 export async function generateMetadata(
   { params }: StorePageProps,
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
   const { storeId } = await params;
-  const store = await getStoreById(storeId);
+  const store = await findStore(storeId);
   const canonicalUrl = `${process.env.NEXT_PUBLIC_APP_URL}/store/${storeId}`;
 
-  if (!store) {
-    return {
-      title: "Bezold 頂讓必售 — 找不到物件",
-      alternates: {
-        canonical: canonicalUrl,
-      },
-      openGraph: {
-        title: "Bezold 頂讓必售 — 找不到物件",
-        description: "此物件不存在或已下架",
-        url: canonicalUrl,
-        siteName: "Bezold 頂讓必售",
-        type: "website",
-        locale: "zh_TW",
-        images: ["/bezold-og.png"],
-      },
-    };
-  }
+  if (!store) notFound();
+
+  const storeTitle = `${store.storeName}｜${store.city ?? ""}店面頂讓`;
 
   return {
-    title: `Bezold 頂讓必售 — ${store.storeName}`,
-    // * drafts are shared with the seller for approval — keep them out of search
-    ...(store.status === STORE_STATUS.DRAFT
+    title: storeTitle,
+    description: toMetaDescription(store.description),
+    ...(!INDEXABLE_STATUSES.includes(store.status)
       ? { robots: { index: false, follow: false } }
       : {}),
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
-      title: `Bezold 頂讓必售 — ${store.storeName}`,
-      description: store.description,
+      ...BASE_OPEN_GRAPH,
+      title: storeTitle,
+      description: toMetaDescription(store.description, 200),
       url: canonicalUrl,
-      siteName: "Bezold 頂讓必售",
-      type: "website",
-      locale: "zh_TW",
-      images: store.images.length ? store.images : ["/bezold-og.png"],
+      images: store.images.length ? store.images : [...BASE_OPEN_GRAPH.images],
     },
   };
 }
@@ -72,11 +73,9 @@ export default async function StoreDetailPage({
 }: StorePageProps) {
   const { storeId } = await params;
   const { modal } = await searchParams;
-  const fetchedStore = await getStoreById(storeId);
+  const fetchedStore = await findStore(storeId);
 
-  if (!fetchedStore) {
-    throw new Error("Store not found");
-  }
+  if (!fetchedStore) notFound();
 
   // Seller contact never reaches the served HTML — SellerContactGate fetches the
   // real values client-side once the viewer is a signed-in member.

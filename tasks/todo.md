@@ -121,15 +121,15 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 48 個店家頁的 description 都不一樣，而且不超過 120 字
-- [ ] pending、rejected、draft 店家頁為 `noindex, nofollow`；approved、sold 為 `index, follow`（SPEC #T3、#T4）
-- [ ] `/store/__seo_audit_missing__` 回 404，不是 500
-- [ ] 沒有 city 的店家，標題是「店名｜店面頂讓」
+- [x] 48 個店家頁的 description 都不一樣，而且不超過 120 字
+- [x] pending、rejected、draft 店家頁為 `noindex, nofollow`；approved、sold 為 `index, follow`（SPEC #T3、#T4）
+- [x] `/store/__seo_audit_missing__` 回 404，不是 500
+- [x] 沒有 city 的店家，標題是「店名｜店面頂讓」
 
 **Verification:**
 
-- [ ] 本機 `seo:audit -- --skip h1,status --noindex <pending>,<rejected>,<draft>`：description 重複、404、noindex 檢查都通過
-- [ ] curl 一筆 sold 店家頁，確認是 `index, follow`
+- [x] 本機 `seo:audit -- --skip h1,status --noindex <pending>,<rejected>,<draft>`：description 重複、404、noindex 檢查都通過
+- [x] curl 一筆 sold 店家頁，確認是 `index, follow`
 
 **Dependencies:** Task 2
 
