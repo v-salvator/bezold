@@ -97,12 +97,12 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 四頁的 canonical 都指向自己
-- [ ] `/policy/editor-pick` 有 og:image，`og:type` 仍為 `article`
+- [x] 四頁的 canonical 都指向自己
+- [x] `/policy/editor-pick` 有 og:image，`og:type` 仍為 `article`
 
 **Verification:**
 
-- [ ] 本機 `seo:audit -- --skip h1,status`：canonical、OG 檢查在所有靜態頁都通過
+- [x] 本機 `seo:audit -- --skip h1,status`：canonical、OG 檢查在所有靜態頁都通過
 
 **Dependencies:** Task 2
 

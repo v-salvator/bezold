@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/utils/seo";
 import LaunchBanner from "@/app/(new)/_components/LaunchBanner";
 import SiteNav from "@/app/(new)/_components/SiteNav";
 import SiteFooter from "@/app/(new)/_components/SiteFooter";
@@ -7,11 +8,12 @@ import LegalProse from "@/app/(new)/_components/LegalProse";
 import Section from "@/app/(new)/_components/Section";
 import SectionTitle from "@/components/refactored/SectionTitle";
 
-export const metadata: Metadata = {
-  title: "隱私政策 — Bezold 頂讓必售",
+export const metadata: Metadata = pageMetadata({
+  title: "隱私政策",
   description:
     "Bezold 頂讓必售 如何蒐集、使用與保護您的個人資料，依個人資料保護法說明您的權利。",
-};
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/utils/seo";
 import Link from "next/link";
 import LaunchBanner from "@/app/(new)/_components/LaunchBanner";
 import SiteNav from "@/app/(new)/_components/SiteNav";
@@ -8,11 +9,12 @@ import LegalProse from "@/app/(new)/_components/LegalProse";
 import Section from "@/app/(new)/_components/Section";
 import SectionTitle from "@/components/refactored/SectionTitle";
 
-export const metadata: Metadata = {
-  title: "免責聲明與交易提醒 — Bezold 頂讓必售",
+export const metadata: Metadata = pageMetadata({
+  title: "免責聲明與交易提醒",
   description:
     "Bezold 頂讓必售 平台服務範圍、刊登資訊限制與買方交易前查證事項說明，協助您了解頂讓交易風險。",
-};
+  path: "/disclaimer",
+});
 
 const LINE_SUPPORT_URL = "https://line.me/ti/p/~bezoldtw";
 

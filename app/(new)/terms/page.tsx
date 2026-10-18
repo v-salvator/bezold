@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/utils/seo";
 import Link from "next/link";
 import LaunchBanner from "@/app/(new)/_components/LaunchBanner";
 import SiteNav from "@/app/(new)/_components/SiteNav";
@@ -8,11 +9,12 @@ import LegalProse from "@/app/(new)/_components/LegalProse";
 import Section from "@/app/(new)/_components/Section";
 import SectionTitle from "@/components/refactored/SectionTitle";
 
-export const metadata: Metadata = {
-  title: "服務條款 — Bezold 頂讓必售",
+export const metadata: Metadata = pageMetadata({
+  title: "服務條款",
   description:
     "Bezold 頂讓必售 平台服務條款，規範買賣雙方使用本平台之權利與義務。",
-};
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (
