@@ -72,14 +72,14 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 三頁的 canonical、og:url 都指向自己，og:title 與 `<title>` 一致
-- [ ] `/store-guide` 的 title、description 和 SPEC 驗收條件 7 完全相同（SPEC #T20）
-- [ ] `/blog` 的 og:title 不再是首頁標題
+- [x] 三頁的 canonical、og:url 都指向自己，og:title 與 `<title>` 一致
+- [x] `/store-guide` 的 title、description 和 SPEC 驗收條件 7 完全相同（SPEC #T20）
+- [x] `/blog` 的 og:title 不再是首頁標題
 
 **Verification:**
 
-- [ ] 本機 `seo:audit -- --skip h1,status`：這三頁通過
-- [ ] curl `/store-list?category=FACTORY`，確認 canonical 仍是 `/store-list`
+- [x] 本機 `seo:audit -- --skip h1,status`：這三頁通過
+- [x] curl `/store-list?category=FACTORY`，確認 canonical 仍是 `/store-list`
 
 **Dependencies:** Task 2
 

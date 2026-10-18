@@ -56,7 +56,7 @@ scripts/seo-audit.mjs ───────────────────�
 
 - [x] Task 1: SEO 驗證腳本 `npm run seo:audit`
 - [x] Task 2: metadata helper，修正 `/faq`、`/sell` 的 canonical 與 OG
-- [ ] Task 3: `/store-guide`、`/store-list`、`/blog` 改用 `pageMetadata()`
+- [x] Task 3: `/store-guide`、`/store-list`、`/blog` 改用 `pageMetadata()`
 - [ ] Task 4: 法律頁與 `/policy/editor-pick` 改用 `pageMetadata()` / `BASE_OPEN_GRAPH`
 - [ ] Task 5: 店家頁 description、標題、索引規則、404
 - [ ] Task 6: 店家頁 JSON-LD：SoldOut、面議不輸出 Product、絕對網址 fallback
