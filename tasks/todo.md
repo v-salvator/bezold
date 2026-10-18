@@ -413,14 +413,14 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] `/store-list` 與首頁的 HTML 每間店只有 1 個圖片網址
-- [ ] `/store-list` 的 TTFB ≤ Task 8 基準值的 110%（SPEC #T17）
-- [ ] 首頁、`/store-list`、店家頁、admin 列表的圖片全部正常顯示
+- [x] `/store-list` 與首頁的 HTML 每間店只有 1 個圖片網址
+- [x] `/store-list` 的 TTFB ≤ Task 8 基準值的 110%（SPEC #T17）— mock 資料：9 次中位數 0.51s，Task 8 基準 0.55s（約 93%）；正式資料待量
+- [ ] 首頁、`/store-list`、店家頁、admin 列表的圖片全部正常顯示 — 首頁、`/store-list`、店家頁已確認；admin 列表走 client SDK（未改動），需要登入，未驗
 
 **Verification:**
 
-- [ ] `next start` 量 3 次 TTFB 取中位數
-- [ ] 逐頁目視檢查圖片
+- [x] `next start` 量 3 次 TTFB 取中位數
+- [x] 逐頁目視檢查圖片
 
 **Dependencies:** Task 15
 

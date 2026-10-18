@@ -27,11 +27,17 @@ const mapDocsToStores = (
   });
 
 // * resolve raw Storage paths to visible download URLs, mutating in place.
-const resolveStoreImages = async (stores: Store[]): Promise<Store[]> => {
+// * coverOnly: list cards only show images[0], so skip resolving (and
+// * serializing) the rest — store.images becomes [coverUrl]
+const resolveStoreImages = async (
+  stores: Store[],
+  { coverOnly = false }: { coverOnly?: boolean } = {},
+): Promise<Store[]> => {
   await Promise.all(
     stores.map(async (store) => {
       if (store?.images?.length > 0) {
-        store.images = await getImagesByPath(store.images);
+        const imagePaths = coverOnly ? store.images.slice(0, 1) : store.images;
+        store.images = await getImagesByPath(imagePaths);
       }
     }),
   );
@@ -43,11 +49,13 @@ const resolveStoreImages = async (stores: Store[]): Promise<Store[]> => {
 interface GetStoresOptions {
   // * public pages pass the statuses they may show; admin passes nothing
   statuses?: StoreStatus[];
+  // * public lists only need the cover image
+  coverOnly?: boolean;
 }
 
 export const getStores = async (
   searchObj: Record<string, string>,
-  { statuses }: GetStoresOptions = {},
+  { statuses, coverOnly }: GetStoresOptions = {},
 ) => {
   const storesRef = db.collection(COLLECTION);
 
@@ -105,7 +113,7 @@ export const getStores = async (
   const stores = mapDocsToStores(snapshot).filter(
     (store) => !statuses || (!!store.status && statuses.includes(store.status)),
   );
-  return resolveStoreImages(stores);
+  return resolveStoreImages(stores, { coverOnly });
 };
 
 export const getStoreById = async (storeId: string) => {
@@ -149,7 +157,7 @@ export const getHighlightedStores = async () => {
     .filter((store) => store.status === STORE_STATUS.APPROVED)
     .slice(0, 9);
 
-  return resolveStoreImages(approvedStores);
+  return resolveStoreImages(approvedStores, { coverOnly: true });
 };
 
 export const getEmergencyStores = async () => {
@@ -166,7 +174,7 @@ export const getEmergencyStores = async () => {
     .filter((store) => store.status === STORE_STATUS.APPROVED)
     .slice(0, 9);
 
-  return resolveStoreImages(approvedStores);
+  return resolveStoreImages(approvedStores, { coverOnly: true });
 };
 
 export const getSoldStores = async () => {
@@ -183,7 +191,7 @@ export const getSoldStores = async () => {
     .sort((a, b) => b.updateTime.getTime() - a.updateTime.getTime())
     .slice(0, 9);
 
-  return resolveStoreImages(soldStores);
+  return resolveStoreImages(soldStores, { coverOnly: true });
 };
 
 // TODO: create store
