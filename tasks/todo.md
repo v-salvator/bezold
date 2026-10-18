@@ -229,13 +229,13 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] `GET /api/stores` 回 404；`/api/stores/{id}`、`/api/stores/{id}/contact`、`/api/stores/highlight` 照常運作（SPEC #T8）
-- [ ] grep 的結果寫進 PR 描述
+- [x] `GET /api/stores` 回 404；`/api/stores/{id}`、`/api/stores/{id}/contact`、`/api/stores/highlight` 照常運作（SPEC #T8）
+- [x] grep 的結果寫進 PR 描述
 
 **Verification:**
 
-- [ ] 本機 curl 上面 4 個端點
-- [ ] build 通過（沒有殘留的 import）
+- [x] 本機 curl 上面 4 個端點
+- [x] build 通過（沒有殘留的 import）
 
 **Dependencies:** Task 8
 
