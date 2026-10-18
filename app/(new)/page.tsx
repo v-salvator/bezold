@@ -90,7 +90,7 @@ export default async function NewHomePage() {
       />
       <LaunchBanner />
       <SiteNav />
-      <div className={styles.frame}>
+      <main className={styles.frame}>
         <HeroSplit />
         {/* <Newsletter /> */}
         <AccelerationPromo />
@@ -130,7 +130,7 @@ export default async function NewHomePage() {
         <SellerCta />
         <SocialBar />
         <Faq />
-      </div>
+      </main>
       <SiteFooter />
     </>
   );

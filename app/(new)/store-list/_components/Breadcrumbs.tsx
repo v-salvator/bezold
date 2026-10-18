@@ -7,9 +7,9 @@ export default function Breadcrumbs({ count }: { count: number }) {
         <div className={styles.trail}>
           <a href="/">首頁</a> / <a href="/store-list">我要找店</a>
         </div>
-        <h2 className={styles.title}>
+        <h1 className={styles.title}>
           我要找店 <em>共 {count} 間</em>
-        </h2>
+        </h1>
       </div>
     </div>
   );

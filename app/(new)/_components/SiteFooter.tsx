@@ -95,7 +95,7 @@ export default function SiteFooter() {
         </div>
       </div>
       <div>
-        <h6>找店</h6>
+        <h2>找店</h2>
         <ul>
           <li>
             <a href="/store-list">所有店面</a>
@@ -109,7 +109,7 @@ export default function SiteFooter() {
         </ul>
       </div>
       <div>
-        <h6>頂出</h6>
+        <h2>頂出</h2>
         <ul>
           <li>
             <a href="/sell">早鳥免費刊登</a>
@@ -123,7 +123,7 @@ export default function SiteFooter() {
         </ul>
       </div>
       <div>
-        <h6>關於 / 支援</h6>
+        <h2>關於 / 支援</h2>
         <ul>
           <li>
             <a href="/blog">創業部落格</a>

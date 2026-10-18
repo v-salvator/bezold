@@ -20,10 +20,13 @@
   padding: 3px 8px;
   border-radius: 2px;
   letter-spacing: 0.1em;
-}
-.numDark {
-  background: var(--paper);
-  color: var(--ink);
+
+  /* .num.numDark beats Section's `.dark *` color rule regardless of the
+     order the two CSS chunks load in */
+  &.numDark {
+    background: var(--paper);
+    color: var(--ink);
+  }
 }
 .h {
   font-family: var(--display);

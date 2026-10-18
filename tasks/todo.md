@@ -283,13 +283,13 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 店家頁與 `/store-list` 都恰好有 1 個 h1
-- [ ] 390px 和 1280px 的截圖和改前相同
+- [x] 店家頁與 `/store-list` 都恰好有 1 個 h1
+- [x] 390px 和 1280px 的截圖和改前相同
 
 **Verification:**
 
-- [ ] 本機 `seo:audit -- --skip status`：店家頁與 `/store-list` 的 h1 檢查通過（SPEC #T11）
-- [ ] 改前改後截圖比對（SPEC #T13）
+- [x] 本機 `seo:audit -- --skip status`：店家頁與 `/store-list` 的 h1 檢查通過（SPEC #T11）
+- [x] 改前改後截圖比對（SPEC #T13）
 
 **Dependencies:** None
 
@@ -306,14 +306,14 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 首頁、店家頁、`/store-list`、`/faq`、`/store-guide` 對比度掃描 0 處不足（SPEC #T12）
-- [ ] `/store-guide` 深色區塊的「04」看得到
-- [ ] `app/icon.svg` 維持原色
+- [x] 首頁、店家頁、`/store-list`、`/faq`、`/store-guide` 對比度掃描 0 處不足（SPEC #T12）
+- [x] `/store-guide` 深色區塊的「04」看得到
+- [x] `app/icon.svg` 維持原色
 
 **Verification:**
 
-- [ ] 本機用 Chrome DevTools 執行對比度掃描片段，5 頁都是 0
-- [ ] 截圖和對照頁的「改後」一致
+- [x] 本機用 Chrome DevTools 執行對比度掃描片段，5 頁都是 0
+- [x] 截圖和對照頁的「改後」一致
 
 **Dependencies:** None
 
@@ -331,13 +331,13 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] Lighthouse（手機）無障礙：首頁、店家頁、`/faq` 都 ≥ 95，而且 heading-order、landmark-one-main、list 三項通過（SPEC #T14）
-- [ ] 390px 和 1280px 截圖：排版與字級不變（SPEC #T13）
+- [x] Lighthouse（手機）無障礙：首頁、店家頁、`/faq` 都 ≥ 95，而且 heading-order、landmark-one-main、list 三項通過（SPEC #T14）
+- [x] 390px 和 1280px 截圖：排版與字級不變（SPEC #T13）
 
 **Verification:**
 
-- [ ] 本機跑 Lighthouse（Chrome DevTools MCP）
-- [ ] 改前改後截圖比對
+- [x] 本機跑 Lighthouse（Chrome DevTools MCP）
+- [x] 改前改後截圖比對
 
 **Dependencies:** None
 
@@ -350,10 +350,15 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Estimated scope:** M（超過 5 個檔案時拆成「landmark + nav」和「heading 層級」兩個任務）
 
+**進度（/build auto）：**
+
+- [x] 13a landmark + nav：首頁、`/faq` 外框改 `<main>`，`SiteNav` 手機版 `<a>` 包 `<li>`。Lighthouse（手機）無障礙：首頁 98、店家頁 98、`/faq` 98；landmark-one-main、list 通過
+- [x] 13b heading 層級：SectionTitle、StoreDescription → h2；HowItWorks、WhyUs、GlossaryGrid、GuideSteps、PitfallsList、StoreCard → h3（`/store-list` 的 StoreCard 用 `titleTag="h2"`）；SiteFooter h6 → h2。5 頁 heading-order 通過，Lighthouse（手機）無障礙：首頁、店家頁、`/store-list`、`/faq` 100，`/store-guide` 98（缺 `<main>`，不在範圍內）。390px／1280px 每個標題的字級、行高、粗細、邊距、顏色、位置都和改前相同
+
 ### Checkpoint C: `headings-a11y` 完成
 
-- [ ] SPEC #T11–#T14 通過
-- [ ] prettier、eslint、build 通過
+- [x] SPEC #T11–#T14 通過
+- [x] prettier、eslint、build 通過
 - [ ] 和你 review；通過後 commit、開 PR 3
 
 ---
@@ -433,8 +438,8 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 ### Checkpoint D: 全部完成
 
-- [ ] 本機 `npm run seo:audit`（不帶 `--skip`）0 個失敗
-- [ ] prettier、eslint、build 通過
-- [ ] 和你 review；通過後 commit、開 PR 4
+- [x] 本機 `npm run seo:audit`（不帶 `--skip`）0 個失敗（rebase 到 main 之後，4 個模組一起驗）
+- [x] prettier、eslint、build 通過
+- [x] 和你 review；通過後 commit、開 PR 4
 - [ ] 全部上線後：對正式站跑 `seo:audit` 與 Lighthouse（SPEC Success Criteria）
 - [ ] 上線約 4 週後：回到 Search Console 確認 sitemap 狀態、blog 與 `/faq` 的索引、產品摘要無效項目為 0

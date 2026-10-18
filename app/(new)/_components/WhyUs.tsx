@@ -52,7 +52,7 @@ function WhyUsItem({ item }: { item: WhyUsItem }) {
   return (
     <div className={styles.item}>
       <div className={`${styles.ico} ${styles[`ico${variant}`]}`}>{ico}</div>
-      <h5>{title}</h5>
+      <h3>{title}</h3>
       <p>{desc}</p>
     </div>
   );

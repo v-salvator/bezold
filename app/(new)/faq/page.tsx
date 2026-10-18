@@ -155,7 +155,7 @@ export default function FaqPage() {
     <>
       <LaunchBanner />
       <SiteNav activeLink="常見問題" />
-      <div className={styles.frame}>
+      <main className={styles.frame}>
         <FaqHero />
         <FaqCategory
           sectionNum="01"
@@ -193,7 +193,7 @@ export default function FaqPage() {
           items={safety}
         />
         <FaqCta />
-      </div>
+      </main>
       <SiteFooter />
     </>
   );

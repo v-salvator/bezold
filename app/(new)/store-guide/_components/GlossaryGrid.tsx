@@ -52,7 +52,7 @@ function GlossaryCard({ item }: { item: GlossaryItem }) {
   const { term, definition, example } = item;
   return (
     <div className={styles.card}>
-      <h5 className={styles.term}>{term}</h5>
+      <h3 className={styles.term}>{term}</h3>
       <p className={styles.definition}>{definition}</p>
       <p className={styles.example}>例：{example}</p>
     </div>

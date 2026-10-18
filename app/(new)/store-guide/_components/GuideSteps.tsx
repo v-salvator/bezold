@@ -59,7 +59,7 @@ function StepCard({
     >
       <span className={styles.number}>{number}</span>
       <span className={styles.tag}>{type}</span>
-      <h5 className={styles.title}>{title}</h5>
+      <h3 className={styles.title}>{title}</h3>
       <p className={styles.desc}>{desc}</p>
     </div>
   );

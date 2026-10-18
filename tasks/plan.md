@@ -82,13 +82,13 @@ scripts/seo-audit.mjs ───────────────────�
 
 ### Phase 3: `headings-a11y`（PR 3，可與 Phase 1、2 並行）
 
-- [ ] Task 11: 店家頁與 `/store-list` 的 h1
-- [ ] Task 12: 對比度 token、深色區塊 accent、「04」標籤
-- [ ] Task 13: `<main>`、nav `<li>`、heading 層級
+- [x] Task 11: 店家頁與 `/store-list` 的 h1
+- [x] Task 12: 對比度 token、深色區塊 accent、「04」標籤
+- [x] Task 13: `<main>`、nav `<li>`、heading 層級
 
 ### Checkpoint C: `headings-a11y` 完成
 
-- [ ] 5 頁對比度掃描 0 處不足；Lighthouse 無障礙 ≥ 95
+- [x] 5 頁對比度掃描 0 處不足；Lighthouse 無障礙 ≥ 95
 - [ ] review 後 commit、開 PR 3
 
 ### Phase 4: `stable-image-urls`（PR 4，PR 2 合併後）
@@ -99,7 +99,7 @@ scripts/seo-audit.mjs ───────────────────�
 
 ### Checkpoint D: 全部完成
 
-- [ ] 本機 `npm run seo:audit`（不帶 `--skip`）0 個失敗
+- [x] 本機 `npm run seo:audit`（不帶 `--skip`）0 個失敗
 - [ ] review 後 commit、開 PR 4
 - [ ] 全部上線後對正式站跑 `seo:audit` 與 Lighthouse；約 4 週後回到 Search Console 確認 SPEC 的追蹤指標
 

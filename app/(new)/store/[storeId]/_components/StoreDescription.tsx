@@ -7,9 +7,9 @@ export default function StoreDescription({
 }) {
   return (
     <div className={styles.section}>
-      <h3 className={styles.heading}>
+      <h2 className={styles.heading}>
         物件描述 <small>SELLER STORY</small>
-      </h3>
+      </h2>
       <p className={styles.body}>{description}</p>
     </div>
   );

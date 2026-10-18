@@ -35,10 +35,14 @@ const ribbonClass: Record<RibbonVariant, string> = {
 export default function StoreCard({
   card,
   priority = false,
+  titleTag: TitleTag = "h3",
 }: {
   card: StoreCard;
   // * above-the-fold cards: eager load + fetchpriority=high for LCP
   priority?: boolean;
+  // * h3 under a section title (home); h2 where cards sit right under the
+  // * page h1 (store-list) — keeps the heading outline gap-free
+  titleTag?: "h2" | "h3";
 }) {
   return (
     <div className={styles.card}>
@@ -65,9 +69,9 @@ export default function StoreCard({
         )}
       </div>
       <div className={"p-3.5 flex flex-1 flex-col gap-2"}>
-        <h4 className={styles.title} title={card.title}>
+        <TitleTag className={styles.title} title={card.title}>
           {card.title}
-        </h4>
+        </TitleTag>
         <div className={styles.location}>
           <MapPin size={13} strokeWidth={2} />
           <span>{card.location ?? "—"}</span>
