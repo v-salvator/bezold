@@ -1,0 +1,1804 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bezold SEO 健檢</title>
+    <style>
+      :root {
+        --bg: #f6f2e9;
+        --card: #fffdf8;
+        --ink: #1f1b16;
+        --ink-2: #4a443c;
+        --muted: #6e665c;
+        --line: #e2dccd;
+        --p0: #b3261e;
+        --p0-bg: #fbe9e6;
+        --p1: #a35c00;
+        --p1-bg: #fdf0dc;
+        --p2: #2a6f4d;
+        --p2-bg: #e3f1e9;
+        --add-bg: #e6f4ea;
+        --add-ink: #14532d;
+        --del-bg: #fdecea;
+        --del-ink: #7f1d1d;
+        --hunk-bg: #eef1f6;
+        --hunk-ink: #475569;
+        --code-bg: #f2eee4;
+        --accent: #c2401f;
+        --decision-bg: #fff7e0;
+        --decision-line: #e6b833;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --bg: #15130f;
+          --card: #1e1b16;
+          --ink: #f1ece2;
+          --ink-2: #cfc7b8;
+          --muted: #a39a8b;
+          --line: #33302a;
+          --p0: #ff8a80;
+          --p0-bg: #3a1714;
+          --p1: #f5b75c;
+          --p1-bg: #3a2a10;
+          --p2: #7fd1a6;
+          --p2-bg: #133024;
+          --add-bg: #10291a;
+          --add-ink: #9be2b5;
+          --del-bg: #331414;
+          --del-ink: #f6a5a5;
+          --hunk-bg: #1f2633;
+          --hunk-ink: #9fb0c8;
+          --code-bg: #2a2620;
+          --accent: #ff7a59;
+          --decision-bg: #2e2712;
+          --decision-line: #c79a1f;
+        }
+      }
+      :root[data-theme="dark"] {
+        --bg: #15130f;
+        --card: #1e1b16;
+        --ink: #f1ece2;
+        --ink-2: #cfc7b8;
+        --muted: #a39a8b;
+        --line: #33302a;
+        --p0: #ff8a80;
+        --p0-bg: #3a1714;
+        --p1: #f5b75c;
+        --p1-bg: #3a2a10;
+        --p2: #7fd1a6;
+        --p2-bg: #133024;
+        --add-bg: #10291a;
+        --add-ink: #9be2b5;
+        --del-bg: #331414;
+        --del-ink: #f6a5a5;
+        --hunk-bg: #1f2633;
+        --hunk-ink: #9fb0c8;
+        --code-bg: #2a2620;
+        --accent: #ff7a59;
+        --decision-bg: #2e2712;
+        --decision-line: #c79a1f;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          15px/1.7 "PingFang TC",
+          "Noto Sans TC",
+          system-ui,
+          sans-serif;
+      }
+      code {
+        font:
+          0.86em ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          monospace;
+        background: var(--code-bg);
+        padding: 1px 5px;
+        border-radius: 4px;
+        overflow-wrap: anywhere;
+      }
+      .wrap {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 32px 16px 80px;
+      }
+      .hero h1 {
+        font-size: 28px;
+        margin: 0 0 4px;
+        letter-spacing: 0.02em;
+      }
+      .hero .meta {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .hero .meta a {
+        color: var(--accent);
+      }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin: 24px 0;
+      }
+      .stat {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 14px 16px;
+      }
+      .stat .n {
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1.1;
+        font-variant-numeric: tabular-nums;
+      }
+      .stat .l {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .stat.p0 .n {
+        color: var(--p0);
+      }
+      .stat.p1 .n {
+        color: var(--p1);
+      }
+      .stat.p2 .n {
+        color: var(--p2);
+      }
+      h2 {
+        font-size: 19px;
+        margin: 40px 0 12px;
+      }
+      .panel {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 16px 20px;
+      }
+      .panel ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+      .cols {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-variant-numeric: tabular-nums;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--line);
+        font-size: 14px;
+      }
+      th {
+        color: var(--muted);
+        font-weight: 600;
+        font-size: 12px;
+      }
+      .toc {
+        display: grid;
+        gap: 4px;
+      }
+      .toc a {
+        display: flex;
+        gap: 10px;
+        color: var(--ink-2);
+        text-decoration: none;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+      .toc a:hover {
+        background: var(--code-bg);
+      }
+      .toc a span {
+        font:
+          600 12px ui-monospace,
+          monospace;
+        min-width: 44px;
+        padding-top: 3px;
+      }
+      .toc-p0 span {
+        color: var(--p0);
+      }
+      .toc-p1 span {
+        color: var(--p1);
+      }
+      .toc-p2 span {
+        color: var(--p2);
+      }
+      .toc a.is-seen {
+        opacity: 0.45;
+        text-decoration: line-through;
+      }
+      .toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        background: var(--bg);
+        padding: 10px 0;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 16px;
+      }
+      .chip {
+        border: 1px solid var(--line);
+        background: var(--card);
+        color: var(--ink-2);
+        border-radius: 999px;
+        padding: 4px 12px;
+        font: inherit;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      .chip[aria-pressed="true"] {
+        background: var(--ink);
+        color: var(--bg);
+        border-color: var(--ink);
+      }
+      .toolbar .spacer {
+        flex: 1;
+      }
+      .issue {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 20px 22px;
+        margin-bottom: 18px;
+        scroll-margin-top: 64px;
+      }
+      .issue.is-seen {
+        opacity: 0.6;
+      }
+      .issue header {
+        display: grid;
+        grid-template-columns: auto auto auto 1fr;
+        gap: 6px 10px;
+        align-items: center;
+      }
+      .issue h3 {
+        grid-column: 1 / -1;
+        margin: 4px 0 0;
+        font-size: 18px;
+        line-height: 1.45;
+      }
+      .issue .tags {
+        grid-column: 1 / -1;
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+      .tag {
+        font-size: 12px;
+        color: var(--muted);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 0 6px;
+      }
+      .pri {
+        font-size: 12px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 4px;
+      }
+      .pri.p0 {
+        color: var(--p0);
+        background: var(--p0-bg);
+      }
+      .pri.p1 {
+        color: var(--p1);
+        background: var(--p1-bg);
+      }
+      .pri.p2 {
+        color: var(--p2);
+        background: var(--p2-bg);
+      }
+      .iid {
+        font:
+          600 12px ui-monospace,
+          monospace;
+        color: var(--muted);
+      }
+      .seen input {
+        position: absolute;
+        opacity: 0;
+      }
+      .seen span {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border: 1.5px solid var(--muted);
+        border-radius: 5px;
+        cursor: pointer;
+        vertical-align: middle;
+      }
+      .seen input:checked + span {
+        background: var(--p2);
+        border-color: var(--p2);
+        box-shadow: inset 0 0 0 3px var(--card);
+      }
+      .seen input:focus-visible + span {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      .issue h4 {
+        margin: 16px 0 4px;
+        font-size: 13px;
+        color: var(--muted);
+        letter-spacing: 0.04em;
+      }
+      .issue p {
+        margin: 0;
+      }
+      .issue ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+      .grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 24px;
+      }
+      .decision {
+        margin-top: 14px;
+        background: var(--decision-bg);
+        border-left: 3px solid var(--decision-line);
+        padding: 10px 14px;
+        border-radius: 0 8px 8px 0;
+        font-size: 14px;
+      }
+      .decision b {
+        display: block;
+        font-size: 12px;
+        color: var(--p1);
+        margin-bottom: 2px;
+      }
+      details.diffs {
+        margin-top: 16px;
+      }
+      details.diffs > summary {
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--ink-2);
+        padding: 4px 0;
+      }
+      .diff {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        margin-top: 10px;
+        overflow: hidden;
+      }
+      .dh {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 6px 12px;
+        background: var(--code-bg);
+        border-bottom: 1px solid var(--line);
+        font:
+          12.5px ui-monospace,
+          monospace;
+      }
+      .dh .fn {
+        overflow-wrap: anywhere;
+      }
+      .dh .a {
+        color: var(--add-ink);
+      }
+      .dh .d {
+        color: var(--del-ink);
+      }
+      .db {
+        margin: 0;
+        overflow-x: auto;
+        font:
+          12.5px/1.6 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          monospace;
+      }
+      .dl {
+        display: flex;
+        min-width: max-content;
+      }
+      .dl .sg {
+        width: 22px;
+        flex: none;
+        text-align: center;
+        user-select: none;
+        color: var(--muted);
+      }
+      .dl .tx {
+        white-space: pre;
+        padding-right: 16px;
+      }
+      .dl.add {
+        background: var(--add-bg);
+        color: var(--add-ink);
+      }
+      .dl.add .sg {
+        color: var(--add-ink);
+      }
+      .dl.del {
+        background: var(--del-bg);
+        color: var(--del-ink);
+      }
+      .dl.del .sg {
+        color: var(--del-ink);
+      }
+      .dl.hunk {
+        background: var(--hunk-bg);
+        color: var(--hunk-ink);
+        font-size: 11.5px;
+      }
+      .dl.hunk .tx {
+        padding-left: 0;
+      }
+      .prgrid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .pr {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 14px 16px;
+      }
+      .pr h4 {
+        margin: 0 0 2px;
+        font-size: 15px;
+      }
+      .pr .prs {
+        font:
+          12px ui-monospace,
+          monospace;
+        color: var(--accent);
+        margin-bottom: 6px;
+      }
+      .pr p {
+        margin: 0;
+        font-size: 14px;
+        color: var(--ink-2);
+      }
+      .theme {
+        border: 1px solid var(--line);
+        background: var(--card);
+        color: var(--ink-2);
+        border-radius: 6px;
+        padding: 3px 10px;
+        font: inherit;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      @media (max-width: 720px) {
+        .stats {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .cols,
+        .grid2,
+        .prgrid {
+          grid-template-columns: 1fr;
+        }
+        .issue {
+          padding: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="hero">
+        <h1>Bezold SEO 健康檢查</h1>
+        <div class="meta">
+          對象 <a href="https://www.bezold.com.tw/">www.bezold.com.tw</a> ·
+          2026-10-18 · 爬取 sitemap 66 頁 + Lighthouse 3 頁 + 效能追蹤 1 頁 +
+          程式碼對照 · 以下 diff 都是<b>預計修改的內容，尚未套用</b>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat p0">
+          <div class="n">5</div>
+          <div class="l">P0 必修：影響索引或資料</div>
+        </div>
+        <div class="stat p1">
+          <div class="n">4</div>
+          <div class="l">P1 應修：排名與速度</div>
+        </div>
+        <div class="stat p2">
+          <div class="n">3</div>
+          <div class="l">P2 建議：體驗與細節</div>
+        </div>
+        <div class="stat">
+          <div class="n" id="seenCount">0/12</div>
+          <div class="l">已看過</div>
+        </div>
+      </div>
+
+      <div class="cols">
+        <div>
+          <h2 style="margin-top: 0">問題總覽</h2>
+          <div class="panel toc" id="toc">
+            <a href="#P0-1" class="toc-p0"
+              ><span>P0-1</span>8 個頁面的 canonical
+              指向首頁，分享卡片也沿用首頁的標題</a
+            ><a href="#P0-2" class="toc-p0"
+              ><span>P0-2</span>48 個店家頁的 meta description 全部一樣</a
+            ><a href="#P0-3" class="toc-p0"
+              ><span>P0-3</span>審核中、被拒絕的店家頁可以被 Google
+              索引；已售出的頁面卻標示有貨</a
+            ><a href="#P0-4" class="toc-p0"
+              ><span>P0-4</span>不存在的店家網址回傳 500，而不是 404</a
+            ><a href="#P0-5" class="toc-p0"
+              ><span>P0-5</span>/store-list 把全部 139 筆店家（含 73
+              筆草稿）送進 HTML，TTFB 2.4 秒</a
+            ><a href="#P1-1" class="toc-p1"
+              ><span>P1-1</span>店家頁和 /store-list 沒有 h1</a
+            ><a href="#P1-2" class="toc-p1"
+              ><span>P1-2</span>圖片使用 7 天後過期的簽名網址</a
+            ><a href="#P1-3" class="toc-p1"
+              ><span>P1-3</span>/store-list 的 LCP 為 6.1 秒，首圖是 lazy load
+              的 4032px 原圖</a
+            ><a href="#P1-4" class="toc-p1"
+              ><span>P1-4</span>sitemap 收錄了 robots 擋掉的 /login、/signup</a
+            ><a href="#P2-1" class="toc-p2"
+              ><span>P2-1</span>標題中品牌名稱重複出現，店名被擠到後面</a
+            ><a href="#P2-2" class="toc-p2"
+              ><span>P2-2</span>/policy/editor-pick 沒有 og:image</a
+            ><a href="#P2-3" class="toc-p2"
+              ><span>P2-3</span>無障礙：文字對比不足、缺少 &lt;main&gt;、heading
+              跳級</a
+            >
+          </div>
+        </div>
+        <div>
+          <h2 style="margin-top: 0">Lighthouse（手機）</h2>
+          <div class="panel">
+            <table>
+              <thead>
+                <tr>
+                  <th>頁面</th>
+                  <th>無障礙</th>
+                  <th>最佳做法</th>
+                  <th>SEO</th>
+                  <th>備註</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>首頁 /</td>
+                  <td>89</td>
+                  <td>100</td>
+                  <td>100</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>店家頁 /store/…</td>
+                  <td>91</td>
+                  <td>100</td>
+                  <td>100</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td>/faq</td>
+                  <td>89</td>
+                  <td>100</td>
+                  <td>92</td>
+                  <td>canonical 無效</td>
+                </tr>
+                <tr>
+                  <td>/store-list</td>
+                  <td>—</td>
+                  <td>—</td>
+                  <td>—</td>
+                  <td>LCP 6.1s · CLS 0</td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="font-size: 13px; color: var(--muted); margin: 10px 0 0">
+              Lighthouse 的 SEO 分數只檢查標籤是否存在，所以 meta description
+              重複、店家頁沒有 h1、500
+              錯誤這些問題它都抓不到；上面的問題大多是爬取實際 HTML 才發現的。
+            </p>
+          </div>
+          <h2>做得好的地方</h2>
+          <div class="panel">
+            <ul>
+              <li>
+                HTTPS 正常；<code>bezold.com.tw</code> 與
+                <code>http://</code> 都用 308 導向 <code>https://www.</code>
+              </li>
+              <li>robots.txt 規則正確，有擋住 /admin、/api、/my-listings</li>
+              <li>動態 sitemap 共 66 個網址，全部回 200</li>
+              <li><code>&lt;html lang="zh-Hant"&gt;</code> 設定正確</li>
+              <li>
+                Blog 文章做得完整：canonical、獨立的 description，加上
+                BlogPosting、BreadcrumbList、FAQPage 結構化資料
+              </li>
+              <li>店家頁的 canonical 正確，也已經有 Product 結構化資料</li>
+              <li>首頁與 blog 的 TTFB 約 90 ms；CLS 為 0</li>
+              <li>Lighthouse：首頁與店家頁 SEO 100，Best Practices 100</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h2>問題細節與預計修改</h2>
+      <div class="toolbar" role="toolbar" aria-label="篩選">
+        <button class="chip" data-filter="all" aria-pressed="true">全部</button>
+        <button class="chip" data-filter="p0" aria-pressed="false">P0</button>
+        <button class="chip" data-filter="p1" aria-pressed="false">P1</button>
+        <button class="chip" data-filter="p2" aria-pressed="false">P2</button>
+        <button class="chip" data-filter="decision" aria-pressed="false">
+          已決定事項
+        </button>
+        <span class="spacer"></span>
+        <button class="chip" id="toggleDiffs">收合所有 diff</button>
+        <button class="theme" id="theme">深色 / 淺色</button>
+      </div>
+
+      <article class="issue" data-pri="p0" id="P0-1">
+        <header>
+          <label class="seen" title="標記為已看過"
+            ><input type="checkbox" data-id="P0-1" /><span></span
+          ></label>
+          <span class="pri p0">P0 · 必修</span>
+          <span class="iid">P0-1</span>
+          <h3>8 個頁面的 canonical 指向首頁，分享卡片也沿用首頁的標題</h3>
+          <div class="tags">
+            <span class="tag">metadata</span><span class="tag">索引</span>
+          </div>
+        </header>
+        <div class="grid2">
+          <section>
+            <h4>影響</h4>
+            <p>
+              Google 會把 /faq、/sell、/store-guide
+              等頁面當成首頁的重複內容，這些頁面可能完全不出現在搜尋結果。在
+              LINE / FB 分享時，卡片顯示的也是首頁標題。
+            </p>
+          </section>
+          <section>
+            <h4>證據（實測）</h4>
+            <ul>
+              <li>
+                /faq、/sell、/store-guide、/privacy、/terms、/disclaimer、/login、/signup
+                的 <code>&lt;link rel="canonical"&gt;</code> 都是
+                <code>https://www.bezold.com.tw</code>
+              </li>
+              <li>
+                上述頁面的 <code>og:title</code> /
+                <code>og:description</code> 都是首頁的文案
+              </li>
+              <li>
+                Lighthouse /faq：SEO 92 分，失敗項目為「Document does not have a
+                valid rel=canonical」
+              </li>
+            </ul>
+          </section>
+        </div>
+        <section>
+          <h4>原因</h4>
+          <p>
+            <code>app/layout.tsx</code> 的 root metadata 設了
+            <code>alternates.canonical: "/"</code>，沒有自行設定 canonical
+            的頁面全部繼承這個值。openGraph 也是相同機制：子頁只設了 title /
+            description，沒有設 openGraph，就沿用首頁的。
+          </p>
+        </section>
+        <section>
+          <h4>修法</h4>
+          <p>
+            拿掉 root layout 的 canonical（首頁本身已經有自己的設定），新增
+            <code>pageMetadata()</code> helper，一次產生
+            title、description、canonical、openGraph，讓每頁不會再漏設。依
+            CLAUDE.md 的慣例，靜態常數放 <code>constant/</code>、轉換函式放
+            <code>utils/</code>。其餘 4
+            頁（store-guide、privacy、terms、disclaimer）改法和 faq 完全相同。
+          </p>
+        </section>
+
+        <details class="diffs" open>
+          <summary>預計修改（5 個檔案）</summary>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn">constant/seo.ts（新檔）</span
+              ><span class="stat"
+                ><span class="a">+15</span> <span class="d">−0</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">新檔案</span></span><span class="dl add"><span class="sg">+</span><span class="tx">export const SITE_NAME = &quot;Bezold 頂讓必售&quot;;</span></span><span class="dl add"><span class="sg">+</span><span class="tx"> </span></span><span class="dl add"><span class="sg">+</span><span class="tx">// * moved from app/layout.tsx so pages and helpers share one copy</span></span><span class="dl add"><span class="sg">+</span><span class="tx">export const SITE_TITLE = &quot;頂讓網｜全台店面頂讓平台 - Bezold 頂讓必售&quot;;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">export const SITE_DESCRIPTION =</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  &quot;頂讓網 Bezold — 全台店面頂讓平台。買家直接接手已有客群、設備、營運的店面；賣家把心血交給合適的人。店面頂讓、生意頂讓真實刊登，早鳥前 3 個月免費刊登，永久不抽成。&quot;;</span></span><span class="dl add"><span class="sg">+</span><span class="tx"> </span></span><span class="dl add"><span class="sg">+</span><span class="tx">// * Next replaces (not merges) the parent&#x27;s openGraph when a page sets its</span></span><span class="dl add"><span class="sg">+</span><span class="tx">// * own, so every page-level openGraph must start from this base.</span></span><span class="dl add"><span class="sg">+</span><span class="tx">export const BASE_OPEN_GRAPH = {</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  siteName: SITE_NAME,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  type: &quot;website&quot;,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  locale: &quot;zh_TW&quot;,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  images: [&quot;/bezold-og.png&quot;],</span></span><span class="dl add"><span class="sg">+</span><span class="tx">} as const;</span></span></pre>
+          </div>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn">utils/seo.ts（新檔）</span
+              ><span class="stat"
+                ><span class="a">+35</span> <span class="d">−0</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">新檔案</span></span><span class="dl add"><span class="sg">+</span><span class="tx">import type { Metadata } from &quot;next&quot;;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">import { BASE_OPEN_GRAPH } from &quot;@/constant/seo&quot;;</span></span><span class="dl add"><span class="sg">+</span><span class="tx"> </span></span><span class="dl add"><span class="sg">+</span><span class="tx">// * title / description / canonical / og in one call, so a page can never</span></span><span class="dl add"><span class="sg">+</span><span class="tx">// * silently inherit the homepage&#x27;s canonical or share card again</span></span><span class="dl add"><span class="sg">+</span><span class="tx">export const pageMetadata = ({</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  title,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  description,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  path,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  images,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">}: {</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  title: string;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  description: string;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  path: string;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  images?: string[];</span></span><span class="dl add"><span class="sg">+</span><span class="tx">}): Metadata =&gt; ({</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  title,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  description,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  alternates: { canonical: path },</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  openGraph: {</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    ...BASE_OPEN_GRAPH,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    title,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    description,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    url: path,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    images: images ?? [...BASE_OPEN_GRAPH.images],</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  },</span></span><span class="dl add"><span class="sg">+</span><span class="tx">});</span></span><span class="dl add"><span class="sg">+</span><span class="tx"> </span></span><span class="dl add"><span class="sg">+</span><span class="tx">// * flatten line breaks and cap the length for &lt;meta name=&quot;description&quot;&gt;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">export const toMetaDescription = (text: string, maxLength = 120) =&gt; {</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  const flatText = text.replace(/\s+/g, &quot; &quot;).trim();</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  return flatText.length &gt; maxLength</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    ? `${flatText.slice(0, maxLength - 1)}…`</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    : flatText;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">};</span></span></pre>
+          </div>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn">app/layout.tsx</span
+              ><span class="stat"
+                ><span class="a">+6</span> <span class="d">−10</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 20 行</span></span><span class="dl del"><span class="sg">−</span><span class="tx">const SITE_TITLE = &quot;頂讓網｜全台店面頂讓平台 - Bezold 頂讓必售&quot;;</span></span><span class="dl del"><span class="sg">−</span><span class="tx">const SITE_DESCRIPTION =</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  &quot;頂讓網 Bezold — 全台店面頂讓平台。…&quot;;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">import {</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  BASE_OPEN_GRAPH,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  SITE_DESCRIPTION,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  SITE_TITLE,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">} from &quot;@/constant/seo&quot;;</span></span><span class="dl hunk"><span class="sg"></span><span class="tx">第 36 行</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">export const metadata: Metadata = {</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL!),</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  title: {</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    default: SITE_TITLE,</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    template: &quot;%s｜頂讓網 Bezold&quot;,</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  },</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  description: SITE_DESCRIPTION,</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  keywords: SITE_KEYWORDS,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  alternates: {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    canonical: &quot;/&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  },</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  robots: {</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    index: true,</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    follow: true,</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  },</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  openGraph: {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    siteName: &quot;Bezold 頂讓必售&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    type: &quot;website&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    locale: &quot;zh_TW&quot;,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    ...BASE_OPEN_GRAPH,</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    title: SITE_TITLE,</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    description: SITE_DESCRIPTION,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    images: [&quot;/bezold-og.png&quot;],</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  },</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">};</span></span></pre>
+          </div>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn">app/(new)/faq/page.tsx</span
+              ><span class="stat"
+                ><span class="a">+5</span> <span class="d">−3</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 1 行</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">import type { Metadata } from &quot;next&quot;;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">import { pageMetadata } from &quot;@/utils/seo&quot;;</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">import LaunchBanner from &quot;../_components/LaunchBanner&quot;;</span></span><span class="dl hunk"><span class="sg"></span><span class="tx">第 11 行</span></span><span class="dl del"><span class="sg">−</span><span class="tx">export const metadata: Metadata = {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  title: &quot;常見問題 — Bezold 頂讓必售&quot;,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">export const metadata: Metadata = pageMetadata({</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  title: &quot;常見問題&quot;,</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  description:</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    &quot;關於頂讓平台的刊登、買賣流程、費用、安全保障等常見問題一次解答。&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">};</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  path: &quot;/faq&quot;,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">});</span></span></pre>
+          </div>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn">app/(new)/sell/page.tsx</span
+              ><span class="stat"
+                ><span class="a">+5</span> <span class="d">−4</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 8 行</span></span><span class="dl del"><span class="sg">−</span><span class="tx">export const metadata: Metadata = {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  title: &quot;Bezold 頂讓必售 — 限時免費刊登&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  description: &quot;在 Bezold 頂讓必售 免費刊登您的頂讓店面，快速找到合適買家。&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">};</span></span><span class="dl add"><span class="sg">+</span><span class="tx">export const metadata: Metadata = pageMetadata({</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  title: &quot;免費刊登頂讓店面&quot;,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  description: &quot;在 Bezold 頂讓必售 免費刊登您的頂讓店面，快速找到合適買家。&quot;,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  path: &quot;/sell&quot;,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">});</span></span></pre>
+          </div>
+        </details>
+      </article>
+      <article class="issue" data-pri="p0" id="P0-2">
+        <header>
+          <label class="seen" title="標記為已看過"
+            ><input type="checkbox" data-id="P0-2" /><span></span
+          ></label>
+          <span class="pri p0">P0 · 必修</span>
+          <span class="iid">P0-2</span>
+          <h3>48 個店家頁的 meta description 全部一樣</h3>
+          <div class="tags">
+            <span class="tag">metadata</span><span class="tag">店家頁</span>
+          </div>
+        </header>
+        <div class="grid2">
+          <section>
+            <h4>影響</h4>
+            <p>
+              店家頁是最有機會吃到長尾搜尋的頁面（例如「逢甲 韓式料理
+              頂讓」），但每頁的搜尋摘要都是同一段首頁文案。Google
+              可能判定為重複內容，點擊率也會偏低。
+            </p>
+          </section>
+          <section>
+            <h4>證據（實測）</h4>
+            <ul>
+              <li>
+                48 / 48 個店家頁的
+                <code>&lt;meta name="description"&gt;</code> 都是「頂讓網 Bezold
+                — 全台店面頂讓平台。買家直接接手…」
+              </li>
+              <li>
+                <code>og:description</code>
+                反而是正確的店家描述，代表資料拿得到，只是沒有放進 description
+              </li>
+            </ul>
+          </section>
+        </div>
+        <section>
+          <h4>原因</h4>
+          <p>
+            <code>generateMetadata</code> 只在 <code>openGraph</code> 裡放了
+            <code>store.description</code>，最外層沒有
+            <code>description</code> 欄位，所以沿用 root。
+          </p>
+        </section>
+        <section>
+          <h4>修法</h4>
+          <p>
+            加上
+            <code>description: toMetaDescription(store.description)</code
+            >，壓平換行並截斷到 120 字。同一段 diff 也一起處理 P0-3、P0-4，以及
+            P2 的標題順序。
+          </p>
+        </section>
+
+        <details class="diffs" open>
+          <summary>預計修改（1 個檔案）</summary>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn"
+                >app/(new)/store/[storeId]/page.tsx — generateMetadata</span
+              ><span class="stat"
+                ><span class="a">+20</span> <span class="d">−26</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 1 行</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">import type { Metadata, ResolvingMetadata } from &quot;next&quot;;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">import { notFound } from &quot;next/navigation&quot;;</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">import { getStoreById } from &quot;@/firebase/serverUtils&quot;;</span></span><span class="dl del"><span class="sg">−</span><span class="tx">import { STORE_STATUS } from &quot;@/types&quot;;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">import { STORE_STATUS, type StoreStatus } from &quot;@/types&quot;;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">import { BASE_OPEN_GRAPH } from &quot;@/constant/seo&quot;;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">import { toMetaDescription } from &quot;@/utils/seo&quot;;</span></span><span class="dl hunk"><span class="sg"></span><span class="tx">第 21 行</span></span><span class="dl add"><span class="sg">+</span><span class="tx">// * only live and sold listings belong in search — drafts, pending and</span></span><span class="dl add"><span class="sg">+</span><span class="tx">// * rejected pages stay reachable by direct link but are noindexed</span></span><span class="dl add"><span class="sg">+</span><span class="tx">const INDEXABLE_STATUSES: (StoreStatus | undefined)[] = [</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  STORE_STATUS.APPROVED,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  STORE_STATUS.SOLD,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">];</span></span><span class="dl add"><span class="sg">+</span><span class="tx"> </span></span><span class="dl hunk"><span class="sg"></span><span class="tx">第 26 行</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  const { storeId } = await params;</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  const store = await getStoreById(storeId);</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  const canonicalUrl = `${process.env.NEXT_PUBLIC_APP_URL}/store/${storeId}`;</span></span><span class="dl ctx"><span class="sg"></span><span class="tx"> </span></span><span class="dl del"><span class="sg">−</span><span class="tx">  if (!store) {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    return {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      title: &quot;Bezold 頂讓必售 — 找不到物件&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      alternates: {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        canonical: canonicalUrl,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      },</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      openGraph: {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        title: &quot;Bezold 頂讓必售 — 找不到物件&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        description: &quot;此物件不存在或已下架&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        url: canonicalUrl,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        siteName: &quot;Bezold 頂讓必售&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        type: &quot;website&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        locale: &quot;zh_TW&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        images: [&quot;/bezold-og.png&quot;],</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      },</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    };</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  }</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  if (!store) notFound();</span></span><span class="dl add"><span class="sg">+</span><span class="tx"> </span></span><span class="dl add"><span class="sg">+</span><span class="tx">  const storeTitle = `${store.storeName}｜${store.city}店面頂讓`;</span></span><span class="dl ctx"><span class="sg"></span><span class="tx"> </span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  return {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    title: `Bezold 頂讓必售 — ${store.storeName}`,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    // * drafts are shared with the seller for approval — keep them out of search</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    ...(store.status === STORE_STATUS.DRAFT</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    title: storeTitle,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    description: toMetaDescription(store.description),</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    ...(!INDEXABLE_STATUSES.includes(store.status)</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">      ? { robots: { index: false, follow: false } }</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">      : {}),</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    alternates: {</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">      canonical: canonicalUrl,</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    },</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    openGraph: {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      title: `Bezold 頂讓必售 — ${store.storeName}`,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      description: store.description,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">      ...BASE_OPEN_GRAPH,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">      title: storeTitle,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">      description: toMetaDescription(store.description, 200),</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">      url: canonicalUrl,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      siteName: &quot;Bezold 頂讓必售&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      type: &quot;website&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      locale: &quot;zh_TW&quot;,</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">      images: store.images.length ? store.images : [&quot;/bezold-og.png&quot;],</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    },</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  };</span></span></pre>
+          </div>
+        </details>
+      </article>
+      <article class="issue" data-pri="p0" id="P0-3">
+        <header>
+          <label class="seen" title="標記為已看過"
+            ><input type="checkbox" data-id="P0-3" /><span></span
+          ></label>
+          <span class="pri p0">P0 · 必修</span>
+          <span class="iid">P0-3</span>
+          <h3>
+            審核中、被拒絕的店家頁可以被 Google 索引；已售出的頁面卻標示有貨
+          </h3>
+          <div class="tags">
+            <span class="tag">索引</span><span class="tag">結構化資料</span>
+          </div>
+        </header>
+        <div class="grid2">
+          <section>
+            <h4>影響</h4>
+            <p>
+              還沒審核或被退件的刊登，可能以正式物件的樣子出現在搜尋結果。已售出的物件在結構化資料裡標成
+              InStock，搜尋結果可能顯示「有貨」，使用者點進去才發現已售出。
+            </p>
+          </section>
+          <section>
+            <h4>證據（實測）</h4>
+            <ul>
+              <li>
+                pending 店家頁：HTTP 200 + <code>robots: index, follow</code>
+              </li>
+              <li>
+                rejected 店家頁：HTTP 200 + <code>robots: index, follow</code>
+              </li>
+              <li>
+                sold 店家頁：<code
+                  >availability: https://schema.org/InStock</code
+                >
+              </li>
+              <li>draft 已經正確設為 noindex</li>
+            </ul>
+          </section>
+        </div>
+        <section>
+          <h4>原因</h4>
+          <p>
+            <code>generateMetadata</code> 只把
+            <code>STORE_STATUS.DRAFT</code> 設成 noindex；JSON-LD 的
+            availability 寫死成 InStock。
+          </p>
+        </section>
+        <section>
+          <h4>修法</h4>
+          <p>
+            改成白名單
+            <code>INDEXABLE_STATUSES = [APPROVED, SOLD]</code>，其餘狀態一律
+            noindex，頁面本身仍可用連結開啟，不影響賣家預覽。已售出的物件改標
+            <code>SoldOut</code>。
+          </p>
+        </section>
+        <div class="decision">
+          <b>已決定 · 採用建議</b>已售出的頁面<b>保留索引</b>，結構化資料標成
+          SoldOut，當作成交案例。
+        </div>
+        <details class="diffs" open>
+          <summary>預計修改（2 個檔案）</summary>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn"
+                >app/(new)/store/[storeId]/page.tsx — generateMetadata</span
+              ><span class="stat"
+                ><span class="a">+20</span> <span class="d">−26</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 1 行</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">import type { Metadata, ResolvingMetadata } from &quot;next&quot;;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">import { notFound } from &quot;next/navigation&quot;;</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">import { getStoreById } from &quot;@/firebase/serverUtils&quot;;</span></span><span class="dl del"><span class="sg">−</span><span class="tx">import { STORE_STATUS } from &quot;@/types&quot;;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">import { STORE_STATUS, type StoreStatus } from &quot;@/types&quot;;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">import { BASE_OPEN_GRAPH } from &quot;@/constant/seo&quot;;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">import { toMetaDescription } from &quot;@/utils/seo&quot;;</span></span><span class="dl hunk"><span class="sg"></span><span class="tx">第 21 行</span></span><span class="dl add"><span class="sg">+</span><span class="tx">// * only live and sold listings belong in search — drafts, pending and</span></span><span class="dl add"><span class="sg">+</span><span class="tx">// * rejected pages stay reachable by direct link but are noindexed</span></span><span class="dl add"><span class="sg">+</span><span class="tx">const INDEXABLE_STATUSES: (StoreStatus | undefined)[] = [</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  STORE_STATUS.APPROVED,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  STORE_STATUS.SOLD,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">];</span></span><span class="dl add"><span class="sg">+</span><span class="tx"> </span></span><span class="dl hunk"><span class="sg"></span><span class="tx">第 26 行</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  const { storeId } = await params;</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  const store = await getStoreById(storeId);</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  const canonicalUrl = `${process.env.NEXT_PUBLIC_APP_URL}/store/${storeId}`;</span></span><span class="dl ctx"><span class="sg"></span><span class="tx"> </span></span><span class="dl del"><span class="sg">−</span><span class="tx">  if (!store) {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    return {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      title: &quot;Bezold 頂讓必售 — 找不到物件&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      alternates: {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        canonical: canonicalUrl,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      },</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      openGraph: {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        title: &quot;Bezold 頂讓必售 — 找不到物件&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        description: &quot;此物件不存在或已下架&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        url: canonicalUrl,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        siteName: &quot;Bezold 頂讓必售&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        type: &quot;website&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        locale: &quot;zh_TW&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        images: [&quot;/bezold-og.png&quot;],</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      },</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    };</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  }</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  if (!store) notFound();</span></span><span class="dl add"><span class="sg">+</span><span class="tx"> </span></span><span class="dl add"><span class="sg">+</span><span class="tx">  const storeTitle = `${store.storeName}｜${store.city}店面頂讓`;</span></span><span class="dl ctx"><span class="sg"></span><span class="tx"> </span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  return {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    title: `Bezold 頂讓必售 — ${store.storeName}`,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    // * drafts are shared with the seller for approval — keep them out of search</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    ...(store.status === STORE_STATUS.DRAFT</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    title: storeTitle,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    description: toMetaDescription(store.description),</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    ...(!INDEXABLE_STATUSES.includes(store.status)</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">      ? { robots: { index: false, follow: false } }</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">      : {}),</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    alternates: {</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">      canonical: canonicalUrl,</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    },</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    openGraph: {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      title: `Bezold 頂讓必售 — ${store.storeName}`,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      description: store.description,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">      ...BASE_OPEN_GRAPH,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">      title: storeTitle,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">      description: toMetaDescription(store.description, 200),</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">      url: canonicalUrl,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      siteName: &quot;Bezold 頂讓必售&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      type: &quot;website&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      locale: &quot;zh_TW&quot;,</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">      images: store.images.length ? store.images : [&quot;/bezold-og.png&quot;],</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    },</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  };</span></span></pre>
+          </div>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn"
+                >app/(new)/store/[storeId]/page.tsx — JSON-LD</span
+              ><span class="stat"
+                ><span class="a">+9</span> <span class="d">−2</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 97 行</span></span><span class="dl del"><span class="sg">−</span><span class="tx">          image: store.images.length ? store.images : [&quot;/bezold-avatar-v2.png&quot;],</span></span><span class="dl add"><span class="sg">+</span><span class="tx">          // * schema.org wants absolute URLs; the share card is a better</span></span><span class="dl add"><span class="sg">+</span><span class="tx">          // * fallback than the avatar</span></span><span class="dl add"><span class="sg">+</span><span class="tx">          image: store.images.length</span></span><span class="dl add"><span class="sg">+</span><span class="tx">            ? store.images</span></span><span class="dl add"><span class="sg">+</span><span class="tx">            : [`${process.env.NEXT_PUBLIC_APP_URL}/bezold-og.png`],</span></span><span class="dl hunk"><span class="sg"></span><span class="tx">第 106 行</span></span><span class="dl del"><span class="sg">−</span><span class="tx">              availability: &quot;https://schema.org/InStock&quot;,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">              availability:</span></span><span class="dl add"><span class="sg">+</span><span class="tx">                store.status === STORE_STATUS.SOLD</span></span><span class="dl add"><span class="sg">+</span><span class="tx">                  ? &quot;https://schema.org/SoldOut&quot;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">                  : &quot;https://schema.org/InStock&quot;,</span></span></pre>
+          </div>
+        </details>
+      </article>
+      <article class="issue" data-pri="p0" id="P0-4">
+        <header>
+          <label class="seen" title="標記為已看過"
+            ><input type="checkbox" data-id="P0-4" /><span></span
+          ></label>
+          <span class="pri p0">P0 · 必修</span>
+          <span class="iid">P0-4</span>
+          <h3>不存在的店家網址回傳 500，而不是 404</h3>
+          <div class="tags">
+            <span class="tag">HTTP 狀態</span><span class="tag">爬取</span>
+          </div>
+        </header>
+        <div class="grid2">
+          <section>
+            <h4>影響</h4>
+            <p>
+              下架或刪除的店家被 Google 重新爬取時會拿到 5xx。Google 會把 5xx
+              當成伺服器不穩定，降低整站的爬取頻率，也不會把那個網址從索引中移除。
+            </p>
+          </section>
+          <section>
+            <h4>證據（實測）</h4>
+            <ul>
+              <li><code>GET /store/doesNotExist123</code> → <b>500</b></li>
+              <li><code>GET /zzz-nope</code> → 404（一般頁面正常）</li>
+            </ul>
+          </section>
+        </div>
+        <section>
+          <h4>原因</h4>
+          <p>
+            頁面元件在找不到店家時執行
+            <code>throw new Error("Store not found")</code>，被
+            <code>error.tsx</code> 接住後回 500。
+          </p>
+        </section>
+        <section>
+          <h4>修法</h4>
+          <p>
+            <code>generateMetadata</code> 和頁面本體都改用
+            <code>notFound()</code>，交給 Next 的 404
+            頁處理。原本那段「找不到物件」的 metadata 也就用不到了，可以刪掉。
+          </p>
+        </section>
+
+        <details class="diffs" open>
+          <summary>預計修改（1 個檔案）</summary>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn"
+                >app/(new)/store/[storeId]/page.tsx — 頁面本體</span
+              ><span class="stat"
+                ><span class="a">+3</span> <span class="d">−3</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 75 行</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  const fetchedStore = await getStoreById(storeId);</span></span><span class="dl ctx"><span class="sg"></span><span class="tx"> </span></span><span class="dl del"><span class="sg">−</span><span class="tx">  if (!fetchedStore) {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    throw new Error(&quot;Store not found&quot;);</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  }</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  // * a removed listing is a 404, not a server error — 5xx makes Google</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  // * back off crawling the whole site</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  if (!fetchedStore) notFound();</span></span></pre>
+          </div>
+        </details>
+      </article>
+      <article class="issue" data-pri="p0" id="P0-5">
+        <header>
+          <label class="seen" title="標記為已看過"
+            ><input type="checkbox" data-id="P0-5" /><span></span
+          ></label>
+          <span class="pri p0">P0 · 必修</span>
+          <span class="iid">P0-5</span>
+          <h3>
+            /store-list 把全部 139 筆店家（含 73 筆草稿）送進 HTML，TTFB 2.4 秒
+          </h3>
+          <div class="tags">
+            <span class="tag">效能</span><span class="tag">資料外洩</span>
+          </div>
+        </header>
+        <div class="grid2">
+          <section>
+            <h4>影響</h4>
+            <p>
+              ① 速度：/store-list 是最重要的著陸頁，TTFB 2.4 秒、HTML 735
+              KB，會拖累排名和跳出率。②
+              資料：草稿、審核中、被拒絕的店名、描述、價格、圖片網址，任何人「檢視原始碼」都看得到（賣家聯絡方式沒有外流，只有
+              user ID）。
+            </p>
+          </section>
+          <section>
+            <h4>證據（實測）</h4>
+            <ul>
+              <li>
+                HTML 中的 status 統計：approved 52、<b>draft 73</b>、pending
+                4、rejected 1、sold 9
+              </li>
+              <li>
+                HTML 內有 522
+                個簽名圖片網址（每筆店家的每張圖都在伺服器端逐一簽名）
+              </li>
+              <li>
+                curl 量測：/store-list TTFB 2.40 秒；首頁與 blog 約 0.09 秒
+              </li>
+              <li>
+                公開且不需登入的 <code>/api/stores</code> 也回傳同樣 139
+                筆資料（含草稿），而且前端完全沒有呼叫它
+              </li>
+            </ul>
+          </section>
+        </div>
+        <section>
+          <h4>原因</h4>
+          <p>
+            <code>page.tsx</code> 把未過濾的 <code>stores</code> 傳給 client
+            component
+            <code>ResultsArea</code>，過濾在前端才做，但資料已經序列化進 RSC
+            payload。另外 <code>resolveStoreImages</code> 是用
+            <code>for…await</code> 逐筆簽名，時間全部疊加。
+          </p>
+        </section>
+        <section>
+          <h4>修法</h4>
+          <p>
+            <code>getStores</code> 新增
+            <code>statuses</code>
+            選項，在簽名圖片之前就先過濾（在記憶體過濾，不必新增 Firestore
+            composite index）。簽名改成 <code>Promise.all</code> 平行處理。admin
+            的呼叫不傳 statuses，行為不變。
+          </p>
+        </section>
+        <div class="decision">
+          <b>已決定 · 採用建議</b
+          ><code>/api/stores</code> 沒有任何前端在用，<b>直接刪除</b>這支
+          route。
+        </div>
+        <details class="diffs" open>
+          <summary>預計修改（3 個檔案）</summary>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn">firebase/serverUtils/store.ts</span
+              ><span class="stat"
+                ><span class="a">+25</span> <span class="d">−8</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 1 行</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">import { db } from &quot;@/firebase/server&quot;;</span></span><span class="dl del"><span class="sg">−</span><span class="tx">import { Store, STORE_CATEGORY, STORE_STATUS, STORE_TAG } from &quot;@/types&quot;;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">import {</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  Store,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  STORE_CATEGORY,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  STORE_STATUS,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  STORE_TAG,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  type StoreStatus,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">} from &quot;@/types&quot;;</span></span><span class="dl hunk"><span class="sg"></span><span class="tx">第 24 行</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">const resolveStoreImages = async (stores: Store[]): Promise&lt;Store[]&gt; =&gt; {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  for (const store of stores) {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    if (store?.images?.length &gt; 0) {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      store.images = await getImagesByPath(store.images);</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    }</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  }</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  // * sign in parallel — the serial loop was most of /store-list&#x27;s 2.4s TTFB</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  await Promise.all(</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    stores.map(async (store) =&gt; {</span></span><span class="dl add"><span class="sg">+</span><span class="tx">      if (store?.images?.length &gt; 0) {</span></span><span class="dl add"><span class="sg">+</span><span class="tx">        store.images = await getImagesByPath(store.images);</span></span><span class="dl add"><span class="sg">+</span><span class="tx">      }</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    }),</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  );</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  return stores;</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">};</span></span><span class="dl hunk"><span class="sg"></span><span class="tx">第 35 行</span></span><span class="dl del"><span class="sg">−</span><span class="tx">export const getStores = async (searchObj: Record&lt;string, string&gt;) =&gt; {</span></span><span class="dl add"><span class="sg">+</span><span class="tx">export const getStores = async (</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  searchObj: Record&lt;string, string&gt;,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  { statuses }: { statuses?: StoreStatus[] } = {},</span></span><span class="dl add"><span class="sg">+</span><span class="tx">) =&gt; {</span></span><span class="dl hunk"><span class="sg"></span><span class="tx">第 87 行</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  const stores = mapDocsToStores(snapshot);</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  return resolveStoreImages(stores);</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  // * filter in memory (a status where() would need new composite indexes)</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  // * and before signing, so hidden listings cost nothing and never ship</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  const visibleStores = statuses</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    ? stores.filter((store) =&gt; store.status &amp;&amp; statuses.includes(store.status))</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    : stores;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  return resolveStoreImages(visibleStores);</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">};</span></span></pre>
+          </div>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn">app/(new)/store-list/page.tsx</span
+              ><span class="stat"
+                ><span class="a">+5</span> <span class="d">−5</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 30 行</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  const stores = await getStores(searchObj);</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  const approvedStores = stores.filter(</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    (store) =&gt; store.status === STORE_STATUS.APPROVED,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  );</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  // * public page — only approved listings may reach the HTML payload</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  const stores = await getStores(searchObj, {</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    statuses: [STORE_STATUS.APPROVED],</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  });</span></span><span class="dl hunk"><span class="sg"></span><span class="tx">第 40 行</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        &lt;Breadcrumbs count={approvedStores.length} /&gt;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">        &lt;Breadcrumbs count={stores.length} /&gt;</span></span></pre>
+          </div>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn">app/api/stores/route.ts（刪除）</span
+              ><span class="stat"
+                ><span class="a">+0</span> <span class="d">−12</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">刪除整個檔案</span></span><span class="dl del"><span class="sg">−</span><span class="tx">import { mockStores } from &quot;@/mocks&quot;;</span></span><span class="dl del"><span class="sg">−</span><span class="tx">import { getStores } from &quot;@/firebase/serverUtils&quot;;</span></span><span class="dl del"><span class="sg">−</span><span class="tx">import { NextRequest } from &quot;next/server&quot;;</span></span><span class="dl del"><span class="sg">−</span><span class="tx"> </span></span><span class="dl del"><span class="sg">−</span><span class="tx">export async function GET(request: NextRequest) {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  const searchParams = request.nextUrl.searchParams;</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  const searchObj = Object.fromEntries(searchParams);</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  // * query data from firebase</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  const mockStoresByDB = await getStores(searchObj);</span></span><span class="dl del"><span class="sg">−</span><span class="tx"> </span></span><span class="dl del"><span class="sg">−</span><span class="tx">  return Response.json({ data: mockStoresByDB });</span></span><span class="dl del"><span class="sg">−</span><span class="tx">}</span></span></pre>
+          </div>
+        </details>
+      </article>
+      <article class="issue" data-pri="p1" id="P1-1">
+        <header>
+          <label class="seen" title="標記為已看過"
+            ><input type="checkbox" data-id="P1-1" /><span></span
+          ></label>
+          <span class="pri p1">P1 · 應修</span>
+          <span class="iid">P1-1</span>
+          <h3>店家頁和 /store-list 沒有 h1</h3>
+          <div class="tags"><span class="tag">內容結構</span></div>
+        </header>
+        <div class="grid2">
+          <section>
+            <h4>影響</h4>
+            <p>
+              h1 是 Google
+              判斷頁面主題的重要訊號。店名是店家頁最關鍵的關鍵字，目前卻只是
+              h2。
+            </p>
+          </section>
+          <section>
+            <h4>證據（實測）</h4>
+            <ul>
+              <li>
+                48 / 48 個店家頁 h1 數量為 0（店名在 <code>&lt;h2&gt;</code>）
+              </li>
+              <li>/store-list h1 數量為 0</li>
+            </ul>
+          </section>
+        </div>
+        <section>
+          <h4>原因</h4>
+          <p>
+            <code>StoreTitleRow</code> 和 <code>Breadcrumbs</code> 用的是
+            <code>&lt;h2&gt;</code>。
+          </p>
+        </section>
+        <section>
+          <h4>修法</h4>
+          <p>
+            直接改成 <code>&lt;h1&gt;</code>。樣式掛在 CSS module 的 class
+            上，globals.css 也沒有 h1 / h2
+            的元素樣式，外觀應該不會變，改完會在瀏覽器確認。
+          </p>
+        </section>
+
+        <details class="diffs" open>
+          <summary>預計修改（2 個檔案）</summary>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn"
+                >app/(new)/store/[storeId]/_components/StoreTitleRow.tsx</span
+              ><span class="stat"
+                ><span class="a">+2</span> <span class="d">−2</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 42 行</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        &lt;h2 className={styles.name}&gt;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">        &lt;h1 className={styles.name}&gt;</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">          {city &amp;&amp; &lt;&gt;{city} · &lt;/&gt;}</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">          &lt;em&gt;{storeName}&lt;/em&gt;</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        &lt;/h2&gt;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">        &lt;/h1&gt;</span></span></pre>
+          </div>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn"
+                >app/(new)/store-list/_components/Breadcrumbs.tsx</span
+              ><span class="stat"
+                ><span class="a">+2</span> <span class="d">−2</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 10 行</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        &lt;h2 className={styles.title}&gt;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">        &lt;h1 className={styles.title}&gt;</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">          我要找店 &lt;em&gt;共 {count} 間&lt;/em&gt;</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        &lt;/h2&gt;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">        &lt;/h1&gt;</span></span></pre>
+          </div>
+        </details>
+      </article>
+      <article class="issue" data-pri="p1" id="P1-2">
+        <header>
+          <label class="seen" title="標記為已看過"
+            ><input type="checkbox" data-id="P1-2" /><span></span
+          ></label>
+          <span class="pri p1">P1 · 應修</span>
+          <span class="iid">P1-2</span>
+          <h3>圖片使用 7 天後過期的簽名網址</h3>
+          <div class="tags">
+            <span class="tag">圖片</span><span class="tag">社群分享</span
+            ><span class="tag">需決策</span>
+          </div>
+        </header>
+        <div class="grid2">
+          <section>
+            <h4>影響</h4>
+            <p>
+              分享到 LINE / FB 的卡片圖會在 7 天後失效。Google
+              圖片搜尋每次爬到的網址都不同，無法累積索引。每次請求都產生新網址，瀏覽器和
+              CDN 也都無法快取。
+            </p>
+          </section>
+          <section>
+            <h4>證據（實測）</h4>
+            <ul>
+              <li>
+                og:image 與 JSON-LD image 都是
+                <code
+                  >storage.googleapis.com/…&amp;Expires=1792886400&amp;Signature=…</code
+                >（2026/10/25 到期）
+              </li>
+              <li>
+                圖片回應標頭：<code>cache-control: private, max-age=0</code>
+              </li>
+            </ul>
+          </section>
+        </div>
+        <section>
+          <h4>原因</h4>
+          <p>
+            <code>firebase/serverUtils/image.ts</code> 的
+            <code>getImageByPath</code> 用
+            <code>getSignedUrl</code>，每次都簽一個 7 天後到期的新網址。
+          </p>
+        </section>
+        <section>
+          <h4>修法</h4>
+          <p>
+            建議方案：在自己網域加一個 <code>/img/[...path]</code> route，從
+            bucket 讀圖並回傳長快取標頭，網址固定、可以被 CDN 快取。限制只能讀
+            <code>prodStore/</code> 開頭的路徑。<br />替代方案：把 bucket
+            設為公開讀取，改用 <code>publicUrl()</code>。這樣最省事，但整個
+            bucket 都會公開，要先確認裡面沒有其他私人檔案。
+          </p>
+        </section>
+        <div class="decision">
+          <b>已決定 · 採用建議</b>採用<b>自建 /img route</b>。bucket
+          維持私有，只開放 <code>prodStore/</code>（dev 環境為
+          <code>mockStore/</code>）路徑。
+        </div>
+        <details class="diffs" open>
+          <summary>預計修改（2 個檔案）</summary>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn">app/img/[...path]/route.ts（新檔）</span
+              ><span class="stat"
+                ><span class="a">+32</span> <span class="d">−0</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">新檔案</span></span><span class="dl add"><span class="sg">+</span><span class="tx">import { bucket } from &quot;@/firebase/server&quot;;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">import { COLLECTIONS } from &quot;@/firebase/constants&quot;;</span></span><span class="dl add"><span class="sg">+</span><span class="tx"> </span></span><span class="dl add"><span class="sg">+</span><span class="tx">// * Stable, cacheable image URLs on our own domain. Signed URLs expire in</span></span><span class="dl add"><span class="sg">+</span><span class="tx">// * 7 days and change on every render, which breaks share cards, Google</span></span><span class="dl add"><span class="sg">+</span><span class="tx">// * Images and every cache in between.</span></span><span class="dl add"><span class="sg">+</span><span class="tx">export async function GET(</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  _request: Request,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  { params }: { params: { path: string[] } },</span></span><span class="dl add"><span class="sg">+</span><span class="tx">) {</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  const objectPath = params.path.join(&quot;/&quot;);</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  // * listing photos only — never expose other bucket prefixes</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  if (!objectPath.startsWith(`${COLLECTIONS.STORE}/`)) {</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    return new Response(&quot;Not found&quot;, { status: 404 });</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  }</span></span><span class="dl add"><span class="sg">+</span><span class="tx"> </span></span><span class="dl add"><span class="sg">+</span><span class="tx">  const file = bucket.file(objectPath);</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  const [exists] = await file.exists();</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  if (!exists) return new Response(&quot;Not found&quot;, { status: 404 });</span></span><span class="dl add"><span class="sg">+</span><span class="tx"> </span></span><span class="dl add"><span class="sg">+</span><span class="tx">  const [[buffer], [metadata]] = await Promise.all([</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    file.download(),</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    file.getMetadata(),</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  ]);</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  return new Response(buffer, {</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    headers: {</span></span><span class="dl add"><span class="sg">+</span><span class="tx">      &quot;Content-Type&quot;: metadata.contentType ?? &quot;image/jpeg&quot;,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">      // * browser 1 day, Vercel CDN 30 days</span></span><span class="dl add"><span class="sg">+</span><span class="tx">      &quot;Cache-Control&quot;: &quot;public, max-age=86400, s-maxage=2592000&quot;,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    },</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  });</span></span><span class="dl add"><span class="sg">+</span><span class="tx">}</span></span></pre>
+          </div>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn">firebase/serverUtils/image.ts</span
+              ><span class="stat"
+                ><span class="a">+3</span> <span class="d">−7</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 66 行</span></span><span class="dl del"><span class="sg">−</span><span class="tx">export const getImageByPath = async (imagePath: string) =&gt; {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  const sevenDaysAfter = dayjs().add(7, &quot;day&quot;).format(&quot;MM-DD-YYYY&quot;);</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  const image = await bucket</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    .file(imagePath)</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    .getSignedUrl({ action: &quot;read&quot;, expires: sevenDaysAfter });</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  return image[0];</span></span><span class="dl del"><span class="sg">−</span><span class="tx">};</span></span><span class="dl add"><span class="sg">+</span><span class="tx">// * kept async so every existing caller stays unchanged</span></span><span class="dl add"><span class="sg">+</span><span class="tx">export const getImageByPath = async (imagePath: string) =&gt;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  `${process.env.NEXT_PUBLIC_APP_URL}/img/${imagePath}`;</span></span></pre>
+          </div>
+        </details>
+      </article>
+      <article class="issue" data-pri="p1" id="P1-3">
+        <header>
+          <label class="seen" title="標記為已看過"
+            ><input type="checkbox" data-id="P1-3" /><span></span
+          ></label>
+          <span class="pri p1">P1 · 應修</span>
+          <span class="iid">P1-3</span>
+          <h3>/store-list 的 LCP 為 6.1 秒，首圖是 lazy load 的 4032px 原圖</h3>
+          <div class="tags">
+            <span class="tag">效能</span
+            ><span class="tag">Core Web Vitals</span>
+          </div>
+        </header>
+        <div class="grid2">
+          <section>
+            <h4>影響</h4>
+            <p>
+              LCP 超過 2.5 秒就會被 Google
+              判定為「不佳」。這次在本機、沒有限速的條件下就量到 6.1 秒，手機 4G
+              只會更慢。
+            </p>
+          </section>
+          <section>
+            <h4>證據（實測）</h4>
+            <ul>
+              <li>
+                效能追蹤：LCP 6,120 ms（Load delay 2,783 ms + Render delay 2,454
+                ms）
+              </li>
+              <li>
+                LCP 元素是第一張 StoreCard
+                圖片，<code>loading=lazy</code>，也沒有
+                <code>fetchpriority=high</code>
+              </li>
+              <li>
+                其中一張圖原始尺寸 4032×2406，實際只顯示 900×675，單張就浪費 2.5
+                MB
+              </li>
+            </ul>
+          </section>
+        </div>
+        <section>
+          <h4>原因</h4>
+          <p>
+            <code>StoreCard</code> 沒有 <code>priority</code> 選項。<code
+              >next.config.js</code
+            >
+            設了 <code>images.unoptimized: true</code>（為了避開 Vercel
+            圖片優化的 402 額度問題），所以原圖直接下載。
+          </p>
+        </section>
+        <section>
+          <h4>修法</h4>
+          <p>
+            短期：前 2 張卡片加 <code>priority</code>（下方
+            diff）。中期：上傳時用 sharp 產生 1200px 的 WebP
+            版本，列表改用縮圖。這需要改上傳流程，建議另開 PR。
+          </p>
+        </section>
+
+        <details class="diffs" open>
+          <summary>預計修改（2 個檔案）</summary>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn">components/refactored/StoreCard.tsx</span
+              ><span class="stat"
+                ><span class="a">+9</span> <span class="d">−1</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 35 行</span></span><span class="dl del"><span class="sg">−</span><span class="tx">export default function StoreCard({ card }: { card: StoreCard }) {</span></span><span class="dl add"><span class="sg">+</span><span class="tx">export default function StoreCard({</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  card,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  priority = false,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">}: {</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  card: StoreCard;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  // * above-the-fold cards: eager load + fetchpriority=high for LCP</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  priority?: boolean;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">}) {</span></span><span class="dl hunk"><span class="sg"></span><span class="tx">第 40 行</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">          &lt;Image</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">            src={card.image}</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">            fill</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">            alt={card.title}</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">            className={styles.photo}</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">            sizes=&quot;(max-width: 640px) 100vw, 50vw&quot;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">            priority={priority}</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">          /&gt;</span></span></pre>
+          </div>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn"
+                >app/(new)/store-list/_components/ResultsArea.tsx</span
+              ><span class="stat"
+                ><span class="a">+2</span> <span class="d">−2</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 53 行</span></span><span class="dl del"><span class="sg">−</span><span class="tx">        {sortedStores.map((store) =&gt; (</span></span><span class="dl add"><span class="sg">+</span><span class="tx">        {sortedStores.map((store, index) =&gt; (</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">          &lt;a</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">            key={store.id}</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">            href={`/store/${store.id}`}</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">            className={styles.cardLink}</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">          &gt;</span></span><span class="dl del"><span class="sg">−</span><span class="tx">            &lt;StoreCard card={storeToCard(store)} /&gt;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">            &lt;StoreCard card={storeToCard(store)} priority={index &lt; 2} /&gt;</span></span></pre>
+          </div>
+        </details>
+      </article>
+      <article class="issue" data-pri="p1" id="P1-4">
+        <header>
+          <label class="seen" title="標記為已看過"
+            ><input type="checkbox" data-id="P1-4" /><span></span
+          ></label>
+          <span class="pri p1">P1 · 應修</span>
+          <span class="iid">P1-4</span>
+          <h3>sitemap 收錄了 robots 擋掉的 /login、/signup</h3>
+          <div class="tags"><span class="tag">sitemap</span></div>
+        </header>
+        <div class="grid2">
+          <section>
+            <h4>影響</h4>
+            <p>
+              sitemap 叫 Google 收錄，robots 卻禁止爬取，Search Console
+              會標成「已提交但遭 robots.txt
+              封鎖」。這兩頁的標題和描述也直接沿用首頁的。
+            </p>
+          </section>
+          <section>
+            <h4>證據（實測）</h4>
+            <ul>
+              <li>sitemap.xml 包含 /login、/signup</li>
+              <li>
+                robots.txt：<code>Disallow: /login</code>、<code
+                  >Disallow: /signup</code
+                >
+              </li>
+              <li>兩頁的 &lt;title&gt; 都是首頁標題</li>
+            </ul>
+          </section>
+        </div>
+        <section>
+          <h4>原因</h4>
+          <p>
+            <code>app/sitemap.ts</code> 的 STATIC_ROUTES
+            列了這兩頁；兩頁也都沒有 export metadata。
+          </p>
+        </section>
+        <section>
+          <h4>修法</h4>
+          <p>從 sitemap 移除，並各自加上 title 與 noindex。</p>
+        </section>
+
+        <details class="diffs" open>
+          <summary>預計修改（2 個檔案）</summary>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn">app/sitemap.ts</span
+              ><span class="stat"
+                ><span class="a">+0</span> <span class="d">−2</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 32 行</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  route(&quot;/terms&quot;, &quot;yearly&quot;, 0.3),</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  route(&quot;/disclaimer&quot;, &quot;yearly&quot;, 0.3),</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  route(&quot;/login&quot;, &quot;yearly&quot;, 0.2),</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  route(&quot;/signup&quot;, &quot;yearly&quot;, 0.2),</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">];</span></span></pre>
+          </div>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn">app/(new)/login/page.tsx（signup 同理）</span
+              ><span class="stat"
+                ><span class="a">+6</span> <span class="d">−0</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 1 行</span></span><span class="dl add"><span class="sg">+</span><span class="tx">import type { Metadata } from &quot;next&quot;;</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">import { Suspense } from &quot;react&quot;;</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">import AuthNav from &quot;../_components/AuthNav&quot;;</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">import LoginForm from &quot;./_components/LoginForm&quot;;</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">import styles from &quot;./page.module.css&quot;;</span></span><span class="dl add"><span class="sg">+</span><span class="tx"> </span></span><span class="dl add"><span class="sg">+</span><span class="tx">export const metadata: Metadata = {</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  title: &quot;登入&quot;,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  robots: { index: false, follow: true },</span></span><span class="dl add"><span class="sg">+</span><span class="tx">};</span></span></pre>
+          </div>
+        </details>
+      </article>
+      <article class="issue" data-pri="p2" id="P2-1">
+        <header>
+          <label class="seen" title="標記為已看過"
+            ><input type="checkbox" data-id="P2-1" /><span></span
+          ></label>
+          <span class="pri p2">P2 · 建議</span>
+          <span class="iid">P2-1</span>
+          <h3>標題中品牌名稱重複出現，店名被擠到後面</h3>
+          <div class="tags"><span class="tag">metadata</span></div>
+        </header>
+        <div class="grid2">
+          <section>
+            <h4>影響</h4>
+            <p>
+              例如「常見問題 — Bezold 頂讓必售｜頂讓網
+              Bezold」裡品牌出現兩次。Google 標題大約只顯示 30 個中文字，blog
+              標題的後半段會被截掉。店家頁以「Bezold 頂讓必售
+              —」開頭，真正的店名反而被推到後面。
+            </p>
+          </section>
+          <section>
+            <h4>證據（實測）</h4>
+            <ul>
+              <li>
+                blog 標題長度約 50
+                字，例如「創業成本要多少？…（自己開店、加盟、接手店比較） —
+                Bezold 頂讓必售｜頂讓網 Bezold」
+              </li>
+              <li>店家頁：「Bezold 頂讓必售 — 島嶼早午餐｜頂讓網 Bezold」</li>
+            </ul>
+          </section>
+        </div>
+        <section>
+          <h4>原因</h4>
+          <p>
+            root 的 template 已經會加上「｜頂讓網 Bezold」，但各頁的 title
+            又自己加了「— Bezold 頂讓必售」。
+          </p>
+        </section>
+        <section>
+          <h4>修法</h4>
+          <p>
+            各頁 title 只寫頁面本身的名稱，品牌交給 template 處理。faq、sell
+            已經在 P0-1 的 diff 裡改好。店家頁改成「店名｜城市店面頂讓｜頂讓網
+            Bezold」，已含在 P0-2 的 diff。
+          </p>
+        </section>
+        <div class="decision">
+          <b>已決定 · 採用建議</b
+          >先採用報告中的建議文案；之後要改，只需要動字串。
+        </div>
+        <details class="diffs" open>
+          <summary>預計修改（2 個檔案）</summary>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn">app/(new)/blog/[slug]/page.tsx</span
+              ><span class="stat"
+                ><span class="a">+1</span> <span class="d">−1</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 44 行</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  return {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    title: `${meta.title} — Bezold 頂讓必售`,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    title: meta.title,</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    description: meta.description,</span></span></pre>
+          </div>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn">app/(new)/store-list/page.tsx</span
+              ><span class="stat"
+                ><span class="a">+6</span> <span class="d">−8</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 13 行</span></span><span class="dl del"><span class="sg">−</span><span class="tx">export const metadata: Metadata = {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  title: &quot;Bezold 頂讓必售 — 我要找店&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  description:</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    &quot;瀏覽全台頂讓店面。依地區、行業、頂讓金快速篩選，直接聯絡賣家，沒有中間人。&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  alternates: {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    canonical: &quot;/store-list&quot;,</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  },</span></span><span class="dl del"><span class="sg">−</span><span class="tx">};</span></span><span class="dl add"><span class="sg">+</span><span class="tx">export const metadata: Metadata = pageMetadata({</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  title: &quot;全台頂讓店面列表&quot;,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  description:</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    &quot;瀏覽全台頂讓店面。依地區、行業、頂讓金快速篩選，直接聯絡賣家，沒有中間人。&quot;,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  path: &quot;/store-list&quot;,</span></span><span class="dl add"><span class="sg">+</span><span class="tx">});</span></span></pre>
+          </div>
+        </details>
+      </article>
+      <article class="issue" data-pri="p2" id="P2-2">
+        <header>
+          <label class="seen" title="標記為已看過"
+            ><input type="checkbox" data-id="P2-2" /><span></span
+          ></label>
+          <span class="pri p2">P2 · 建議</span>
+          <span class="iid">P2-2</span>
+          <h3>/policy/editor-pick 沒有 og:image</h3>
+          <div class="tags"><span class="tag">社群分享</span></div>
+        </header>
+        <div class="grid2">
+          <section>
+            <h4>影響</h4>
+            <p>分享這一頁時不會顯示預覽圖。</p>
+          </section>
+          <section>
+            <h4>證據（實測）</h4>
+            <ul>
+              <li>og:image 不存在（是唯一缺少 og:image 的頁面）</li>
+            </ul>
+          </section>
+        </div>
+        <section>
+          <h4>原因</h4>
+          <p>
+            這頁有自己的 <code>openGraph</code>，但沒有放 images，Next
+            不會往上合併 root 的設定。
+          </p>
+        </section>
+        <section>
+          <h4>修法</h4>
+          <p>展開 <code>BASE_OPEN_GRAPH</code>，和 P0-1 用同一個常數。</p>
+        </section>
+
+        <details class="diffs" open>
+          <summary>預計修改（1 個檔案）</summary>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn">app/(new)/policy/editor-pick/page.tsx</span
+              ><span class="stat"
+                ><span class="a">+1</span> <span class="d">−0</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 25 行</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  openGraph: {</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    ...BASE_OPEN_GRAPH,</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    type: &quot;article&quot;,</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    url: PAGE_PATH,</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    title: PAGE_TITLE,</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    description: PAGE_DESCRIPTION,</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  },</span></span></pre>
+          </div>
+        </details>
+      </article>
+      <article class="issue" data-pri="p2" id="P2-3">
+        <header>
+          <label class="seen" title="標記為已看過"
+            ><input type="checkbox" data-id="P2-3" /><span></span
+          ></label>
+          <span class="pri p2">P2 · 建議</span>
+          <span class="iid">P2-3</span>
+          <h3>無障礙：文字對比不足、缺少 &lt;main&gt;、heading 跳級</h3>
+          <div class="tags">
+            <span class="tag">無障礙</span><span class="tag">需決策</span>
+          </div>
+        </header>
+        <div class="grid2">
+          <section>
+            <h4>影響</h4>
+            <p>
+              Lighthouse 無障礙分數 89～91。對比不足會影響閱讀，這也是 Google
+              頁面體驗的一部分。
+            </p>
+          </section>
+          <section>
+            <h4>證據（實測）</h4>
+            <ul>
+              <li>
+                <code>--accent #d94a2a</code> 在米色底上對比 3.79，白字在 accent
+                底上 4.23（標準為 4.5）
+              </li>
+              <li><code>--muted #8a8278</code> 在米色底上對比 3.39</li>
+              <li>
+                首頁、/faq 沒有 <code>&lt;main&gt;</code>；SiteNav 的手機版
+                <code>&lt;ul&gt;</code> 直接包 <code>&lt;a&gt;</code>，沒有
+                <code>&lt;li&gt;</code>
+              </li>
+              <li>
+                heading 從 h1 直接跳到 h5、h6（HowItWorks、WhyUs、SiteFooter）
+              </li>
+              <li>
+                順帶發現：/store-guide
+                深色區塊的「04」編號標籤，文字和背景同色，<b>完全看不見</b>
+              </li>
+            </ul>
+          </section>
+        </div>
+        <section>
+          <h4>原因</h4>
+          <p>
+            品牌色本身的明度偏亮；部分頁面的外框用的是
+            <code>&lt;div&gt;</code>。
+          </p>
+        </section>
+        <section>
+          <h4>修法</h4>
+          <p>
+            token 調暗：<code>--accent #b33a1d</code>（米色底 5.31、卡其底
+            4.72、白字 5.93），<code>--muted #736b61</code
+            >（4.69）。深色區塊另外新增
+            <code>--accent-on-dark #f07a5a</code
+            >（6.31），黃色圓點上的編號改成深色字。在正式站實測：5
+            頁不合格文字共 67 處，改後剩 0 處（含「04」修正）。外框
+            <code>div</code> 改成 <code>main</code>。nav 補上
+            <code>&lt;li&gt;</code>，heading 依序調整（這部分沒有附 diff）。
+          </p>
+        </section>
+        <div class="decision">
+          <b>已決定 · 採用建議</b>直接調整全站 token（<code
+            >--accent → #b33a1d</code
+          >、<code>--muted → #736b61</code>）。改動前後的實際畫面對照見
+          <code>docs/contrast-before-after.html</code>。
+        </div>
+        <details class="diffs" open>
+          <summary>預計修改（4 個檔案）</summary>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn">app/globals.css</span
+              ><span class="stat"
+                ><span class="a">+4</span> <span class="d">−2</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 17 行</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  --accent: #d94a2a;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  --accent: #b33a1d;</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  --accent-2: #2a6f4d;</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  --accent-3: #e6b833;</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  --muted: #8a8278;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  --muted: #736b61;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  /* accent text on dark (--ink) sections — #b33a1d is too dark there */</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  --accent-on-dark: #f07a5a;</span></span></pre>
+          </div>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn">app/(new)/_components/HowItWorks.module.css</span
+              ><span class="stat"
+                ><span class="a">+3</span> <span class="d">−2</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 57 行</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  &amp; .number {</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">    background: var(--accent-3);</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    color: var(--ink);</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  }</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">}</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">.buyer {</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  &amp; .type {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    color: var(--accent);</span></span><span class="dl del"><span class="sg">−</span><span class="tx">    border-color: var(--accent);</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    color: var(--accent-on-dark);</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    border-color: var(--accent-on-dark);</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  }</span></span></pre>
+          </div>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn"
+                >components/refactored/SectionTitle.module.css</span
+              ><span class="stat"
+                ><span class="a">+8</span> <span class="d">−5</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 23 行</span></span><span class="dl ctx"><span class="sg"></span><span class="tx">  letter-spacing: 0.1em;</span></span><span class="dl del"><span class="sg">−</span><span class="tx">}</span></span><span class="dl del"><span class="sg">−</span><span class="tx">.numDark {</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  background: var(--paper);</span></span><span class="dl del"><span class="sg">−</span><span class="tx">  color: var(--ink);</span></span><span class="dl del"><span class="sg">−</span><span class="tx">}</span></span><span class="dl add"><span class="sg">+</span><span class="tx"> </span></span><span class="dl add"><span class="sg">+</span><span class="tx">  /* .num.numDark beats Section&#x27;s `.dark *` color rule regardless of the</span></span><span class="dl add"><span class="sg">+</span><span class="tx">     order the two CSS chunks load in */</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  &amp;.numDark {</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    background: var(--paper);</span></span><span class="dl add"><span class="sg">+</span><span class="tx">    color: var(--ink);</span></span><span class="dl add"><span class="sg">+</span><span class="tx">  }</span></span><span class="dl add"><span class="sg">+</span><span class="tx">}</span></span></pre>
+          </div>
+          <div class="diff">
+            <div class="dh">
+              <span class="fn">app/(new)/page.tsx（faq/page.tsx 同理）</span
+              ><span class="stat"
+                ><span class="a">+2</span> <span class="d">−2</span></span
+              >
+            </div>
+            <pre
+              class="db"
+            ><span class="dl hunk"><span class="sg"></span><span class="tx">第 93 行</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      &lt;div className={styles.frame}&gt;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">      &lt;main className={styles.frame}&gt;</span></span><span class="dl hunk"><span class="sg"></span><span class="tx">頁尾對應的結尾</span></span><span class="dl del"><span class="sg">−</span><span class="tx">      &lt;/div&gt;</span></span><span class="dl add"><span class="sg">+</span><span class="tx">      &lt;/main&gt;</span></span></pre>
+          </div>
+        </details>
+      </article>
+
+      <h2>建議的 PR 拆分</h2>
+      <div class="prgrid">
+        <div class="pr">
+          <h4>PR 1 · Metadata 與索引</h4>
+          <div class="prs">P0-1、P0-2、P0-3、P0-4、P1-4、P2-1、P2-2</div>
+          <p>
+            只改 metadata 與狀態碼，風險低，效果最直接。上線後到 Search Console
+            重新提交 sitemap。
+          </p>
+        </div>
+        <div class="pr">
+          <h4>PR 2 · /store-list 資料與效能</h4>
+          <div class="prs">P0-5、P1-3（priority）</div>
+          <p>同時解決資料外洩與 TTFB。admin 呼叫 getStores 的行為不變。</p>
+        </div>
+        <div class="pr">
+          <h4>PR 3 · 標題層級與無障礙</h4>
+          <div class="prs">P1-1、P2-3</div>
+          <p>會影響外觀，需要在瀏覽器逐頁確認。token 色彩要你先決定。</p>
+        </div>
+        <div class="pr">
+          <h4>PR 4 · 圖片網址</h4>
+          <div class="prs">P1-2</div>
+          <p>等你決定方案再做；牽涉流量成本與 bucket 權限。</p>
+        </div>
+      </div>
+
+      <h2>評估後不建議做</h2>
+      <div class="panel">
+        <ul>
+          <li>
+            <b>FAQPage 結構化資料不建議加在 /faq</b>　Google 從 2023 年 8
+            月起，只對政府與醫療等權威網站顯示 FAQ rich result。對 Bezold
+            來說投資報酬率很低，而且 /faq 的答案是
+            JSX，還得另外維護一份純文字版本。
+          </li>
+          <li>
+            <b>&lt;meta keywords&gt; 不用管</b>　Google
+            早就忽略這個欄位，留著也沒有壞處。
+          </li>
+        </ul>
+      </div>
+
+      <h2>這次沒涵蓋的範圍</h2>
+      <div class="panel">
+        <ul>
+          <li>
+            Search Console
+            資料（實際排名、索引涵蓋範圍、搜尋字詞）：需要你的帳號權限，建議接上後再對照這份報告
+          </li>
+          <li>
+            CrUX 真實使用者 Core Web Vitals：目前流量不足，Google 沒有資料
+          </li>
+          <li>反向連結、競品關鍵字：需要 Ahrefs / Semrush 這類工具</li>
+          <li>
+            Lighthouse 只跑了 4 個代表頁（首頁、店家頁、/faq、/store-list
+            效能追蹤）；其他頁面只檢查了 HTML 標籤
+          </li>
+        </ul>
+      </div>
+    </div>
+    <script>
+      (function () {
+        var KEY = "bezold-seo-audit-seen";
+        var seen = {};
+        try {
+          seen = JSON.parse(localStorage.getItem(KEY) || "{}");
+        } catch (error) {
+          seen = {};
+        }
+        var boxes = document.querySelectorAll(".seen input");
+        function sync() {
+          var total = 0;
+          boxes.forEach(function (box) {
+            var id = box.dataset.id,
+              on = !!seen[id];
+            box.checked = on;
+            document.getElementById(id).classList.toggle("is-seen", on);
+            var link = document.querySelector('.toc a[href="#' + id + '"]');
+            if (link) link.classList.toggle("is-seen", on);
+            if (on) total++;
+          });
+          document.getElementById("seenCount").textContent =
+            total + "/" + boxes.length;
+        }
+        boxes.forEach(function (box) {
+          box.addEventListener("change", function () {
+            seen[box.dataset.id] = box.checked;
+            try {
+              localStorage.setItem(KEY, JSON.stringify(seen));
+            } catch (error) {}
+            sync();
+          });
+        });
+        sync();
+
+        var chips = document.querySelectorAll(".chip[data-filter]");
+        chips.forEach(function (chip) {
+          chip.addEventListener("click", function () {
+            var filter = chip.dataset.filter;
+            chips.forEach(function (other) {
+              other.setAttribute("aria-pressed", String(other === chip));
+            });
+            document.querySelectorAll(".issue").forEach(function (issue) {
+              var show =
+                filter === "all" ||
+                (filter === "decision"
+                  ? !!issue.querySelector(".decision")
+                  : issue.dataset.pri === filter);
+              issue.style.display = show ? "" : "none";
+            });
+          });
+        });
+
+        var open = true;
+        document
+          .getElementById("toggleDiffs")
+          .addEventListener("click", function (event) {
+            open = !open;
+            document
+              .querySelectorAll("details.diffs")
+              .forEach(function (detail) {
+                detail.open = open;
+              });
+            event.currentTarget.textContent = open
+              ? "收合所有 diff"
+              : "展開所有 diff";
+          });
+
+        document.getElementById("theme").addEventListener("click", function () {
+          var root = document.documentElement;
+          var dark = root.dataset.theme
+            ? root.dataset.theme === "dark"
+            : window.matchMedia("(prefers-color-scheme: dark)").matches;
+          root.dataset.theme = dark ? "light" : "dark";
+        });
+      })();
+    </script>
+  </body>
+</html>

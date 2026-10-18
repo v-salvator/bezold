@@ -1,202 +1,345 @@
-# Spec: 草稿商店（`draft` 狀態）
+# Spec: SEO 健檢修正
 
 ## Objective
 
-新增商店狀態 `draft`。管理員可以先把蒐集到一半的店面存成草稿，資料補齊後再送審；也可以把 Store List 裡任何一間店轉回草稿重新整理。草稿只有管理員看得到管理介面，不會出現在前台列表。
+修正 2026-10-18 SEO 健檢（[`docs/seo-audit-2026-10-18.html`](docs/seo-audit-2026-10-18.html)）找到的 12 個問題，讓 Google 正確索引每一頁、店家頁能吃到長尾搜尋、非公開刊登不外流，並把 `/store-list` 的速度拉回合理範圍。
 
-**使用者**：Bezold 管理員（`/admin`，Firebase custom claims 驗證）。賣家只會在「我的刊登」看到自己的店被轉成草稿後的狀態。
+**使用者**：
 
-**草稿頁面的用途**：管理員會把草稿的前台網址 `/store/{id}` 給賣家看，請賣家確認內容後再送審。所以草稿頁面要能用網址開啟，外觀和一般店面頁完全相同（包含「免費加入會員後顯示」的聯絡鎖頭），但任何人都拿不到賣家聯絡方式。
+- 從 Google 搜尋進站的買家與賣家（手機為主）。
+- 在 LINE / FB 分享店家頁的使用者：分享卡片要顯示正確的標題、描述和圖片。
+- 營運者：之後每次上線都能重跑同一套檢查（`npm run seo:audit`）。
 
-**為什麼**：管理員常常是陸續拿到店家資料（圖片、月租、聯絡方式），現在只能等全部到齊才建立，或先建立成 `pending` 混在審核佇列裡。草稿讓「還在整理」和「等待審核」分開。
+**為什麼**：目前 8 個頁面的 canonical 指向首頁、48 個店家頁的 description 全部相同、不存在的店家回 500，`/store-list` 的 TTFB 是 2.4 秒、LCP 是 6.1 秒，而且會把 73 筆草稿送進公開的 HTML。這些問題 Lighthouse 的 SEO 分數（100）都抓不到，所以需要自己的檢查腳本。
 
-UI 參考：[`mockups/admin-draft-stores.html`](mockups/admin-draft-stores.html)（方案 A ＋「所有方案共通：轉為草稿」區塊）。
+**Search Console 實際資料**（2026-10-18 讀取，近 90 天）：
+
+- 332 次點擊、4,650 次曝光，平均點閱率 7.1%，平均排名 8。點擊有 66% 來自首頁（218 次）。
+- **從來沒有提交過 sitemap**。Google 只索引了 32 頁：sitemap 裡的 66 個網址有 27 個被索引，**6 篇 blog 文章、`/blog`、`/faq`、`/sell`、`/store-list` 都不在索引裡**（blog 文章 7–8 月就已發布），23 個店家頁也還沒有被索引。
+- 曝光最多的店家頁 `/store/HUluGiOrAjMfT5N1Oqzg`（巴地越南小吃，545 次曝光）是**已售出**的店，不在 sitemap，卻已經被索引；另外 3 個被索引的已售出店家也一樣。這代表成交案例本身就有搜尋流量。
+- 「頂讓是什麼意思」相關的查詢（頂讓是什麼意思、頂讓意思、頂讓的意思、頂讓 意思…）合計約 55 次曝光、平均排名 10～11、**0 次點擊**。`/store-guide` 的 h1 就是「什麼是頂讓？」，但它的標題「頂讓指南」沒有對到這個搜尋意圖。
+- 產品摘要報表有 **2 個無效項目**：「必須指定 offers、review 或 aggregateRating」。原因是面議的店家（`price === 0 && priceNegotiable`）的 JSON-LD 拿掉了 `offers`，但仍然輸出 `Product`。
+- 商家資訊報表只有警告（缺 `hasMerchantReturnPolicy`、`shippingDetails`、全球 ID），這些欄位不適用於店面頂讓，不處理。
+- Core Web Vitals：行動裝置和桌面的使用資料都還不足，無法判斷。HTTPS、導覽標記、人工判決處罰都沒有問題。
 
 ### 已確定的決策
 
-| 項目                 | 決定                                                                                                                        |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| 誰能建立草稿         | 只有管理員                                                                                                                  |
-| 草稿列表位置         | **方案 A**：獨立頁面 `/admin/store/drafts`，側邊欄新增「Draft Stores」（不顯示數量）                                        |
-| 主 Store List        | 不顯示草稿，狀態篩選也沒有「草稿」選項                                                                                      |
-| 草稿發布後的狀態     | **一律 `pending`**（送審），走一般審核流程                                                                                  |
-| 轉為草稿             | Store List 裡**任何狀態**的店都可以轉為草稿（單筆或批次）                                                                   |
-| 再次送審是否還原原狀 | 不還原。草稿送審一律變 `pending`，不記錄轉換前的狀態                                                                        |
-| 賣家看到什麼         | 「我的刊登」顯示徽章「整理中」，不提供編輯和標記已頂讓                                                                      |
-| 前台 `/store/[id]`   | 知道網址仍可開啟草稿頁面（給賣家確認用），**外觀比照一般店面頁**（未登入顯示註冊解鎖）；但 contact API 對草稿不回傳聯絡方式 |
-| Firestore Rules      | 這次不改，之後另外加上「草稿只有管理員能寫」                                                                                |
-
-### User stories 與驗收條件
-
-1. **新增狀態**：`STORE_STATUS.DRAFT = "draft"`。管理後台標籤為紫色虛線「草稿」，賣家端徽章為「整理中」。所有以 `StoreStatus` 為 key 的對照表都要有 draft 的值（型別檢查會強制）。
-2. **儲存草稿**：`/admin/store/create` 底部按鈕變成「Cancel ／ 儲存草稿 ／ Create」。
-   - 「儲存草稿」不檢查必填欄位，可以全部空白；建立 user 文件與 store 文件，`status: "draft"`，空的字串欄位寫入 `""`（不寫 `undefined`）。
-   - 成功後導向 `/admin/store/edit/{storeId}/image`，與 Create 相同。
-   - 「Create」維持現在的行為（檢查必填、建立為 `pending`）。
-3. **草稿列表頁** `/admin/store/drafts`：
-   - 只列出 `status === "draft"` 的店，預設依建立時間新到舊排序（`createTime` desc，與 `getStores()` 的查詢順序相同）。
-   - 欄位：勾選、店名（空白顯示「（未命名）」）、完成度（進度條＋百分比）、城市／區域、頂讓金、建立、最後編輯、操作（編輯、送審）。
-   - 可依店名搜尋。
-   - 點「編輯」前往現有的 `/admin/store/edit/{storeId}`。
-   - 點選任一列會開啟和 Store List 相同的詳情側欄（封面、資料、店家連結、刪除／查看／編輯）；狀態區改為草稿標籤、完成度、送審前還缺的欄位與「送審」按鈕。
-   - 右上角「＋ 新增草稿」前往 `/admin/store/create`。
-4. **完成度**：檢查清單共 9 項。
-   - **必填（擋送審）**：店名、地址 `location`、描述、賣家姓名 `userName`、賣家電話 `phone`。與現有 Create 的必填一致。
-   - **建議（只顯示）**：城市、區域、類別、至少一張圖片。
-   - 完成度 ＝ 已填項目 ÷ 9。列表不另外顯示缺少哪些欄位。
-5. **送審**：
-   - 單筆：必填全部填好時「送審」按鈕可按，按下後 `status → pending`，該列從草稿頁消失，成功訊息「已送審」。必填未齊時按鈕停用，滑過顯示缺少哪些欄位。
-   - 批次：勾選後出現「送審」「刪除」「取消選取」。送審只處理必填已齊的列；其餘列保持勾選並提示「N 筆缺少必填，未送審」。
-6. **刪除草稿**：沿用現有 `DELETE /api/stores/{storeId}` 與確認框，文字改為「刪除草稿」。批次刪除也要先確認一次。
-7. **轉為草稿（Store List）**：
-   - `StoreDetailDrawer` 新增「↩ 轉為草稿」按鈕；批次操作列新增「↩ 轉為草稿」。
-   - 轉換前一律跳確認框。若選取的店包含已上架或已頂讓（前台看得到的），確認文字說明「會從前台列表下架」。
-   - 只改 `status` 和 `updateTime`，資料、圖片、瀏覽數全部保留。
-   - 成功後該店從 Store List 消失、出現在 Draft Stores。
-8. **側邊欄**：「Store List」下方新增「Draft Stores」，不顯示草稿數量。
-9. **賣家端**：
-   - `StatusBadge` 新增 draft →「整理中」，使用新的中性樣式。
-   - `ListingCard` 對草稿不顯示「編輯」和「標記已頂讓」（現有 `canEdit` 判斷已排除，需確認）。
-   - `EditListingForm` 遇到 draft 時導回 `/my-listings`（比照 rejected）。
-10. **其他管理頁**：Store Analytics 的狀態篩選不加入 draft；`STATUS_LABEL`／`STATUS_COLOR` 加入 draft 以通過型別檢查。
-11. **草稿頁面外觀照常，但不洩漏聯絡方式**：
-    - `GET /api/stores/{storeId}/contact` 對 draft 回傳空的聯絡資料，和已頂讓相同（伺服器端擋，這是唯一的讀取路徑）。
-    - 前台元件**不改**：未登入時顯示模糊的聯絡資訊＋「免費加入會員後顯示」鎖頭與上鎖的 CTA 按鈕，和一般已上架店面一樣。未驗證信箱的會員看到「驗證信箱後顯示」。
-    - 已登入且已驗證的會員因為 API 回空值，會看到現有的「賣家尚未提供聯絡方式」，不顯示聯絡按鈕。
-    - 其他內容（價格、急售標籤、圖片、描述）照常顯示，讓賣家看到的畫面就是正式上架後的樣子。
-12. **草稿頁面不被搜尋引擎收錄**：`/store/[storeId]` 的 `generateMetadata` 對 draft 回傳 `robots: { index: false, follow: false }`。其他狀態的 metadata 不變；送審後（`pending` 以後）自動恢復可收錄。
+| 項目                      | 決定                                                                                                                                                                                      |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 已售出（sold）店家頁      | **保留索引**，JSON-LD 標 `SoldOut`，當作成交案例                                                                                                                                          |
+| pending / rejected 店家頁 | 頁面照常可以開啟，但設為 `noindex, nofollow`（比照 draft）                                                                                                                                |
+| `/api/stores`（GET 列表） | **刪除**。前端沒有呼叫，而且會回傳草稿；`/api/stores/[storeId]/*` 與 `highlight` 不動                                                                                                     |
+| 圖片網址                  | **Firebase 下載網址**：server 端改用 `firebase-admin` 的 `getDownloadURL()`（附 token 的永久網址），沒有 token 時退回原本的簽名網址。不改 Storage 權限、不經過 Vercel、沒有 4.5 MB 的限制 |
+| 頁面標題                  | 各頁只寫頁面名稱，品牌交給 root template（`%s｜頂讓網 Bezold`）；採用健檢報告中的建議文案                                                                                                 |
+| 對比度                    | `--accent #b33a1d`、`--muted #736b61`，新增 `--accent-on-dark #f07a5a`（見 [`docs/contrast-before-after.html`](docs/contrast-before-after.html)）                                         |
+| 面議店家的結構化資料      | **不輸出 `Product` JSON-LD**。沒有價格就無法提供有效的 `offers`，輸出不完整的 Product 只會產生無效項目                                                                                    |
+| 已售出店家與 sitemap      | **加進 sitemap**（priority 0.4），讓 Google 能持續發現這些有搜尋流量的成交案例                                                                                                            |
+| `/store-guide` 標題       | 改成對應「頂讓是什麼意思」搜尋意圖的標題與描述（見 `seo-metadata` 驗收條件 7）                                                                                                            |
+| 驗證腳本                  | 新增 `scripts/seo-audit.mjs` 與 `npm run seo:audit`，放進 repo                                                                                                                            |
+| Spec 檔                   | Capability map 與 4 個模組的 spec 都放在這份 `SPEC.md`                                                                                                                                    |
 
 ### 不在範圍內
 
-- 前台 `/store/[id]` 對草稿回 404（草稿要給賣家確認，網址必須能開）。
-- Firestore Rules（之後另外處理）。
-- 草稿直接發布為「已上架」或還原成轉換前的狀態。
-- 賣家自己建立草稿（`/sell` 不變）。
-- 方案 C 的「快速建立」列與卡片看板。
+- 上傳時壓縮或縮圖（4032px 原圖問題的根治方式），之後另開 PR。
+- 在 Search Console 提交 sitemap、要求重新索引，以及 Bing Webmaster 設定（由你在 Console 操作）。
+- 商家資訊報表的警告（退貨政策、運送資訊、全球 ID），這些欄位不適用於店面頂讓。
+- `/faq` 的 FAQPage 結構化資料（Google 已不對一般網站顯示 FAQ rich result）。
+- 不在 sitemap 裡的頁面（`/acceleration`、`/store-example`、`/my-listings`…）的 metadata 調整；root 拿掉 canonical 之後它們會沒有 canonical，這是可以接受的預設行為。
 - 新增測試框架。
+
+---
+
+## Capability Map
+
+| Module id            | 負責範圍                                                                                                                                                                                                  | 依賴                 |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| `seo-metadata`       | 驗證腳本；canonical / OG；店家頁 description、索引規則、SoldOut、面議不輸出 Product、404；sitemap（含已售出）；標題與 `/store-guide` 文案（報告 P0-1～4、P1-4、P2-1、P2-2，以及 Search Console 的新發現） | —                    |
+| `store-list-payload` | `getStores` 狀態過濾與平行簽圖；刪除 `/api/stores`；首屏卡片 priority（P0-5、P1-3）                                                                                                                       | `seo-metadata`       |
+| `headings-a11y`      | h1；對比度 token；「04」看不見的 bug；`<main>`、nav `<li>`、heading 層級（P1-1、P2-3）                                                                                                                    | —                    |
+| `stable-image-urls`  | 用 Firebase 下載網址取代 7 天過期的簽名網址；公開列表只解析封面圖（P1-2）                                                                                                                                 | `store-list-payload` |
+
+建置順序：`seo-metadata` → `store-list-payload` → `headings-a11y` → `stable-image-urls`
+
+- `store-list-payload` 依賴 `seo-metadata`，因為兩者都會修改 `app/(new)/store-list/page.tsx`，而且會用到 `seo-metadata` 提供的驗證腳本。
+- `stable-image-urls` 依賴 `store-list-payload`，因為兩者都會修改 `firebase/serverUtils/store.ts` 的 `getStores` 與 `resolveStoreImages`，而且要用 `store-list-payload` 量到的 TTFB 當基準。
+- `headings-a11y` 和其他模組沒有共用檔案，必要時可以和前兩個模組並行。
+- 一個模組一個分支、一個 PR，PR 說明連回本文件對應的章節。
+
+---
+
+## Module: `seo-metadata`
+
+### 驗收條件
+
+1. **驗證腳本** `scripts/seo-audit.mjs`（Node 24 內建 `fetch`，不加依賴），以 `npm run seo:audit -- <baseUrl>` 執行，預設 `http://localhost:3000`：
+   - 讀取 `/robots.txt` 與 `/sitemap.xml`，逐一抓取 sitemap 裡的網址（同時最多 8 個連線）。
+   - 每頁檢查：HTTP 200；`<link rel="canonical">` 等於自己的網址；有 `<meta name="description">`；`og:title`、`og:description`、`og:image` 存在，且 `og:title` 不等於首頁標題（首頁除外）；h1 恰好 1 個；HTML 裡沒有 `"status":"draft|pending|rejected"`。
+   - 跨頁檢查：description 不可重複（列出重複的群組）；sitemap 裡的網址不可被 robots.txt 的 `Disallow` 擋住。
+   - 額外檢查：`/store/__seo_audit_missing__` 回 404。
+   - 可以用 `--noindex /store/<id>,…` 指定應該為 noindex 的網址，用 `--json` 輸出 JSON。
+   - 輸出一張「檢查項目 × 失敗數」摘要表，加上每個失敗網址的明細；有任何失敗就以 exit code 1 結束。
+   - h1 和 status 這兩項在 `headings-a11y`、`store-list-payload` 完成之前一定會失敗，所以提供 `--skip h1,status` 參數，讓每個模組只驗證自己負責的項目。
+2. **Canonical / OG**：
+   - 移除 root `app/layout.tsx` 的 `alternates.canonical`；`SITE_TITLE`、`SITE_DESCRIPTION` 移到 `constant/seo.ts`，並新增 `BASE_OPEN_GRAPH`。
+   - 新增 `utils/seo.ts`：`pageMetadata({ title, description, path, images? })` 與 `toMetaDescription(text, maxLength = 120)`。
+   - `/faq`、`/sell`、`/store-guide`、`/privacy`、`/terms`、`/disclaimer`、`/store-list` 改用 `pageMetadata()`；`/policy/editor-pick` 的 openGraph 展開 `BASE_OPEN_GRAPH`；`/blog` 目前沒有設定 openGraph（會沿用首頁的分享卡片），也改用 `pageMetadata()`。
+3. **店家頁 metadata**（`app/(new)/store/[storeId]/page.tsx`）：
+   - `description` = `toMetaDescription(store.description)`；`og:description` 用 200 字上限。
+   - 標題 `${storeName}｜${city}店面頂讓`；沒有 city 時為 `${storeName}｜店面頂讓`。
+   - 只有 `approved`、`sold` 可以被索引，其他狀態（含 `status` 不存在）一律 `robots: { index: false, follow: false }`。
+   - JSON-LD：`sold` 為 `https://schema.org/SoldOut`，其他狀態為 `InStock`；沒有圖片時的 fallback 改成絕對網址 `${NEXT_PUBLIC_APP_URL}/bezold-og.png`。
+   - 面議（`price === 0 && priceNegotiable`）的店家**完全不輸出** `Product` JSON-LD。免頂讓金（`price === 0` 且不可議價）照常輸出 `price: 0` 的 Offer。
+4. **404**：`generateMetadata` 和頁面本體在找不到店家時都呼叫 `notFound()`，刪除原本「找不到物件」的 metadata 分支。`error.tsx` 保留給真正的錯誤。
+5. **Sitemap / 登入頁**：
+   - `app/sitemap.ts` 移除 `/login`、`/signup`；這兩頁加上 `metadata`（標題「登入」、「加入會員」，`robots: { index: false, follow: true }`）。
+   - 店家網址改為收錄 `approved` 與 `sold`：查詢改成 `where("status", "in", [STORE_STATUS.APPROVED, STORE_STATUS.SOLD])`。這是單一欄位的 `in` 查詢，不需要 composite index。`approved` 維持 `weekly` / 0.7，`sold` 為 `monthly` / 0.4，`lastModified` 都用 `updateTime`。
+6. **標題**：頁面 title 不再包含「— Bezold 頂讓必售」或「Bezold 頂讓必售 —」，blog 文章頁改成 `meta.title`。首頁維持 `title.absolute`。
+7. **`/store-guide` 文案**（`pageMetadata()`，path `/store-guide`）：
+   - title：`頂讓是什麼？頂讓流程、頂讓金與注意事項一次看懂`（加上 template 後是「…｜頂讓網 Bezold」）。
+   - description：`頂讓是什麼意思？從頂讓、頂讓金、盤讓等名詞解釋，到買店與頂出的交接流程和常見地雷，第一次接手店面也能一頁看懂。`
+   - 頁面內容和 h1「什麼是頂讓？」不變。
+
+### 檔案
+
+```
+scripts/seo-audit.mjs                       ★ 驗證腳本
+package.json                                ✎ "seo:audit": "node scripts/seo-audit.mjs"
+constant/seo.ts                             ★ SITE_NAME / SITE_TITLE / SITE_DESCRIPTION / BASE_OPEN_GRAPH
+utils/seo.ts                                ★ pageMetadata() / toMetaDescription()
+app/layout.tsx                              ✎ 移除 canonical，改用 constant/seo
+app/sitemap.ts                              ✎ 移除 /login /signup；店家收錄 approved + sold
+app/(new)/{faq,sell,store-guide,privacy,terms,disclaimer,store-list}/page.tsx  ✎ pageMetadata()
+app/(new)/policy/editor-pick/page.tsx       ✎ BASE_OPEN_GRAPH
+app/(new)/blog/page.tsx                     ✎ pageMetadata()
+app/(new)/blog/[slug]/page.tsx              ✎ 標題
+app/(new)/login/page.tsx                    ✎ metadata
+app/(new)/signup/page.tsx                   ✎ metadata
+app/(new)/store/[storeId]/page.tsx          ✎ description / 標題 / 索引規則 / SoldOut / 面議不輸出 Product / notFound()
+```
+
+---
+
+## Module: `store-list-payload`
+
+### 驗收條件
+
+1. `getStores(searchObj, { statuses? })`：有傳 `statuses` 時，在記憶體中過濾（不新增 Firestore `where`，避免需要新的 composite index），**過濾完才**呼叫 `resolveStoreImages`。不傳時行為和現在完全相同（admin 的 3 個呼叫點不改）。
+2. `resolveStoreImages` 改用 `Promise.all` 平行簽圖。
+3. `/store-list` 呼叫 `getStores(searchObj, { statuses: [STORE_STATUS.APPROVED] })`；`Breadcrumbs` 的數量改用 `stores.length`。`ResultsArea` 內原本的 approved 過濾可以保留（無害）。
+4. 刪除 `app/api/stores/route.ts`。刪除前用 grep 確認整個 repo（含 `hooks/`、`components/`、`mocks/`）沒有任何地方呼叫 `GET /api/stores`。
+5. `StoreCard` 新增選用的 `priority` prop，傳給 `next/image`；`ResultsArea` 對前 2 張卡片傳 `priority`。
+6. 成效（本機 `next start` 搭配正式資料，量 3 次取中位數）：`/store-list` 的 TTFB 至少比改前低 50%，HTML 大小至少比改前小 40%。實作前先用同樣方式量一次改前的基準值，記錄在 PR 裡。
+
+### 檔案
+
+```
+firebase/serverUtils/store.ts               ✎ statuses 選項、平行簽圖
+app/(new)/store-list/page.tsx               ✎ 只取 approved
+app/api/stores/route.ts                     ✗ 刪除
+components/refactored/StoreCard.tsx         ✎ priority prop
+app/(new)/store-list/_components/ResultsArea.tsx  ✎ 前 2 張 priority
+```
+
+---
+
+## Module: `headings-a11y`
+
+### 驗收條件
+
+1. `StoreTitleRow` 的店名和 `/store-list` `Breadcrumbs` 的標題由 `<h2>` 改為 `<h1>`，外觀不變（在 390px 與 1280px 兩種寬度截圖比對）。
+2. `app/globals.css`：`--accent: #b33a1d`、`--muted: #736b61`，新增 `--accent-on-dark: #f07a5a`。
+3. `HowItWorks.module.css`：`.buyer .type` 改用 `--accent-on-dark`；`.seller .number` 加上 `color: var(--ink)`。
+4. `SectionTitle.module.css`：`.numDark` 改成巢狀 `&.numDark`，修正 `/store-guide` 深色區塊「04」看不見的問題。
+5. 首頁與 `/faq` 的外框 `<div className={styles.frame}>` 改為 `<main>`；`SiteNav` 手機版 `<ul>` 內的 `<a>` 外面包 `<li>`；首頁 HowItWorks / WhyUs 的 `<h5>` 和 SiteFooter 的 `<h6>` 改成符合層級的標籤，並用 CSS module 保持原本的字級。
+6. 用健檢時的對比度掃描（實作時放進 `scripts/seo-audit.mjs` 的 `--contrast` 模式，或以瀏覽器 console 執行）檢查首頁、店家頁、`/store-list`、`/faq`、`/store-guide`：對比不足的文字 **0 處**。
+7. Lighthouse（手機）無障礙分數：首頁、店家頁、`/faq` 都 ≥ 95。
+8. Favicon `app/icon.svg` 維持原色。
+
+### 檔案
+
+```
+app/globals.css                                         ✎ token
+app/(new)/_components/HowItWorks.module.css             ✎ 深色區塊與黃色編號
+app/(new)/_components/HowItWorks.tsx                    ✎ h5 → h3
+app/(new)/_components/WhyUs.tsx (+ .module.css)         ✎ h5 → h3
+app/(new)/_components/SiteFooter.tsx (+ .module.css)    ✎ h6 → 適當層級
+app/(new)/_components/SiteNav.tsx                       ✎ <li>
+components/refactored/SectionTitle.module.css           ✎ &.numDark
+app/(new)/store/[storeId]/_components/StoreTitleRow.tsx ✎ h1
+app/(new)/store-list/_components/Breadcrumbs.tsx        ✎ h1
+app/(new)/page.tsx、app/(new)/faq/page.tsx              ✎ <main>
+```
+
+確切的元件檔名會在實作時用 grep 確認；如果需要改到超過 10 個檔案，先停下來和你確認。
+
+---
+
+## Module: `stable-image-urls`
+
+### 為什麼要一起處理列表頁
+
+`getSignedUrl()` 在本機用金鑰就能算出網址，不需要網路請求；`getDownloadURL()` 每張圖都要呼叫一次 Firebase metadata API。`/store-list` 目前每次會解析 474 張圖，直接換掉的話 TTFB 會變得更慢。所以這個模組會一起做兩件事：網址快取，以及公開列表只解析卡片會用到的封面圖。
+
+### 驗收條件
+
+1. **實作前先抽查**（唯讀腳本，不寫入任何資料）：統計 `COLLECTIONS.STORE` 底下有多少物件沒有 `firebaseStorageDownloadTokens`，並把數量和代表路徑回報給你。如果超過 10%，先停下來討論要不要補 token（補 token 等於寫入正式資料，屬於「先詢問」）。
+2. `firebase/serverUtils/image.ts` 的 `getImageByPath(imagePath)`：
+   - 先呼叫 `getDownloadURL(bucket.file(imagePath))`（`firebase-admin/storage`），成功時回傳附 token 的網址。
+   - 遇到 `storage/no-download-token` 或其他錯誤時，退回原本的 7 天簽名網址，並在 server log 記一行 `console.warn`（含路徑）。
+   - 成功的網址存在模組層級的 `Map` 快取，TTL 10 分鐘。賣家用相同檔名重新上傳時，token 可能會換，TTL 可以避免一直回傳舊網址。簽名網址不快取。
+   - 維持 async 簽名，`getImagesByPath` 與所有呼叫端都不用改。
+3. **公開列表只解析封面圖**：`resolveStoreImages(stores, { coverOnly })`。`coverOnly` 為 true 時只解析 `images[0]`，`store.images` 變成 `[封面網址]`，不會把原始路徑送到前台。
+   - `getStores` 新增 `coverOnly` 選項；`/store-list` 傳入 `coverOnly: true`。
+   - `getHighlightedStores`、`getEmergencyStores`、`getSoldStores`（首頁區塊）改成 `coverOnly`。
+   - admin 呼叫端和店家頁（`getStoreById`）維持解析全部圖片。
+4. Client 端的 `firebase/clientUtils/image.ts` 不改。
+5. 成效：
+   - 店家頁的 og:image、JSON-LD image、`<img src>` 都不再含 `Expires=`（沒有 token 的物件除外）。連續請求同一頁兩次，圖片網址完全相同。
+   - `/store-list` 的 TTFB（`next start`，3 次取中位數）不超過 `store-list-payload` 完成後基準值的 110%。
+   - 首頁、`/store-list`、店家頁、admin 列表的圖片全部正常顯示。
+
+### 檔案
+
+```
+scripts/check-download-tokens.mjs           ★ 唯讀抽查腳本（驗收條件 1，可以不 commit）
+firebase/serverUtils/image.ts               ✎ getImageByPath：下載網址 + 快取 + 退回簽名網址
+firebase/serverUtils/store.ts               ✎ resolveStoreImages / getStores 的 coverOnly；首頁三個查詢改成 coverOnly
+app/(new)/store-list/page.tsx               ✎ getStores 傳入 coverOnly: true
+```
+
+---
 
 ## Tech Stack
 
-Next.js 14 App Router · TypeScript · Ant Design 5（管理後台）· Firebase client SDK（Firestore 讀寫）· CSS Modules（賣家端徽章）。不新增依賴。
+Next.js 14 App Router · TypeScript · CSS Modules + Tailwind · Firebase Admin SDK（Firestore、Storage）· Vercel。不新增 npm 依賴；驗證腳本只用 Node 24 內建的 `fetch`。
 
 ## Commands
 
 ```bash
 nvm use
-npm run dev       # 開發伺服器（port 3000），NEXT_PUBLIC_ENV_VERSION=dev 走 mockStore
-npm run lint      # ESLint
-npm run build     # production build，含型別檢查
+npm run dev                                   # port 3000；worktree 預設會讀到正式資料，見下方說明
+npm run build && npm run start                # 量 TTFB 與 HTML 大小時用 production 模式
+npx eslint --no-eslintrc -c .eslintrc.json --ext .ts,.tsx app components constant types utils hooks lib firebase
 npx prettier --write <changed files>
+npm run seo:audit                             # 本機 http://localhost:3000
+npm run seo:audit -- https://www.bezold.com.tw --skip h1,status   # 正式站，改前的基準值
 ```
+
+- Worktree 裡 `next lint` 會因為 plugin 衝突而失敗，請用上面的 eslint 指令。目前的基準是 0 個錯誤、2 個既有的警告。
+- Worktree 沒有 `.env`。執行 `npm run build` 時，暫時建立指向主 checkout `.env` 的 symlink，結束後刪除。
+- Worktree 的 `.env.development` 設定為 `prod`，所以本機會讀到正式資料。這次所有驗證都只讀不寫。
 
 ## Project Structure
 
-新增（★）與修改（✎）的檔案：
-
 ```
-types/
-  StoreStatus.ts                         ✎ 新增 DRAFT
-constant/
-  adminStore.ts                          ✎ STATUS_LABEL / STATUS_COLOR 加 draft
-  storeDraft.ts                          ★ 完成度檢查清單（必填 / 建議欄位、標籤文字）
-utils/
-  storeDraft.ts                          ★ getDraftChecklist(store, seller) → { done, total, missingRequired, missingSuggested }
-components/
-  AdminSidebar.tsx                       ✎ 新增 Draft Stores 項目
-app/admin/store/
-  create/StoreBaseForm.tsx               ✎ 「儲存草稿」按鈕，跳過必填檢查
-  list/page.tsx                          ✎ 排除 draft；批次「轉為草稿」＋確認框
-  list/_components/StoreDetailDrawer.tsx ✎ 「轉為草稿」按鈕
-  drafts/page.tsx                        ★ 草稿列表（表格、搜尋、批次送審／刪除）
-  analytics/page.tsx                     ✎ 只在型別需要時調整
-app/(new)/store/[storeId]/
-  page.tsx                               ✎ generateMetadata：draft 加 noindex
-app/api/stores/[storeId]/contact/
-  route.ts                               ✎ draft 回空聯絡資料（比照 sold）
-app/(new)/my-listings/
-  _components/StatusBadge.tsx (+ .module.css)  ✎ draft →「整理中」
-  _components/ListingCard.tsx            ✎ 確認草稿沒有任何操作
-  edit/[storeId]/_components/EditListingForm.tsx  ✎ draft 導回 /my-listings
+scripts/        → 一次性或維運用的 Node 腳本（已有 mark-existing-users-verified.mjs）
+constant/       → 靜態常數與對照表（新增 seo.ts）
+utils/          → 資料轉換函式（新增 seo.ts）
+app/            → 路由；metadata 寫在各 page.tsx
+components/refactored/ → 共用元件
+firebase/serverUtils/  → Admin SDK 存取
+docs/           → 健檢報告與對比度對照頁（這次一起 commit）
 ```
 
 ## Code Style
 
-遵守 CLAUDE.md：Ant Design 元件用 Tailwind 排版、不和 CSS module 混用；`cn()` 組 class；變數名稱不用單字母；資料轉換放 `utils/`，靜態對照表放 `constant/`。
+遵守 CLAUDE.md：靜態值放 `constant/`、轉換函式放 `utils/`；CSS module 負責視覺、Tailwind 負責排版，不在同一個元素上混用；CSS 用巢狀語法；變數名稱不用單字母；註解沿用 `// *` 的風格。
 
 ```ts
-// constant/storeDraft.ts
-export const DRAFT_REQUIRED_FIELDS = [
-  { key: "storeName", label: "店名" },
-  { key: "location", label: "地址" },
-  { key: "description", label: "描述" },
-] as const;
+// utils/seo.ts
+export const pageMetadata = ({
+  title,
+  description,
+  path,
+  images,
+}: PageMetadataInput): Metadata => ({
+  title,
+  description,
+  alternates: { canonical: path },
+  openGraph: {
+    ...BASE_OPEN_GRAPH,
+    title,
+    description,
+    url: path,
+    images: images ?? [...BASE_OPEN_GRAPH.images],
+  },
+});
 
-// utils/storeDraft.ts
-export const getDraftChecklist = (store: Store, seller?: Partial<User>) => {
-  const missingRequired = [
-    ...DRAFT_REQUIRED_FIELDS.filter(({ key }) => !store[key]),
-    ...DRAFT_REQUIRED_SELLER_FIELDS.filter(({ key }) => !seller?.[key]),
-  ].map(({ label }) => label);
-  // ...
-  return { done, total, missingRequired, missingSuggested };
-};
+// app/(new)/faq/page.tsx
+export const metadata: Metadata = pageMetadata({
+  title: "常見問題",
+  description:
+    "關於頂讓平台的刊登、買賣流程、費用、安全保障等常見問題一次解答。",
+  path: "/faq",
+});
 ```
 
-狀態更新沿用 `updateStoreStatus(storeId, STORE_STATUS.DRAFT)`，批次沿用 `Promise.allSettled`，失敗的列保持勾選（與現有 `handleBulkStatusChange` 一致）。
+Next 的 metadata 合併是淺層的：子頁面只要設定了 `openGraph`，就會整個取代父層的設定。所以每個頁面層級的 `openGraph` 都必須從 `BASE_OPEN_GRAPH` 展開。
 
 ## Testing Strategy
 
-這個專案**沒有測試框架**，加入測試框架屬於「先詢問」。驗證方式：
+這個專案沒有測試框架，加入測試框架屬於「先詢問」。每個模組的驗證方式：
 
-1. `npm run lint` 和 `npm run build` 都要通過。
-2. 在 dev server（mock collections）用瀏覽器手動跑以下流程：
+1. prettier、eslint、`npm run build` 都要通過。
+2. 本機 `npm run build && npm run start` 後，執行 `npm run seo:audit`，模組負責的檢查項目全部通過（尚未完成的模組用 `--skip` 略過）。
+3. 模組各自的驗收條件：
 
-| #   | 流程                                              | 預期結果                                                                                       |
-| --- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| T1  | Store Create 全部空白 → 儲存草稿                  | 建立成功，導到圖片頁；Draft Stores 出現「（未命名）」，完成度 0%                               |
-| T2  | Store Create 只填必填 → Create                    | 和現在一樣建立為待審核，不出現在 Draft Stores                                                  |
-| T3  | Draft Stores 必填未齊的列                         | 「送審」停用，滑過顯示缺少欄位；完成度百分比正確                                               |
-| T4  | 補齊必填後送審                                    | 列消失；Store List 出現該店，狀態「待審核」                                                    |
-| T5  | 批次送審（1 筆齊、1 筆未齊）                      | 齊的送審成功；未齊的保持勾選並提示                                                             |
-| T6  | 刪除草稿（單筆、批次）                            | 先確認，確認後文件與圖片刪除                                                                   |
-| T7  | Store List drawer 對已上架的店「轉為草稿」        | 確認框提到前台下架；確認後從 Store List 消失、出現在 Draft Stores                              |
-| T8  | Store List 批次轉為草稿（待審核＋已拒絕＋已頂讓） | 全部轉為草稿；任一失敗時保持勾選並提示                                                         |
-| T9  | Store List 狀態篩選、Store Analytics 狀態篩選     | 都沒有「草稿」選項，也不會列出草稿                                                             |
-| T10 | 前台 `/store-list`、首頁區塊、`/sitemap.xml`      | 不出現草稿                                                                                     |
-| T11 | 賣家帳號：自己的店被轉為草稿後開「我的刊登」      | 顯示「整理中」徽章，沒有編輯和標記已頂讓；直接開編輯網址會被導回 `/my-listings`                |
-| T12 | 草稿送審後，賣家「我的刊登」                      | 顯示「審核中」                                                                                 |
-| T13 | 未登入開草稿的 `/store/{id}`                      | 和一般店面頁相同：聯絡資訊模糊，顯示「免費加入會員後顯示」，CTA 上鎖，點擊開啟 Buyer Club 彈窗 |
-| T14 | 已登入且已驗證的會員開同一個草稿頁                | 顯示「賣家尚未提供聯絡方式」，沒有聯絡按鈕；Network 裡 contact API 回空值                      |
-| T15 | 用 curl 帶會員 token 呼叫草稿的 contact API       | 回傳空的 `phone` / `lineId` / `threadsId` / `email`                                            |
-| T16 | 草稿送審並通過後，會員再開同一個網址              | 看得到賣家聯絡方式與聯絡按鈕                                                                   |
-| T17 | 檢視草稿頁與已上架店面頁的原始碼                  | 草稿頁有 `<meta name="robots" content="noindex, nofollow">`；已上架店面頁沒有                  |
+| #   | 模組                 | 檢查                                                                                                         | 預期                                                                             |
+| --- | -------------------- | ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| T1  | `seo-metadata`       | 對正式站執行 `seo:audit`（改前的基準值）                                                                     | 會列出 canonical、description 重複、404 等失敗，證明腳本抓得到                   |
+| T2  | `seo-metadata`       | 本機 `seo:audit`                                                                                             | canonical、description、OG、robots-vs-sitemap、404 全部通過                      |
+| T3  | `seo-metadata`       | `seo:audit --noindex` 指定 1 筆 pending、1 筆 rejected、1 筆 draft                                           | 三頁都是 `noindex, nofollow`                                                     |
+| T4  | `seo-metadata`       | curl 一筆 sold 店家頁                                                                                        | `index, follow`，JSON-LD 為 `SoldOut`                                            |
+| T5  | `seo-metadata`       | 用 [Rich Results Test](https://search.google.com/test/rich-results) 檢查 Vercel preview 的店家頁與 blog 文章 | Product、BlogPosting 都沒有錯誤                                                  |
+| T6  | `store-list-payload` | 本機 `seo:audit`                                                                                             | status 檢查通過（任何頁面都沒有非公開狀態）                                      |
+| T7  | `store-list-payload` | `/store-list` TTFB 與 HTML 大小，改前改後各量 3 次                                                           | 達到驗收條件 6 的目標                                                            |
+| T8  | `store-list-payload` | `curl /api/stores`                                                                                           | 404；`/api/stores/{id}/contact` 照常運作                                         |
+| T9  | `store-list-payload` | admin Store List、Drafts、Analytics 頁                                                                       | 仍然列出所有狀態（行為不變）                                                     |
+| T10 | `store-list-payload` | `/store-list` 效能追蹤                                                                                       | LCP 圖片有 `fetchpriority=high`，不是 lazy                                       |
+| T11 | `headings-a11y`      | 本機 `seo:audit`（不 skip）                                                                                  | h1 檢查通過                                                                      |
+| T12 | `headings-a11y`      | 5 頁對比度掃描                                                                                               | 0 處不足                                                                         |
+| T13 | `headings-a11y`      | 首頁、店家頁、`/faq`、`/store-guide` 在 390px 與 1280px 截圖                                                 | 除了顏色，排版與字級不變；「04」看得到                                           |
+| T14 | `headings-a11y`      | Lighthouse（手機）無障礙                                                                                     | 首頁、店家頁、`/faq` 都 ≥ 95                                                     |
+| T15 | `stable-image-urls`  | 抽查腳本（驗收條件 1）                                                                                       | 回報沒有 token 的物件數量與代表路徑；全程沒有寫入                                |
+| T16 | `stable-image-urls`  | 本機店家頁原始碼連續抓兩次                                                                                   | og:image、JSON-LD image 都是 `firebasestorage.googleapis.com/…&token=`，兩次相同 |
+| T17 | `stable-image-urls`  | 首頁、`/store-list`、店家頁、admin 列表的圖片；`/store-list` TTFB                                            | 全部正常顯示；TTFB ≤ 基準值的 110%；`/store-list` HTML 每間店只有 1 個圖片網址   |
+| T18 | `seo-metadata`       | 用 Rich Results Test 檢查 Vercel preview 上一筆面議店家、一筆免頂讓金店家                                    | 面議頁沒有 Product；免頂讓金頁的 Product 有效（price 0）                         |
+| T19 | `seo-metadata`       | 本機 `/sitemap.xml`                                                                                          | 包含已售出店家（priority 0.4），不包含 pending / rejected / draft                |
+| T20 | `seo-metadata`       | 本機 `/store-guide` 原始碼                                                                                   | title、description、og:title 都是驗收條件 7 的文案；canonical 為 `/store-guide`  |
 
 ## Boundaries
 
 - **Always**
-  - 在這個 worktree 的分支上工作，做完先停下來等你 review，再 commit 和開 PR。
-  - 遵守 CLAUDE.md 的樣式與 Firebase 規則（`COLLECTIONS`、`updateDoc` 不寫入 `undefined`、空字串用 `""`）。
-  - 新的 UI 先看 `components/refactored/` 有沒有可以重用的元件。
-  - 每次修改都跑 prettier、lint、build。
+  - 一個模組一個分支（從 main 開），做完先停下來等你 review，之後再 commit 和開 PR。
+  - 每次修改都跑 prettier、eslint、build、`seo:audit`。
+  - 公開頁面與 API 一律只輸出 `approved`（和 sold 的單頁），賣家聯絡方式維持只能從 `/api/stores/[storeId]/contact` 取得。
+  - 變更 metadata 時，同時檢查 `og:*`，不能只改 `<title>`。
 - **Ask first**
   - 新增任何 npm 依賴。
-  - 修改 Firestore Rules（例如禁止賣家把自己的草稿改成別的狀態），這些由你在 Console 操作。
-  - 修改前台 `/store/[id]` 或公開 API 的行為（user story 11、12 以外）。
-  - 修改不在上面檔案清單裡的檔案。
+  - 修改 Storage / Firestore 權限或 Vercel 設定。
+  - 修改不在各模組檔案清單裡的檔案，或單一模組改動超過 10 個檔案。
+  - 調整 Firestore 查詢條件、新增 composite index。
+  - 修改 `next.config.js`（例如重新開啟圖片優化）。
 - **Never**
-  - commit `.env` 或任何金鑰。
-  - 直接修改 `main` 或 push 到 `main`。
-  - 讓草稿出現在前台列表、首頁區塊或 sitemap。
-  - 讓賣家聯絡方式出現在公開 payload。
+  - 直接修改或 push 到 `main`；commit `.env` 或金鑰。
+  - 在本機驗證時寫入正式資料。
+  - 讓 draft / pending / rejected 出現在任何公開的 HTML、API 或 sitemap。
+  - 為了補下載 token 而寫入或修改正式環境的 Storage 物件 metadata（要先詢問）。
 
 ## Success Criteria
 
-- User stories 1–12 的驗收條件全部成立，測試表 T1–T17 全部通過。
-- 任何人（包含已驗證的會員）都無法從草稿頁面或 API 取得賣家聯絡方式。
-- `npm run lint`、`npm run build` 沒有錯誤。
-- 主 Store List 與 Draft Stores 的資料互不重疊，兩者加起來等於全部店面。
-- 現有流程（Create、狀態切換、批次通過／拒絕／已頂讓、刪除、賣家標記已頂讓）行為不變。
+- 4 個模組的驗收條件全部成立，T1–T20 全部通過。
+- 對本機與上線後的正式站執行 `npm run seo:audit`（不帶 `--skip`）結果為 0 個失敗。
+- Search Console 追蹤（你提交 sitemap、`seo-metadata` 上線後約 4 週）：sitemap 狀態為「成功」；6 篇 blog 文章、`/faq`、`/store-list` 都已建立索引；產品摘要報表的無效項目為 0；「頂讓是什麼意思」相關查詢開始有點擊。
+- 對正式站重新跑健檢：Lighthouse SEO 首頁、店家頁、`/faq` 都是 100；無障礙都 ≥ 95；`/store-list` 的 TTFB 和 HTML 大小達到 `store-list-payload` 的目標。
+- 現有行為不變：admin 列表、草稿流程、聯絡方式的會員限制、分享按鈕、圖片上傳。
 
 ## Open Questions
 
-目前沒有。（Firestore Rules：之後另外處理。草稿頁 noindex：要加，見 user story 12。）
+目前沒有。
+
+已解決：
+
+- 圖片網址的做法：採用 Firebase 下載網址。302 轉址會多一次往返，而且 Google 圖片最後抓到的仍是會變動的簽名網址；bucket 公開讀取需要改權限。實測 474 張圖中有 19 張超過 Vercel Function 4.5 MB 的回應上限，所以不考慮由 Vercel 代送圖片。
+- Vercel 頻寬：改用下載網址後圖片不經過 Vercel，Hobby 方案的額度（目前 Fast Data Transfer 2.22 GB / 100 GB）不受影響。
+- 換照片沿用同檔名：下載網址不經過 CDN 快取；server 端快取 TTL 只有 10 分鐘，不會長時間顯示舊圖。
