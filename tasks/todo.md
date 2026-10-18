@@ -350,6 +350,11 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Estimated scope:** M（超過 5 個檔案時拆成「landmark + nav」和「heading 層級」兩個任務）
 
+**進度（/build auto）：**
+
+- [x] 13a landmark + nav：首頁、`/faq` 外框改 `<main>`，`SiteNav` 手機版 `<a>` 包 `<li>`。Lighthouse（手機）無障礙：首頁 98、店家頁 98、`/faq` 98；landmark-one-main、list 通過
+- [ ] 13b heading 層級：待確認。h2 → h1 之後，heading-order 還會被 `StoreDescription`（h3）、`StoreCard`（h4）、`SectionTitle`（h3，共用元件）、`GlossaryGrid` / `GuideSteps` / `PitfallsList`（h5）擋住，這些都不在檔案清單裡，而且模組總檔案數會超過 10 個
+
 ### Checkpoint C: `headings-a11y` 完成
 
 - [ ] SPEC #T11–#T14 通過

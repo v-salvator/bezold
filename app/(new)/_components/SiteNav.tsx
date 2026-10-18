@@ -53,9 +53,11 @@ export default function SiteNav({ activeLink }: { activeLink?: string }) {
         )}
       >
         {navLinks.map(({ label, href }) => (
-          <Link href={href} key={label} active={label === activeLink}>
-            {label}
-          </Link>
+          <li key={label}>
+            <Link href={href} active={label === activeLink}>
+              {label}
+            </Link>
+          </li>
         ))}
       </ul>
     </nav>
