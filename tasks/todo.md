@@ -251,12 +251,12 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 前 2 張卡片的 `<img>` 有 `fetchpriority="high"`，而且不是 `loading="lazy"`；其他卡片維持 lazy
-- [ ] 首頁等其他使用 StoreCard 的地方行為不變
+- [x] 前 2 張卡片的 `<img>` 有 `fetchpriority="high"`，而且不是 `loading="lazy"`；其他卡片維持 lazy
+- [x] 首頁等其他使用 StoreCard 的地方行為不變
 
 **Verification:**
 
-- [ ] 本機 `/store-list` 效能追蹤：LCP 圖片的 LCPDiscovery 檢查通過（SPEC #T10）
+- [x] 本機 `/store-list` 效能追蹤：LCP 圖片的 LCPDiscovery 檢查通過（SPEC #T10）
 
 **Dependencies:** Task 8
 
@@ -269,8 +269,8 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 ### Checkpoint B: `store-list-payload` 完成
 
-- [ ] 本機 `npm run seo:audit -- --skip h1` 0 個失敗
-- [ ] prettier、eslint、build 通過
+- [x] 本機 `npm run seo:audit -- --skip h1` 0 個失敗
+- [x] prettier、eslint、build 通過
 - [ ] 和你 review；通過後 commit、開 PR 2
 
 ---
