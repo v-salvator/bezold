@@ -390,13 +390,13 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 店家頁的 og:image、JSON-LD image、`<img src>` 都是 `firebasestorage.googleapis.com/…&token=`，連續請求兩次完全相同（SPEC #T16）
-- [ ] Task 14 回報的沒有 token 的物件仍然正常顯示（簽名網址）
-- [ ] 簽名網址不進快取
+- [x] 店家頁的 og:image、JSON-LD image、`<img src>` 都是 `firebasestorage.googleapis.com/…&token=`，連續請求兩次完全相同（SPEC #T16）
+- [ ] Task 14 回報的沒有 token 的物件仍然正常顯示（簽名網址）— mockStore 沒有這種物件；已確認 `getDownloadURL` 對沒有 token 的路徑會丟錯、退回簽名網址。正式資料待驗
+- [x] 簽名網址不進快取
 
 **Verification:**
 
-- [ ] 本機 curl 店家頁兩次並比對圖片網址
+- [x] 本機 curl 店家頁兩次並比對圖片網址
 - [ ] 開一筆沒有 token 的店家頁，確認圖片正常顯示，server log 有 warn
 
 **Dependencies:** Task 14
