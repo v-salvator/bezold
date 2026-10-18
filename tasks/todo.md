@@ -168,14 +168,14 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] sitemap 包含 sold 店家，不包含 pending、rejected、draft、`/login`、`/signup`（SPEC #T19）
-- [ ] `/login`、`/signup` 的標題是「登入」、「加入會員」，並設為 `noindex, follow`
-- [ ] blog 文章標題不再包含「— Bezold 頂讓必售」
+- [x] sitemap 包含 sold 店家，不包含 pending、rejected、draft、`/login`、`/signup`（SPEC #T19）
+- [x] `/login`、`/signup` 的標題是「登入」、「加入會員」，並設為 `noindex, follow`
+- [x] blog 文章標題不再包含「— Bezold 頂讓必售」
 
 **Verification:**
 
-- [ ] 本機 `seo:audit -- --skip h1,status`：「sitemap 網址被 robots 擋」這項通過
-- [ ] 比對本機 sitemap 的店家數量 = approved + sold 的數量
+- [x] 本機 `seo:audit -- --skip h1,status`：「sitemap 網址被 robots 擋」這項通過
+- [x] 比對本機 sitemap 的店家數量 = approved + sold 的數量
 
 **Dependencies:** Task 2
 
@@ -190,8 +190,8 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 ### Checkpoint A: `seo-metadata` 完成
 
-- [ ] 本機 `npm run seo:audit -- --skip h1,status` 0 個失敗（SPEC #T2）
-- [ ] prettier、eslint、build 通過
+- [x] 本機 `npm run seo:audit -- --skip h1,status` 0 個失敗（SPEC #T2）
+- [x] prettier、eslint、build 通過
 - [ ] 和你 review；通過後 commit（連同 `SPEC.md`、`tasks/`、`docs/`）並開 PR 1
 - [ ] PR 1 的 Vercel preview 完成 Task 6 的 Rich Results Test
 

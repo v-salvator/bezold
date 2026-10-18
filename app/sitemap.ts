@@ -31,23 +31,23 @@ const STATIC_ROUTES: MetadataRoute.Sitemap = [
   route("/privacy", "yearly", 0.3),
   route("/terms", "yearly", 0.3),
   route("/disclaimer", "yearly", 0.3),
-  route("/login", "yearly", 0.2),
-  route("/signup", "yearly", 0.2),
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const snapshot = await db
     .collection(COLLECTIONS.STORE)
-    .where("status", "==", STORE_STATUS.APPROVED)
+    .where("status", "in", [STORE_STATUS.APPROVED, STORE_STATUS.SOLD])
     .get();
 
+  // * sold listings stay listed as closed deals — they still get search traffic
   const storeRoutes: MetadataRoute.Sitemap = snapshot.docs.map((doc) => {
     const data = doc.data();
+    const isSold = data.status === STORE_STATUS.SOLD;
     return {
       url: `${BASE_URL}/store/${doc.id}`,
       lastModified: data.updateTime?.toDate?.() ?? new Date(),
-      changeFrequency: "weekly",
-      priority: 0.7,
+      changeFrequency: isSold ? "monthly" : "weekly",
+      priority: isSold ? 0.4 : 0.7,
     };
   });
 
