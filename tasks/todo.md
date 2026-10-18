@@ -205,13 +205,13 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] `/store-list` 的 HTML 裡沒有 `"status":"draft|pending|rejected|sold"`（SPEC #T6）
-- [ ] TTFB 至少降低 50%、HTML 至少縮小 40%（3 次取中位數，改前改後數字寫進 PR）
-- [ ] admin 的 3 個 `getStores()` 呼叫不傳 `statuses`，行為不變
+- [x] `/store-list` 的 HTML 裡沒有 `"status":"draft|pending|rejected|sold"`（SPEC #T6）
+- [ ] TTFB 至少降低 50%、HTML 至少縮小 40%（3 次取中位數，改前改後數字寫進 PR）— mock 資料：TTFB 0.52→0.55s、HTML 90,093→70,129 bytes（−22%）；正式資料待量
+- [x] admin 的 3 個 `getStores()` 呼叫不傳 `statuses`，行為不變
 
 **Verification:**
 
-- [ ] 本機 `seo:audit -- --skip h1`：status 檢查通過
+- [x] 本機 `seo:audit -- --skip h1`：status 檢查通過
 - [ ] 開 admin Store List、Drafts、Analytics，確認仍然列出所有狀態（SPEC #T9）
 
 **Dependencies:** Checkpoint A

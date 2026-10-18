@@ -1,5 +1,11 @@
 import { db } from "@/firebase/server";
-import { Store, STORE_CATEGORY, STORE_STATUS, STORE_TAG } from "@/types";
+import {
+  Store,
+  STORE_CATEGORY,
+  STORE_STATUS,
+  STORE_TAG,
+  type StoreStatus,
+} from "@/types";
 import { getImagesByPath } from "./image";
 import { getUserById } from "./user";
 import { COLLECTIONS } from "@/firebase/constants";
@@ -22,17 +28,27 @@ const mapDocsToStores = (
 
 // * resolve raw Storage paths to visible download URLs, mutating in place.
 const resolveStoreImages = async (stores: Store[]): Promise<Store[]> => {
-  for (const store of stores) {
-    if (store?.images?.length > 0) {
-      store.images = await getImagesByPath(store.images);
-    }
-  }
+  await Promise.all(
+    stores.map(async (store) => {
+      if (store?.images?.length > 0) {
+        store.images = await getImagesByPath(store.images);
+      }
+    }),
+  );
   return stores;
 };
 
 // Store related
 
-export const getStores = async (searchObj: Record<string, string>) => {
+interface GetStoresOptions {
+  // * public pages pass the statuses they may show; admin passes nothing
+  statuses?: StoreStatus[];
+}
+
+export const getStores = async (
+  searchObj: Record<string, string>,
+  { statuses }: GetStoresOptions = {},
+) => {
   const storesRef = db.collection(COLLECTION);
 
   // * default search object to reduce the firestore compound index
@@ -84,7 +100,11 @@ export const getStores = async (searchObj: Record<string, string>) => {
   );
   const snapshot = await storesWithQueryRef.orderBy("createTime", "desc").get();
 
-  const stores = mapDocsToStores(snapshot);
+  // * filter in memory — an extra `where` would need a new composite index —
+  // * and before signing images, so hidden stores cost nothing
+  const stores = mapDocsToStores(snapshot).filter(
+    (store) => !statuses || (!!store.status && statuses.includes(store.status)),
+  );
   return resolveStoreImages(stores);
 };
 
