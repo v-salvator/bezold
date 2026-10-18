@@ -205,13 +205,13 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] `/store-list` 的 HTML 裡沒有 `"status":"draft|pending|rejected|sold"`（SPEC #T6）
-- [ ] TTFB 至少降低 50%、HTML 至少縮小 40%（3 次取中位數，改前改後數字寫進 PR）
-- [ ] admin 的 3 個 `getStores()` 呼叫不傳 `statuses`，行為不變
+- [x] `/store-list` 的 HTML 裡沒有 `"status":"draft|pending|rejected|sold"`（SPEC #T6）
+- [ ] TTFB 至少降低 50%、HTML 至少縮小 40%（3 次取中位數，改前改後數字寫進 PR）— mock 資料：TTFB 0.52→0.55s、HTML 90,093→70,129 bytes（−22%）；正式資料待量
+- [x] admin 的 3 個 `getStores()` 呼叫不傳 `statuses`，行為不變
 
 **Verification:**
 
-- [ ] 本機 `seo:audit -- --skip h1`：status 檢查通過
+- [x] 本機 `seo:audit -- --skip h1`：status 檢查通過
 - [ ] 開 admin Store List、Drafts、Analytics，確認仍然列出所有狀態（SPEC #T9）
 
 **Dependencies:** Checkpoint A
@@ -229,13 +229,13 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] `GET /api/stores` 回 404；`/api/stores/{id}`、`/api/stores/{id}/contact`、`/api/stores/highlight` 照常運作（SPEC #T8）
-- [ ] grep 的結果寫進 PR 描述
+- [x] `GET /api/stores` 回 404；`/api/stores/{id}`、`/api/stores/{id}/contact`、`/api/stores/highlight` 照常運作（SPEC #T8）
+- [x] grep 的結果寫進 PR 描述
 
 **Verification:**
 
-- [ ] 本機 curl 上面 4 個端點
-- [ ] build 通過（沒有殘留的 import）
+- [x] 本機 curl 上面 4 個端點
+- [x] build 通過（沒有殘留的 import）
 
 **Dependencies:** Task 8
 
@@ -251,12 +251,12 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 前 2 張卡片的 `<img>` 有 `fetchpriority="high"`，而且不是 `loading="lazy"`；其他卡片維持 lazy
-- [ ] 首頁等其他使用 StoreCard 的地方行為不變
+- [x] 前 2 張卡片的 `<img>` 有 `fetchpriority="high"`，而且不是 `loading="lazy"`；其他卡片維持 lazy
+- [x] 首頁等其他使用 StoreCard 的地方行為不變
 
 **Verification:**
 
-- [ ] 本機 `/store-list` 效能追蹤：LCP 圖片的 LCPDiscovery 檢查通過（SPEC #T10）
+- [x] 本機 `/store-list` 效能追蹤：LCP 圖片的 LCPDiscovery 檢查通過（SPEC #T10）
 
 **Dependencies:** Task 8
 
@@ -269,8 +269,8 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 ### Checkpoint B: `store-list-payload` 完成
 
-- [ ] 本機 `npm run seo:audit -- --skip h1` 0 個失敗
-- [ ] prettier、eslint、build 通過
+- [x] 本機 `npm run seo:audit -- --skip h1` 0 個失敗
+- [x] prettier、eslint、build 通過
 - [ ] 和你 review；通過後 commit、開 PR 2
 
 ---

@@ -70,9 +70,9 @@ scripts/seo-audit.mjs ───────────────────�
 
 ### Phase 2: `store-list-payload`（PR 2，PR 1 合併後）
 
-- [ ] Task 8: `getStores` 狀態過濾與平行簽圖，`/store-list` 只取 approved
-- [ ] Task 9: 刪除 `GET /api/stores`
-- [ ] Task 10: 首屏 StoreCard 加 priority
+- [x] Task 8: `getStores` 狀態過濾與平行簽圖，`/store-list` 只取 approved
+- [x] Task 9: 刪除 `GET /api/stores`
+- [x] Task 10: 首屏 StoreCard 加 priority
 
 ### Checkpoint B: `store-list-payload` 完成
 

@@ -26,17 +26,16 @@ export default async function StoreListPage({ searchParams }: PageProps) {
   const storeSearchParams = new URLSearchParams(searchParams);
   const searchObj = Object.fromEntries(storeSearchParams);
 
-  const stores = await getStores(searchObj);
-  const approvedStores = stores.filter(
-    (store) => store.status === STORE_STATUS.APPROVED,
-  );
+  const stores = await getStores(searchObj, {
+    statuses: [STORE_STATUS.APPROVED],
+  });
 
   return (
     <>
       <LaunchBanner />
       <SiteNav activeLink="我要找店" />
       <main className={styles.main}>
-        <Breadcrumbs count={approvedStores.length} />
+        <Breadcrumbs count={stores.length} />
         <SearchBar />
         <ActiveFilters />
         <ResultsArea stores={stores} />

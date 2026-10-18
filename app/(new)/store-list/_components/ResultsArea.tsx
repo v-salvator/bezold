@@ -24,6 +24,9 @@ function sortStores(stores: Store[], sort: string): Store[] {
   return sorted.sort((a, b) => b.createTime.getTime() - a.createTime.getTime());
 }
 
+// * the first row on mobile and desktop — loaded eagerly as LCP candidates
+const ABOVE_THE_FOLD_CARDS = 2;
+
 export default function ResultsArea({ stores }: { stores: Store[] }) {
   const [sort, setSort] = useState("newest");
   const approvedStores = stores.filter(
@@ -50,13 +53,16 @@ export default function ResultsArea({ stores }: { stores: Store[] }) {
       </div>
 
       <div className={styles.grid}>
-        {sortedStores.map((store) => (
+        {sortedStores.map((store, index) => (
           <a
             key={store.id}
             href={`/store/${store.id}`}
             className={styles.cardLink}
           >
-            <StoreCard card={storeToCard(store)} />
+            <StoreCard
+              card={storeToCard(store)}
+              priority={index < ABOVE_THE_FOLD_CARDS}
+            />
           </a>
         ))}
       </div>

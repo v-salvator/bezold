@@ -32,7 +32,14 @@ const ribbonClass: Record<RibbonVariant, string> = {
 // * Every text slot has a fixed line budget (title 2, location 1, description 2,
 // * specs 1) and the price is pinned to the bottom, so all cards in a grid share
 // * one height regardless of content length.
-export default function StoreCard({ card }: { card: StoreCard }) {
+export default function StoreCard({
+  card,
+  priority = false,
+}: {
+  card: StoreCard;
+  // * above-the-fold cards: eager load + fetchpriority=high for LCP
+  priority?: boolean;
+}) {
   return (
     <div className={styles.card}>
       <div className={styles.placeholderPhoto}>
@@ -43,6 +50,7 @@ export default function StoreCard({ card }: { card: StoreCard }) {
             alt={card.title}
             className={styles.photo}
             sizes="(max-width: 640px) 100vw, 50vw"
+            priority={priority}
           />
         )}
         {card.ribbon && (
