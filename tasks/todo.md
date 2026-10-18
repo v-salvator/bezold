@@ -21,14 +21,14 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 支援 `<baseUrl>`、`--skip <checks>`、`--noindex <paths>`、`--json`；有失敗時 exit code 為 1
-- [ ] 輸出摘要表（檢查項目 × 失敗數）與失敗明細
-- [ ] 對正式站執行時，能列出 canonical 指向首頁（8 頁）、店家頁 description 重複、login / signup 被 robots 擋、`/store/__seo_audit_missing__` 回 500
+- [x] 支援 `<baseUrl>`、`--skip <checks>`、`--noindex <paths>`、`--json`；有失敗時 exit code 為 1
+- [x] 輸出摘要表（檢查項目 × 失敗數）與失敗明細
+- [x] 對正式站執行時，能列出 canonical 指向首頁（8 頁）、店家頁 description 重複、login / signup 被 robots 擋、`/store/__seo_audit_missing__` 回 500
 
 **Verification:**
 
-- [ ] `npm run seo:audit -- https://www.bezold.com.tw --skip h1,status` 的結果和健檢報告一致（SPEC #T1），把輸出貼進 PR 描述當作改前基準
-- [ ] `--json` 輸出可以用 `node -e "JSON.parse(...)"` 解析
+- [x] `npm run seo:audit -- https://www.bezold.com.tw --skip h1,status` 的結果和健檢報告一致（SPEC #T1），把輸出貼進 PR 描述當作改前基準
+- [x] `--json` 輸出可以用 `node -e "JSON.parse(...)"` 解析
 
 **Dependencies:** None
 
