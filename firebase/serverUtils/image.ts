@@ -1,4 +1,5 @@
 import { db, bucket } from "@/firebase/server";
+import { getDownloadURL } from "firebase-admin/storage";
 import { FieldValue } from "firebase-admin/firestore";
 import dayjs from "dayjs";
 import { COLLECTIONS } from "@/firebase/constants";
@@ -63,10 +64,37 @@ export const getImagesByPath = async (imagesPath: string[]) => {
   return imagesUrl;
 };
 
-export const getImageByPath = async (imagePath: string) => {
+// * Download URLs never expire, but a re-upload under the same file name can
+// * rotate the token — cache them briefly rather than for the process lifetime
+const DOWNLOAD_URL_TTL_MS = 10 * 60 * 1000;
+const downloadUrlCache = new Map<string, { url: string; expiresAt: number }>();
+
+const getSignedImageUrl = async (imagePath: string) => {
   const sevenDaysAfter = dayjs().add(7, "day").format("MM-DD-YYYY");
-  const image = await bucket
+  const [url] = await bucket
     .file(imagePath)
     .getSignedUrl({ action: "read", expires: sevenDaysAfter });
-  return image[0];
+  return url;
+};
+
+// * Stable token URL so og:image / JSON-LD / <img> stay the same across
+// * requests; objects without a token fall back to an (uncached) signed URL
+export const getImageByPath = async (imagePath: string) => {
+  const cached = downloadUrlCache.get(imagePath);
+  if (cached && cached.expiresAt > Date.now()) return cached.url;
+
+  try {
+    const url = await getDownloadURL(bucket.file(imagePath));
+    downloadUrlCache.set(imagePath, {
+      url,
+      expiresAt: Date.now() + DOWNLOAD_URL_TTL_MS,
+    });
+    return url;
+  } catch (error) {
+    const code = (error as { code?: string }).code ?? "unknown";
+    console.warn(
+      `[getImageByPath] ${code} — falling back to signed URL: ${imagePath}`,
+    );
+    return getSignedImageUrl(imagePath);
+  }
 };

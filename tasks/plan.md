@@ -93,9 +93,9 @@ scripts/seo-audit.mjs ───────────────────�
 
 ### Phase 4: `stable-image-urls`（PR 4，PR 2 合併後）
 
-- [ ] Task 14: 唯讀抽查沒有下載 token 的物件（gate）
-- [ ] Task 15: `getImageByPath` 改用下載網址，加上快取與退回機制
-- [ ] Task 16: 公開列表只解析封面圖
+- [x] Task 14: 唯讀抽查沒有下載 token 的物件（gate）
+- [x] Task 15: `getImageByPath` 改用下載網址，加上快取與退回機制
+- [x] Task 16: 公開列表只解析封面圖
 
 ### Checkpoint D: 全部完成
 

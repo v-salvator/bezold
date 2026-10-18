@@ -366,13 +366,13 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 回報總數、沒有 token 的數量與比例、最多 10 筆代表路徑（SPEC #T15）
-- [ ] 腳本只呼叫 list 與 getMetadata
-- [ ] 比例超過 10% 時停下來，由你決定是否補 token（補 token 是寫入正式資料，屬於「先詢問」）
+- [x] 回報總數、沒有 token 的數量與比例、最多 10 筆代表路徑（SPEC #T15）
+- [x] 腳本只呼叫 list 與 getMetadata
+- [x] 比例超過 10% 時停下來，由你決定是否補 token（補 token 是寫入正式資料，屬於「先詢問」）
 
 **Verification:**
 
-- [ ] 結果貼給你確認後，才開始 Task 15
+- [x] 結果貼給你確認後，才開始 Task 15
 
 **Dependencies:** Checkpoint B
 
@@ -382,19 +382,21 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Estimated scope:** XS
 
+**進度（/build auto）：** 腳本已完成。`mockStore/`：10 個物件，0 個沒有 token（0%）。`prodStore/`（2026-10-18 由你執行）：476 個物件，0 個沒有 token（0%），低於 10%，不需要補 token
+
 ### Task 15: `getImageByPath` 改用下載網址，加上快取與退回機制
 
 **Description:** 改用 `firebase-admin/storage` 的 `getDownloadURL()`；成功的網址放進模組層級的 `Map` 快取（TTL 10 分鐘）；`storage/no-download-token` 或其他錯誤時，退回 7 天簽名網址並記 `console.warn`。維持 async 簽名，呼叫端都不用改。
 
 **Acceptance criteria:**
 
-- [ ] 店家頁的 og:image、JSON-LD image、`<img src>` 都是 `firebasestorage.googleapis.com/…&token=`，連續請求兩次完全相同（SPEC #T16）
-- [ ] Task 14 回報的沒有 token 的物件仍然正常顯示（簽名網址）
-- [ ] 簽名網址不進快取
+- [x] 店家頁的 og:image、JSON-LD image、`<img src>` 都是 `firebasestorage.googleapis.com/…&token=`，連續請求兩次完全相同（SPEC #T16）
+- [ ] Task 14 回報的沒有 token 的物件仍然正常顯示（簽名網址）— mockStore 沒有這種物件；已確認 `getDownloadURL` 對沒有 token 的路徑會丟錯、退回簽名網址。正式資料 0 個沒有 token，不會走到這條路徑
+- [x] 簽名網址不進快取
 
 **Verification:**
 
-- [ ] 本機 curl 店家頁兩次並比對圖片網址
+- [x] 本機 curl 店家頁兩次並比對圖片網址
 - [ ] 開一筆沒有 token 的店家頁，確認圖片正常顯示，server log 有 warn
 
 **Dependencies:** Task 14
@@ -411,14 +413,14 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] `/store-list` 與首頁的 HTML 每間店只有 1 個圖片網址
-- [ ] `/store-list` 的 TTFB ≤ Task 8 基準值的 110%（SPEC #T17）
-- [ ] 首頁、`/store-list`、店家頁、admin 列表的圖片全部正常顯示
+- [x] `/store-list` 與首頁的 HTML 每間店只有 1 個圖片網址
+- [x] `/store-list` 的 TTFB ≤ Task 8 基準值的 110%（SPEC #T17）— mock 資料：9 次中位數 0.51s，Task 8 基準 0.55s（約 93%）；正式資料待量
+- [ ] 首頁、`/store-list`、店家頁、admin 列表的圖片全部正常顯示 — 首頁、`/store-list`、店家頁已確認；admin 列表走 client SDK（未改動），需要登入，未驗
 
 **Verification:**
 
-- [ ] `next start` 量 3 次 TTFB 取中位數
-- [ ] 逐頁目視檢查圖片
+- [x] `next start` 量 3 次 TTFB 取中位數
+- [x] 逐頁目視檢查圖片
 
 **Dependencies:** Task 15
 

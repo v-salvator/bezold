@@ -28,6 +28,7 @@ export default async function StoreListPage({ searchParams }: PageProps) {
 
   const stores = await getStores(searchObj, {
     statuses: [STORE_STATUS.APPROVED],
+    coverOnly: true,
   });
 
   return (
