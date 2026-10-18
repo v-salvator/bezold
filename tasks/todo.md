@@ -382,6 +382,8 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Estimated scope:** XS
 
+**進度（/build auto）：** 腳本已完成。`mockStore/`：10 個物件，0 個沒有 token（0%）。`prodStore/` 需要讀取正式資料，auto mode 擋下，待你執行：`NEXT_PUBLIC_ENV_VERSION=prod node --env-file=.env scripts/check-download-tokens.mjs`
+
 ### Task 15: `getImageByPath` 改用下載網址，加上快取與退回機制
 
 **Description:** 改用 `firebase-admin/storage` 的 `getDownloadURL()`；成功的網址放進模組層級的 `Map` 快取（TTL 10 分鐘）；`storage/no-download-token` 或其他錯誤時，退回 7 天簽名網址並記 `console.warn`。維持 async 簽名，呼叫端都不用改。
