@@ -4,6 +4,10 @@ import { COLLECTIONS } from "@/firebase/constants";
 import { STORE_STATUS } from "@/types";
 import { getAllPostsMeta } from "@/lib/blog";
 
+// * ISR: newly approved / sold stores show up within an hour, no redeploy needed.
+// Crawlers re-fetch sitemaps far less often than that, so a shorter window only adds Firestore reads.
+export const revalidate = 3600;
+
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL!;
 
 type ChangeFrequency = NonNullable<
