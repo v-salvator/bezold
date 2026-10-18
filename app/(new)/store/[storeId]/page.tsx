@@ -85,29 +85,39 @@ export default async function StoreDetailPage({
   // landings) and bypasses the once-per-day suppression.
   const forceOpenBuyerClub = modal === "buyer-club";
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  const storeUrl = `${appUrl}/store/${storeId}`;
+  // * 面議 (price 0 + negotiable) has no price to advertise, and a Product
+  // * without offers is an invalid rich result — skip the JSON-LD entirely
+  const isPriceNegotiable = store.price === 0 && store.priceNegotiable;
+
   return (
     <>
-      <JsonLd
-        data={{
-          "@context": "https://schema.org",
-          "@type": "Product",
-          name: store.storeName,
-          description: store.description,
-          image: store.images.length ? store.images : ["/bezold-avatar-v2.png"],
-          url: `${process.env.NEXT_PUBLIC_APP_URL}/store/${storeId}`,
-          // * 面議 (price 0 + negotiable) has no price to advertise — omit the
-          // * Offer entirely rather than emit an invalid non-numeric price.
-          ...(!(store.price === 0 && store.priceNegotiable) && {
+      {!isPriceNegotiable && (
+        <JsonLd
+          data={{
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: store.storeName,
+            description: store.description,
+            image: store.images.length
+              ? store.images
+              : [`${appUrl}/bezold-og.png`],
+            url: storeUrl,
             offers: {
               "@type": "Offer",
               priceCurrency: store.currency,
               price: store.price,
-              availability: "https://schema.org/InStock",
-              url: `${process.env.NEXT_PUBLIC_APP_URL}/store/${storeId}`,
+              // * sold listings stay indexed as closed deals
+              availability:
+                store.status === STORE_STATUS.SOLD
+                  ? "https://schema.org/SoldOut"
+                  : "https://schema.org/InStock",
+              url: storeUrl,
             },
-          }),
-        }}
-      />
+          }}
+        />
+      )}
       <LaunchBanner />
       <SiteNav activeLink="我要找店" />
       <main className={styles.main}>

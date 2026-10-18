@@ -59,7 +59,7 @@ scripts/seo-audit.mjs ───────────────────�
 - [x] Task 3: `/store-guide`、`/store-list`、`/blog` 改用 `pageMetadata()`
 - [x] Task 4: 法律頁與 `/policy/editor-pick` 改用 `pageMetadata()` / `BASE_OPEN_GRAPH`
 - [x] Task 5: 店家頁 description、標題、索引規則、404
-- [ ] Task 6: 店家頁 JSON-LD：SoldOut、面議不輸出 Product、絕對網址 fallback
+- [x] Task 6: 店家頁 JSON-LD：SoldOut、面議不輸出 Product、絕對網址 fallback
 - [ ] Task 7: sitemap 收錄 sold、移除登入頁；登入頁 noindex；blog 文章標題
 
 ### Checkpoint A: `seo-metadata` 完成

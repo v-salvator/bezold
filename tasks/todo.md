@@ -145,14 +145,14 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] sold 店家的 `availability` 為 `https://schema.org/SoldOut`
-- [ ] 面議店家頁沒有 `application/ld+json` 的 Product；免頂讓金店家仍有 `price: 0` 的 Offer
-- [ ] JSON-LD 的 image 一律是絕對網址
+- [x] sold 店家的 `availability` 為 `https://schema.org/SoldOut`
+- [x] 面議店家頁沒有 `application/ld+json` 的 Product；免頂讓金店家仍有 `price: 0` 的 Offer
+- [x] JSON-LD 的 image 一律是絕對網址
 
 **Verification:**
 
-- [ ] curl 一筆 sold、一筆面議、一筆免頂讓金、一筆沒有圖片的店家，檢查 JSON-LD
-- [ ] PR 的 Vercel preview 通過 Rich Results Test（SPEC #T5、#T18）
+- [x] curl 一筆 sold、一筆面議、一筆免頂讓金、一筆沒有圖片的店家，檢查 JSON-LD
+- [x] PR 的 Vercel preview 通過 Rich Results Test（SPEC #T5、#T18）
 
 **Dependencies:** Task 5
 
