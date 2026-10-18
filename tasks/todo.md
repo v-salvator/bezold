@@ -306,14 +306,14 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 首頁、店家頁、`/store-list`、`/faq`、`/store-guide` 對比度掃描 0 處不足（SPEC #T12）
-- [ ] `/store-guide` 深色區塊的「04」看得到
-- [ ] `app/icon.svg` 維持原色
+- [x] 首頁、店家頁、`/store-list`、`/faq`、`/store-guide` 對比度掃描 0 處不足（SPEC #T12）
+- [x] `/store-guide` 深色區塊的「04」看得到
+- [x] `app/icon.svg` 維持原色
 
 **Verification:**
 
-- [ ] 本機用 Chrome DevTools 執行對比度掃描片段，5 頁都是 0
-- [ ] 截圖和對照頁的「改後」一致
+- [x] 本機用 Chrome DevTools 執行對比度掃描片段，5 頁都是 0
+- [x] 截圖和對照頁的「改後」一致
 
 **Dependencies:** None
 

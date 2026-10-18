@@ -56,12 +56,13 @@
 
   & .number {
     background: var(--accent-3);
+    color: var(--ink);
   }
 }
 .buyer {
   & .type {
-    color: var(--accent);
-    border-color: var(--accent);
+    color: var(--accent-on-dark);
+    border-color: var(--accent-on-dark);
   }
 
   & .number {

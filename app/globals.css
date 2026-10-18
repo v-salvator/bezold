@@ -14,10 +14,12 @@
   --paper: #f6f2e9;
   --paper-2: #ece5d3;
   --paper-3: #e0d6bc;
-  --accent: #d94a2a;
+  --accent: #b33a1d;
   --accent-2: #2a6f4d;
   --accent-3: #e6b833;
-  --muted: #8a8278;
+  --muted: #736b61;
+  /* accent text on dark (--ink) sections — #b33a1d is too dark there */
+  --accent-on-dark: #f07a5a;
 
   /* Spacing */
   --header-height: 64px;
