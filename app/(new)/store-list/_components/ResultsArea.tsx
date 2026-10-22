@@ -62,6 +62,7 @@ export default function ResultsArea({ stores }: { stores: Store[] }) {
             <StoreCard
               card={storeToCard(store)}
               priority={index < ABOVE_THE_FOLD_CARDS}
+              titleTag="h2"
             />
           </a>
         ))}

@@ -39,10 +39,10 @@ export default function StoreTitleRow({ store }: { store: Store }) {
           ))}
           {category && <Pill>{category}</Pill>}
         </div>
-        <h2 className={styles.name}>
+        <h1 className={styles.name}>
           {city && <>{city} · </>}
           <em>{storeName}</em>
-        </h2>
+        </h1>
         <div className={styles.loc}>
           <MapPin size={18} strokeWidth={2.5} className={styles.pin} />
           {city}
