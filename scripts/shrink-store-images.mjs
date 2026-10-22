@@ -19,6 +19,7 @@
 // types. package.json has no "type", so Node warns MODULE_TYPELESS_PACKAGE_JSON;
 // it is harmless — add --disable-warning=MODULE_TYPELESS_PACKAGE_JSON to hide it.
 
+import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { cert, initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
@@ -29,6 +30,7 @@ import {
   IMAGE_OUTPUT_EXTENSION,
   IMAGE_OUTPUT_TYPE,
   IMAGE_QUALITY,
+  IMAGE_SETTINGS_TAG,
   IMAGE_SKIP_BYTES,
 } from "../constant/image.ts";
 
@@ -45,6 +47,7 @@ const SKIP_REASONS = {
   larger: "output not smaller",
   unreadable: "could not decode",
   outside: "path outside prefix",
+  removed: "removed from the store during the run",
 };
 
 function parseArgs(argv) {
@@ -132,7 +135,7 @@ async function inspectImage(bucket, prefix, imagePath) {
     status: "convert",
     bytes,
     output,
-    contentType: metadata.contentType,
+    outputBytes: output.length,
   };
 }
 
@@ -169,6 +172,106 @@ async function planStore(bucket, prefix, storeDoc) {
   return inspected;
 }
 
+async function deleteFiles(bucket, paths) {
+  await Promise.all(
+    paths.map((filePath) =>
+      bucket.file(filePath).delete({ ignoreNotFound: true }),
+    ),
+  );
+}
+
+// * upload the new files (never over an existing object), then swap the
+// * paths in one transaction — only `images` is written, order kept, so
+// * `updateTime` (sold-list order, 「更新」date) stays as it was
+async function convertStore(db, bucket, storeRef, images) {
+  const toConvert = images.filter((image) => image.status === "convert");
+  if (toConvert.length === 0) return;
+
+  const uploadErrors = await mapWithConcurrency(
+    toConvert,
+    CONCURRENCY,
+    async (image) => {
+      try {
+        await bucket.file(image.targetPath).save(image.output, {
+          resumable: false,
+          contentType: IMAGE_OUTPUT_TYPE,
+          preconditionOpts: { ifGenerationMatch: 0 },
+          metadata: {
+            metadata: {
+              firebaseStorageDownloadTokens: randomUUID(),
+              sourcePath: image.imagePath,
+              shrunk: IMAGE_SETTINGS_TAG,
+              originalBytes: String(image.bytes),
+            },
+          },
+        });
+        return null;
+      } catch (error) {
+        return error;
+      }
+    },
+  );
+  const uploadedPaths = toConvert
+    .filter((_, index) => !uploadErrors[index])
+    .map((image) => image.targetPath);
+  const uploadError = uploadErrors.find(Boolean);
+  if (uploadError) {
+    await deleteFiles(bucket, uploadedPaths);
+    throw uploadError;
+  }
+
+  const replacements = new Map(
+    toConvert.map((image) => [image.imagePath, image.targetPath]),
+  );
+  let removedPaths = [];
+  try {
+    await db.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(storeRef);
+      const currentImages = snapshot.data()?.images ?? [];
+      removedPaths = toConvert
+        .filter((image) => !currentImages.includes(image.imagePath))
+        .map((image) => image.imagePath);
+      transaction.update(storeRef, {
+        images: currentImages.map(
+          (imagePath) => replacements.get(imagePath) ?? imagePath,
+        ),
+      });
+    });
+  } catch (error) {
+    await deleteFiles(bucket, uploadedPaths);
+    throw error;
+  }
+
+  // * the seller deleted these while we encoded — drop their new files
+  for (const image of toConvert) {
+    if (removedPaths.includes(image.imagePath)) image.status = "removed";
+  }
+  await deleteFiles(
+    bucket,
+    removedPaths.map((imagePath) => replacements.get(imagePath)),
+  );
+  await verifyStore(
+    bucket,
+    storeRef,
+    toConvert.filter((image) => image.status === "convert"),
+  );
+}
+
+async function verifyStore(bucket, storeRef, convertedImages) {
+  const currentImages = (await storeRef.get()).data()?.images ?? [];
+  for (const image of convertedImages) {
+    const [metadata] = await bucket.file(image.targetPath).getMetadata();
+    const problems = [
+      !currentImages.includes(image.targetPath) && "path not in store",
+      metadata.contentType !== IMAGE_OUTPUT_TYPE &&
+        `contentType ${metadata.contentType}`,
+      !metadata.metadata?.firebaseStorageDownloadTokens && "no download token",
+    ].filter(Boolean);
+    if (problems.length > 0)
+      throw new Error(`${image.targetPath}: ${problems.join(", ")}`);
+  }
+}
+
 const megabytes = (bytes) => `${(bytes / 1e6).toFixed(2)} MB`;
 
 function percentile(values, fraction) {
@@ -182,7 +285,7 @@ function percentile(values, fraction) {
 function printImage(image) {
   if (image.status === "convert") {
     console.log(
-      `  convert  ${image.imagePath} (${megabytes(image.bytes)}) → ${image.targetPath} (${megabytes(image.output.length)})`,
+      `  convert  ${image.imagePath} (${megabytes(image.bytes)}) → ${image.targetPath} (${megabytes(image.outputBytes)})`,
     );
   } else {
     console.log(
@@ -196,10 +299,10 @@ function printSummary(allImages, { write, failures }) {
   const beforeBytes = allImages.reduce((sum, image) => sum + image.bytes, 0);
   const afterBytes = allImages.reduce(
     (sum, image) =>
-      sum + (image.status === "convert" ? image.output.length : image.bytes),
+      sum + (image.status === "convert" ? image.outputBytes : image.bytes),
     0,
   );
-  const outputSizes = converted.map((image) => image.output.length);
+  const outputSizes = converted.map((image) => image.outputBytes);
 
   console.log(
     `\n${write ? "Converted" : "Would convert"}: ${converted.length}`,
@@ -208,7 +311,7 @@ function printSummary(allImages, { write, failures }) {
     const count = allImages.filter((image) => image.status === status).length;
     if (count > 0) console.log(`Skipped (${reason}): ${count}`);
   }
-  console.log(`Failed: ${failures}`);
+  console.log(`Failed stores: ${failures}`);
   console.log(
     `Referenced images: ${megabytes(beforeBytes)} → ${megabytes(afterBytes)}`,
   );
@@ -266,6 +369,17 @@ async function main() {
       continue;
     }
     images.forEach(printImage);
+    if (write) {
+      try {
+        await convertStore(db, bucket, storeDoc.ref, images);
+      } catch (error) {
+        failures++;
+        console.log(`  FAILED   ${error.message}`);
+        for (const image of images)
+          if (image.status === "convert") image.status = "failed";
+      }
+    }
+    for (const image of images) delete image.output;
     allImages.push(...images);
   }
 

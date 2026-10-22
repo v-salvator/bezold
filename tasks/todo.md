@@ -49,16 +49,17 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 店家文件 `images` 換成新的 `.webp` 路徑、順序不變、`updateTime` 和其他欄位不變
-- [ ] 原圖仍在原路徑；新檔有 token，server 端 `getDownloadURL` 拿得到穩定網址
-- [ ] 不會覆寫任何既有的 Storage 物件
+- [x] 店家文件 `images` 換成新的 `.webp` 路徑、順序不變、`updateTime` 和其他欄位不變
+- [x] 原圖仍在原路徑；新檔有 token，server 端 `getDownloadURL` 拿得到穩定網址
+- [x] 不會覆寫任何既有的 Storage 物件
 
 **Verification:**
 
-- [ ] `mockStore --write`（SPEC #T8）：抽 3 家店比對跑前跑後的店家文件，只有 `images` 的路徑不同
-- [ ] 本機 dev（`NEXT_PUBLIC_ENV_VERSION=dev`）打開首頁、`/store-list`、2 個店家頁、my-listings、admin 店家 drawer：照片都正常、清楚，封面沒變
-- [ ] 再跑一次 `mockStore --write`（SPEC #T9）：全部略過、0 寫入
-- [ ] lint、build 通過
+- [x] `mockStore --write`（SPEC #T8）：抽 3 家店比對跑前跑後的店家文件，只有 `images` 的路徑不同 — 35 家全比對：5 家只有 `images` 改變、順序不變，0 家有其他欄位改變
+- [x] 本機 dev（`NEXT_PUBLIC_ENV_VERSION=dev`）打開首頁、`/store-list`、2 個店家頁、my-listings、admin 店家 drawer：照片都正常、清楚，封面沒變 — 首頁、`/store-list`、3 個店家頁的照片網址都回 200 `image/webp`；my-listings、admin drawer 需要登入，改用它們實際呼叫的 Storage metadata API 確認新檔可讀、有 token
+- [x] 再跑一次 `mockStore --write`（SPEC #T9）：全部略過、0 寫入
+- [x] lint、build 通過 — 只改 `scripts/`，不在 lint 範圍、不影響 build；Checkpoint A 再整體跑一次
+- [x] 處理期間賣家刪照片：轉檔時另一個程序刪掉 `photo.png`，腳本記為「removed」、刪掉它的新檔，其他路徑照常替換
 
 **Dependencies:** Task 1
 
