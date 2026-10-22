@@ -14,6 +14,9 @@
 // Roll back (points images at the originals again, deletes the converted files;
 // an original already moved to backup/ is copied back first):
 //   node --env-file=.env scripts/shrink-store-images.mjs --prefix mockStore --only <storeId> --rollback --write
+// Clean up (moves each converted image's original to backup/<path>, so the
+// store folder keeps only files in use; --rollback still works from backup/):
+//   node --env-file=.env scripts/shrink-store-images.mjs --prefix mockStore --cleanup --write
 //
 // --prefix is both the Firestore collection and the Storage folder. It is
 // required on purpose: dev and prod share one Firebase project.
@@ -41,7 +44,7 @@ const BUCKET_NAME = "bezold.appspot.com";
 const PREFIXES = ["mockStore", "prodStore"];
 const CONCURRENCY = 4;
 const USAGE =
-  "Usage: node --env-file=.env scripts/shrink-store-images.mjs --prefix <mockStore|prodStore> [--only <storeId>] [--rollback] [--write]";
+  "Usage: node --env-file=.env scripts/shrink-store-images.mjs --prefix <mockStore|prodStore> [--only <storeId>] [--rollback | --cleanup] [--write]";
 
 const SKIP_REASONS = {
   missing: "object not found",
@@ -68,10 +71,15 @@ function parseArgs(argv) {
     console.error(`--only needs a store id.\n${USAGE}`);
     process.exit(1);
   }
+  if (argv.includes("--rollback") && argv.includes("--cleanup")) {
+    console.error(`Use --rollback or --cleanup, not both.\n${USAGE}`);
+    process.exit(1);
+  }
   return {
     prefix,
     only,
     rollback: argv.includes("--rollback"),
+    cleanup: argv.includes("--cleanup"),
     write: argv.includes("--write"),
   };
 }
@@ -379,6 +387,109 @@ async function runRollback({ db, bucket, storeDocs, write }) {
   return failures;
 }
 
+// * for every converted image the store references: is its original still
+// * next to it (to move), already in backup/ (done), or gone from both
+async function planCleanup(bucket, storeDoc) {
+  const images = storeDoc.data().images ?? [];
+  const plans = await mapWithConcurrency(
+    images,
+    CONCURRENCY,
+    async (imagePath) => {
+      const [exists] = await bucket.file(imagePath).exists();
+      if (!exists) return null;
+      const [metadata] = await bucket.file(imagePath).getMetadata();
+      const sourcePath = metadata.metadata?.sourcePath;
+      if (!sourcePath) return null;
+
+      const backupPath = `backup/${sourcePath}`;
+      const [[sourceExists], [backupExists]] = await Promise.all([
+        bucket.file(sourcePath).exists(),
+        bucket.file(backupPath).exists(),
+      ]);
+      if (!sourceExists)
+        return backupExists
+          ? { sourcePath, backupPath, status: "done" }
+          : { sourcePath, backupPath, status: "lost" };
+      const [sourceMetadata] = await bucket.file(sourcePath).getMetadata();
+      return {
+        sourcePath,
+        backupPath,
+        backupExists,
+        status: "move",
+        bytes: Number(sourceMetadata.size),
+        generation: sourceMetadata.generation,
+        md5Hash: sourceMetadata.md5Hash,
+      };
+    },
+  );
+  return plans.filter(Boolean);
+}
+
+// * copy to backup/ (never over an existing object), check the copy matches,
+// * then delete the original only if it hasn't changed since we looked
+async function moveToBackup(bucket, plan) {
+  if (!plan.backupExists)
+    await bucket.file(plan.sourcePath).copy(bucket.file(plan.backupPath), {
+      preconditionOpts: { ifGenerationMatch: 0 },
+    });
+  const [backupMetadata] = await bucket.file(plan.backupPath).getMetadata();
+  if (backupMetadata.md5Hash !== plan.md5Hash)
+    throw new Error(`${plan.backupPath} does not match ${plan.sourcePath}`);
+  await bucket
+    .file(plan.sourcePath)
+    .delete({ ifGenerationMatch: plan.generation });
+}
+
+async function runCleanup({ bucket, storeDocs, write }) {
+  let moved = 0;
+  let movedBytes = 0;
+  let alreadyDone = 0;
+  let failures = 0;
+  for (const storeDoc of storeDocs) {
+    let plans;
+    try {
+      plans = await planCleanup(bucket, storeDoc);
+    } catch (error) {
+      failures++;
+      console.log(`${storeDoc.id}\n  FAILED   ${error.message}`);
+      continue;
+    }
+    alreadyDone += plans.filter((plan) => plan.status === "done").length;
+    const pending = plans.filter((plan) => plan.status !== "done");
+    if (pending.length === 0) continue;
+    console.log(storeDoc.id);
+    for (const plan of pending) {
+      if (plan.status === "lost") {
+        failures++;
+        console.log(
+          `  cannot   ${plan.sourcePath} — not in place and not in backup/`,
+        );
+        continue;
+      }
+      console.log(
+        `  move     ${plan.sourcePath} (${megabytes(plan.bytes)}) → ${plan.backupPath}`,
+      );
+      if (!write) continue;
+      try {
+        await moveToBackup(bucket, plan);
+        moved++;
+        movedBytes += plan.bytes;
+      } catch (error) {
+        failures++;
+        console.log(`  FAILED   ${error.message}`);
+      }
+    }
+  }
+  console.log(
+    write
+      ? `\nMoved to backup/: ${moved} (${megabytes(movedBytes)})`
+      : "\nDry run — nothing moved.",
+  );
+  console.log(`Already in backup/: ${alreadyDone}`);
+  console.log(`Failed: ${failures}`);
+  return failures;
+}
+
 const megabytes = (bytes) => `${(bytes / 1e6).toFixed(2)} MB`;
 
 function percentile(values, fraction) {
@@ -429,7 +540,9 @@ function printSummary(allImages, { write, failures }) {
 }
 
 async function main() {
-  const { prefix, only, rollback, write } = parseArgs(process.argv.slice(2));
+  const { prefix, only, rollback, cleanup, write } = parseArgs(
+    process.argv.slice(2),
+  );
 
   initializeApp({
     credential: cert({
@@ -456,6 +569,14 @@ async function main() {
     storeDocs = [storeDoc];
   } else {
     storeDocs = (await collection.get()).docs;
+  }
+
+  if (cleanup) {
+    console.log(
+      `${write ? "WRITE" : "DRY RUN"} · CLEANUP · ${prefix} · ${storeDocs.length} store(s)\n`,
+    );
+    const failures = await runCleanup({ bucket, storeDocs, write });
+    process.exit(failures > 0 ? 1 : 0);
   }
 
   if (rollback) {
