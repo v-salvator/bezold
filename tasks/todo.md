@@ -1,445 +1,250 @@
-# Tasks: SEO 健檢修正
+# Tasks: 店家照片瘦身
 
 Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 每個任務都要先滿足以下條件才算完成：
 
 - 修改過的檔案都跑過 `npx prettier --write`
-- `npx eslint --no-eslintrc -c .eslintrc.json --ext .ts,.tsx app components constant types utils hooks lib firebase` 沒有新的錯誤（基準：0 個錯誤、2 個既有警告）
+- `npx eslint --no-eslintrc -c .eslintrc.json --ext .ts,.tsx app components constant types utils hooks lib firebase` 沒有新的錯誤
 - `npm run build` 通過（worktree 先暫時 symlink 主 checkout 的 `.env`，結束後刪除）
-- 遵守 CLAUDE.md（`constant/` 與 `utils/` 分工、CSS Module 和 Tailwind 不混用、`cn()`、`COLLECTIONS`、變數命名完整）
-- 本機只讀資料：worktree 的 dev / start 連的是正式 Firestore
+- 遵守 CLAUDE.md（`constant/` 與 `utils/` 分工、`COLLECTIONS`、`cn()`、變數命名完整）
+- 腳本在 worktree 裡用 `--env-file=../../../.env`
+- 任何對 `prodStore` 加 `--write` 的執行都要先問你
 - 「SPEC #Tn」指 SPEC.md Testing Strategy 表的測試編號
 
 ---
 
-## Phase 1: `seo-metadata`（PR 1）
+## Phase 1: `image-backfill`（PR 1）
 
-### Task 1: SEO 驗證腳本 `npm run seo:audit`
+### Task 1: 共用參數 + 腳本試跑模式
 
-**Description:** 新增 `scripts/seo-audit.mjs`（只用 Node 24 內建 `fetch`），依照 SPEC `seo-metadata` 驗收條件 1 檢查 sitemap 上的每一頁，以及跨頁的 description 重複、robots 與 sitemap 衝突、404。先對正式站跑，證明它抓得到已知的問題。
+**Description:** 新增 `constant/image.ts`（`IMAGE_MAX_EDGE`、`IMAGE_QUALITY`、`IMAGE_SKIP_BYTES`、`IMAGE_OUTPUT_TYPE`、`IMAGE_SETTINGS_TAG`），加 `sharp` devDependency，新增 `scripts/shrink-store-images.mjs` 的唯讀部分：解析參數、逐家讀店家文件的 `images`、判斷略過原因（`missing` / 已轉過 / 已在門檻內 / 轉完變大）、在記憶體裡真的轉檔、算出新檔名（含撞名時的 `-2`），印出每張照片的前後大小和總摘要。這一步完全不寫入。
 
 **Acceptance criteria:**
 
-- [x] 支援 `<baseUrl>`、`--skip <checks>`、`--noindex <paths>`、`--json`；有失敗時 exit code 為 1
-- [x] 輸出摘要表（檢查項目 × 失敗數）與失敗明細
-- [x] 對正式站執行時，能列出 canonical 指向首頁（8 頁）、店家頁 description 重複、login / signup 被 robots 擋、`/store/__seo_audit_missing__` 回 500
+- [x] 沒有 `--prefix` 就報錯退出；`--prefix` 只接受 `mockStore`、`prodStore`；支援 `--only`
+- [x] 沒有 `--write` 時不呼叫任何寫入 API（Storage 和 Firestore 都一樣）
+- [x] 摘要包含：會處理數、各種略過數、店家文件參照的照片總 MB（處理前 → 處理後）
+- [x] 參數從 `constant/image.ts` import，腳本裡沒有重複的數字
 
 **Verification:**
 
-- [x] `npm run seo:audit -- https://www.bezold.com.tw --skip h1,status` 的結果和健檢報告一致（SPEC #T1），把輸出貼進 PR 描述當作改前基準
-- [x] `--json` 輸出可以用 `node -e "JSON.parse(...)"` 解析
+- [x] `mockStore` 試跑（SPEC #T7）：數字合理；跑前跑後 Storage 物件的 generation、店家文件的 `images` 和 `updateTime` 完全相同
+- [x] `prodStore` 試跑（唯讀）：記下處理後總大小，確認 ≤ 120 MB（Success Criteria 1）；如果不到，先回來討論參數 — 490.29 MB → 94.63 MB；299 張要轉、222 張已在門檻內、1 張轉完變大；新檔 p95 0.33 MB、最大 0.53 MB
+- [x] lint、build 通過
 
 **Dependencies:** None
 
 **Files likely touched:**
 
-- `scripts/seo-audit.mjs`
-- `package.json`
+- `constant/image.ts`
+- `scripts/shrink-store-images.mjs`
+- `package.json`、`package-lock.json`
 
-**Estimated scope:** S
+**Estimated scope:** M
 
-### Task 2: metadata helper，修正 `/faq`、`/sell` 的 canonical 與 OG
+### Task 2: 轉檔模式
 
-**Description:** 新增 `constant/seo.ts`（`SITE_NAME`、`SITE_TITLE`、`SITE_DESCRIPTION`、`BASE_OPEN_GRAPH`）和 `utils/seo.ts`（`pageMetadata()`、`toMetaDescription()`）。移除 root layout 的 `alternates.canonical`，root openGraph 改成展開 `BASE_OPEN_GRAPH`。先套用到 `/faq`、`/sell`，跑通整條流程。
+**Description:** 加上 `--write`：上傳新檔（`ifGenerationMatch: 0`、`contentType`、新的 `firebaseStorageDownloadTokens`、`sourcePath`、`shrunk`、`originalBytes`）→ 用 transaction 重新讀店家文件，把舊路徑換成新路徑（順序不變、只寫 `images`）→ 舊路徑已經不在 `images` 時跳過並刪掉剛上傳的新檔。原圖不動。同時最多 4 張；有 failed 時 exit code 為 1。
 
 **Acceptance criteria:**
 
-- [x] 首頁 canonical 仍是 `https://www.bezold.com.tw`
-- [x] `/faq`、`/sell` 的 canonical、og:url 指向自己；og:title 是頁面自己的標題
-- [x] 標題為「常見問題｜頂讓網 Bezold」、「免費刊登頂讓店面｜頂讓網 Bezold」
+- [x] 店家文件 `images` 換成新的 `.webp` 路徑、順序不變、`updateTime` 和其他欄位不變
+- [x] 原圖仍在原路徑；新檔有 token，server 端 `getDownloadURL` 拿得到穩定網址
+- [x] 不會覆寫任何既有的 Storage 物件
 
 **Verification:**
 
-- [x] 本機 `npm run build && npm run start` 後執行 `seo:audit -- --skip h1,status`：`/faq`、`/sell` 的 canonical 與 OG 檢查通過
-- [x] curl 首頁確認 canonical、og 標籤和改前相同
+- [x] `mockStore --write`（SPEC #T8）：抽 3 家店比對跑前跑後的店家文件，只有 `images` 的路徑不同 — 35 家全比對：5 家只有 `images` 改變、順序不變，0 家有其他欄位改變
+- [x] 本機 dev（`NEXT_PUBLIC_ENV_VERSION=dev`）打開首頁、`/store-list`、2 個店家頁、my-listings、admin 店家 drawer：照片都正常、清楚，封面沒變 — 首頁、`/store-list`、3 個店家頁的照片網址都回 200 `image/webp`；my-listings、admin drawer 需要登入，改用它們實際呼叫的 Storage metadata API 確認新檔可讀、有 token
+- [x] 再跑一次 `mockStore --write`（SPEC #T9）：全部略過、0 寫入
+- [x] lint、build 通過 — 只改 `scripts/`，不在 lint 範圍、不影響 build；Checkpoint A 再整體跑一次
+- [x] 處理期間賣家刪照片：轉檔時另一個程序刪掉 `photo.png`，腳本記為「removed」、刪掉它的新檔，其他路徑照常替換
 
 **Dependencies:** Task 1
 
 **Files likely touched:**
 
-- `constant/seo.ts`
-- `utils/seo.ts`
-- `app/layout.tsx`
-- `app/(new)/faq/page.tsx`
-- `app/(new)/sell/page.tsx`
+- `scripts/shrink-store-images.mjs`
 
-**Estimated scope:** M
+**Estimated scope:** S
 
-### Task 3: `/store-guide`、`/store-list`、`/blog` 改用 `pageMetadata()`
+### Task 3: 還原模式
 
-**Description:** 這三頁是 Search Console 上最需要被索引的頁面。`/store-guide` 換成 SPEC 驗收條件 7 的標題與描述（對應「頂讓是什麼意思」的搜尋意圖）；`/store-list` 的標題改成「全台頂讓店面列表」；`/blog` 補上 openGraph。
+**Description:** 加上 `--rollback`：對店家文件裡每個帶 `sourcePath` 的路徑，確認原圖存在（不在原路徑但在 `backup/<sourcePath>` 就先複製回來）→ transaction 換回 `sourcePath` → 刪除轉好的檔。
 
 **Acceptance criteria:**
 
-- [x] 三頁的 canonical、og:url 都指向自己，og:title 與 `<title>` 一致
-- [x] `/store-guide` 的 title、description 和 SPEC 驗收條件 7 完全相同（SPEC #T20）
-- [x] `/blog` 的 og:title 不再是首頁標題
+- [x] 還原後店家文件的 `images` 和轉檔前完全相同（含順序）
+- [x] 轉好的 `.webp` 被刪除；原圖仍在
+- [x] 還原後再跑轉檔模式，結果和第一次相同
 
 **Verification:**
 
-- [x] 本機 `seo:audit -- --skip h1,status`：這三頁通過
-- [x] curl `/store-list?category=FACTORY`，確認 canonical 仍是 `/store-list`
+- [x] `mockStore --write --rollback --only <id>`（SPEC #T10）：和 Task 2 前存下的店家文件比對完全相同；本機 dev 店家頁照片正常
+- [x] 同一家店再轉一次，頁面正常
+- [x] 原圖已搬到 `backup/` 時：還原會先複製回原路徑，download token 和原本相同
+- [x] lint、build 通過
 
 **Dependencies:** Task 2
 
 **Files likely touched:**
 
-- `app/(new)/store-guide/page.tsx`
-- `app/(new)/store-list/page.tsx`
-- `app/(new)/blog/page.tsx`
+- `scripts/shrink-store-images.mjs`
 
 **Estimated scope:** S
 
-### Task 4: 法律頁與 `/policy/editor-pick` 的 metadata
+### Checkpoint A: mockStore 驗證完成
 
-**Description:** `/privacy`、`/terms`、`/disclaimer` 改用 `pageMetadata()`，標題去掉「— Bezold 頂讓必售」；`/policy/editor-pick` 的 openGraph 展開 `BASE_OPEN_GRAPH`，補上 og:image。
-
-**Acceptance criteria:**
-
-- [x] 四頁的 canonical 都指向自己
-- [x] `/policy/editor-pick` 有 og:image，`og:type` 仍為 `article`
-
-**Verification:**
-
-- [x] 本機 `seo:audit -- --skip h1,status`：canonical、OG 檢查在所有靜態頁都通過
-
-**Dependencies:** Task 2
-
-**Files likely touched:**
-
-- `app/(new)/privacy/page.tsx`
-- `app/(new)/terms/page.tsx`
-- `app/(new)/disclaimer/page.tsx`
-- `app/(new)/policy/editor-pick/page.tsx`
-
-**Estimated scope:** S
-
-### Task 5: 店家頁 description、標題、索引規則、404
-
-**Description:** 修改 `generateMetadata`：加上 `description`、標題改成 `店名｜城市店面頂讓`、openGraph 展開 `BASE_OPEN_GRAPH`；只有 approved 和 sold 可以被索引。找不到店家時，`generateMetadata` 和頁面本體都呼叫 `notFound()`。
-
-**Acceptance criteria:**
-
-- [x] 48 個店家頁的 description 都不一樣，而且不超過 120 字
-- [x] pending、rejected、draft 店家頁為 `noindex, nofollow`；approved、sold 為 `index, follow`（SPEC #T3、#T4）
-- [x] `/store/__seo_audit_missing__` 回 404，不是 500
-- [x] 沒有 city 的店家，標題是「店名｜店面頂讓」
-
-**Verification:**
-
-- [x] 本機 `seo:audit -- --skip h1,status --noindex <pending>,<rejected>,<draft>`：description 重複、404、noindex 檢查都通過
-- [x] curl 一筆 sold 店家頁，確認是 `index, follow`
-
-**Dependencies:** Task 2
-
-**Files likely touched:**
-
-- `app/(new)/store/[storeId]/page.tsx`
-
-**Estimated scope:** S
-
-### Task 6: 店家頁 JSON-LD
-
-**Description:** sold 店家標 `SoldOut`；面議（`price === 0 && priceNegotiable`）完全不輸出 `Product`；沒有圖片時的 fallback 改成 `${NEXT_PUBLIC_APP_URL}/bezold-og.png`。
-
-**Acceptance criteria:**
-
-- [x] sold 店家的 `availability` 為 `https://schema.org/SoldOut`
-- [x] 面議店家頁沒有 `application/ld+json` 的 Product；免頂讓金店家仍有 `price: 0` 的 Offer
-- [x] JSON-LD 的 image 一律是絕對網址
-
-**Verification:**
-
-- [x] curl 一筆 sold、一筆面議、一筆免頂讓金、一筆沒有圖片的店家，檢查 JSON-LD
-- [x] PR 的 Vercel preview 通過 Rich Results Test（SPEC #T5、#T18）
-
-**Dependencies:** Task 5
-
-**Files likely touched:**
-
-- `app/(new)/store/[storeId]/page.tsx`
-
-**Estimated scope:** XS
-
-### Task 7: sitemap、登入頁、blog 文章標題
-
-**Description:** sitemap 移除 `/login`、`/signup`，店家改成收錄 approved 與 sold（sold 為 `monthly` / 0.4）；登入頁與註冊頁加上 metadata 與 noindex；blog 文章頁的標題改成 `meta.title`。
-
-**Acceptance criteria:**
-
-- [x] sitemap 包含 sold 店家，不包含 pending、rejected、draft、`/login`、`/signup`（SPEC #T19）
-- [x] `/login`、`/signup` 的標題是「登入」、「加入會員」，並設為 `noindex, follow`
-- [x] blog 文章標題不再包含「— Bezold 頂讓必售」
-
-**Verification:**
-
-- [x] 本機 `seo:audit -- --skip h1,status`：「sitemap 網址被 robots 擋」這項通過
-- [x] 比對本機 sitemap 的店家數量 = approved + sold 的數量
-
-**Dependencies:** Task 2
-
-**Files likely touched:**
-
-- `app/sitemap.ts`
-- `app/(new)/login/page.tsx`
-- `app/(new)/signup/page.tsx`
-- `app/(new)/blog/[slug]/page.tsx`
-
-**Estimated scope:** S
-
-### Checkpoint A: `seo-metadata` 完成
-
-- [x] 本機 `npm run seo:audit -- --skip h1,status` 0 個失敗（SPEC #T2）
-- [x] prettier、eslint、build 通過
-- [ ] 和你 review；通過後 commit（連同 `SPEC.md`、`tasks/`、`docs/`）並開 PR 1
-- [ ] PR 1 的 Vercel preview 完成 Task 6 的 Rich Results Test
+- [x] SPEC #T7–T10 通過（測試用的 `shrink-fixture` 店家和檔案已刪除；`mockStore` 其他 5 家店維持轉好的狀態）
+- [ ] 和你 review；通過後 commit（連同 `SPEC.md`、`tasks/`）並開 PR 1
 
 ---
 
-## Phase 2: `store-list-payload`（PR 2，PR 1 合併後從 main 開分支）
+## Phase 2: 正式資料
 
-### Task 8: `getStores` 狀態過濾與平行簽圖，`/store-list` 只取 approved
+### Task 4: 單店試轉 + LINE / Facebook 預覽驗證
 
-**Description:** 先在 `next start` 量 3 次 `/store-list` 的 TTFB 與 HTML 大小當作基準值。接著 `getStores(searchObj, { statuses })` 在記憶體中過濾、過濾後才簽圖；`resolveStoreImages` 改用 `Promise.all`；`/store-list` 只取 approved，`Breadcrumbs` 改用 `stores.length`。
+**Description:** 你選一家正式店家（見 plan 的 Open Questions），經你同意後執行 `--prefix prodStore --write --only <storeId>`。確認正式站店家頁照片正常，再請你在 LINE 和 Facebook 分享這家店的網址，確認預覽圖有出現。結果決定 `IMAGE_OUTPUT_TYPE`。
 
 **Acceptance criteria:**
 
-- [x] `/store-list` 的 HTML 裡沒有 `"status":"draft|pending|rejected|sold"`（SPEC #T6）
-- [ ] TTFB 至少降低 50%、HTML 至少縮小 40%（3 次取中位數，改前改後數字寫進 PR）— mock 資料：TTFB 0.52→0.55s、HTML 90,093→70,129 bytes（−22%）；正式資料待量
-- [x] admin 的 3 個 `getStores()` 呼叫不傳 `statuses`，行為不變
+- [ ] 正式站這家店的店家頁、列表卡片照片正常
+- [ ] LINE 和 Facebook 分享預覽都有圖（SPEC #T11）
+- [ ] 如果任何一邊沒有圖：經你同意後 `--rollback --only <storeId>` → `IMAGE_OUTPUT_TYPE` 改成 `image/jpeg` → `mockStore` 重跑 Task 2、3 的驗證 → 再試轉這家店一次
 
 **Verification:**
 
-- [x] 本機 `seo:audit -- --skip h1`：status 檢查通過
-- [ ] 開 admin Store List、Drafts、Analytics，確認仍然列出所有狀態（SPEC #T9）
+- [ ] 正式站店家頁照片的回應 `Content-Type` 是 `IMAGE_OUTPUT_TYPE`、大小 ≤ 400 KB
+- [ ] Facebook Sharing Debugger「Scrape Again」顯示預覽圖
+- [ ] LINE 聊天室分享網址（必要時加 `?v=1` 避開快取）顯示預覽圖（**你在手機上看**）
 
 **Dependencies:** Checkpoint A
 
 **Files likely touched:**
 
-- `firebase/serverUtils/store.ts`
-- `app/(new)/store-list/page.tsx`
+- `constant/image.ts`（只有改成 JPEG 時）
+
+**Estimated scope:** XS
+
+### Task 5: 全部正式資料轉檔
+
+**Description:** 先存一份 `seo:audit` 基準，經你同意後執行 `--prefix prodStore --write`。記錄實際的處理前後總大小，確認正式站沒有破圖。
+
+**Acceptance criteria:**
+
+- [ ] 0 個 failed；參照照片總大小 ≤ 120 MB，p95 ≤ 400 KB（Success Criteria 1）
+- [ ] 所有店家文件的 `images` 都指向存在的物件（Success Criteria 2）
+
+**Verification:**
+
+- [ ] 正式站首頁、`/store-list`、5 個店家頁照片都正常（SPEC #T12）
+- [ ] `npm run seo:audit -- https://www.bezold.com.tw` 結果和基準一樣
+- [ ] 再跑一次 `prodStore` 試跑：全部略過
+
+**Dependencies:** Task 4
+
+**Files likely touched:** 無（只執行腳本）
+
+**Estimated scope:** XS
+
+### Checkpoint B: 正式資料完成
+
+- [ ] 實際數字（處理數、前後總大小、p95）寫進 PR 1 描述
+- [ ] 記下完成日期，4 週後做 Phase 4
+
+---
+
+## Phase 3: `upload-resize`（PR 2）
+
+### Task 6: 上傳時縮圖 + 不撞名的檔名
+
+**Description:** 新增 `utils/image.ts` 的 `resizeImageFile(file)`：`createImageBitmap(file, { imageOrientation: "from-image" })` → canvas 縮到最長邊 ≤ `IMAGE_MAX_EDGE` → `toBlob(IMAGE_OUTPUT_TYPE, IMAGE_QUALITY / 100)` → 回傳新的 `File`。`uploadStoreImageByFile` 上傳前呼叫它，存成 `<名稱>-<6 碼短 id>.<副檔名>`，並帶 `{ contentType }`。這個任務只處理主要路徑。
+
+**Acceptance criteria:**
+
+- [ ] `/sell` 上傳 4000×3000、約 5 MB 的 JPEG：Storage 裡是 `<名稱>-<id>.webp`，最長邊 1600、≤ 400 KB
+- [ ] admin 圖片頁上傳同一張圖，結果相同
+- [ ] 同一家店先後上傳 `a.jpg`、`a.png`，兩張都在 `images` 裡
+- [ ] `StoreImageUpload.tsx` 和 admin 圖片頁不用改
+
+**Verification:**
+
+- [ ] 本機 dev（**先確認 `NEXT_PUBLIC_ENV_VERSION=dev`**）用 chrome-devtools MCP `upload_file` 測 SPEC #T1、#T2、#T5 撞名部分；測試圖用 sharp 產生在 scratchpad
+- [ ] 上傳後縮圖顯示正常；測完刪除測試照片
+- [ ] lint、build 通過
+
+**Dependencies:** Task 4（輸出格式已確定）
+
+**Files likely touched:**
+
+- `utils/image.ts`
+- `firebase/clientUtils/image.ts`
 
 **Estimated scope:** S
 
-### Task 9: 刪除 `GET /api/stores`
+### Task 7: 上傳縮圖的例外情況
 
-**Description:** 先 grep 整個 repo（含 `hooks/`、`components/`、`mocks/`、`app/admin/`），確認沒有任何地方呼叫 `GET /api/stores`，再刪除 `app/api/stores/route.ts`。
-
-**Acceptance criteria:**
-
-- [x] `GET /api/stores` 回 404；`/api/stores/{id}`、`/api/stores/{id}/contact`、`/api/stores/highlight` 照常運作（SPEC #T8）
-- [x] grep 的結果寫進 PR 描述
-
-**Verification:**
-
-- [x] 本機 curl 上面 4 個端點
-- [x] build 通過（沒有殘留的 import）
-
-**Dependencies:** Task 8
-
-**Files likely touched:**
-
-- `app/api/stores/route.ts`（刪除）
-
-**Estimated scope:** XS
-
-### Task 10: 首屏 StoreCard 加 priority
-
-**Description:** `StoreCard` 新增選用的 `priority` prop 並傳給 `next/image`；`ResultsArea` 對前 2 張卡片傳 `priority`。
+**Description:** 補上 SPEC `upload-resize` 表格的其他情況：已在門檻內、`image/gif` / `image/svg+xml`、解碼失敗、轉完比原檔大 → 都回傳原檔；瀏覽器不支援 WebP 編碼（`blob.type` 不對）→ 改用 `image/jpeg`。任何例外都不能讓上傳失敗。
 
 **Acceptance criteria:**
 
-- [x] 前 2 張卡片的 `<img>` 有 `fetchpriority="high"`，而且不是 `loading="lazy"`；其他卡片維持 lazy
-- [x] 首頁等其他使用 StoreCard 的地方行為不變
+- [ ] 小圖（< 300 KB、< 1600px）內容原封不動（SPEC #T3）
+- [ ] 帶 EXIF 方向的直拍照片方向正確（SPEC #T4）
+- [ ] 無法解碼的檔案（假的 `.heic`）照舊上傳原檔，沒有錯誤訊息（SPEC #T5）
+- [ ] GIF 原封不動
 
 **Verification:**
 
-- [x] 本機 `/store-list` 效能追蹤：LCP 圖片的 LCPDiscovery 檢查通過（SPEC #T10）
+- [ ] 本機 dev（`mockStore`）逐一上傳上述測試檔，在 Storage 確認結果；測完刪除
+- [ ] 不支援 WebP 的路徑：在瀏覽器暫時讓 `toBlob` 回傳 PNG（devtools 覆寫 `HTMLCanvasElement.prototype.toBlob`），確認改存 JPEG
+- [ ] lint、build 通過
 
-**Dependencies:** Task 8
+**Dependencies:** Task 6
 
 **Files likely touched:**
 
-- `components/refactored/StoreCard.tsx`
-- `app/(new)/store-list/_components/ResultsArea.tsx`
+- `utils/image.ts`
 
-**Estimated scope:** XS
+**Estimated scope:** S
 
-### Checkpoint B: `store-list-payload` 完成
+### Checkpoint C: 上傳縮圖上線
 
-- [x] 本機 `npm run seo:audit -- --skip h1` 0 個失敗
-- [x] prettier、eslint、build 通過
 - [ ] 和你 review；通過後 commit、開 PR 2
+- [ ] 確認 Vercel preview 連哪一組資料後，請你用 iPhone Safari 實機上傳（SPEC #T6）
+- [ ] PR 2 上線後：`prodStore` 試跑 → 經你同意後轉檔，補處理中間上傳的照片
+- [ ] 一週後看 Billing Reports 的 Cloud Storage 對外流量費用（Success Criteria 5）
 
 ---
 
-## Phase 3: `headings-a11y`（PR 3，不依賴其他模組，可以和 Phase 1、2 並行）
+## Phase 4: 清理（PR 3，Task 5 完成約 4 週後）
 
-### Task 11: 店家頁與 `/store-list` 的 h1
+### Task 8: 清理模式 + 正式資料清理
 
-**Description:** `StoreTitleRow` 的店名和 `Breadcrumbs` 的標題從 `<h2>` 改成 `<h1>`。樣式都在 CSS module 的 class 上，預期外觀不變。
-
-**Acceptance criteria:**
-
-- [x] 店家頁與 `/store-list` 都恰好有 1 個 h1
-- [x] 390px 和 1280px 的截圖和改前相同
-
-**Verification:**
-
-- [x] 本機 `seo:audit -- --skip status`：店家頁與 `/store-list` 的 h1 檢查通過（SPEC #T11）
-- [x] 改前改後截圖比對（SPEC #T13）
-
-**Dependencies:** None
-
-**Files likely touched:**
-
-- `app/(new)/store/[storeId]/_components/StoreTitleRow.tsx`
-- `app/(new)/store-list/_components/Breadcrumbs.tsx`
-
-**Estimated scope:** XS
-
-### Task 12: 對比度 token、深色區塊 accent、「04」標籤
-
-**Description:** 依照 [`docs/contrast-before-after.html`](../docs/contrast-before-after.html) 的 diff 修改 `globals.css` 的 token、`HowItWorks.module.css`，以及 `SectionTitle.module.css` 的 `&.numDark`。
+**Description:** 加上 `--cleanup`：對店家文件裡每個帶 `sourcePath` 的路徑，把原圖複製到 `backup/<sourcePath>`、確認存在後刪除原路徑的原圖。先在 `mockStore` 跑，再經你同意後跑 `prodStore`。
 
 **Acceptance criteria:**
 
-- [x] 首頁、店家頁、`/store-list`、`/faq`、`/store-guide` 對比度掃描 0 處不足（SPEC #T12）
-- [x] `/store-guide` 深色區塊的「04」看得到
-- [x] `app/icon.svg` 維持原色
+- [ ] 原圖先有 `backup/` 複本才會被刪除
+- [ ] 清理後頁面照片都正常；`--rollback` 仍可從 `backup/` 還原
+- [ ] `prodStore/` 只剩正在使用的檔案（Success Criteria 3）
 
 **Verification:**
 
-- [x] 本機用 Chrome DevTools 執行對比度掃描片段，5 頁都是 0
-- [x] 截圖和對照頁的「改後」一致
+- [ ] `mockStore --cleanup --write`（SPEC #T13）：`backup/mockStore/` 檔案數等於被替換的原圖數；本機 dev 頁面正常；對一家店跑 `--rollback` 確認能從備份還原，再轉回來
+- [ ] 清理前抽查：LINE 預覽和 Google 搜尋結果裡的店家圖片已經是新網址
+- [ ] `prodStore --cleanup --write` 後，正式站首頁、`/store-list`、5 個店家頁照片正常
+- [ ] lint、build 通過
 
-**Dependencies:** None
+**Dependencies:** Checkpoint B + 4 週
 
 **Files likely touched:**
 
-- `app/globals.css`
-- `app/(new)/_components/HowItWorks.module.css`
-- `components/refactored/SectionTitle.module.css`
+- `scripts/shrink-store-images.mjs`
 
 **Estimated scope:** S
 
-### Task 13: `<main>`、nav `<li>`、heading 層級
+### Checkpoint D: 完成
 
-**Description:** 首頁與 `/faq` 的外框改用 `<main>`；`SiteNav` 手機版 `<ul>` 內的 `<a>` 外面包 `<li>`；HowItWorks、WhyUs 的 `<h5>` 改成 `<h3>`，SiteFooter 的 `<h6>` 改成符合層級的標籤，並用 CSS module 保持原本字級。
-
-**Acceptance criteria:**
-
-- [x] Lighthouse（手機）無障礙：首頁、店家頁、`/faq` 都 ≥ 95，而且 heading-order、landmark-one-main、list 三項通過（SPEC #T14）
-- [x] 390px 和 1280px 截圖：排版與字級不變（SPEC #T13）
-
-**Verification:**
-
-- [x] 本機跑 Lighthouse（Chrome DevTools MCP）
-- [x] 改前改後截圖比對
-
-**Dependencies:** None
-
-**Files likely touched:**
-
-- `app/(new)/page.tsx`
-- `app/(new)/faq/page.tsx`
-- `app/(new)/_components/SiteNav.tsx`
-- `app/(new)/_components/HowItWorks.tsx`、`WhyUs.tsx`、`SiteFooter.tsx`（及對應的 `.module.css`，只在字級需要時修改）
-
-**Estimated scope:** M（超過 5 個檔案時拆成「landmark + nav」和「heading 層級」兩個任務）
-
-**進度（/build auto）：**
-
-- [x] 13a landmark + nav：首頁、`/faq` 外框改 `<main>`，`SiteNav` 手機版 `<a>` 包 `<li>`。Lighthouse（手機）無障礙：首頁 98、店家頁 98、`/faq` 98；landmark-one-main、list 通過
-- [x] 13b heading 層級：SectionTitle、StoreDescription → h2；HowItWorks、WhyUs、GlossaryGrid、GuideSteps、PitfallsList、StoreCard → h3（`/store-list` 的 StoreCard 用 `titleTag="h2"`）；SiteFooter h6 → h2。5 頁 heading-order 通過，Lighthouse（手機）無障礙：首頁、店家頁、`/store-list`、`/faq` 100，`/store-guide` 98（缺 `<main>`，不在範圍內）。390px／1280px 每個標題的字級、行高、粗細、邊距、顏色、位置都和改前相同
-
-### Checkpoint C: `headings-a11y` 完成
-
-- [x] SPEC #T11–#T14 通過
-- [x] prettier、eslint、build 通過
 - [ ] 和你 review；通過後 commit、開 PR 3
-
----
-
-## Phase 4: `stable-image-urls`（PR 4，PR 2 合併後從 main 開分支）
-
-### Task 14: 唯讀抽查沒有下載 token 的物件（gate）
-
-**Description:** 寫一個唯讀腳本，列出 `COLLECTIONS.STORE` 底下的物件，用 `getMetadata()` 統計沒有 `firebaseStorageDownloadTokens` 的數量與代表路徑。這個腳本不寫入任何資料。
-
-**Acceptance criteria:**
-
-- [x] 回報總數、沒有 token 的數量與比例、最多 10 筆代表路徑（SPEC #T15）
-- [x] 腳本只呼叫 list 與 getMetadata
-- [x] 比例超過 10% 時停下來，由你決定是否補 token（補 token 是寫入正式資料，屬於「先詢問」）
-
-**Verification:**
-
-- [x] 結果貼給你確認後，才開始 Task 15
-
-**Dependencies:** Checkpoint B
-
-**Files likely touched:**
-
-- `scripts/check-download-tokens.mjs`（可以不 commit）
-
-**Estimated scope:** XS
-
-**進度（/build auto）：** 腳本已完成。`mockStore/`：10 個物件，0 個沒有 token（0%）。`prodStore/`（2026-10-18 由你執行）：476 個物件，0 個沒有 token（0%），低於 10%，不需要補 token
-
-### Task 15: `getImageByPath` 改用下載網址，加上快取與退回機制
-
-**Description:** 改用 `firebase-admin/storage` 的 `getDownloadURL()`；成功的網址放進模組層級的 `Map` 快取（TTL 10 分鐘）；`storage/no-download-token` 或其他錯誤時，退回 7 天簽名網址並記 `console.warn`。維持 async 簽名，呼叫端都不用改。
-
-**Acceptance criteria:**
-
-- [x] 店家頁的 og:image、JSON-LD image、`<img src>` 都是 `firebasestorage.googleapis.com/…&token=`，連續請求兩次完全相同（SPEC #T16）
-- [ ] Task 14 回報的沒有 token 的物件仍然正常顯示（簽名網址）— mockStore 沒有這種物件；已確認 `getDownloadURL` 對沒有 token 的路徑會丟錯、退回簽名網址。正式資料 0 個沒有 token，不會走到這條路徑
-- [x] 簽名網址不進快取
-
-**Verification:**
-
-- [x] 本機 curl 店家頁兩次並比對圖片網址
-- [ ] 開一筆沒有 token 的店家頁，確認圖片正常顯示，server log 有 warn
-
-**Dependencies:** Task 14
-
-**Files likely touched:**
-
-- `firebase/serverUtils/image.ts`
-
-**Estimated scope:** S
-
-### Task 16: 公開列表只解析封面圖
-
-**Description:** `resolveStoreImages(stores, { coverOnly })`；`getStores` 新增 `coverOnly` 選項，`/store-list` 傳入 true；`getHighlightedStores`、`getEmergencyStores`、`getSoldStores` 改成 coverOnly。admin 和 `getStoreById` 維持解析全部圖片。
-
-**Acceptance criteria:**
-
-- [x] `/store-list` 與首頁的 HTML 每間店只有 1 個圖片網址
-- [x] `/store-list` 的 TTFB ≤ Task 8 基準值的 110%（SPEC #T17）— mock 資料：9 次中位數 0.51s，Task 8 基準 0.55s（約 93%）；正式資料待量
-- [ ] 首頁、`/store-list`、店家頁、admin 列表的圖片全部正常顯示 — 首頁、`/store-list`、店家頁已確認；admin 列表走 client SDK（未改動），需要登入，未驗
-
-**Verification:**
-
-- [x] `next start` 量 3 次 TTFB 取中位數
-- [x] 逐頁目視檢查圖片
-
-**Dependencies:** Task 15
-
-**Files likely touched:**
-
-- `firebase/serverUtils/store.ts`
-- `app/(new)/store-list/page.tsx`
-
-**Estimated scope:** S
-
-### Checkpoint D: 全部完成
-
-- [x] 本機 `npm run seo:audit`（不帶 `--skip`）0 個失敗（rebase 到 main 之後，4 個模組一起驗）
-- [x] prettier、eslint、build 通過
-- [x] 和你 review；通過後 commit、開 PR 4
-- [ ] 全部上線後：對正式站跑 `seo:audit` 與 Lighthouse（SPEC Success Criteria）
-- [ ] 上線約 4 週後：回到 Search Console 確認 sitemap 狀態、blog 與 `/faq` 的索引、產品摘要無效項目為 0
+- [ ] 一個月後決定是否刪除 `backup/`（刪除前先問你）
