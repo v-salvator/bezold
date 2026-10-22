@@ -1,345 +1,225 @@
-# Spec: SEO 健檢修正
+# Spec: 店家照片瘦身
 
 ## Objective
 
-修正 2026-10-18 SEO 健檢（[`docs/seo-audit-2026-10-18.html`](docs/seo-audit-2026-10-18.html)）找到的 12 個問題，讓 Google 正確索引每一頁、店家頁能吃到長尾搜尋、非公開刊登不外流，並把 `/store-list` 的速度拉回合理範圍。
+2026-10-22 Google Cloud 預算通知連續觸發 50%、100%。最可能的原因是 Firebase Storage 的對外流量：`next.config.js` 設定 `images.unoptimized: true`，訪客直接從 `bezold.appspot.com`（US multi-region）下載原圖。`prodStore/` 有 522 個檔案、共 490 MB，平均 0.94 MB，最大 7 MB；一個店家頁 5 張圖就是 16–29 MB。
 
-**使用者**：
+目標是讓訪客下載的照片變成原本的 1/5～1/10，而且之後新上傳的照片不再是原圖：
 
-- 從 Google 搜尋進站的買家與賣家（手機為主）。
-- 在 LINE / FB 分享店家頁的使用者：分享卡片要顯示正確的標題、描述和圖片。
-- 營運者：之後每次上線都能重跑同一套檢查（`npm run seo:audit`）。
+1. **既有照片**：每張超過門檻的照片轉成新的 `.webp` 檔（最長邊 1600px），把店家文件的 `images` 換成新路徑。原圖先留在原路徑，等快取更新後再搬到 `backup/`。
+2. **新上傳照片**：賣家（`/sell`、`/my-listings` 編輯）和管理員（`/admin/store/edit/[storeId]/image`）上傳前，在瀏覽器裡先縮圖、轉成 `.webp`。
 
-**為什麼**：目前 8 個頁面的 canonical 指向首頁、48 個店家頁的 description 全部相同、不存在的店家回 500，`/store-list` 的 TTFB 是 2.4 秒、LCP 是 6.1 秒，而且會把 73 筆草稿送進公開的 HTML。這些問題 Lighthouse 的 SEO 分數（100）都抓不到，所以需要自己的檢查腳本。
+使用者是訪客（看得更快、站方付更少流量費）、賣家和管理員（上傳流程不變，只是檔案變小）。
 
-**Search Console 實際資料**（2026-10-18 讀取，近 90 天）：
+### Capability Map
 
-- 332 次點擊、4,650 次曝光，平均點閱率 7.1%，平均排名 8。點擊有 66% 來自首頁（218 次）。
-- **從來沒有提交過 sitemap**。Google 只索引了 32 頁：sitemap 裡的 66 個網址有 27 個被索引，**6 篇 blog 文章、`/blog`、`/faq`、`/sell`、`/store-list` 都不在索引裡**（blog 文章 7–8 月就已發布），23 個店家頁也還沒有被索引。
-- 曝光最多的店家頁 `/store/HUluGiOrAjMfT5N1Oqzg`（巴地越南小吃，545 次曝光）是**已售出**的店，不在 sitemap，卻已經被索引；另外 3 個被索引的已售出店家也一樣。這代表成交案例本身就有搜尋流量。
-- 「頂讓是什麼意思」相關的查詢（頂讓是什麼意思、頂讓意思、頂讓的意思、頂讓 意思…）合計約 55 次曝光、平均排名 10～11、**0 次點擊**。`/store-guide` 的 h1 就是「什麼是頂讓？」，但它的標題「頂讓指南」沒有對到這個搜尋意圖。
-- 產品摘要報表有 **2 個無效項目**：「必須指定 offers、review 或 aggregateRating」。原因是面議的店家（`price === 0 && priceNegotiable`）的 JSON-LD 拿掉了 `offers`，但仍然輸出 `Product`。
-- 商家資訊報表只有警告（缺 `hasMerchantReturnPolicy`、`shippingDetails`、全球 ID），這些欄位不適用於店面頂讓，不處理。
-- Core Web Vitals：行動裝置和桌面的使用資料都還不足，無法判斷。HTTPS、導覽標記、人工判決處罰都沒有問題。
+| Module id        | 負責                                                                                 | 依賴             |
+| ---------------- | ------------------------------------------------------------------------------------ | ---------------- |
+| `image-settings` | 共用的編碼參數（最長邊、品質、略過門檻、輸出格式）                                   | —                |
+| `image-backfill` | 一次性 Node 腳本：轉出新的 `.webp` → 更新 Firestore 路徑；可還原；之後把原圖搬到備份 | `image-settings` |
+| `upload-resize`  | 瀏覽器端上傳前縮圖，接在 `uploadStoreImageByFile` 裡                                 | `image-settings` |
 
-### 已確定的決策
+Build order：`image-settings` → `image-backfill` → `upload-resize`
 
-| 項目                      | 決定                                                                                                                                                                                      |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 已售出（sold）店家頁      | **保留索引**，JSON-LD 標 `SoldOut`，當作成交案例                                                                                                                                          |
-| pending / rejected 店家頁 | 頁面照常可以開啟，但設為 `noindex, nofollow`（比照 draft）                                                                                                                                |
-| `/api/stores`（GET 列表） | **刪除**。前端沒有呼叫，而且會回傳草稿；`/api/stores/[storeId]/*` 與 `highlight` 不動                                                                                                     |
-| 圖片網址                  | **Firebase 下載網址**：server 端改用 `firebase-admin` 的 `getDownloadURL()`（附 token 的永久網址），沒有 token 時退回原本的簽名網址。不改 Storage 權限、不經過 Vercel、沒有 4.5 MB 的限制 |
-| 頁面標題                  | 各頁只寫頁面名稱，品牌交給 root template（`%s｜頂讓網 Bezold`）；採用健檢報告中的建議文案                                                                                                 |
-| 對比度                    | `--accent #b33a1d`、`--muted #736b61`，新增 `--accent-on-dark #f07a5a`（見 [`docs/contrast-before-after.html`](docs/contrast-before-after.html)）                                         |
-| 面議店家的結構化資料      | **不輸出 `Product` JSON-LD**。沒有價格就無法提供有效的 `offers`，輸出不完整的 Product 只會產生無效項目                                                                                    |
-| 已售出店家與 sitemap      | **加進 sitemap**（priority 0.4），讓 Google 能持續發現這些有搜尋流量的成交案例                                                                                                            |
-| `/store-guide` 標題       | 改成對應「頂讓是什麼意思」搜尋意圖的標題與描述（見 `seo-metadata` 驗收條件 7）                                                                                                            |
-| 驗證腳本                  | 新增 `scripts/seo-audit.mjs` 與 `npm run seo:audit`，放進 repo                                                                                                                            |
-| Spec 檔                   | Capability map 與 4 個模組的 spec 都放在這份 `SPEC.md`                                                                                                                                    |
-
-### 不在範圍內
-
-- 上傳時壓縮或縮圖（4032px 原圖問題的根治方式），之後另開 PR。
-- 在 Search Console 提交 sitemap、要求重新索引，以及 Bing Webmaster 設定（由你在 Console 操作）。
-- 商家資訊報表的警告（退貨政策、運送資訊、全球 ID），這些欄位不適用於店面頂讓。
-- `/faq` 的 FAQPage 結構化資料（Google 已不對一般網站顯示 FAQ rich result）。
-- 不在 sitemap 裡的頁面（`/acceleration`、`/store-example`、`/my-listings`…）的 metadata 調整；root 拿掉 canonical 之後它們會沒有 canonical，這是可以接受的預設行為。
-- 新增測試框架。
-
----
-
-## Capability Map
-
-| Module id            | 負責範圍                                                                                                                                                                                                  | 依賴                 |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| `seo-metadata`       | 驗證腳本；canonical / OG；店家頁 description、索引規則、SoldOut、面議不輸出 Product、404；sitemap（含已售出）；標題與 `/store-guide` 文案（報告 P0-1～4、P1-4、P2-1、P2-2，以及 Search Console 的新發現） | —                    |
-| `store-list-payload` | `getStores` 狀態過濾與平行簽圖；刪除 `/api/stores`；首屏卡片 priority（P0-5、P1-3）                                                                                                                       | `seo-metadata`       |
-| `headings-a11y`      | h1；對比度 token；「04」看不見的 bug；`<main>`、nav `<li>`、heading 層級（P1-1、P2-3）                                                                                                                    | —                    |
-| `stable-image-urls`  | 用 Firebase 下載網址取代 7 天過期的簽名網址；公開列表只解析封面圖（P1-2）                                                                                                                                 | `store-list-payload` |
-
-建置順序：`seo-metadata` → `store-list-payload` → `headings-a11y` → `stable-image-urls`
-
-- `store-list-payload` 依賴 `seo-metadata`，因為兩者都會修改 `app/(new)/store-list/page.tsx`，而且會用到 `seo-metadata` 提供的驗證腳本。
-- `stable-image-urls` 依賴 `store-list-payload`，因為兩者都會修改 `firebase/serverUtils/store.ts` 的 `getStores` 與 `resolveStoreImages`，而且要用 `store-list-payload` 量到的 TTFB 當基準。
-- `headings-a11y` 和其他模組沒有共用檔案，必要時可以和前兩個模組並行。
-- 一個模組一個分支、一個 PR，PR 說明連回本文件對應的章節。
-
----
-
-## Module: `seo-metadata`
-
-### 驗收條件
-
-1. **驗證腳本** `scripts/seo-audit.mjs`（Node 24 內建 `fetch`，不加依賴），以 `npm run seo:audit -- <baseUrl>` 執行，預設 `http://localhost:3000`：
-   - 讀取 `/robots.txt` 與 `/sitemap.xml`，逐一抓取 sitemap 裡的網址（同時最多 8 個連線）。
-   - 每頁檢查：HTTP 200；`<link rel="canonical">` 等於自己的網址；有 `<meta name="description">`；`og:title`、`og:description`、`og:image` 存在，且 `og:title` 不等於首頁標題（首頁除外）；h1 恰好 1 個；HTML 裡沒有 `"status":"draft|pending|rejected"`。
-   - 跨頁檢查：description 不可重複（列出重複的群組）；sitemap 裡的網址不可被 robots.txt 的 `Disallow` 擋住。
-   - 額外檢查：`/store/__seo_audit_missing__` 回 404。
-   - 可以用 `--noindex /store/<id>,…` 指定應該為 noindex 的網址，用 `--json` 輸出 JSON。
-   - 輸出一張「檢查項目 × 失敗數」摘要表，加上每個失敗網址的明細；有任何失敗就以 exit code 1 結束。
-   - h1 和 status 這兩項在 `headings-a11y`、`store-list-payload` 完成之前一定會失敗，所以提供 `--skip h1,status` 參數，讓每個模組只驗證自己負責的項目。
-2. **Canonical / OG**：
-   - 移除 root `app/layout.tsx` 的 `alternates.canonical`；`SITE_TITLE`、`SITE_DESCRIPTION` 移到 `constant/seo.ts`，並新增 `BASE_OPEN_GRAPH`。
-   - 新增 `utils/seo.ts`：`pageMetadata({ title, description, path, images? })` 與 `toMetaDescription(text, maxLength = 120)`。
-   - `/faq`、`/sell`、`/store-guide`、`/privacy`、`/terms`、`/disclaimer`、`/store-list` 改用 `pageMetadata()`；`/policy/editor-pick` 的 openGraph 展開 `BASE_OPEN_GRAPH`；`/blog` 目前沒有設定 openGraph（會沿用首頁的分享卡片），也改用 `pageMetadata()`。
-3. **店家頁 metadata**（`app/(new)/store/[storeId]/page.tsx`）：
-   - `description` = `toMetaDescription(store.description)`；`og:description` 用 200 字上限。
-   - 標題 `${storeName}｜${city}店面頂讓`；沒有 city 時為 `${storeName}｜店面頂讓`。
-   - 只有 `approved`、`sold` 可以被索引，其他狀態（含 `status` 不存在）一律 `robots: { index: false, follow: false }`。
-   - JSON-LD：`sold` 為 `https://schema.org/SoldOut`，其他狀態為 `InStock`；沒有圖片時的 fallback 改成絕對網址 `${NEXT_PUBLIC_APP_URL}/bezold-og.png`。
-   - 面議（`price === 0 && priceNegotiable`）的店家**完全不輸出** `Product` JSON-LD。免頂讓金（`price === 0` 且不可議價）照常輸出 `price: 0` 的 Offer。
-4. **404**：`generateMetadata` 和頁面本體在找不到店家時都呼叫 `notFound()`，刪除原本「找不到物件」的 metadata 分支。`error.tsx` 保留給真正的錯誤。
-5. **Sitemap / 登入頁**：
-   - `app/sitemap.ts` 移除 `/login`、`/signup`；這兩頁加上 `metadata`（標題「登入」、「加入會員」，`robots: { index: false, follow: true }`）。
-   - 店家網址改為收錄 `approved` 與 `sold`：查詢改成 `where("status", "in", [STORE_STATUS.APPROVED, STORE_STATUS.SOLD])`。這是單一欄位的 `in` 查詢，不需要 composite index。`approved` 維持 `weekly` / 0.7，`sold` 為 `monthly` / 0.4，`lastModified` 都用 `updateTime`。
-6. **標題**：頁面 title 不再包含「— Bezold 頂讓必售」或「Bezold 頂讓必售 —」，blog 文章頁改成 `meta.title`。首頁維持 `title.absolute`。
-7. **`/store-guide` 文案**（`pageMetadata()`，path `/store-guide`）：
-   - title：`頂讓是什麼？頂讓流程、頂讓金與注意事項一次看懂`（加上 template 後是「…｜頂讓網 Bezold」）。
-   - description：`頂讓是什麼意思？從頂讓、頂讓金、盤讓等名詞解釋，到買店與頂出的交接流程和常見地雷，第一次接手店面也能一頁看懂。`
-   - 頁面內容和 h1「什麼是頂讓？」不變。
-
-### 檔案
-
-```
-scripts/seo-audit.mjs                       ★ 驗證腳本
-package.json                                ✎ "seo:audit": "node scripts/seo-audit.mjs"
-constant/seo.ts                             ★ SITE_NAME / SITE_TITLE / SITE_DESCRIPTION / BASE_OPEN_GRAPH
-utils/seo.ts                                ★ pageMetadata() / toMetaDescription()
-app/layout.tsx                              ✎ 移除 canonical，改用 constant/seo
-app/sitemap.ts                              ✎ 移除 /login /signup；店家收錄 approved + sold
-app/(new)/{faq,sell,store-guide,privacy,terms,disclaimer,store-list}/page.tsx  ✎ pageMetadata()
-app/(new)/policy/editor-pick/page.tsx       ✎ BASE_OPEN_GRAPH
-app/(new)/blog/page.tsx                     ✎ pageMetadata()
-app/(new)/blog/[slug]/page.tsx              ✎ 標題
-app/(new)/login/page.tsx                    ✎ metadata
-app/(new)/signup/page.tsx                   ✎ metadata
-app/(new)/store/[storeId]/page.tsx          ✎ description / 標題 / 索引規則 / SoldOut / 面議不輸出 Product / notFound()
-```
-
----
-
-## Module: `store-list-payload`
-
-### 驗收條件
-
-1. `getStores(searchObj, { statuses? })`：有傳 `statuses` 時，在記憶體中過濾（不新增 Firestore `where`，避免需要新的 composite index），**過濾完才**呼叫 `resolveStoreImages`。不傳時行為和現在完全相同（admin 的 3 個呼叫點不改）。
-2. `resolveStoreImages` 改用 `Promise.all` 平行簽圖。
-3. `/store-list` 呼叫 `getStores(searchObj, { statuses: [STORE_STATUS.APPROVED] })`；`Breadcrumbs` 的數量改用 `stores.length`。`ResultsArea` 內原本的 approved 過濾可以保留（無害）。
-4. 刪除 `app/api/stores/route.ts`。刪除前用 grep 確認整個 repo（含 `hooks/`、`components/`、`mocks/`）沒有任何地方呼叫 `GET /api/stores`。
-5. `StoreCard` 新增選用的 `priority` prop，傳給 `next/image`；`ResultsArea` 對前 2 張卡片傳 `priority`。
-6. 成效（本機 `next start` 搭配正式資料，量 3 次取中位數）：`/store-list` 的 TTFB 至少比改前低 50%，HTML 大小至少比改前小 40%。實作前先用同樣方式量一次改前的基準值，記錄在 PR 裡。
-
-### 檔案
-
-```
-firebase/serverUtils/store.ts               ✎ statuses 選項、平行簽圖
-app/(new)/store-list/page.tsx               ✎ 只取 approved
-app/api/stores/route.ts                     ✗ 刪除
-components/refactored/StoreCard.tsx         ✎ priority prop
-app/(new)/store-list/_components/ResultsArea.tsx  ✎ 前 2 張 priority
-```
-
----
-
-## Module: `headings-a11y`
-
-### 驗收條件
-
-1. `StoreTitleRow` 的店名和 `/store-list` `Breadcrumbs` 的標題由 `<h2>` 改為 `<h1>`，外觀不變（在 390px 與 1280px 兩種寬度截圖比對）。
-2. `app/globals.css`：`--accent: #b33a1d`、`--muted: #736b61`，新增 `--accent-on-dark: #f07a5a`。
-3. `HowItWorks.module.css`：`.buyer .type` 改用 `--accent-on-dark`；`.seller .number` 加上 `color: var(--ink)`。
-4. `SectionTitle.module.css`：`.numDark` 改成巢狀 `&.numDark`，修正 `/store-guide` 深色區塊「04」看不見的問題。
-5. 首頁與 `/faq` 的外框 `<div className={styles.frame}>` 改為 `<main>`；`SiteNav` 手機版 `<ul>` 內的 `<a>` 外面包 `<li>`；首頁 HowItWorks / WhyUs 的 `<h5>` 和 SiteFooter 的 `<h6>` 改成符合層級的標籤，並用 CSS module 保持原本的字級。
-6. 用健檢時的對比度掃描（實作時放進 `scripts/seo-audit.mjs` 的 `--contrast` 模式，或以瀏覽器 console 執行）檢查首頁、店家頁、`/store-list`、`/faq`、`/store-guide`：對比不足的文字 **0 處**。
-7. Lighthouse（手機）無障礙分數：首頁、店家頁、`/faq` 都 ≥ 95。
-8. Favicon `app/icon.svg` 維持原色。
-
-### 檔案
-
-```
-app/globals.css                                         ✎ token
-app/(new)/_components/HowItWorks.module.css             ✎ 深色區塊與黃色編號
-app/(new)/_components/HowItWorks.tsx                    ✎ h5 → h3
-app/(new)/_components/WhyUs.tsx (+ .module.css)         ✎ h5 → h3
-app/(new)/_components/SiteFooter.tsx (+ .module.css)    ✎ h6 → 適當層級
-app/(new)/_components/SiteNav.tsx                       ✎ <li>
-components/refactored/SectionTitle.module.css           ✎ &.numDark
-app/(new)/store/[storeId]/_components/StoreTitleRow.tsx ✎ h1
-app/(new)/store-list/_components/Breadcrumbs.tsx        ✎ h1
-app/(new)/page.tsx、app/(new)/faq/page.tsx              ✎ <main>
-```
-
-確切的元件檔名會在實作時用 grep 確認；如果需要改到超過 10 個檔案，先停下來和你確認。
-
----
-
-## Module: `stable-image-urls`
-
-### 為什麼要一起處理列表頁
-
-`getSignedUrl()` 在本機用金鑰就能算出網址，不需要網路請求；`getDownloadURL()` 每張圖都要呼叫一次 Firebase metadata API。`/store-list` 目前每次會解析 474 張圖，直接換掉的話 TTFB 會變得更慢。所以這個模組會一起做兩件事：網址快取，以及公開列表只解析卡片會用到的封面圖。
-
-### 驗收條件
-
-1. **實作前先抽查**（唯讀腳本，不寫入任何資料）：統計 `COLLECTIONS.STORE` 底下有多少物件沒有 `firebaseStorageDownloadTokens`，並把數量和代表路徑回報給你。如果超過 10%，先停下來討論要不要補 token（補 token 等於寫入正式資料，屬於「先詢問」）。
-2. `firebase/serverUtils/image.ts` 的 `getImageByPath(imagePath)`：
-   - 先呼叫 `getDownloadURL(bucket.file(imagePath))`（`firebase-admin/storage`），成功時回傳附 token 的網址。
-   - 遇到 `storage/no-download-token` 或其他錯誤時，退回原本的 7 天簽名網址，並在 server log 記一行 `console.warn`（含路徑）。
-   - 成功的網址存在模組層級的 `Map` 快取，TTL 10 分鐘。賣家用相同檔名重新上傳時，token 可能會換，TTL 可以避免一直回傳舊網址。簽名網址不快取。
-   - 維持 async 簽名，`getImagesByPath` 與所有呼叫端都不用改。
-3. **公開列表只解析封面圖**：`resolveStoreImages(stores, { coverOnly })`。`coverOnly` 為 true 時只解析 `images[0]`，`store.images` 變成 `[封面網址]`，不會把原始路徑送到前台。
-   - `getStores` 新增 `coverOnly` 選項；`/store-list` 傳入 `coverOnly: true`。
-   - `getHighlightedStores`、`getEmergencyStores`、`getSoldStores`（首頁區塊）改成 `coverOnly`。
-   - admin 呼叫端和店家頁（`getStoreById`）維持解析全部圖片。
-4. Client 端的 `firebase/clientUtils/image.ts` 不改。
-5. 成效：
-   - 店家頁的 og:image、JSON-LD image、`<img src>` 都不再含 `Expires=`（沒有 token 的物件除外）。連續請求同一頁兩次，圖片網址完全相同。
-   - `/store-list` 的 TTFB（`next start`，3 次取中位數）不超過 `store-list-payload` 完成後基準值的 110%。
-   - 首頁、`/store-list`、店家頁、admin 列表的圖片全部正常顯示。
-
-### 檔案
-
-```
-scripts/check-download-tokens.mjs           ★ 唯讀抽查腳本（驗收條件 1，可以不 commit）
-firebase/serverUtils/image.ts               ✎ getImageByPath：下載網址 + 快取 + 退回簽名網址
-firebase/serverUtils/store.ts               ✎ resolveStoreImages / getStores 的 coverOnly；首頁三個查詢改成 coverOnly
-app/(new)/store-list/page.tsx               ✎ getStores 傳入 coverOnly: true
-```
-
----
+backfill 先做：490 MB 的既有照片是費用大宗，而且最大的風險（LINE 預覽能不能顯示 WebP）要靠一家正式店家試轉才驗證得了。這個結果決定兩個模組共用的輸出格式，越早知道越好。`upload-resize` 上線後再跑一次 backfill，補處理中間這段時間上傳的照片（腳本可以重跑）。`image-settings` 只有一個常數檔，和 `image-backfill` 放在同一個 PR。
 
 ## Tech Stack
 
-Next.js 14 App Router · TypeScript · CSS Modules + Tailwind · Firebase Admin SDK（Firestore、Storage）· Vercel。不新增 npm 依賴；驗證腳本只用 Node 24 內建的 `fetch`。
+- Next.js 14（App Router）· TypeScript · Firebase JS SDK 10（`firebase/storage`）· Firebase Admin 11（`@google-cloud/storage` 6.12）
+- 瀏覽器端：原生 `createImageBitmap` + `<canvas>` + `canvas.toBlob`，**不加套件**
+- 腳本端：Node 24（`.nvmrc`，可以直接 import `.ts`）+ **`sharp`（新增 devDependency，只給腳本用）**
 
 ## Commands
 
 ```bash
 nvm use
-npm run dev                                   # port 3000；worktree 預設會讀到正式資料，見下方說明
-npm run build && npm run start                # 量 TTFB 與 HTML 大小時用 production 模式
-npx eslint --no-eslintrc -c .eslintrc.json --ext .ts,.tsx app components constant types utils hooks lib firebase
+npm install -D sharp
+
+# 格式化、lint、build（每個任務完成前都要跑）
 npx prettier --write <changed files>
-npm run seo:audit                             # 本機 http://localhost:3000
-npm run seo:audit -- https://www.bezold.com.tw --skip h1,status   # 正式站，改前的基準值
+npx eslint --no-eslintrc -c .eslintrc.json --ext .ts,.tsx app components constant types utils hooks lib firebase
+npm run build
+
+# backfill：預設只試跑，加 --write 才會寫入；--prefix 必填，不從環境變數推斷
+node --env-file=.env scripts/shrink-store-images.mjs --prefix mockStore
+node --env-file=.env scripts/shrink-store-images.mjs --prefix mockStore --write
+node --env-file=.env scripts/shrink-store-images.mjs --prefix mockStore --write --rollback --only <storeId>
+node --env-file=.env scripts/shrink-store-images.mjs --prefix prodStore                         # 唯讀試跑
+node --env-file=.env scripts/shrink-store-images.mjs --prefix prodStore --write --only <storeId>  # 單店試轉
+node --env-file=.env scripts/shrink-store-images.mjs --prefix prodStore --write
+# 約 4 週後（Phase 4）
+node --env-file=.env scripts/shrink-store-images.mjs --prefix prodStore --cleanup --write
 ```
 
-- Worktree 裡 `next lint` 會因為 plugin 衝突而失敗，請用上面的 eslint 指令。目前的基準是 0 個錯誤、2 個既有的警告。
-- Worktree 沒有 `.env`。執行 `npm run build` 時，暫時建立指向主 checkout `.env` 的 symlink，結束後刪除。
-- Worktree 的 `.env.development` 設定為 `prod`，所以本機會讀到正式資料。這次所有驗證都只讀不寫。
+worktree 裡沒有 `.env`，跑腳本時用 `--env-file=../../../.env`（主 checkout 的檔案）。
 
 ## Project Structure
 
 ```
-scripts/        → 一次性或維運用的 Node 腳本（已有 mark-existing-users-verified.mjs）
-constant/       → 靜態常數與對照表（新增 seo.ts）
-utils/          → 資料轉換函式（新增 seo.ts）
-app/            → 路由；metadata 寫在各 page.tsx
-components/refactored/ → 共用元件
-firebase/serverUtils/  → Admin SDK 存取
-docs/           → 健檢報告與對比度對照頁（這次一起 commit）
+constant/image.ts                → 新增：IMAGE_MAX_EDGE、IMAGE_QUALITY、IMAGE_SKIP_BYTES、IMAGE_OUTPUT_TYPE、IMAGE_SETTINGS_TAG
+scripts/shrink-store-images.mjs  → 新增：backfill 腳本（試跑 / 轉檔 / 還原 / 清理），從 constant/image.ts 讀參數
+utils/image.ts                   → 新增：resizeImageFile(file) — 瀏覽器端縮圖（轉換資料的函式放 utils/）
+firebase/clientUtils/image.ts    → 修改：uploadStoreImageByFile 上傳前呼叫 resizeImageFile，檔名加短 id，明確設定 contentType
+package.json                     → 修改：devDependencies 加 sharp
 ```
+
+`StoreImageUpload.tsx`、admin 圖片頁、店家頁、列表頁都不用改：它們都從店家文件的 `images` 讀路徑，執行時才換成網址。
+
+## 模組規格
+
+### `image-settings`
+
+```ts
+// constant/image.ts
+// * shared by the browser upload resize and scripts/shrink-store-images.mjs —
+// * keep erasable-only TS (no enums / path aliases) so Node can import it
+export const IMAGE_MAX_EDGE = 1600;
+export const IMAGE_QUALITY = 80; // 0–100; canvas.toBlob takes IMAGE_QUALITY / 100
+export const IMAGE_SKIP_BYTES = 300 * 1024;
+export const IMAGE_OUTPUT_TYPE = "image/webp";
+// * written to each converted object, e.g. "webp-1600-q80"
+export const IMAGE_SETTINGS_TAG = `${IMAGE_OUTPUT_TYPE.split("/")[1]}-${IMAGE_MAX_EDGE}-q${IMAGE_QUALITY}`;
+```
+
+- 檔案已經「最長邊 ≤ `IMAGE_MAX_EDGE` 而且 ≤ `IMAGE_SKIP_BYTES`」就不處理。
+- 輸出格式集中在 `IMAGE_OUTPUT_TYPE`。如果 LINE 預覽測試失敗，改成 `image/jpeg`，副檔名跟著變成 `.jpg`。
+
+### `image-backfill`
+
+`scripts/shrink-store-images.mjs`。以 **Firestore 店家文件**為單位處理（`--prefix` 同時是 Firestore collection 和 Storage 資料夾名稱），只處理店家文件 `images` 裡實際用到的照片。
+
+| 參數              | 說明                                                                 |
+| ----------------- | -------------------------------------------------------------------- |
+| `--prefix <name>` | 必填，`mockStore` 或 `prodStore`                                     |
+| `--write`         | 沒加就只試跑：在記憶體裡真的轉檔，列出實際的前後大小，不寫入任何東西 |
+| `--only <id>`     | 只處理某一個店家                                                     |
+| `--rollback`      | 還原模式（見下方）                                                   |
+| `--cleanup`       | 清理模式（見下方，Phase 4 才用）                                     |
+
+**轉檔模式**（預設），每家店：
+
+1. 讀店家文件的 `images`。每個路徑判斷：
+   - 物件不存在 → 略過，記為 `missing`
+   - 物件 metadata 已有 `sourcePath`（已經是轉好的檔）→ 略過
+   - 已在門檻內 → 略過，路徑不變
+2. 下載 → sharp：`.rotate()`（套 EXIF 方向）→ `.resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true })` → 依 `IMAGE_OUTPUT_TYPE` 輸出 `.webp({ quality: 80 })` 或 `.jpeg({ quality: 80, mozjpeg: true })`。轉出來比原檔大就略過。
+3. **新檔名**：同資料夾、`<原檔名去副檔名>.webp`。如果這個名稱已經存在（例如 `IMG_1.jpg` 和 `IMG_1.png` 都在，或原檔本來就是 `.webp`），改成 `<名稱>-2.webp`、`-3`…
+4. **上傳新檔**：`contentType: IMAGE_OUTPUT_TYPE`，custom metadata 帶 `firebaseStorageDownloadTokens: randomUUID()`（server 端 `getDownloadURL` 需要 token）、`sourcePath: <原路徑>`、`shrunk: IMAGE_SETTINGS_TAG`、`originalBytes`。用 `ifGenerationMatch: 0`，不會覆蓋已存在的物件。
+5. **更新 Firestore**（transaction）：重新讀店家文件，把 `images` 裡的舊路徑換成新路徑，**順序不變**（第一張仍是封面）。**只寫 `images`，不寫 `updateTime`**（`getSoldStores` 用它排序、店家頁顯示「更新」日期）。transaction 裡發現某個舊路徑已經不在 `images`（賣家剛好刪掉了），就跳過那一張並刪除剛上傳的新檔。
+6. 原圖**不動**，留在原路徑。
+
+**還原模式**（`--rollback`，可搭配 `--only`）：對店家文件裡每個帶 `sourcePath` 的路徑，如果原圖還在原路徑（或在 `backup/<sourcePath>`，就先複製回來），用 transaction 把路徑換回 `sourcePath`，再刪除轉好的檔。用在單店試轉失敗、或任何轉完發現有問題的時候。
+
+**清理模式**（`--cleanup`，Phase 4，約 4 週後）：對店家文件裡每個帶 `sourcePath` 的路徑，把原圖複製到 `backup/<sourcePath>`、確認存在後，刪除原路徑的原圖。之後 `prodStore/` 只剩正在使用的檔案。
+
+共通規則：
+
+- 同時最多處理 4 張照片；店家之間依序處理。
+- 最後印出摘要：處理數、略過數（依原因分類）、失敗數、店家文件裡參照的照片總 MB（處理前 → 處理後）。只要有失敗，exit code 就是 1。
+- 列出時排除 `backup/`。不在任何店家文件裡的 Storage 物件不處理。
+
+### `upload-resize`
+
+`resizeImageFile(file: File): Promise<File>`，處理規則：
+
+| 輸入                                                            | 結果                                         |
+| --------------------------------------------------------------- | -------------------------------------------- |
+| 一般 JPEG / PNG / WebP，超過門檻                                | 縮到最長邊 ≤ 1600px，輸出 WebP（品質 80）    |
+| 瀏覽器不支援 WebP 編碼（`toBlob` 回傳的 `blob.type` 不是 webp） | 改用 `image/jpeg`、同品質                    |
+| 已經在門檻內                                                    | 原檔不動                                     |
+| 解碼失敗（例如桌機 Chrome 選了 HEIC）                           | 原檔不動，照舊上傳（**不擋使用者**）         |
+| `image/gif`、`image/svg+xml`                                    | 原檔不動（避免動畫或向量圖被壓成單張點陣圖） |
+| 轉出來比原檔還大                                                | 用原檔                                       |
+
+- 用 `createImageBitmap(file, { imageOrientation: "from-image" })`，套用 EXIF 方向，手機直拍不會變橫的。
+- canvas 重繪會去掉 EXIF（包含 GPS），賣家照片不再外流拍攝位置，這是附帶的好處。
+- **檔名**：`uploadStoreImageByFile` 存成 `<原檔名去副檔名>-<6 碼短 id>.<實際格式副檔名>`。轉檔後不同副檔名的照片會撞名（`IMG_1.jpg`、`IMG_1.png` 都變成 `IMG_1.webp`），而 `arrayUnion` 遇到相同路徑不會新增，第二張會默默蓋掉第一張。
+- 呼叫 `uploadBytes` 時帶 `{ contentType: resizedFile.type }`。
+- 選檔後的預覽和現在一樣用原檔；只在按下上傳時縮圖，沿用現有的 `uploading` 狀態，不新增 UI。
 
 ## Code Style
 
-遵守 CLAUDE.md：靜態值放 `constant/`、轉換函式放 `utils/`；CSS module 負責視覺、Tailwind 負責排版，不在同一個元素上混用；CSS 用巢狀語法；變數名稱不用單字母；註解沿用 `// *` 的風格。
+沿用專案現有寫法：`// *` 註解、完整變數名稱、轉換資料的函式放 `utils/`、靜態值放 `constant/`。
 
 ```ts
-// utils/seo.ts
-export const pageMetadata = ({
-  title,
-  description,
-  path,
-  images,
-}: PageMetadataInput): Metadata => ({
-  title,
-  description,
-  alternates: { canonical: path },
-  openGraph: {
-    ...BASE_OPEN_GRAPH,
-    title,
-    description,
-    url: path,
-    images: images ?? [...BASE_OPEN_GRAPH.images],
-  },
-});
+// utils/image.ts
+import {
+  IMAGE_MAX_EDGE,
+  IMAGE_QUALITY,
+  IMAGE_SKIP_BYTES,
+  IMAGE_OUTPUT_TYPE,
+} from "@/constant/image";
 
-// app/(new)/faq/page.tsx
-export const metadata: Metadata = pageMetadata({
-  title: "常見問題",
-  description:
-    "關於頂讓平台的刊登、買賣流程、費用、安全保障等常見問題一次解答。",
-  path: "/faq",
-});
+const PASSTHROUGH_TYPES = ["image/gif", "image/svg+xml"];
+
+// * shrink a photo before it reaches Storage; any failure returns the
+// * original file so a seller is never blocked from uploading
+export const resizeImageFile = async (file: File): Promise<File> => {
+  if (PASSTHROUGH_TYPES.includes(file.type)) return file;
+
+  let bitmap: ImageBitmap;
+  try {
+    bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+  } catch {
+    return file;
+  }
+  // ...scale, toBlob(IMAGE_OUTPUT_TYPE), fall back to image/jpeg
+};
 ```
-
-Next 的 metadata 合併是淺層的：子頁面只要設定了 `openGraph`，就會整個取代父層的設定。所以每個頁面層級的 `openGraph` 都必須從 `BASE_OPEN_GRAPH` 展開。
 
 ## Testing Strategy
 
-這個專案沒有測試框架，加入測試框架屬於「先詢問」。每個模組的驗證方式：
+專案沒有測試框架，這次也**不新增**。驗證方式：
 
-1. prettier、eslint、`npm run build` 都要通過。
-2. 本機 `npm run build && npm run start` 後，執行 `npm run seo:audit`，模組負責的檢查項目全部通過（尚未完成的模組用 `--skip` 略過）。
-3. 模組各自的驗收條件：
-
-| #   | 模組                 | 檢查                                                                                                         | 預期                                                                             |
-| --- | -------------------- | ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
-| T1  | `seo-metadata`       | 對正式站執行 `seo:audit`（改前的基準值）                                                                     | 會列出 canonical、description 重複、404 等失敗，證明腳本抓得到                   |
-| T2  | `seo-metadata`       | 本機 `seo:audit`                                                                                             | canonical、description、OG、robots-vs-sitemap、404 全部通過                      |
-| T3  | `seo-metadata`       | `seo:audit --noindex` 指定 1 筆 pending、1 筆 rejected、1 筆 draft                                           | 三頁都是 `noindex, nofollow`                                                     |
-| T4  | `seo-metadata`       | curl 一筆 sold 店家頁                                                                                        | `index, follow`，JSON-LD 為 `SoldOut`                                            |
-| T5  | `seo-metadata`       | 用 [Rich Results Test](https://search.google.com/test/rich-results) 檢查 Vercel preview 的店家頁與 blog 文章 | Product、BlogPosting 都沒有錯誤                                                  |
-| T6  | `store-list-payload` | 本機 `seo:audit`                                                                                             | status 檢查通過（任何頁面都沒有非公開狀態）                                      |
-| T7  | `store-list-payload` | `/store-list` TTFB 與 HTML 大小，改前改後各量 3 次                                                           | 達到驗收條件 6 的目標                                                            |
-| T8  | `store-list-payload` | `curl /api/stores`                                                                                           | 404；`/api/stores/{id}/contact` 照常運作                                         |
-| T9  | `store-list-payload` | admin Store List、Drafts、Analytics 頁                                                                       | 仍然列出所有狀態（行為不變）                                                     |
-| T10 | `store-list-payload` | `/store-list` 效能追蹤                                                                                       | LCP 圖片有 `fetchpriority=high`，不是 lazy                                       |
-| T11 | `headings-a11y`      | 本機 `seo:audit`（不 skip）                                                                                  | h1 檢查通過                                                                      |
-| T12 | `headings-a11y`      | 5 頁對比度掃描                                                                                               | 0 處不足                                                                         |
-| T13 | `headings-a11y`      | 首頁、店家頁、`/faq`、`/store-guide` 在 390px 與 1280px 截圖                                                 | 除了顏色，排版與字級不變；「04」看得到                                           |
-| T14 | `headings-a11y`      | Lighthouse（手機）無障礙                                                                                     | 首頁、店家頁、`/faq` 都 ≥ 95                                                     |
-| T15 | `stable-image-urls`  | 抽查腳本（驗收條件 1）                                                                                       | 回報沒有 token 的物件數量與代表路徑；全程沒有寫入                                |
-| T16 | `stable-image-urls`  | 本機店家頁原始碼連續抓兩次                                                                                   | og:image、JSON-LD image 都是 `firebasestorage.googleapis.com/…&token=`，兩次相同 |
-| T17 | `stable-image-urls`  | 首頁、`/store-list`、店家頁、admin 列表的圖片；`/store-list` TTFB                                            | 全部正常顯示；TTFB ≤ 基準值的 110%；`/store-list` HTML 每間店只有 1 個圖片網址   |
-| T18 | `seo-metadata`       | 用 Rich Results Test 檢查 Vercel preview 上一筆面議店家、一筆免頂讓金店家                                    | 面議頁沒有 Product；免頂讓金頁的 Product 有效（price 0）                         |
-| T19 | `seo-metadata`       | 本機 `/sitemap.xml`                                                                                          | 包含已售出店家（priority 0.4），不包含 pending / rejected / draft                |
-| T20 | `seo-metadata`       | 本機 `/store-guide` 原始碼                                                                                   | title、description、og:title 都是驗收條件 7 的文案；canonical 為 `/store-guide`  |
+| #   | 驗證                                                                                                                                                                                         | 對應模組         |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| T1  | 本機 dev（`NEXT_PUBLIC_ENV_VERSION=dev`，寫入 `mockStore`）在 `/sell` 上傳一張 4000×3000、約 5 MB 的 JPEG：Storage 裡是 `<名稱>-<id>.webp`，最長邊 ≤ 1600、≤ 400 KB，縮圖正常顯示            | `upload-resize`  |
+| T2  | 同樣的流程在 admin 圖片頁再做一次                                                                                                                                                            | `upload-resize`  |
+| T3  | 上傳一張已經很小的圖（< 300 KB、< 1600px）：內容原封不動                                                                                                                                     | `upload-resize`  |
+| T4  | 上傳手機直拍、帶 EXIF 方向的照片：方向正確                                                                                                                                                   | `upload-resize`  |
+| T5  | 上傳 `.heic`（桌機 Chrome）：照舊上傳原檔，沒有錯誤訊息；同一家店先後上傳 `a.jpg`、`a.png`，兩張都在                                                                                         | `upload-resize`  |
+| T6  | iPhone Safari 實機上傳（**需要你用手機測**）：檔案變小，格式是 WebP 或 JPEG                                                                                                                  | `upload-resize`  |
+| T7  | `mockStore` 試跑：數字合理；跑前跑後 Storage 物件的 generation 和店家文件的 `images`、`updateTime` 完全相同                                                                                  | `image-backfill` |
+| T8  | `mockStore --write`：店家文件 `images` 換成 `.webp`、順序不變、`updateTime` 不變；原圖仍在；本機 dev 首頁、`/store-list`、店家頁、my-listings、admin drawer 照片都正常                       | `image-backfill` |
+| T9  | `mockStore --write` 再跑一次：全部略過、0 寫入                                                                                                                                               | `image-backfill` |
+| T10 | `mockStore --rollback --only <id>`：路徑換回原圖、轉好的檔被刪除、頁面正常；再轉一次也正常                                                                                                   | `image-backfill` |
+| T11 | 單店試轉（`prodStore --write --only <storeId>`）後，在 LINE 和 Facebook 分享這家店的正式站網址，確認 WebP 的 og:image 有顯示。LINE 抓不到 localhost，所以一定要用正式站；失敗就 `--rollback` | `image-backfill` |
+| T12 | 全部跑完後打開正式站首頁、`/store-list`、幾個店家頁確認沒有破圖；`npm run seo:audit -- https://www.bezold.com.tw` 結果和跑之前一樣                                                           | `image-backfill` |
+| T13 | 清理模式先在 `mockStore` 跑：原圖移到 `backup/`、頁面照片正常；之後才跑 `prodStore`                                                                                                          | `image-backfill` |
+| T14 | 每個 PR 都要通過 lint（0 錯誤）和 `npm run build`                                                                                                                                            | 全部             |
 
 ## Boundaries
 
 - **Always**
-  - 一個模組一個分支（從 main 開），做完先停下來等你 review，之後再 commit 和開 PR。
-  - 每次修改都跑 prettier、eslint、build、`seo:audit`。
-  - 公開頁面與 API 一律只輸出 `approved`（和 sold 的單頁），賣家聯絡方式維持只能從 `/api/stores/[storeId]/contact` 取得。
-  - 變更 metadata 時，同時檢查 `og:*`，不能只改 `<title>`。
+  - backfill 先在 `mockStore` 完整跑過（轉檔、重跑、還原、清理），再碰 `prodStore`；正式資料先單店試轉，通過 T11 才跑全部
+  - Firestore 只用 transaction 更新 `images`，順序不變；不寫 `updateTime` 或其他欄位
+  - 新檔一律用 `ifGenerationMatch: 0` 上傳，不覆蓋任何現有物件
+  - 刪除原圖之前，確認 `backup/` 裡的複本已經存在
+  - 改過的檔案都跑 prettier；遵守 CLAUDE.md（`COLLECTIONS`、`utils/` vs `constant/`、完整變數名稱）
+  - 本機瀏覽器測試會寫入資料時，先把 `NEXT_PUBLIC_ENV_VERSION` 改成 `dev`
 - **Ask first**
-  - 新增任何 npm 依賴。
-  - 修改 Storage / Firestore 權限或 Vercel 設定。
-  - 修改不在各模組檔案清單裡的檔案，或單一模組改動超過 10 個檔案。
-  - 調整 Firestore 查詢條件、新增 composite index。
-  - 修改 `next.config.js`（例如重新開啟圖片優化）。
+  - 每一次對 `prodStore` 加 `--write`（包含單店試轉、還原、清理）
+  - 刪除 `backup/` 裡的任何東西
+  - 除了 `sharp` 以外再加任何套件
+  - 動到 Storage rules 或 `next.config.js`
 - **Never**
-  - 直接修改或 push 到 `main`；commit `.env` 或金鑰。
-  - 在本機驗證時寫入正式資料。
-  - 讓 draft / pending / rejected 出現在任何公開的 HTML、API 或 sitemap。
-  - 為了補下載 token 而寫入或修改正式環境的 Storage 物件 metadata（要先詢問）。
+  - 在沒有備份的情況下刪除原圖
+  - 覆寫任何現有的 Storage 物件
+  - 寫入店家文件 `images` 以外的欄位
+  - 因為圖片處理失敗就擋住賣家上傳
+  - commit `.env` 或 service account 金鑰
 
 ## Success Criteria
 
-- 4 個模組的驗收條件全部成立，T1–T20 全部通過。
-- 對本機與上線後的正式站執行 `npm run seo:audit`（不帶 `--skip`）結果為 0 個失敗。
-- Search Console 追蹤（你提交 sitemap、`seo-metadata` 上線後約 4 週）：sitemap 狀態為「成功」；6 篇 blog 文章、`/faq`、`/store-list` 都已建立索引；產品摘要報表的無效項目為 0；「頂讓是什麼意思」相關查詢開始有點擊。
-- 對正式站重新跑健檢：Lighthouse SEO 首頁、店家頁、`/faq` 都是 100；無障礙都 ≥ 95；`/store-list` 的 TTFB 和 HTML 大小達到 `store-list-payload` 的目標。
-- 現有行為不變：admin 列表、草稿流程、聯絡方式的會員限制、分享按鈕、圖片上傳。
+1. 正式站店家文件參照的照片總大小從約 490 MB 降到 **≤ 120 MB**；轉好的檔最長邊都 ≤ 1600px，p95 大小 ≤ 400 KB。
+2. 所有店家文件的 `images` 都指向存在的物件、順序不變、`updateTime` 不變；正式站首頁、`/store-list`、店家頁沒有破圖（T12）。
+3. 清理後，`backup/prodStore/` 有每一張被替換原圖的複本，`prodStore/` 只剩正在使用的檔案。
+4. 部署之後，從 `/sell` 或 admin 上傳一張 5 MB 的照片，進到 Storage 時 ≤ 400 KB（T1、T2）。
+5. 一週內，Billing Reports 的 Cloud Storage 對外流量費用明顯下降（這項不卡 PR，部署後追蹤）。
 
 ## Open Questions
 
-目前沒有。
-
-已解決：
-
-- 圖片網址的做法：採用 Firebase 下載網址。302 轉址會多一次往返，而且 Google 圖片最後抓到的仍是會變動的簽名網址；bucket 公開讀取需要改權限。實測 474 張圖中有 19 張超過 Vercel Function 4.5 MB 的回應上限，所以不考慮由 Vercel 代送圖片。
-- Vercel 頻寬：改用下載網址後圖片不經過 Vercel，Hobby 方案的額度（目前 Fast Data Transfer 2.22 GB / 100 GB）不受影響。
-- 換照片沿用同檔名：下載網址不經過 CDN 快取；server 端快取 TTL 只有 10 分鐘，不會長時間顯示舊圖。
+1. **LINE / Facebook 對 WebP og:image 的支援**：店家頁的 og:image 是第一張照片。如果 LINE 分享預覽不顯示 WebP，在台灣影響很大。T11 在跑全部正式資料之前，用一家正式店家試轉來驗證；失敗就 `--rollback`，把 `IMAGE_OUTPUT_TYPE` 改成 `image/jpeg`（同樣 1600px、品質 80，大約 250–400 KB），再試轉一次。
+2. **原圖留在原路徑多久**：網址換了以後，Google、LINE、Facebook 會在幾天到幾週內重新抓。建議 **4 週**後再跑清理。在那之前，舊網址仍然能用，而且還原很簡單。
+3. **Cache-Control**：這次不設定（之前建議的第 3 項）。如果第 5 項成功指標的流量費降得不夠多，再另外開一個 spec。
+4. **`backup/` 保留多久**：建議清理後再穩定一個月，才決定是否刪除。刪除前會先問你。
