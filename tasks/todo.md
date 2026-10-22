@@ -22,16 +22,16 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 沒有 `--prefix` 就報錯退出；`--prefix` 只接受 `mockStore`、`prodStore`；支援 `--only`
-- [ ] 沒有 `--write` 時不呼叫任何寫入 API（Storage 和 Firestore 都一樣）
-- [ ] 摘要包含：會處理數、各種略過數、店家文件參照的照片總 MB（處理前 → 處理後）
-- [ ] 參數從 `constant/image.ts` import，腳本裡沒有重複的數字
+- [x] 沒有 `--prefix` 就報錯退出；`--prefix` 只接受 `mockStore`、`prodStore`；支援 `--only`
+- [x] 沒有 `--write` 時不呼叫任何寫入 API（Storage 和 Firestore 都一樣）
+- [x] 摘要包含：會處理數、各種略過數、店家文件參照的照片總 MB（處理前 → 處理後）
+- [x] 參數從 `constant/image.ts` import，腳本裡沒有重複的數字
 
 **Verification:**
 
-- [ ] `mockStore` 試跑（SPEC #T7）：數字合理；跑前跑後 Storage 物件的 generation、店家文件的 `images` 和 `updateTime` 完全相同
-- [ ] `prodStore` 試跑（唯讀）：記下處理後總大小，確認 ≤ 120 MB（Success Criteria 1）；如果不到，先回來討論參數
-- [ ] lint、build 通過
+- [x] `mockStore` 試跑（SPEC #T7）：數字合理；跑前跑後 Storage 物件的 generation、店家文件的 `images` 和 `updateTime` 完全相同
+- [x] `prodStore` 試跑（唯讀）：記下處理後總大小，確認 ≤ 120 MB（Success Criteria 1）；如果不到，先回來討論參數 — 490.29 MB → 94.63 MB；299 張要轉、222 張已在門檻內、1 張轉完變大；新檔 p95 0.33 MB、最大 0.53 MB
+- [x] lint、build 通過
 
 **Dependencies:** None
 
