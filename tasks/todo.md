@@ -109,15 +109,15 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 正式站這家店的店家頁、列表卡片照片正常
-- [ ] LINE 和 Facebook 分享預覽都有圖（SPEC #T11）
-- [ ] 如果任何一邊沒有圖：經你同意後 `--rollback --only <storeId>` → `IMAGE_OUTPUT_TYPE` 改成 `image/jpeg` → `mockStore` 重跑 Task 2、3 的驗證 → 再試轉這家店一次
+- [x] 正式站這家店的店家頁、列表卡片照片正常 — 試轉 `4fy20TpARRzvSzLt3N4F`（2026-10-22）：5 張、28.91 MB → 0.80 MB；`images` 順序不變、`updateTime` 不變
+- [x] LINE 和 Facebook 分享預覽都有圖（SPEC #T11）— 兩邊都顯示 `DSCF0151.webp` 封面，維持 WebP
+- [x] ~~如果任何一邊沒有圖~~（不需要）：如果任何一邊沒有圖：經你同意後 `--rollback --only <storeId>` → `IMAGE_OUTPUT_TYPE` 改成 `image/jpeg` → `mockStore` 重跑 Task 2、3 的驗證 → 再試轉這家店一次
 
 **Verification:**
 
-- [ ] 正式站店家頁照片的回應 `Content-Type` 是 `IMAGE_OUTPUT_TYPE`、大小 ≤ 400 KB
-- [ ] Facebook Sharing Debugger「Scrape Again」顯示預覽圖
-- [ ] LINE 聊天室分享網址（必要時加 `?v=1` 避開快取）顯示預覽圖（**你在手機上看**）
+- [x] 正式站店家頁照片的回應 `Content-Type` 是 `IMAGE_OUTPUT_TYPE`、大小 ≤ 400 KB — 5 張都是 200 `image/webp`，89–193 KB
+- [x] Facebook Sharing Debugger「Scrape Again」顯示預覽圖
+- [x] LINE 聊天室分享網址（必要時加 `?v=1` 避開快取）顯示預覽圖（**你在手機上看**）
 
 **Dependencies:** Checkpoint A
 
@@ -133,14 +133,14 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 0 個 failed；參照照片總大小 ≤ 120 MB，p95 ≤ 400 KB（Success Criteria 1）
-- [ ] 所有店家文件的 `images` 都指向存在的物件（Success Criteria 2）
+- [x] 0 個 failed；參照照片總大小 ≤ 120 MB，p95 ≤ 400 KB（Success Criteria 1）— 2026-10-22：轉了 294 張（加上試轉 5 張共 299），490.29 MB → 94.63 MB，p95 0.33 MB、最大 0.53 MB
+- [x] 所有店家文件的 `images` 都指向存在的物件（Success Criteria 2）— 153 家、522 個參照全部存在；299 張新檔的原圖都還在；腳本沒有寫 `updateTime`（當天有 2 家的 `updateTime` 是賣家在轉檔前自己改的）
 
 **Verification:**
 
-- [ ] 正式站首頁、`/store-list`、5 個店家頁照片都正常（SPEC #T12）
-- [ ] `npm run seo:audit -- https://www.bezold.com.tw` 結果和基準一樣
-- [ ] 再跑一次 `prodStore` 試跑：全部略過
+- [x] 正式站首頁、`/store-list`、5 個店家頁照片都正常（SPEC #T12）— 所有照片網址都回 200；剩下的 JPEG 是本來就在門檻內、沒有轉的
+- [x] `npm run seo:audit -- https://www.bezold.com.tw` 結果和基準一樣 — 跑前跑後都是 90 頁、0 個失敗
+- [x] 再跑一次 `prodStore` 試跑：全部略過 — 0 張要轉（299 已轉、222 在門檻內、1 轉完變大）
 
 **Dependencies:** Task 4
 
@@ -151,7 +151,7 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 ### Checkpoint B: 正式資料完成
 
 - [ ] 實際數字（處理數、前後總大小、p95）寫進 PR 1 描述
-- [ ] 記下完成日期，4 週後做 Phase 4
+- [x] 記下完成日期，4 週後做 Phase 4 — 2026-10-22 完成，約 2026-11-19 之後清理
 
 ---
 
@@ -163,16 +163,16 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] `/sell` 上傳 4000×3000、約 5 MB 的 JPEG：Storage 裡是 `<名稱>-<id>.webp`，最長邊 1600、≤ 400 KB
-- [ ] admin 圖片頁上傳同一張圖，結果相同
-- [ ] 同一家店先後上傳 `a.jpg`、`a.png`，兩張都在 `images` 裡
-- [ ] `StoreImageUpload.tsx` 和 admin 圖片頁不用改
+- [x] `/sell` 上傳 4000×3000、約 5 MB 的 JPEG：Storage 裡是 `<名稱>-<id>.webp`，最長邊 1600、≤ 400 KB — 函式本身已驗證（瀏覽器內測 `resizeImageFile`，未上傳）：6.4 MB 4000×3000 → 1200×1600 WebP 261 KB；你在本機（`mockStore` 店家 `S8m4RyRNigobdZ0WxdI5`）實際上傳：`截圖 …-nlbwaa.webp` 112 KB 1600×1000、`截圖 …-5vkox5.webp` 144 KB 1108×1468
+- [ ] admin 圖片頁上傳同一張圖，結果相同 — **需要 admin 登入，等你測**
+- [ ] 同一家店先後上傳 `a.jpg`、`a.png`，兩張都在 `images` 裡 — `toUniqueFileName` 對兩個同名檔產生不同後綴；**實際上傳等你測**
+- [x] `StoreImageUpload.tsx` 和 admin 圖片頁不用改
 
 **Verification:**
 
-- [ ] 本機 dev（**先確認 `NEXT_PUBLIC_ENV_VERSION=dev`**）用 chrome-devtools MCP `upload_file` 測 SPEC #T1、#T2、#T5 撞名部分；測試圖用 sharp 產生在 scratchpad
-- [ ] 上傳後縮圖顯示正常；測完刪除測試照片
-- [ ] lint、build 通過
+- [x] ~~用 chrome-devtools MCP `upload_file` 測~~ 改用暫時的測試頁在瀏覽器裡直接跑 `resizeImageFile`（上傳頁需要登入）；測試頁和測試圖已刪除
+- [x] 上傳後縮圖顯示正常 — 店家頁照片以 WebP 載入（115 kB、147 kB）
+- [x] lint、build 通過
 
 **Dependencies:** Task 4（輸出格式已確定）
 
@@ -189,16 +189,16 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 小圖（< 300 KB、< 1600px）內容原封不動（SPEC #T3）
-- [ ] 帶 EXIF 方向的直拍照片方向正確（SPEC #T4）
-- [ ] 無法解碼的檔案（假的 `.heic`）照舊上傳原檔，沒有錯誤訊息（SPEC #T5）
-- [ ] GIF 原封不動
+- [x] 小圖（< 300 KB、< 1600px）內容原封不動（SPEC #T3）（瀏覽器內測 `resizeImageFile`，未上傳）
+- [x] 帶 EXIF 方向的直拍照片方向正確（SPEC #T4）（瀏覽器內測 `resizeImageFile`，未上傳）：orientation 6 的 4000×3000 → 1200×1600
+- [x] 無法解碼的檔案（假的 `.heic`）照舊上傳原檔，沒有錯誤訊息（SPEC #T5）（瀏覽器內測 `resizeImageFile`，未上傳）：回傳原檔、沒有丟錯
+- [x] GIF 原封不動（瀏覽器內測 `resizeImageFile`，未上傳）
 
 **Verification:**
 
-- [ ] 本機 dev（`mockStore`）逐一上傳上述測試檔，在 Storage 確認結果；測完刪除
-- [ ] 不支援 WebP 的路徑：在瀏覽器暫時讓 `toBlob` 回傳 PNG（devtools 覆寫 `HTMLCanvasElement.prototype.toBlob`），確認改存 JPEG
-- [ ] lint、build 通過
+- [x] ~~本機 dev 逐一上傳~~ 改用測試頁逐一跑上述測試檔；另外透明 PNG 轉 WebP 保留透明
+- [x] 不支援 WebP 的路徑：在瀏覽器暫時讓 `toBlob` 回傳 PNG（devtools 覆寫 `HTMLCanvasElement.prototype.toBlob`），確認改存 JPEG — 3 個大檔都改存 `.jpeg`，尺寸相同；透明 PNG 的透明處填白
+- [x] lint、build 通過
 
 **Dependencies:** Task 6
 

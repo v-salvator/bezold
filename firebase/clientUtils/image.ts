@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { Store } from "@/types";
 import { COLLECTIONS } from "@/firebase/constants";
+import { resizeImageFile, toUniqueFileName } from "@/utils/image";
 
 const COLLECTION = COLLECTIONS.STORE;
 
@@ -21,8 +22,17 @@ export const uploadStoreImageByFile = async (
   storeId: Store["id"],
   file: File,
 ) => {
-  const storageRef = ref(storage, `${COLLECTION}/${storeId}/${file.name}`);
-  const snapshot = await uploadBytes(storageRef, file);
+  // * shrink in the browser first — originals are what visitors download
+  const resizedFile = await resizeImageFile(file);
+  const storageRef = ref(
+    storage,
+    `${COLLECTION}/${storeId}/${toUniqueFileName(resizedFile.name)}`,
+  );
+  const snapshot = await uploadBytes(
+    storageRef,
+    resizedFile,
+    resizedFile.type ? { contentType: resizedFile.type } : undefined,
+  );
   // * after upload image update images path to store doc
   const docRef = doc(db, COLLECTION, storeId);
   await updateDoc(docRef, {
