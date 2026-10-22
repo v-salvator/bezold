@@ -75,15 +75,16 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 還原後店家文件的 `images` 和轉檔前完全相同（含順序）
-- [ ] 轉好的 `.webp` 被刪除；原圖仍在
-- [ ] 還原後再跑轉檔模式，結果和第一次相同
+- [x] 還原後店家文件的 `images` 和轉檔前完全相同（含順序）
+- [x] 轉好的 `.webp` 被刪除；原圖仍在
+- [x] 還原後再跑轉檔模式，結果和第一次相同
 
 **Verification:**
 
-- [ ] `mockStore --write --rollback --only <id>`（SPEC #T10）：和 Task 2 前存下的店家文件比對完全相同；本機 dev 店家頁照片正常
-- [ ] 同一家店再轉一次，頁面正常
-- [ ] lint、build 通過
+- [x] `mockStore --write --rollback --only <id>`（SPEC #T10）：和 Task 2 前存下的店家文件比對完全相同；本機 dev 店家頁照片正常
+- [x] 同一家店再轉一次，頁面正常
+- [x] 原圖已搬到 `backup/` 時：還原會先複製回原路徑，download token 和原本相同
+- [x] lint、build 通過
 
 **Dependencies:** Task 2
 
@@ -95,7 +96,7 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 ### Checkpoint A: mockStore 驗證完成
 
-- [ ] SPEC #T7–T10 通過
+- [x] SPEC #T7–T10 通過（測試用的 `shrink-fixture` 店家和檔案已刪除；`mockStore` 其他 5 家店維持轉好的狀態）
 - [ ] 和你 review；通過後 commit（連同 `SPEC.md`、`tasks/`）並開 PR 1
 
 ---

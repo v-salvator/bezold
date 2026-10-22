@@ -11,6 +11,9 @@
 //   node --env-file=.env scripts/shrink-store-images.mjs --prefix mockStore --write
 // One store only:
 //   node --env-file=.env scripts/shrink-store-images.mjs --prefix mockStore --only <storeId>
+// Roll back (points images at the originals again, deletes the converted files;
+// an original already moved to backup/ is copied back first):
+//   node --env-file=.env scripts/shrink-store-images.mjs --prefix mockStore --only <storeId> --rollback --write
 //
 // --prefix is both the Firestore collection and the Storage folder. It is
 // required on purpose: dev and prod share one Firebase project.
@@ -38,7 +41,7 @@ const BUCKET_NAME = "bezold.appspot.com";
 const PREFIXES = ["mockStore", "prodStore"];
 const CONCURRENCY = 4;
 const USAGE =
-  "Usage: node --env-file=.env scripts/shrink-store-images.mjs --prefix <mockStore|prodStore> [--only <storeId>] [--write]";
+  "Usage: node --env-file=.env scripts/shrink-store-images.mjs --prefix <mockStore|prodStore> [--only <storeId>] [--rollback] [--write]";
 
 const SKIP_REASONS = {
   missing: "object not found",
@@ -65,7 +68,12 @@ function parseArgs(argv) {
     console.error(`--only needs a store id.\n${USAGE}`);
     process.exit(1);
   }
-  return { prefix, only, write: argv.includes("--write") };
+  return {
+    prefix,
+    only,
+    rollback: argv.includes("--rollback"),
+    write: argv.includes("--write"),
+  };
 }
 
 async function mapWithConcurrency(items, limit, mapper) {
@@ -272,6 +280,105 @@ async function verifyStore(bucket, storeRef, convertedImages) {
   }
 }
 
+// * for every converted image the store references: where its original is now
+async function planRollback(bucket, storeDoc) {
+  const images = storeDoc.data().images ?? [];
+  const plans = await mapWithConcurrency(
+    images,
+    CONCURRENCY,
+    async (imagePath) => {
+      const [exists] = await bucket.file(imagePath).exists();
+      if (!exists) return null;
+      const [metadata] = await bucket.file(imagePath).getMetadata();
+      const sourcePath = metadata.metadata?.sourcePath;
+      if (!sourcePath) return null;
+
+      const [sourceExists] = await bucket.file(sourcePath).exists();
+      if (sourceExists) return { imagePath, sourcePath, backupPath: null };
+      const backupPath = `backup/${sourcePath}`;
+      const [backupExists] = await bucket.file(backupPath).exists();
+      if (backupExists) return { imagePath, sourcePath, backupPath };
+      return { imagePath, sourcePath, error: "original not found" };
+    },
+  );
+  return plans.filter(Boolean);
+}
+
+async function rollbackStore(db, bucket, storeRef, plans) {
+  const unrestorable = plans.find((plan) => plan.error);
+  if (unrestorable)
+    throw new Error(`${unrestorable.sourcePath}: ${unrestorable.error}`);
+
+  // * copying keeps the original's metadata, so its download token comes back
+  await Promise.all(
+    plans
+      .filter((plan) => plan.backupPath)
+      .map((plan) =>
+        bucket.file(plan.backupPath).copy(bucket.file(plan.sourcePath), {
+          preconditionOpts: { ifGenerationMatch: 0 },
+        }),
+      ),
+  );
+
+  const originals = new Map(
+    plans.map((plan) => [plan.imagePath, plan.sourcePath]),
+  );
+  let swappedPaths = [];
+  await db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(storeRef);
+    const currentImages = snapshot.data()?.images ?? [];
+    swappedPaths = currentImages.filter((imagePath) =>
+      originals.has(imagePath),
+    );
+    transaction.update(storeRef, {
+      images: currentImages.map(
+        (imagePath) => originals.get(imagePath) ?? imagePath,
+      ),
+    });
+  });
+  await deleteFiles(bucket, swappedPaths);
+}
+
+async function runRollback({ db, bucket, storeDocs, write }) {
+  let restored = 0;
+  let fromBackup = 0;
+  let failures = 0;
+  for (const storeDoc of storeDocs) {
+    let plans;
+    try {
+      plans = await planRollback(bucket, storeDoc);
+    } catch (error) {
+      failures++;
+      console.log(`${storeDoc.id}\n  FAILED   ${error.message}`);
+      continue;
+    }
+    if (plans.length === 0) continue;
+    console.log(storeDoc.id);
+    for (const plan of plans)
+      console.log(
+        plan.error
+          ? `  cannot   ${plan.imagePath} — ${plan.sourcePath}: ${plan.error}`
+          : `  restore  ${plan.imagePath} → ${plan.sourcePath}${plan.backupPath ? " (from backup)" : ""}`,
+      );
+    if (!write) continue;
+    try {
+      await rollbackStore(db, bucket, storeDoc.ref, plans);
+      restored += plans.length;
+      fromBackup += plans.filter((plan) => plan.backupPath).length;
+    } catch (error) {
+      failures++;
+      console.log(`  FAILED   ${error.message}`);
+    }
+  }
+  console.log(
+    write
+      ? `\nRestored: ${restored} (${fromBackup} copied back from backup/)`
+      : "\nDry run — nothing restored.",
+  );
+  console.log(`Failed stores: ${failures}`);
+  return failures;
+}
+
 const megabytes = (bytes) => `${(bytes / 1e6).toFixed(2)} MB`;
 
 function percentile(values, fraction) {
@@ -322,7 +429,7 @@ function printSummary(allImages, { write, failures }) {
 }
 
 async function main() {
-  const { prefix, only, write } = parseArgs(process.argv.slice(2));
+  const { prefix, only, rollback, write } = parseArgs(process.argv.slice(2));
 
   initializeApp({
     credential: cert({
@@ -349,6 +456,14 @@ async function main() {
     storeDocs = [storeDoc];
   } else {
     storeDocs = (await collection.get()).docs;
+  }
+
+  if (rollback) {
+    console.log(
+      `${write ? "WRITE" : "DRY RUN"} · ROLLBACK · ${prefix} · ${storeDocs.length} store(s)\n`,
+    );
+    const failures = await runRollback({ db, bucket, storeDocs, write });
+    process.exit(failures > 0 ? 1 : 0);
   }
 
   console.log(
