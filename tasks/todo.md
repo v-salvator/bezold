@@ -225,18 +225,18 @@ Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
 
 **Acceptance criteria:**
 
-- [ ] 原圖先有 `backup/` 複本才會被刪除
-- [ ] 清理後頁面照片都正常；`--rollback` 仍可從 `backup/` 還原
-- [ ] `prodStore/` 只剩正在使用的檔案（Success Criteria 3）
+- [x] 原圖先有 `backup/` 複本才會被刪除 — 複製用 `ifGenerationMatch: 0`，比對 MD5 後才用原圖的 generation 條件刪除
+- [x] 清理後頁面照片都正常；`--rollback` 仍可從 `backup/` 還原
+- [x] `prodStore/` 只剩正在使用的檔案（Success Criteria 3）— 2026-10-22：522 個物件、94.63 MB，全部都有店家參照；`backup/prodStore/` 299 個、448.89 MB，全部帶 token；重跑搬 0 個
 
 **Verification:**
 
-- [ ] `mockStore --cleanup --write`（SPEC #T13）：`backup/mockStore/` 檔案數等於被替換的原圖數；本機 dev 頁面正常；對一家店跑 `--rollback` 確認能從備份還原，再轉回來
-- [ ] 清理前抽查：LINE 預覽和 Google 搜尋結果裡的店家圖片已經是新網址
-- [ ] `prodStore --cleanup --write` 後，正式站首頁、`/store-list`、5 個店家頁照片正常
-- [ ] lint、build 通過
+- [x] `mockStore --cleanup --write`（SPEC #T13）：`backup/mockStore/` 檔案數等於被替換的原圖數；本機 dev 頁面正常；對一家店跑 `--rollback` 確認能從備份還原，再轉回來 — 搬了 5 個（7.36 MB），重跑 0 個；12 個參照都存在；`ANYD3IPHPZ7K6hadReoO` 還原 → 再轉 → 再清理都正常
+- [ ] ~~清理前抽查：LINE 預覽和 Google 搜尋結果裡的店家圖片已經是新網址~~ — 你決定 2026-10-22 就清理，不等 4 週；舊網址在爬蟲更新前會 404，必要時可從 `backup/` 複製回原路徑（token 不變）
+- [x] `prodStore --cleanup --write` 後，正式站首頁、`/store-list`、5 個店家頁照片正常 — 所有照片網址都回 200；舊原圖網址回 404（預期）；`seo:audit` 90 頁、0 個失敗
+- [x] lint、build 通過 — 只改 `scripts/`，不在 lint 範圍、不影響 build
 
-**Dependencies:** Checkpoint B + 4 週
+**Dependencies:** Checkpoint B（原訂再等 4 週，你決定提前）
 
 **Files likely touched:**
 
