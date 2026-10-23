@@ -14,7 +14,11 @@ import {
 } from "firebase/firestore";
 import { Store } from "@/types";
 import { COLLECTIONS } from "@/firebase/constants";
-import { resizeImageFile, toUniqueFileName } from "@/utils/image";
+import {
+  assertUploadableImage,
+  resizeImageFile,
+  toUniqueFileName,
+} from "@/utils/image";
 
 const COLLECTION = COLLECTIONS.STORE;
 
@@ -24,6 +28,8 @@ export const uploadStoreImageByFile = async (
 ) => {
   // * shrink in the browser first — originals are what visitors download
   const resizedFile = await resizeImageFile(file);
+  // * throws before any Storage call — callers check isImageUploadLimitError
+  assertUploadableImage(resizedFile);
   const storageRef = ref(
     storage,
     `${COLLECTION}/${storeId}/${toUniqueFileName(resizedFile.name)}`,

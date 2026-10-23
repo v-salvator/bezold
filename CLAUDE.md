@@ -8,9 +8,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run dev     # start Next.js dev server (port 3000)
 npm run build   # production build
 npm run lint    # ESLint via next/core-web-vitals
+npm run test:rules  # Firestore + Storage rules tests (emulators, needs Java 21)
 ```
 
-No test runner is configured. Node version is pinned in `.nvmrc` (24) — run `nvm use` first.
+The only tests are the security-rules tests in `tests/rules/` (Node's built-in `node --test`); app code has no test runner. Node version is pinned in `.nvmrc` (24) — run `nvm use` first.
 
 ## Environment
 
@@ -67,6 +68,14 @@ Images in Firestore are stored as raw Storage paths (e.g. `mockStore/{storeId}/1
 - Admin routes: client calls `authedFetch(idToken, …)` (`lib/authedFetch.ts`); server checks with `verifyAdminToken`. Member-only routes use `verifyUserToken` (any signed-in user).
 - Seller contact (`userInfo` phone/LINE/Threads/email) must never reach the public payload — pass stores through `omitSellerContact()` (`utils/store.ts`) in any public page or endpoint. The only read path is `GET /api/stores/[storeId]/contact` (member-gated, returns empty for sold listings).
 
+### Security rules
+
+`firestore.rules` and `storage.rules` (repo root) are the source of truth — never edit rules in the Firebase console. The Admin SDK (server components, API routes, scripts) bypasses them; they only govern the browser SDK, which is used by sellers on their own data and by admins (`admin` custom claim).
+
+- **A new client-side read or write needs a rule and a test.** Add an `assertSucceeds` test in `tests/rules/` that mirrors the exact payload the code sends — otherwise the call fails with `permission-denied` in production. Sellers can only write the fields listed in `sellFormKeys()` / `ownerEditableKeys()`, so a new seller-editable `Store` field must be added there too.
+- Store photo limits (JPG/PNG/WebP/GIF, < 5 MB) live in both `constant/image.ts` and `isAllowedImage()` in `storage.rules` — change them together.
+- Deploy (the user runs it): `npx firebase deploy --only firestore:rules,storage --project bezold`. One deploy covers dev and prod (same project). Indexes stay console-managed — don't add `firestore.indexes.json`.
+
 ## Styling rules
 
 **CSS Modules handle paint; Tailwind handles layout — never mix both on the same element.**
@@ -113,12 +122,13 @@ Every page under `app/(new)/` follows this structure:
 
 ### Adding fields to the Store type
 
-Any new field on `Store` / `StoreDoc` requires updating **four** places:
+Any new field on `Store` / `StoreDoc` requires updating **five** places:
 
 1. `app/(new)/sell/_components/SellForm.tsx` — public sell form inputs + submit payload
 2. `app/admin/store/create/StoreBaseForm.tsx` — admin create form
 3. `app/admin/store/edit/[storeId]/page.tsx` — admin edit form + `handleUpdateStore` payload (use conditional spreading to avoid writing `undefined` via `updateDoc`)
 4. `utils/store.ts` `storeToCard()` — if the field should appear on store list cards
+5. `firestore.rules` — add it to `sellFormKeys()` (sellers set it on `/sell`) and/or `ownerEditableKeys()` (sellers edit it on `/my-listings`), plus a test in `tests/rules/stores.test.ts`. Admin-only fields need no rule change.
 
 ### Search filter state pattern
 

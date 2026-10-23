@@ -8,7 +8,12 @@ import {
   getImageByPath,
 } from "@/firebase/clientUtils";
 import Button from "@/components/refactored/Button";
+import { IMAGE_UPLOAD_TYPES } from "@/constant/image";
+import { isImageUploadLimitError } from "@/utils/image";
 import styles from "./StoreImageUpload.module.css";
+
+const UPLOAD_LIMIT_MESSAGE =
+  "照片太大或格式不支援（JPG / PNG / WebP / GIF，5 MB 以內）";
 
 interface UploadedImage {
   path: string;
@@ -87,8 +92,12 @@ export default function StoreImageUpload({
       ]);
       setPendingFile(null);
       uploaded = true;
-    } catch {
-      setError("上傳失敗，請稍後再試");
+    } catch (uploadError) {
+      setError(
+        isImageUploadLimitError(uploadError)
+          ? UPLOAD_LIMIT_MESSAGE
+          : "上傳失敗，請稍後再試",
+      );
     }
     if (uploaded) {
       await syncAfterImageChange(
@@ -183,7 +192,7 @@ export default function StoreImageUpload({
           <input
             ref={inputRef}
             type="file"
-            accept="image/*"
+            accept={IMAGE_UPLOAD_TYPES.join(",")}
             style={{ display: "none" }}
             onChange={(event) => {
               if (event.target.files?.[0]) {

@@ -11,6 +11,8 @@ import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 
 import type { Store } from "@/types";
+import { IMAGE_UPLOAD_TYPES } from "@/constant/image";
+import { isImageUploadLimitError } from "@/utils/image";
 
 interface EditStoreImageProps {
   params: { storeId: Store["id"] };
@@ -47,7 +49,7 @@ const UploadFileAndPreview = ({
           type="file"
           id="myFile"
           name="filename"
-          accept="image/*"
+          accept={IMAGE_UPLOAD_TYPES.join(",")}
           style={{ visibility: "hidden" }}
           onChange={onImageChange}
         ></input>
@@ -80,7 +82,17 @@ export default function EditStoreImage({ params }: EditStoreImageProps) {
 
   const handleUploadFile = async () => {
     if (file) {
-      await uploadStoreImageByFile(store!.id, file);
+      try {
+        await uploadStoreImageByFile(store!.id, file);
+      } catch (uploadError) {
+        api.error({
+          message: "Upload failed",
+          description: isImageUploadLimitError(uploadError)
+            ? "Only JPG / PNG / WebP / GIF under 5 MB (after resizing) can be uploaded."
+            : `Could not upload image for ${store?.storeName}`,
+        });
+        return;
+      }
       api.success({
         message: "Successfuly upload image",
         description: `Successfuly upload image for ${store?.storeName}`,

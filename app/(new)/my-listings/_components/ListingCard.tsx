@@ -48,9 +48,12 @@ export default function ListingCard({ store }: { store: Store }) {
   const [markingSold, setMarkingSold] = useState(false);
   const [soldError, setSoldError] = useState(false);
 
-  // * sellers may edit pending/approved listings; rejected/sold ones are not editable
+  // * sellers may edit pending/approved listings and resubmit rejected ones;
+  // * sold listings are final
   const canEdit =
-    status === STORE_STATUS.PENDING || status === STORE_STATUS.APPROVED;
+    status === STORE_STATUS.PENDING ||
+    status === STORE_STATUS.APPROVED ||
+    status === STORE_STATUS.REJECTED;
 
   const openConfirm = () => {
     setSoldError(false);

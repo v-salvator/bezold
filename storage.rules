@@ -1,0 +1,68 @@
+rules_version = '2';
+
+// * Public pages show images through download-token URLs the Admin SDK builds
+// * on the server (firebase/serverUtils/image.ts); token URLs bypass these
+// * rules. Only sellers (their own stores) and admins use the browser SDK, so
+// * everything starts closed. Tests: npm run test:rules
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // * custom claim set by /api/admin/set-claim (same check as verifyAdminToken)
+    function isAdmin() {
+      return signedIn() && request.auth.token.get('admin', false) == true;
+    }
+
+    // * one rules file serves both NEXT_PUBLIC_ENV_VERSION environments
+    function isStoreCollection(collectionName) {
+      return collectionName in ['mockStore', 'prodStore'];
+    }
+
+    function storeDoc(collectionName, storeId) {
+      return firestore.get(
+        /databases/(default)/documents/$(collectionName)/$(storeId));
+    }
+
+    function isStoreOwner(collectionName, storeId) {
+      return signedIn()
+        && storeDoc(collectionName, storeId).data.user == request.auth.uid;
+    }
+
+    // * same statuses firestore.rules lets an owner edit — a photo change on a
+    // * draft/sold listing would leave the store doc and Storage out of sync
+    function isEditableByOwner(collectionName, storeId) {
+      return isStoreOwner(collectionName, storeId)
+        && storeDoc(collectionName, storeId).data.get('status', 'pending')
+          in ['pending', 'approved', 'rejected'];
+    }
+
+    // * keep in sync with IMAGE_UPLOAD_MAX_BYTES / IMAGE_UPLOAD_TYPES in
+    // * constant/image.ts (SVG is left out: it can carry scripts)
+    function isAllowedImage() {
+      return request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp|gif)');
+    }
+
+    // * {collection}/{storeId}/{fileName}, as written by uploadStoreImageByFile
+    match /{collectionName}/{storeId}/{fileName} {
+      allow read: if isStoreCollection(collectionName)
+        && (isAdmin() || isStoreOwner(collectionName, storeId));
+      // * file names carry a random suffix, so nothing is ever overwritten —
+      // * resource == null makes that explicit (the emulator treats an
+      // * overwrite as create)
+      allow create: if resource == null
+        && isStoreCollection(collectionName)
+        && (isAdmin() || isEditableByOwner(collectionName, storeId))
+        && isAllowedImage();
+      allow delete: if isStoreCollection(collectionName)
+        && (isAdmin() || isEditableByOwner(collectionName, storeId));
+    }
+
+    // * backup/ (shrink-store-images) and everything else: Admin SDK only
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
