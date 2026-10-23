@@ -35,7 +35,7 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 ## Phase 3: App changes
 
-- [ ] **T6: Upload limit check + clear message**
+- [x] **T6: Upload limit check + clear message**
   - Acceptance: `constant/image.ts` exports `IMAGE_UPLOAD_MAX_BYTES` (5 MB) and `IMAGE_UPLOAD_TYPES`. After resizing, `uploadStoreImageByFile` throws `ImageUploadLimitError` before any Storage call when the file breaks either limit. `StoreImageUpload` shows the limit message for that error and keeps 「上傳失敗」 for everything else. The admin image page shows an antd error notification instead of an unhandled rejection. The upload inputs' `accept` narrows to the allowed types.
   - Verify: in dev, upload an 8 MB photo the browser can shrink (it succeeds) and an SVG (the limit message shows). Lint is clean.
   - Files: `constant/image.ts`, `firebase/clientUtils/image.ts`, `app/(new)/sell/_components/StoreImageUpload.tsx`, `app/admin/store/edit/[storeId]/image/page.tsx`
