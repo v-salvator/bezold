@@ -104,7 +104,7 @@ function storeOwner(c, id) {
 
 | Op     | Allowed when                                                                                                                                                                                            |
 | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| read   | `isAdmin()` or `storeOwner()` — needed for `getDownloadURL`; public pages use server-signed URLs                                                                                                        |
+| read   | `isAdmin()` or `storeOwner()` — needed for `getDownloadURL`; public pages use Admin SDK download-token URLs, which bypass rules                                                                         |
 | create | file is new (`resource == null`) **and** (`isAdmin()` or `storeOwner()` on a pending / approved / rejected listing) **and** `contentType.matches('image/(jpeg\|png\|webp\|gif)')` **and** `size < 5 MB` |
 | update | denied (file names are unique; nothing overwrites)                                                                                                                                                      |
 | delete | `isAdmin()` or `storeOwner()` on a pending / approved / rejected listing                                                                                                                                |

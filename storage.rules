@@ -1,6 +1,7 @@
 rules_version = '2';
 
-// * Public pages show images through server-signed URLs, which bypass these
+// * Public pages show images through download-token URLs the Admin SDK builds
+// * on the server (firebase/serverUtils/image.ts); token URLs bypass these
 // * rules. Only sellers (their own stores) and admins use the browser SDK, so
 // * everything starts closed. Tests: npm run test:rules
 service firebase.storage {
