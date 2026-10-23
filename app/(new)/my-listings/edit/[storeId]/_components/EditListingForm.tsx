@@ -58,8 +58,8 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
           getUserById(firebaseUser.uid),
         ]);
 
-        // * not found, not the owner, rejected or a draft (an admin is reworking
-        // * it) → sellers can't edit here
+        // * not found, not the owner, a draft (an admin is reworking it) or sold
+        // * → sellers can't edit here (firestore.rules refuses those writes too)
         if (!fetchedStore) {
           setLoadError("找不到此刊登");
           setLoading(false);
@@ -70,8 +70,8 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
           return;
         }
         if (
-          fetchedStore.status === STORE_STATUS.REJECTED ||
-          fetchedStore.status === STORE_STATUS.DRAFT
+          fetchedStore.status === STORE_STATUS.DRAFT ||
+          fetchedStore.status === STORE_STATUS.SOLD
         ) {
           router.push("/my-listings");
           return;
@@ -131,9 +131,10 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
     setBoss((previous) => ({ ...previous, [key]: value }));
   }
 
-  // * image add/delete persists immediately → an approved listing must re-enter review
+  // * image add/delete persists immediately → an approved or rejected listing
+  // * must re-enter review
   async function handleImagesChanged() {
-    if (currentStatus === STORE_STATUS.APPROVED) {
+    if (sendsBackToReview(currentStatus)) {
       await updateStoreStatus(storeId, STORE_STATUS.PENDING);
       setCurrentStatus(STORE_STATUS.PENDING);
     }
@@ -185,8 +186,8 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
         ...(store.equipment
           ? { equipment: store.equipment as EquipmentStatus }
           : {}),
-        // * any seller edit sends an approved listing back for re-review
-        ...(currentStatus === STORE_STATUS.APPROVED
+        // * any seller edit sends an approved or rejected listing back for review
+        ...(sendsBackToReview(currentStatus)
           ? { status: STORE_STATUS.PENDING }
           : {}),
       });
@@ -260,4 +261,9 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
       </form>
     </Card>
   );
+}
+
+// * approved: re-review after a change; rejected: the seller fixed it and resubmits
+function sendsBackToReview(status: Store["status"]) {
+  return status === STORE_STATUS.APPROVED || status === STORE_STATUS.REJECTED;
 }

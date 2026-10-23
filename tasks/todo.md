@@ -40,7 +40,7 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
   - Verify: in dev, upload an 8 MB photo the browser can shrink (it succeeds) and an SVG (the limit message shows). Lint is clean.
   - Files: `constant/image.ts`, `firebase/clientUtils/image.ts`, `app/(new)/sell/_components/StoreImageUpload.tsx`, `app/admin/store/edit/[storeId]/image/page.tsx`
 
-- [ ] **T7: Sellers can resubmit rejected listings**
+- [x] **T7: Sellers can resubmit rejected listings**
   - Acceptance: `ListingCard` shows 編輯 for `rejected` listings. `EditListingForm` no longer redirects rejected listings (drafts are still redirected). Saving the form or changing a photo on a rejected or approved listing writes `status: pending`, and the UI shows the pending state. The comments at both sites are updated.
   - Verify: in dev, as admin, reject a mock listing. As the seller, open 編輯, save, and confirm the listing shows 審核中 in `/my-listings` and the admin list. → **Checkpoint 3**
   - Files: `app/(new)/my-listings/_components/ListingCard.tsx`, `app/(new)/my-listings/edit/[storeId]/_components/EditListingForm.tsx`
