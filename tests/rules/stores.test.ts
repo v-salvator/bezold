@@ -3,6 +3,8 @@ import { assertFails, assertSucceeds } from "@firebase/rules-unit-testing";
 import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import {
   addDoc,
+  arrayRemove,
+  arrayUnion,
   collection,
   deleteDoc,
   doc,
@@ -12,6 +14,7 @@ import {
   query,
   serverTimestamp,
   Timestamp,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import {
@@ -216,6 +219,201 @@ for (const collectionName of STORE_COLLECTIONS) {
       await seed(env, storePath, storeDoc());
       const { admin } = actors(env);
       await assertSucceeds(deleteDoc(doc(admin.firestore(), storePath)));
+    });
+  });
+}
+
+// * EditListingForm handleSubmit → editStoreById (before the optional status)
+const editFormPayload = () => ({
+  storeName: "改過的店名",
+  city: "TAIPEI",
+  district: "中山區",
+  location: "南京東路",
+  description: "賣家更新描述",
+  price: 280000,
+  priceNegotiable: false,
+  category: "RESTAURANT",
+  areaPing: 18,
+  monthlyRent: 52000,
+  equipment: "all",
+  updateTime: serverTimestamp(),
+});
+
+const statusChange = (status: string) => ({
+  status,
+  updateTime: serverTimestamp(),
+});
+
+for (const collectionName of STORE_COLLECTIONS) {
+  const storePath = `${collectionName}/store1`;
+  const imagePath = `${collectionName}/store1/photo-a1b2c3.webp`;
+
+  describe(`${collectionName} update — owner`, () => {
+    for (const status of ["pending", "approved", "rejected"]) {
+      it(`can edit the form on a ${status} listing`, async () => {
+        await seed(env, storePath, storeDoc({ status }));
+        const { seller } = actors(env);
+        await assertSucceeds(
+          updateDoc(doc(seller.firestore(), storePath), {
+            ...editFormPayload(),
+            ...(status === "pending" ? {} : { status: "pending" }),
+          }),
+        );
+      });
+
+      // * uploadStoreImageByFile / delateStoreImage
+      it(`can add and remove photos on a ${status} listing`, async () => {
+        await seed(env, storePath, storeDoc({ status, images: [imagePath] }));
+        const sellerDb = actors(env).seller.firestore();
+        await assertSucceeds(
+          updateDoc(doc(sellerDb, storePath), {
+            images: arrayUnion(`${collectionName}/store1/photo-d4e5f6.webp`),
+            updateTime: serverTimestamp(),
+          }),
+        );
+        await assertSucceeds(
+          updateDoc(doc(sellerDb, storePath), {
+            images: arrayRemove(imagePath),
+            updateTime: serverTimestamp(),
+          }),
+        );
+      });
+    }
+
+    // * updateStoreStatus: re-review after edits, ListingCard 標示為已頂讓
+    const allowedTransitions: [string, string][] = [
+      ["approved", "pending"],
+      ["rejected", "pending"],
+      ["pending", "sold"],
+      ["approved", "sold"],
+    ];
+    for (const [from, to] of allowedTransitions) {
+      it(`can move ${from} → ${to}`, async () => {
+        await seed(env, storePath, storeDoc({ status: from }));
+        const { seller } = actors(env);
+        await assertSucceeds(
+          updateDoc(doc(seller.firestore(), storePath), statusChange(to)),
+        );
+      });
+    }
+
+    it("treats a listing with no status as pending", async () => {
+      const { status, ...legacyStore } = storeDoc();
+      await seed(env, storePath, legacyStore);
+      const { seller } = actors(env);
+      await assertSucceeds(
+        updateDoc(doc(seller.firestore(), storePath), statusChange("sold")),
+      );
+    });
+
+    const deniedTransitions: [string, string][] = [
+      ["pending", "approved"],
+      ["rejected", "approved"],
+      ["rejected", "sold"],
+      ["sold", "pending"],
+      ["sold", "approved"],
+      ["draft", "pending"],
+      ["pending", "draft"],
+      ["pending", "rejected"],
+    ];
+    for (const [from, to] of deniedTransitions) {
+      it(`cannot move ${from} → ${to}`, async () => {
+        await seed(env, storePath, storeDoc({ status: from }));
+        const { seller } = actors(env);
+        await assertFails(
+          updateDoc(doc(seller.firestore(), storePath), statusChange(to)),
+        );
+      });
+    }
+
+    for (const status of ["draft", "sold"]) {
+      it(`cannot edit a ${status} listing`, async () => {
+        await seed(env, storePath, storeDoc({ status }));
+        const sellerDb = actors(env).seller.firestore();
+        await assertFails(
+          updateDoc(doc(sellerDb, storePath), editFormPayload()),
+        );
+        await assertFails(
+          updateDoc(doc(sellerDb, storePath), {
+            images: arrayUnion(imagePath),
+            updateTime: serverTimestamp(),
+          }),
+        );
+      });
+    }
+
+    const protectedFields: [string, unknown][] = [
+      ["user", UID.otherSeller],
+      ["tags", ["RECOMMENDED"]],
+      ["createTime", Timestamp.fromDate(new Date("2020-01-01"))],
+      ["currency", "USD"],
+      ["featured", true],
+    ];
+    for (const [field, value] of protectedFields) {
+      it(`cannot change ${field}`, async () => {
+        await seed(env, storePath, storeDoc());
+        const { seller } = actors(env);
+        await assertFails(
+          updateDoc(doc(seller.firestore(), storePath), {
+            [field]: value,
+            updateTime: serverTimestamp(),
+          }),
+        );
+      });
+    }
+
+    it("must stamp updateTime with the server time", async () => {
+      await seed(env, storePath, storeDoc({ status: "pending" }));
+      const sellerDb = actors(env).seller.firestore();
+      await assertFails(
+        updateDoc(doc(sellerDb, storePath), { storeName: "沒有更新時間" }),
+      );
+      await assertFails(
+        updateDoc(doc(sellerDb, storePath), {
+          storeName: "自己填時間",
+          updateTime: Timestamp.fromDate(new Date("2030-01-01")),
+        }),
+      );
+    });
+  });
+
+  describe(`${collectionName} update — others`, () => {
+    it("another seller cannot edit the store", async () => {
+      await seed(env, storePath, storeDoc({ status: "pending" }));
+      const { otherSeller } = actors(env);
+      await assertFails(
+        updateDoc(doc(otherSeller.firestore(), storePath), editFormPayload()),
+      );
+    });
+
+    it("an anonymous visitor cannot edit the store", async () => {
+      await seed(env, storePath, storeDoc({ status: "pending" }));
+      const { anonymous } = actors(env);
+      await assertFails(
+        updateDoc(doc(anonymous.firestore(), storePath), statusChange("sold")),
+      );
+    });
+
+    // * admin list status buttons, edit page, drafts → any change
+    it("an admin can approve, tag and reassign", async () => {
+      await seed(env, storePath, storeDoc({ status: "pending" }));
+      const { admin } = actors(env);
+      await assertSucceeds(
+        updateDoc(doc(admin.firestore(), storePath), {
+          status: "approved",
+          tags: ["RECOMMENDED"],
+          user: "bossUserDocId",
+          updateTime: serverTimestamp(),
+        }),
+      );
+    });
+
+    it("an admin can turn any listing into a draft", async () => {
+      await seed(env, storePath, storeDoc({ status: "sold" }));
+      const { admin } = actors(env);
+      await assertSucceeds(
+        updateDoc(doc(admin.firestore(), storePath), statusChange("draft")),
+      );
     });
   });
 }

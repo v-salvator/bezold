@@ -69,6 +69,33 @@ service cloud.firestore {
         && data.updateTime == request.time;
     }
 
+    // * what EditListingForm, the photo uploader and ListingCard write
+    function ownerEditableKeys() {
+      return ['storeName', 'city', 'district', 'location', 'description',
+        'price', 'priceNegotiable', 'category', 'areaPing', 'monthlyRent',
+        'equipment', 'images', 'status', 'updateTime'];
+    }
+
+    // * sellers send listings back to review (any edit on approved/rejected)
+    // * or mark them sold; approving, rejecting and drafting are admin-only
+    function isOwnerStatusChange(from, to) {
+      return from == to
+        || (to == 'pending' && from in ['approved', 'rejected'])
+        || (to == 'sold' && from in ['pending', 'approved']);
+    }
+
+    // * docs written before status existed count as pending, like ListingCard
+    function isOwnerEdit() {
+      let from = resource.data.get('status', 'pending');
+      let to = request.resource.data.get('status', 'pending');
+      return signedIn()
+        && resource.data.user == request.auth.uid
+        && from in ['pending', 'approved', 'rejected']
+        && changedKeys().hasOnly(ownerEditableKeys())
+        && request.resource.data.updateTime == request.time
+        && isOwnerStatusChange(from, to);
+    }
+
     match /{collectionName}/{storeId} {
       // * owner: /my-listings query (where user == uid) and the edit page
       // * admin: every list in /admin, drafts included
@@ -76,6 +103,9 @@ service cloud.firestore {
         && (isAdmin() || (signedIn() && resource.data.user == request.auth.uid));
       allow create: if isStoreCollection(collectionName)
         && (isAdmin() || isNewSellerListing());
+      // * draft (admin is reworking it) and sold listings are frozen for sellers
+      allow update: if isStoreCollection(collectionName)
+        && (isAdmin() || isOwnerEdit());
       // * the app deletes through the Admin SDK (DELETE /api/stores/[storeId])
       allow delete: if isStoreCollection(collectionName) && isAdmin();
     }

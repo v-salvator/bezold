@@ -23,7 +23,7 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
   - Verify: `npm run test:rules`
   - Files: `firestore.rules`, `tests/rules/firestore.test.ts`
 
-- [ ] **T4: Store docs — owner update + status transitions**
+- [x] **T4: Store docs — owner update + status transitions**
   - Acceptance: these succeed: the EditListingForm payload; `updateStoreStatus` from approved→pending, rejected→pending, pending→sold and approved→sold; and an image `arrayUnion` / `arrayRemove` with `updateTime`. These are denied: pending→approved; rejected→approved or →sold; any change to a draft or sold listing; changing `user`, `tags`, `createTime` or `currency`; and an update without `updateTime == request.time`. An admin can make any update. Both `mockStore` and `prodStore` are exercised.
   - Verify: `npm run test:rules`
   - Files: `firestore.rules`, `tests/rules/firestore.test.ts`
