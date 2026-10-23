@@ -13,7 +13,7 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 ## Phase 2: Rules (each slice = its rule lines + its tests)
 
-- [ ] **T2: User docs**
+- [x] **T2: User docs**
   - Acceptance: matches the user-docs table in the spec. Tests cover `signup` `setDoc`, `editUserById` (both the update path and the `setDoc` upsert path), `writeBuyerProfile`, admin `addDoc` (`createUserDoc`), and an admin editing another user. Denied: anonymous reads, another member reading someone's contact info, self changing `createTime`, and any delete.
   - Verify: `npm run test:rules`
   - Files: `firestore.rules`, `tests/rules/firestore.test.ts`

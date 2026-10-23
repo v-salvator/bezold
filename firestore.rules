@@ -5,6 +5,43 @@ rules_version = '2';
 // * and by admins, so everything starts closed. Tests: npm run test:rules
 service cloud.firestore {
   match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // * custom claim set by /api/admin/set-claim (same check as verifyAdminToken)
+    function isAdmin() {
+      return signedIn() && request.auth.token.admin == true;
+    }
+
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // * one rules file serves both NEXT_PUBLIC_ENV_VERSION environments
+    function isUserCollection(collectionName) {
+      return collectionName in ['mockUser', 'prodUser'];
+    }
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    // * user docs hold seller contact info (phone / LINE / email) — only the
+    // * user and admins may see them; public pages get it via the member-gated
+    // * /api/stores/[storeId]/contact route
+    match /{collectionName}/{userId} {
+      allow read: if isUserCollection(collectionName)
+        && (isSelf(userId) || isAdmin());
+      // * self: signup / editUserById upsert (id = uid)
+      // * admin: createUserDoc uses addDoc, so the id is random
+      allow create: if isUserCollection(collectionName)
+        && (isSelf(userId) || isAdmin());
+      allow update: if isUserCollection(collectionName)
+        && (isAdmin()
+          || (isSelf(userId) && !changedKeys().hasAny(['createTime'])));
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
