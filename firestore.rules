@@ -23,6 +23,10 @@ service cloud.firestore {
       return collectionName in ['mockUser', 'prodUser'];
     }
 
+    function isStoreCollection(collectionName) {
+      return collectionName in ['mockStore', 'prodStore'];
+    }
+
     function changedKeys() {
       return request.resource.data.diff(resource.data).affectedKeys();
     }
@@ -40,6 +44,40 @@ service cloud.firestore {
       allow update: if isUserCollection(collectionName)
         && (isAdmin()
           || (isSelf(userId) && !changedKeys().hasAny(['createTime'])));
+    }
+
+    // * the fields SellForm sends to createStoreDoc — nothing else on create
+    function sellFormKeys() {
+      return ['storeName', 'city', 'district', 'location', 'description',
+        'price', 'priceNegotiable', 'category', 'areaPing', 'monthlyRent',
+        'equipment', 'tags', 'currency', 'user', 'images', 'status',
+        'createTime', 'updateTime'];
+    }
+
+    // * a new listing always enters review: no tags (admin-only, e.g.
+    // * RECOMMENDED), no photos yet (uploaded after the doc exists), and
+    // * server timestamps
+    function isNewSellerListing() {
+      let data = request.resource.data;
+      return signedIn()
+        && data.keys().hasOnly(sellFormKeys())
+        && data.user == request.auth.uid
+        && data.status == 'pending'
+        && data.tags == []
+        && data.images == []
+        && data.createTime == request.time
+        && data.updateTime == request.time;
+    }
+
+    match /{collectionName}/{storeId} {
+      // * owner: /my-listings query (where user == uid) and the edit page
+      // * admin: every list in /admin, drafts included
+      allow read: if isStoreCollection(collectionName)
+        && (isAdmin() || (signedIn() && resource.data.user == request.auth.uid));
+      allow create: if isStoreCollection(collectionName)
+        && (isAdmin() || isNewSellerListing());
+      // * the app deletes through the Admin SDK (DELETE /api/stores/[storeId])
+      allow delete: if isStoreCollection(collectionName) && isAdmin();
     }
 
     match /{document=**} {

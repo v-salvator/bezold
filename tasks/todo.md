@@ -18,7 +18,7 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
   - Verify: `npm run test:rules`
   - Files: `firestore.rules`, `tests/rules/firestore.test.ts`
 
-- [ ] **T3: Store docs — read, create, delete**
+- [x] **T3: Store docs — read, create, delete**
   - Acceptance: the owner can `get` their store and run the exact `where("user", "==", uid), orderBy("createTime", "desc")` query. Another seller and anonymous users are denied. An admin can list everything. The SellForm create payload, sent exactly as the code sends it, succeeds. A create is denied when it has `status: 'approved'`, a non-empty `tags` or `images`, `user` set to someone else, or an extra key. Admin creates and deletes succeed. A seller delete is denied.
   - Verify: `npm run test:rules`
   - Files: `firestore.rules`, `tests/rules/firestore.test.ts`
