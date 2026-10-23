@@ -47,7 +47,7 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 ## Phase 4: Wrap-up
 
-- [ ] **T8: Docs + final checks + PR**
+- [x] **T8: Docs + final checks + PR**
   - Acceptance: CLAUDE.md gains a short "Security rules" section: where the rules live, `npm run test:rules`, the deploy command, and "new client writes need a rule and a test". `npm run lint` (using the worktree eslint workaround) and `npm run build` pass. The PR description includes the user's deploy steps and the smoke-test checklist from the spec.
   - Verify: lint and build output; the PR is open. → **Checkpoint 4**
   - Files: `CLAUDE.md`
@@ -55,5 +55,5 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 ## After merge (user)
 
 1. Deploy the app with T6 and T7 included.
-2. Run `npx firebase deploy --only firestore:rules,storage --project bezold`.
+2. Run `npx firebase deploy --only firestore:rules,storage --project bezold`. The first time, the CLI asks to let Storage rules read Firestore (cross-service rules). Answer **yes**, or every photo upload fails.
 3. Run the smoke test on dev data (see the spec's Testing Strategy). To roll back, paste the test-mode rules into the console.

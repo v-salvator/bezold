@@ -47,8 +47,10 @@ firestore.rules          → Firestore rules
 storage.rules            → Storage rules
 tests/rules/
   helpers.ts             → initializeTestEnvironment, seed data, auth contexts (anon / member / owner / other / admin)
-  firestore.test.ts      → one describe per collection × actor
-  storage.test.ts
+  firestore.test.ts      → catch-all + anonymous checks
+  users.test.ts          → user docs, per collection × actor
+  stores.test.ts         → store docs: read, create, delete, owner update + status flow
+  storage.test.ts        → store photos, backup/ and other paths
 tests/rules/package.json → {"type": "module"} so Node loads the tests as ESM
 ```
 
@@ -100,16 +102,18 @@ function storeOwner(c, id) {
 }
 ```
 
-| Op     | Allowed when                                                                                                        |
-| ------ | ------------------------------------------------------------------------------------------------------------------- |
-| read   | `isAdmin()` or `storeOwner()` — needed for `getDownloadURL`; public pages use server-signed URLs                    |
-| create | (`isAdmin()` or `storeOwner()`) **and** `contentType.matches('image/(jpeg\|png\|webp\|gif)')` **and** `size < 5 MB` |
-| update | denied (file names are unique; nothing overwrites)                                                                  |
-| delete | `isAdmin()` or `storeOwner()`                                                                                       |
+| Op     | Allowed when                                                                                                                                                                                            |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| read   | `isAdmin()` or `storeOwner()` — needed for `getDownloadURL`; public pages use server-signed URLs                                                                                                        |
+| create | file is new (`resource == null`) **and** (`isAdmin()` or `storeOwner()` on a pending / approved / rejected listing) **and** `contentType.matches('image/(jpeg\|png\|webp\|gif)')` **and** `size < 5 MB` |
+| update | denied (file names are unique; nothing overwrites)                                                                                                                                                      |
+| delete | `isAdmin()` or `storeOwner()` on a pending / approved / rejected listing                                                                                                                                |
 
 **Upload limits (app change).** The browser resize usually brings photos well under 5 MB. It hands back the original file when it can't shrink one: a HEIC photo in Chrome, an SVG, a GIF, or an encoder failure. Those uploads would now be rejected with the generic 「上傳失敗」 message. To give a clear message instead, `uploadStoreImageByFile` checks the resized file against the shared `IMAGE_UPLOAD_MAX_BYTES` / `IMAGE_UPLOAD_TYPES` constants (`constant/image.ts`) before uploading and throws a typed error. The seller upload UI shows 「照片太大或格式不支援（JPG / PNG / WebP / GIF，5 MB 以內）」, and the admin image page shows an error notification. SVG is excluded on purpose, because SVG files served from our bucket could run scripts.
 
 `backup/**` and every other path: denied. The cleanup / backfill scripts use the Admin SDK and are unaffected.
+
+Owners can still read photos on draft / sold listings but not change them. Otherwise `delateStoreImage` would delete the file and then fail the Firestore update, leaving a broken path. The emulator evaluates an overwrite as `create`, which is why the explicit `resource == null` guard is there.
 
 `getDownloadURL` tokens already issued keep working regardless of rules — existing cached image URLs don't break.
 
@@ -150,6 +154,7 @@ Readable variable names, prettier after every file.
 - **Emulator tests** (`tests/rules/*.test.ts`), one `assertSucceeds` / `assertFails` per row of the tables above, for every actor: anonymous, member (no stores), owner, other seller, admin.
 - **Every real client call in the app gets a "succeeds" test** that mirrors its exact payload (SellForm create, EditListingForm edit, ListingCard sold, image upload `arrayUnion`, signup `setDoc`, `editUserById` upsert, `writeBuyerProfile`, admin `addDoc` user). This is the regression guard against the rules breaking the app.
 - Both collection names (`mock*`, `prod*`) are exercised at least once.
+- **App changes (T6, T7):** the limit check is verified in Node against every boundary (just under 5 MB, exactly 5 MB, SVG, HEIC, empty type). The UI paths need a signed-in seller and admin, so they are covered by the smoke test below, not by an automated browser run.
 - **Manual smoke test after deploy**, against the dev (`mock*`) data: sign up → `/sell` → upload photo (and one over 5 MB) → `/my-listings` edit → admin rejects it → seller edits it and it shows 審核中 → mark sold; admin list / edit / image page / drafts / analytics. Public home, store list, store page still render.
 
 ## Boundaries
