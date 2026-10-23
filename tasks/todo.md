@@ -28,7 +28,7 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
   - Verify: `npm run test:rules`
   - Files: `firestore.rules`, `tests/rules/firestore.test.ts`
 
-- [ ] **T5: Storage**
+- [x] **T5: Storage**
   - Acceptance: matches the Storage table in the spec. The owner and admin can upload a WebP under 5 MB and can read and delete. These are denied: another seller uploading to someone else's store, anonymous access, a 5 MB file, `image/svg+xml`, `text/html`, an overwrite of an existing file, and any access to `backup/**` or other paths.
   - Verify: `npm run test:rules` → **Checkpoint 2** (user reviews both rules files)
   - Files: `storage.rules`, `tests/rules/storage.test.ts`, `tests/rules/helpers.ts`

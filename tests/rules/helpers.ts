@@ -1,10 +1,9 @@
 import { readFileSync } from "node:fs";
 import { initializeTestEnvironment } from "@firebase/rules-unit-testing";
-import type {
-  RulesTestContext,
-  RulesTestEnvironment,
-} from "@firebase/rules-unit-testing";
+import type { RulesTestEnvironment } from "@firebase/rules-unit-testing";
 import { doc, setDoc, setLogLevel, Timestamp } from "firebase/firestore";
+import { deleteObject, listAll, ref, uploadBytes } from "firebase/storage";
+import type { StorageReference } from "firebase/storage";
 
 // * every assertFails would otherwise print the SDK's PERMISSION_DENIED warning
 setLogLevel("error");
@@ -41,12 +40,21 @@ export const actors = (env: RulesTestEnvironment) => ({
   admin: env.authenticatedContext(UID.admin, { admin: true }),
 });
 
-export type Actor = keyof ReturnType<typeof actors>;
-export type Context = RulesTestContext;
+// * env.clearStorage() only deletes files at the bucket root, and every store
+// * photo lives under {collection}/{storeId}/ — walk the folders instead
+const deleteAllFiles = async (folder: StorageReference): Promise<void> => {
+  const { items, prefixes } = await listAll(folder);
+  await Promise.all([
+    ...items.map((item) => deleteObject(item)),
+    ...prefixes.map((prefix) => deleteAllFiles(prefix)),
+  ]);
+};
 
 export const resetEmulators = async (env: RulesTestEnvironment) => {
   await env.clearFirestore();
-  await env.clearStorage();
+  await env.withSecurityRulesDisabled(async (context) => {
+    await deleteAllFiles(ref(context.storage()));
+  });
 };
 
 // * a store doc shaped like what SellForm writes, already approved by default
@@ -94,5 +102,17 @@ export const seed = async (
 ) => {
   await env.withSecurityRulesDisabled(async (context) => {
     await setDoc(doc(context.firestore(), path), data);
+  });
+};
+
+export const seedFile = async (
+  env: RulesTestEnvironment,
+  path: string,
+  contentType = "image/webp",
+) => {
+  await env.withSecurityRulesDisabled(async (context) => {
+    await uploadBytes(ref(context.storage(), path), new Uint8Array(16), {
+      contentType,
+    });
   });
 };
