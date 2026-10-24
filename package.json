@@ -10,7 +10,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seo:audit": "node scripts/seo-audit.mjs"
+    "seo:audit": "node scripts/seo-audit.mjs",
+    "test:rules": "firebase emulators:exec --only firestore,storage --project demo-bezold \"node --test --test-concurrency=1 tests/rules/*.test.ts\""
   },
   "dependencies": {
     "@ant-design/nextjs-registry": "^1.0.0",
@@ -44,6 +45,8 @@
     "typescript": "5.2.2"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^3.0.4",
+    "firebase-tools": "^15.34.1",
     "sharp": "^0.35.5"
   }
 }

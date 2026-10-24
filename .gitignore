@@ -39,6 +39,10 @@ next-env.d.ts
 # firebase
 /firebase/serviceAccount.json
 /firebase/configs_old.ts
+firebase-debug.log
+firestore-debug.log
+storage-debug.log
+ui-debug.log
 
 # claude code
 .claude/settings.local.json

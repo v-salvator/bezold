@@ -3,6 +3,8 @@ import {
   IMAGE_OUTPUT_TYPE,
   IMAGE_QUALITY,
   IMAGE_SKIP_BYTES,
+  IMAGE_UPLOAD_MAX_BYTES,
+  IMAGE_UPLOAD_TYPES,
 } from "@/constant/image";
 
 // * animations and vector art would be flattened into one raster frame
@@ -82,3 +84,24 @@ export const toUniqueFileName = (fileName: string) => {
   const suffix = Math.random().toString(36).slice(2, 8);
   return `${baseName}-${suffix}${extension}`;
 };
+
+// * the resize hands back the original when it can't shrink a file (HEIC in
+// * Chrome, SVG, encoder failure); storage.rules would reject those with a
+// * bare permission error, so catch them first with a reason the UI can show
+const IMAGE_UPLOAD_LIMIT_ERROR = "ImageUploadLimitError";
+
+export const assertUploadableImage = (file: File) => {
+  if (
+    file.size >= IMAGE_UPLOAD_MAX_BYTES ||
+    !IMAGE_UPLOAD_TYPES.includes(file.type)
+  ) {
+    const error = new Error(
+      `${file.name} (${file.type || "unknown type"}, ${file.size} bytes) is outside the upload limits`,
+    );
+    error.name = IMAGE_UPLOAD_LIMIT_ERROR;
+    throw error;
+  }
+};
+
+export const isImageUploadLimitError = (error: unknown) =>
+  error instanceof Error && error.name === IMAGE_UPLOAD_LIMIT_ERROR;
