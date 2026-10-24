@@ -23,6 +23,10 @@ export const DIGITAL_ASSET_TYPE_LABEL = Object.fromEntries(
   DIGITAL_ASSET_TYPES.map(({ key, label }) => [key, label]),
 ) as Record<DigitalAssetType, string>;
 
+// * /digital-assets header line, on both the list and the pre-launch teaser
+export const DIGITAL_ASSETS_SUBTITLE =
+  "電商、社群、網站、App……匿名刊登，送出申請後由平台確認雙方再牽線。";
+
 // * fixed caption under every 平均月營收 figure — sellers can't edit it
 export const REVENUE_DISCLAIMER = "賣家提供，未經 Bezold 查核";
 

@@ -4,11 +4,13 @@ import LaunchBanner from "@/app/(new)/_components/LaunchBanner";
 import SiteNav from "@/app/(new)/_components/SiteNav";
 import SiteFooter from "@/app/(new)/_components/SiteFooter";
 import DigitalAssetResults from "./_components/DigitalAssetResults";
+import DigitalAssetsTeaser from "./_components/DigitalAssetsTeaser";
 import { getDigitalAssets } from "@/firebase/serverUtils/store";
 import { STORE_STATUS } from "@/types";
 import { toCard } from "@/utils/store";
 import {
   filterByDigitalAssetTab,
+  isDigitalAssetsLaunched,
   toDigitalAssetTab,
 } from "@/utils/digitalAsset";
 
@@ -30,6 +32,20 @@ interface PageProps {
 }
 
 export default async function DigitalAssetsPage({ searchParams }: PageProps) {
+  // * dynamic page, so this flips on the first request after launch
+  if (!isDigitalAssetsLaunched()) {
+    return (
+      <>
+        <LaunchBanner />
+        <SiteNav activeLink="數位資產" />
+        <div className="flex-1">
+          <DigitalAssetsTeaser />
+        </div>
+        <SiteFooter />
+      </>
+    );
+  }
+
   // * ?type= is the only source of the filter; unknown values mean 全部
   const activeTab = toDigitalAssetTab(searchParams.type);
 
