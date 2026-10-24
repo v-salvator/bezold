@@ -1,5 +1,12 @@
 import Image from "next/image";
-import { MapPin, Ruler, Banknote, Package } from "lucide-react";
+import {
+  MapPin,
+  Ruler,
+  Banknote,
+  Package,
+  Clock,
+  TrendingUp,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import styles from "./StoreCard.module.css";
 
@@ -7,6 +14,8 @@ const SPEC_ICONS = {
   ruler: <Ruler size={13} strokeWidth={2} />,
   banknote: <Banknote size={13} strokeWidth={2} />,
   package: <Package size={13} strokeWidth={2} />,
+  clock: <Clock size={13} strokeWidth={2} />,
+  trendingUp: <TrendingUp size={13} strokeWidth={2} />,
 };
 
 export type RibbonVariant = "default" | "mus" | "sage" | "sold";

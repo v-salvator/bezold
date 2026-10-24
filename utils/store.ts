@@ -1,7 +1,13 @@
 import { type StoreCard } from "@/components/refactored/StoreCard";
-import { type Store, type SellerContact } from "@/types";
+import {
+  type Store,
+  type SellerContact,
+  LISTING_TYPE,
+  STORE_STATUS,
+} from "@/types";
 import { RIBBON_DISPLAY, RIBBON_PRIORITY } from "@/constant/storeDisplay";
 import { EQUIPMENT_LABEL } from "@/constant/storeEquipment";
+import { DIGITAL_ASSET_TYPE_LABEL } from "@/constant/digitalAsset";
 
 export function formatPriceParts(price: number): {
   amount: string;
@@ -33,11 +39,45 @@ export function formatPriceDisplay(
   return priceNegotiable ? `${base}（可面議）` : base;
 }
 
-export function storeToCard(store: Store): StoreCard {
-  const tags = store.tags ?? [];
+// * digital assets may list a price range: `price` is the lower bound and
+// * `priceMax` the upper. Anything that isn't a real range (no upper bound,
+// * upper <= lower, lower 0) falls back to the single-price label.
+export function formatPriceRange(
+  price: number,
+  priceMax?: number,
+  priceNegotiable?: boolean,
+): string {
+  if (!(price > 0 && priceMax && priceMax > price))
+    return formatPriceDisplay(price, priceNegotiable);
 
+  const low = formatPriceParts(price);
+  const high = formatPriceParts(priceMax);
+  const highAmount = high.amount.replace(/^NT\$ /, "");
+
+  let range: string;
+  if (low.unit !== high.unit)
+    range = `${low.amount} ${low.unit}–${highAmount} ${high.unit}`;
+  else if (low.amount === high.amount)
+    // * bounds that round to the same label (50.1 萬–50.4 萬) read as one price
+    return formatPriceDisplay(price, priceNegotiable);
+  else range = `${low.amount}–${highAmount} ${high.unit}`;
+
+  return priceNegotiable ? `${range}（可面議）` : range;
+}
+
+// * listingType is absent on every store created before digital assets
+// * existed — treat missing as physical so no backfill is needed
+export const isDigitalAsset = (store: Pick<Store, "listingType">) =>
+  store.listingType === LISTING_TYPE.DIGITAL;
+
+function tagRibbon(store: Store): StoreCard["ribbon"] {
+  const tags = store.tags ?? [];
   const ribbonTag = RIBBON_PRIORITY.find((tag) => tags.includes(tag));
-  const ribbon = ribbonTag ? RIBBON_DISPLAY[ribbonTag] : undefined;
+  return ribbonTag ? RIBBON_DISPLAY[ribbonTag] : undefined;
+}
+
+export function storeToCard(store: Store): StoreCard {
+  const ribbon = tagRibbon(store);
 
   const locationParts = [store.city, store.location || store.district].filter(
     Boolean,
@@ -76,6 +116,49 @@ export function storeToCard(store: Store): StoreCard {
   };
 }
 
+export function digitalAssetToCard(store: Store): StoreCard {
+  const ribbon: StoreCard["ribbon"] =
+    store.status === STORE_STATUS.SOLD
+      ? { label: "已頂讓", variant: "sold" }
+      : tagRibbon(store);
+
+  const typeLabels = (store.digitalTypes ?? []).map(
+    (type) => DIGITAL_ASSET_TYPE_LABEL[type],
+  );
+
+  const specs: StoreCard["specs"] = [
+    {
+      iconName: "clock",
+      label:
+        store.operatingYears != null
+          ? `經營 ${store.operatingYears} 年`
+          : "經營 —",
+    },
+    {
+      iconName: "trendingUp",
+      label:
+        store.monthlyRevenue != null
+          ? `月營收 ${formatPrice(store.monthlyRevenue)}`
+          : "月營收 —",
+    },
+  ];
+
+  return {
+    ribbon,
+    image: store.images?.[0],
+    photoLabel: "數位資產",
+    title: store.storeName,
+    location: typeLabels.length > 0 ? typeLabels.join(" · ") : undefined,
+    description: store.description || undefined,
+    specs,
+    price: formatPriceRange(store.price, store.priceMax, store.priceNegotiable),
+  };
+}
+
+export function toCard(store: Store): StoreCard {
+  return isDigitalAsset(store) ? digitalAssetToCard(store) : storeToCard(store);
+}
+
 export const genDefaultStore = () => {
   return {
     storeName: "",
@@ -99,7 +182,14 @@ const EMPTY_CONTACT: SellerContact = {
   email: "",
 };
 
+// * assetUrl (admin-only) and verificationImages (admin/owner-only) go through
+// * the same gate — blanked when present, never added when absent
 export function omitSellerContact(store: Store): Store {
-  if (!store.userInfo) return store;
-  return { ...store, userInfo: { ...store.userInfo, ...EMPTY_CONTACT } };
+  const publicStore = { ...store };
+  if (store.userInfo)
+    publicStore.userInfo = { ...store.userInfo, ...EMPTY_CONTACT };
+  if (store.assetUrl !== undefined) publicStore.assetUrl = "";
+  if (store.verificationImages !== undefined)
+    publicStore.verificationImages = [];
+  return publicStore;
 }

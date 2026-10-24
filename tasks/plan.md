@@ -31,7 +31,7 @@ Spec: [`SPEC.md`](../SPEC.md) · Tasks: [`tasks/todo.md`](todo.md)
 ### PR 1 — 資料模型與後台
 
 - [x] Task 1: 合併 main（PR #90 rules）、index 改由 repo 管理、commit spec 和 plan
-- [ ] Task 2: 型別、常數、價格區間與卡片轉換
+- [x] Task 2: 型別、常數、價格區間與卡片轉換
 - [ ] Task 3: 實體查詢排除數位、`getDigitalAssets()`、改用 `toCard()`
 - [ ] Task 4: 後台建立／編輯表單支援數位資產
 - [ ] Task 5: 後台列表的類型欄位與篩選、drawer 顯示數位欄位

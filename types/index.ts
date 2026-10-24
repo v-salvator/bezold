@@ -5,3 +5,4 @@ export * from "./StoreTags";
 export * from "./StoreCategory";
 export * from "./StoreStatus";
 export * from "./StoreAnalytics";
+export * from "./DigitalAsset";

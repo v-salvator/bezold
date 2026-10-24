@@ -2,6 +2,7 @@ import { User } from "./User";
 import type { Timestamp } from "firebase/firestore";
 import { StoreTag } from "@/types/StoreTags";
 import { StoreStatus } from "@/types/StoreStatus";
+import type { DigitalAssetType, ListingType } from "@/types/DigitalAsset";
 
 export type EquipmentStatus = "all" | "none" | "partial";
 
@@ -27,6 +28,14 @@ export interface Store {
   areaPing?: number;
   monthlyRent?: number;
   equipment?: EquipmentStatus;
+  // * ── digital assets (absent on physical stores) ──
+  listingType?: ListingType; // * absent = physical
+  digitalTypes?: DigitalAssetType[];
+  operatingYears?: number;
+  monthlyRevenue?: number; // * 平均月營收 (NT$)
+  priceMax?: number; // * range upper bound; `price` is the lower bound
+  assetUrl?: string; // * admin-only — blanked by omitSellerContact
+  verificationImages?: string[]; // * admin/owner-only Storage paths — blanked by omitSellerContact
 }
 
 // * types in firestore doc
@@ -50,4 +59,12 @@ export interface StoreDoc {
   areaPing?: number;
   monthlyRent?: number;
   equipment?: EquipmentStatus;
+  // * ── digital assets (absent on physical stores) ──
+  listingType?: ListingType; // * absent = physical
+  digitalTypes?: DigitalAssetType[];
+  operatingYears?: number;
+  monthlyRevenue?: number; // * 平均月營收 (NT$)
+  priceMax?: number; // * range upper bound; `price` is the lower bound
+  assetUrl?: string; // * admin-only — blanked by omitSellerContact
+  verificationImages?: string[]; // * admin/owner-only Storage paths — blanked by omitSellerContact
 }
