@@ -16,7 +16,9 @@ import StoreImageUpload from "@/app/(new)/sell/_components/StoreImageUpload";
 import Button from "@/components/refactored/Button";
 import Card from "@/components/refactored/Card";
 import StoreFieldsSection from "@/components/storeForm/StoreFieldsSection";
+import DigitalFieldsSection from "@/components/storeForm/DigitalFieldsSection";
 import ContactFieldsSection from "@/components/storeForm/ContactFieldsSection";
+import VerificationImageUpload from "@/components/storeForm/VerificationImageUpload";
 import {
   type StoreFields,
   type BossFields,
@@ -24,8 +26,14 @@ import {
   validateStoreForm,
 } from "@/components/storeForm/formTypes";
 import styles from "@/components/storeForm/storeForm.module.css";
-import { type Store, type EquipmentStatus, STORE_STATUS } from "@/types";
+import {
+  type Store,
+  type EquipmentStatus,
+  LISTING_TYPE,
+  STORE_STATUS,
+} from "@/types";
 import { normalizeThreadsId } from "@/utils/user";
+import { digitalAssetWriteFields, listingTypeOf } from "@/utils/store";
 
 export default function EditListingForm({ storeId }: { storeId: string }) {
   const router = useRouter();
@@ -36,12 +44,15 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
   const [store, setStore] = useState<StoreFields | null>(null);
   const [boss, setBoss] = useState<BossFields>(emptyBossFields());
   const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [existingScreenshots, setExistingScreenshots] = useState<string[]>([]);
   const [currentStatus, setCurrentStatus] = useState<Store["status"]>(
     STORE_STATUS.PENDING,
   );
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // * fixed for the listing's lifetime — the edit page has no type switch
+  const isDigital = store?.listingType === LISTING_TYPE.DIGITAL;
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -78,6 +89,7 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
         }
 
         setStore({
+          listingType: listingTypeOf(fetchedStore),
           storeName: fetchedStore.storeName ?? "",
           city: fetchedStore.city ?? "",
           district: fetchedStore.district ?? "",
@@ -93,8 +105,15 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
               ? String(fetchedStore.monthlyRent)
               : "",
           equipment: fetchedStore.equipment ?? "",
+          digitalTypes: fetchedStore.digitalTypes ?? [],
+          operatingYears: toFieldString(fetchedStore.operatingYears),
+          monthlyRevenue: toFieldString(fetchedStore.monthlyRevenue),
+          // * 0 = no upper bound → an empty input
+          priceMax: fetchedStore.priceMax ? String(fetchedStore.priceMax) : "",
+          assetUrl: fetchedStore.assetUrl ?? "",
         });
         setExistingImages(fetchedStore.images ?? []);
+        setExistingScreenshots(fetchedStore.verificationImages ?? []);
         setCurrentStatus(fetchedStore.status ?? STORE_STATUS.PENDING);
 
         setBoss({
@@ -131,8 +150,8 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
     setBoss((previous) => ({ ...previous, [key]: value }));
   }
 
-  // * image add/delete persists immediately → an approved or rejected listing
-  // * must re-enter review
+  // * photo / screenshot add or delete persists immediately → an approved or
+  // * rejected listing must re-enter review
   async function handleImagesChanged() {
     if (sendsBackToReview(currentStatus)) {
       await updateStoreStatus(storeId, STORE_STATUS.PENDING);
@@ -168,33 +187,52 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
       return;
     }
 
+    // * the type is fixed (firestore.rules refuses a listingType change), so
+    // * a digital edit sends only the shared and digital fields
+    const { listingType: _unchangedType, ...digitalFields } =
+      digitalAssetWriteFields(store);
+    const reviewStatus = sendsBackToReview(currentStatus)
+      ? { status: STORE_STATUS.PENDING }
+      : {};
+
     try {
-      await editStoreById(storeId, {
-        storeName: store.storeName,
-        city: store.city,
-        district: store.district,
-        location: store.location,
-        description: store.description,
-        price: priceValue,
-        priceNegotiable: store.priceNegotiable,
-        category: store.category,
-        // * mirror admin edit: only write optional fields when present (updateDoc rejects undefined)
-        ...(store.areaPing ? { areaPing: Number(store.areaPing) } : {}),
-        ...(store.monthlyRent
-          ? { monthlyRent: Number(store.monthlyRent) }
-          : {}),
-        ...(store.equipment
-          ? { equipment: store.equipment as EquipmentStatus }
-          : {}),
-        // * any seller edit sends an approved or rejected listing back for review
-        ...(sendsBackToReview(currentStatus)
-          ? { status: STORE_STATUS.PENDING }
-          : {}),
-      });
+      if (isDigital) {
+        await editStoreById(storeId, {
+          storeName: store.storeName,
+          description: store.description,
+          price: priceValue,
+          priceNegotiable: store.priceNegotiable,
+          ...digitalFields,
+          // * any seller edit sends an approved or rejected listing back for review
+          ...reviewStatus,
+        });
+      } else {
+        await editStoreById(storeId, {
+          storeName: store.storeName,
+          city: store.city,
+          district: store.district,
+          location: store.location,
+          description: store.description,
+          price: priceValue,
+          priceNegotiable: store.priceNegotiable,
+          category: store.category,
+          // * mirror admin edit: only write optional fields when present (updateDoc rejects undefined)
+          ...(store.areaPing ? { areaPing: Number(store.areaPing) } : {}),
+          ...(store.monthlyRent
+            ? { monthlyRent: Number(store.monthlyRent) }
+            : {}),
+          ...(store.equipment
+            ? { equipment: store.equipment as EquipmentStatus }
+            : {}),
+          // * any seller edit sends an approved or rejected listing back for review
+          ...reviewStatus,
+        });
+      }
       trackEvent("store_listing_edit", {
         store_id: storeId,
         category: store.category || "unspecified",
         city: store.city || "unspecified",
+        listing_type: store.listingType,
       });
       router.push("/my-listings");
     } catch {
@@ -231,18 +269,35 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
   return (
     <Card className="w-full max-w-[640px]">
       <form className={styles.form} onSubmit={handleSubmit}>
-        <StoreFieldsSection store={store} onChange={setStoreField} />
+        {isDigital ? (
+          <DigitalFieldsSection store={store} onChange={setStoreField} />
+        ) : (
+          <StoreFieldsSection store={store} onChange={setStoreField} />
+        )}
 
         <ContactFieldsSection boss={boss} onChange={setBossField} />
 
         <StoreImageUpload
           storeId={storeId}
-          heading="店面照片"
+          heading={isDigital ? "封面照片" : "店面照片"}
           headingBadge="獨立儲存"
           initialImages={existingImages}
           note="此區為獨立操作：照片一經上傳或刪除即立即生效並重新送審，不需按下方的「儲存變更」。"
           onImagesChanged={handleImagesChanged}
         />
+
+        {isDigital && (
+          <>
+            <VerificationImageUpload
+              storeId={storeId}
+              initialImages={existingScreenshots}
+              onImagesChanged={handleImagesChanged}
+            />
+            <p className={styles.readonlyNote}>
+              截圖一經上傳或刪除即立即生效並重新送審，不需按下方的「儲存變更」。
+            </p>
+          </>
+        )}
 
         {error && <p className={styles.errorMsg}>{error}</p>}
 
@@ -262,6 +317,8 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
     </Card>
   );
 }
+
+const toFieldString = (value?: number) => (value != null ? String(value) : "");
 
 // * approved: re-review after a change; rejected: the seller fixed it and resubmits
 function sendsBackToReview(status: Store["status"]) {
