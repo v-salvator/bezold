@@ -20,3 +20,8 @@ export const DIGITAL_ASSET_TYPE = {
 
 export type DigitalAssetType =
   (typeof DIGITAL_ASSET_TYPE)[keyof typeof DIGITAL_ASSET_TYPE];
+
+// * 「全部」 — the type tab that shows every digital asset
+export const ALL_DIGITAL_ASSET_TYPES = "ALL";
+
+export type DigitalAssetTab = DigitalAssetType | typeof ALL_DIGITAL_ASSET_TYPES;

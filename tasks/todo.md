@@ -314,16 +314,16 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria**：
 
-- [ ] `SectionTitle` 04、`NEW` Pill、副標、「看全部數位資產 →」
-- [ ] 讀最新 30 筆 approved（`limit: 30`）；類型分頁在 client 端篩選、不改網址，每個分頁最多 6 張
-- [ ] 分頁沒資料時顯示「這個類型目前沒有最新刊登」＋「到列表頁看看 →」（`/digital-assets?type=<類型>`）；完全沒資料時顯示整區空狀態
-- [ ] 底部「我也有數位資產想刊登 ↗」（`/sell?type=digital`）和警語
-- [ ] Categories 05、Districts 06、BrowseAll 07、HowItWorks 08、WhyUs 09、Faq 10（`Stories` 沒有掛載，不改）
-- [ ] `getDigitalAssets()` 出錯時區塊顯示空狀態，首頁不會壞
+- [x] `SectionTitle` 04、`NEW` Pill、副標、「看全部數位資產 →」
+- [x] 讀最新 30 筆 approved（`limit: 30`）；類型分頁在 client 端篩選、不改網址，每個分頁最多 6 張
+- [x] 分頁沒資料時顯示「這個類型目前沒有最新刊登」＋「到列表頁看看 →」（`/digital-assets?type=<類型>`）；完全沒資料時顯示整區空狀態
+- [x] 底部「我也有數位資產想刊登 ↗」（`/sell?type=digital`）和警語
+- [x] Categories 05、Districts 06、BrowseAll 07、HowItWorks 08、WhyUs 09、Faq 10（`Stories` 沒有掛載，不改）
+- [x] `getDigitalAssets()` 出錯時區塊顯示空狀態，首頁不會壞
 
 **驗證**：
 
-- [ ] T14：分頁切換、空狀態、編號都正確；手機寬度分頁可以橫向捲動或換行，不撐破版面
+- [x] T14：分頁切換、空狀態、編號都正確；手機寬度分頁可以橫向捲動或換行，不撐破版面
 
 **Dependencies**：PR 2
 **Files**：`app/(new)/_components/DigitalAssets/index.tsx`、`DigitalAssets/TypeTabs.tsx`、`DigitalAssets/DigitalAssets.module.css`、`app/(new)/page.tsx`、6 個區塊元件的 `num`（每個只改一個字串）

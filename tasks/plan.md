@@ -65,7 +65,7 @@ Spec: [`SPEC.md`](../SPEC.md) · Tasks: [`tasks/todo.md`](todo.md)
 
 ### PR 3 — 瀏覽入口
 
-- [ ] Task 15: 首頁「04 數位資產頂讓」區塊
+- [x] Task 15: 首頁「04 數位資產頂讓」區塊
 - [ ] Task 16: `/digital-assets` 列表頁
 - [ ] Task 17: 導覽列「數位資產」
 

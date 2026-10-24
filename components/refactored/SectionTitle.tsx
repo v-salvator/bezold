@@ -6,6 +6,7 @@ export default function SectionTitle({
   num,
   title,
   sub,
+  badge,
   subLink,
   more,
   moreHref,
@@ -13,6 +14,8 @@ export default function SectionTitle({
 }: {
   num: string;
   title: string;
+  /** Rendered right after the title, e.g. a `NEW` Pill. */
+  badge?: React.ReactNode;
   sub?: string;
   /**
    * Optional inline link rendered right after `sub` (e.g. "如何成為編輯精選？→").
@@ -33,6 +36,7 @@ export default function SectionTitle({
       <div className={styles.left}>
         <span className={cn(styles.num, dark && styles.numDark)}>{num}</span>
         <h2 className={styles.h}>{title}</h2>
+        {badge}
         {sub && (
           <span className={cn(styles.sub, dark && styles.subDark)}>{sub}</span>
         )}

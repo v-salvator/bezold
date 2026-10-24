@@ -18,7 +18,7 @@ export default function Districts() {
   return (
     <Section variant="alt">
       <SectionTitle
-        num="05"
+        num="06"
         title="熱門城市"
         sub="— 點擊看該市所有刊登 —"
         more="看全部城市 →"
