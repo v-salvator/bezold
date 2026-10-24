@@ -14,6 +14,10 @@ import {
   toDigitalAssetTab,
 } from "@/utils/digitalAsset";
 
+// * the pre-launch teaser returns before reading searchParams, which would let
+// * Next build this page statically and keep the teaser past launch
+export const dynamic = "force-dynamic";
+
 const PAGE_TITLE = "數位資產頂讓｜電商、社群、網站轉讓 - Bezold";
 
 export const metadata: Metadata = {
@@ -32,7 +36,7 @@ interface PageProps {
 }
 
 export default async function DigitalAssetsPage({ searchParams }: PageProps) {
-  // * dynamic page, so this flips on the first request after launch
+  // * rendered per request, so this flips on the first request after launch
   if (!isDigitalAssetsLaunched()) {
     return (
       <>
