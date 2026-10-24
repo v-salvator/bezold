@@ -63,11 +63,6 @@
 }
 
 .footer {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px 18px;
-  flex-wrap: wrap;
   margin-top: 18px;
 }
 
@@ -82,11 +77,4 @@
   &:hover {
     opacity: 0.8;
   }
-}
-
-.notice {
-  font-family: var(--note);
-  font-size: 12px;
-  color: var(--ink-2);
-  margin: 0;
 }

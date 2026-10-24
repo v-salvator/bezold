@@ -2,7 +2,6 @@ import Section from "../Section";
 import SellCtaLink from "../SellCtaLink";
 import SectionTitle from "@/components/refactored/SectionTitle";
 import StoreCard from "@/components/refactored/StoreCard";
-import { TRANSFER_RISK_NOTICE } from "@/constant/digitalAsset";
 import type { Store } from "@/types";
 import { toCard } from "@/utils/store";
 import styles from "./DigitalAssets.module.css";
@@ -51,7 +50,6 @@ export default function DigitalAssets({ assets }: { assets: Store[] }) {
         >
           我也有數位資產想刊登 ↗
         </SellCtaLink>
-        <p className={styles.notice}>{TRANSFER_RISK_NOTICE}</p>
       </div>
     </Section>
   );
