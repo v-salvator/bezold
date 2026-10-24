@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   ...pageMetadata({
     title: PAGE_TITLE,
     description:
-      "瀏覽電商賣場、FB 社團、網站、App、SaaS 等數位資產頂讓。匿名刊登，買家送出申請後由 Bezold 確認雙方，再為你們牽線。",
+      "瀏覽電商賣場、FB 社團、網站、App、SaaS 等數位資產頂讓。匿名刊登，每筆都經 Bezold 核對營收截圖；有興趣可在刊登頁申請查看賣家資料。",
     path: "/digital-assets",
   }),
   // * the spec's full title — skip the root "｜頂讓網 Bezold" template
