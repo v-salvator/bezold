@@ -11,7 +11,7 @@ import styles from "./LaunchBanner.module.css";
 type BannerMessage = {
   key: string;
   tag: string;
-  /** Phone-width versions — one line has to fit at 360px. */
+  /** Narrow-screen versions (≤ 720px) — one line has to fit at 360px. */
   shortTag?: string;
   text: string;
   shortText: string;

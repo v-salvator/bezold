@@ -113,7 +113,8 @@
   }
 }
 
-@media (max-width: 640px) {
+/* the long pre-launch message needs ~640px; leave room for wider fonts */
+@media (max-width: 720px) {
   .item {
     gap: 8px;
     padding: 0 36px 0 12px;
