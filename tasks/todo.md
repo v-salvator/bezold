@@ -1,250 +1,456 @@
-# Tasks: 店家照片瘦身
+# Tasks: 數位資產頂讓
 
-Plan: [`tasks/plan.md`](plan.md) · Spec: [`SPEC.md`](../SPEC.md)
+Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
-每個任務都要先滿足以下條件才算完成：
+每個 task 完成時都要：prettier 改過的檔案、lint 0 錯誤、`npm run build` 通過。下面的「驗證」只列這個 task 額外要做的事。本機驗證前先確認 `NEXT_PUBLIC_ENV_VERSION=dev`。
 
-- 修改過的檔案都跑過 `npx prettier --write`
-- `npx eslint --no-eslintrc -c .eslintrc.json --ext .ts,.tsx app components constant types utils hooks lib firebase` 沒有新的錯誤
-- `npm run build` 通過（worktree 先暫時 symlink 主 checkout 的 `.env`，結束後刪除）
-- 遵守 CLAUDE.md（`constant/` 與 `utils/` 分工、`COLLECTIONS`、`cn()`、變數命名完整）
-- 腳本在 worktree 裡用 `--env-file=../../../.env`
-- 任何對 `prodStore` 加 `--write` 的執行都要先問你
-- 「SPEC #Tn」指 SPEC.md Testing Strategy 表的測試編號
+**Prerequisite（你）**：rules 測試需要 Java 21（`brew install openjdk@21`），PR #90 已經寫在 CLAUDE.md。
 
 ---
 
-## Phase 1: `image-backfill`（PR 1）
+## PR 1 — 資料模型與後台
 
-### Task 1: 共用參數 + 腳本試跑模式
+### Task 1: 合併 main、index 改由 repo 管理、commit spec 和 plan
 
-**Description:** 新增 `constant/image.ts`（`IMAGE_MAX_EDGE`、`IMAGE_QUALITY`、`IMAGE_SKIP_BYTES`、`IMAGE_OUTPUT_TYPE`、`IMAGE_SETTINGS_TAG`），加 `sharp` devDependency，新增 `scripts/shrink-store-images.mjs` 的唯讀部分：解析參數、逐家讀店家文件的 `images`、判斷略過原因（`missing` / 已轉過 / 已在門檻內 / 轉完變大）、在記憶體裡真的轉檔、算出新檔名（含撞名時的 `-2`），印出每張照片的前後大小和總摘要。這一步完全不寫入。
+**說明**：這個分支是在 PR #90（Firestore／Storage rules）合併前切出來的。先 commit `SPEC.md`、`tasks/plan.md`、`tasks/todo.md`，再用 `sync_with_base_branch` 合併 `main`。衝突的 `SPEC.md`、`tasks/*` 保留這個分支的版本。
 
-**Acceptance criteria:**
+接著把 index 改成在 repo 管理：`firestore.indexes.json` 已經從正式專案匯出（14 個現有的 index），並加上數位資產的 2 個。`firebase.json` 指向這個檔案；CLAUDE.md 改掉「Indexes stay console-managed」，換成新的規則和部署指令。
 
-- [x] 沒有 `--prefix` 就報錯退出；`--prefix` 只接受 `mockStore`、`prodStore`；支援 `--only`
-- [x] 沒有 `--write` 時不呼叫任何寫入 API（Storage 和 Firestore 都一樣）
-- [x] 摘要包含：會處理數、各種略過數、店家文件參照的照片總 MB（處理前 → 處理後）
-- [x] 參數從 `constant/image.ts` import，腳本裡沒有重複的數字
+**Acceptance criteria**：
 
-**Verification:**
+- [ ] 分支包含 `firestore.rules`、`storage.rules`、`tests/rules/`、新版 CLAUDE.md
+- [ ] `SPEC.md`、`tasks/*` 是數位資產的版本
+- [ ] `firebase.json` 的 `firestore` 有 `"indexes": "firestore.indexes.json"`
+- [ ] CLAUDE.md：index 由 `firestore.indexes.json` 管理、部署指令包含 `firestore:indexes`、不要加 `--force`、新的複合查詢要在同一個 PR 加 index
 
-- [x] `mockStore` 試跑（SPEC #T7）：數字合理；跑前跑後 Storage 物件的 generation、店家文件的 `images` 和 `updateTime` 完全相同
-- [x] `prodStore` 試跑（唯讀）：記下處理後總大小，確認 ≤ 120 MB（Success Criteria 1）；如果不到，先回來討論參數 — 490.29 MB → 94.63 MB；299 張要轉、222 張已在門檻內、1 張轉完變大；新檔 p95 0.33 MB、最大 0.53 MB
-- [x] lint、build 通過
+**驗證**：
 
-**Dependencies:** None
+- [ ] `npm run test:rules` 全過（確認 emulator 能跑）
+- [ ] 你執行 `npx firebase deploy --only firestore:indexes --project bezold`（不加 `--force`）：CLI 只新增 2 個數位資產 index，沒有要刪除任何 index；如果問要不要刪除，回答 No 並告訴我
+- [ ] console 上 2 個新 index 的狀態變成「已啟用」
+- [ ] `npm run build` 通過
 
-**Files likely touched:**
+**Dependencies**：None
+**Files**：`SPEC.md`、`tasks/plan.md`、`tasks/todo.md`、`firestore.indexes.json`、`firebase.json`、`CLAUDE.md`
+**Scope**：S
 
-- `constant/image.ts`
-- `scripts/shrink-store-images.mjs`
-- `package.json`、`package-lock.json`
+### Task 2: 型別、常數、價格區間與卡片轉換
 
-**Estimated scope:** M
+**說明**：建立數位資產的資料形狀和純函式，還沒有任何頁面使用。
 
-### Task 2: 轉檔模式
+**Acceptance criteria**：
 
-**Description:** 加上 `--write`：上傳新檔（`ifGenerationMatch: 0`、`contentType`、新的 `firebaseStorageDownloadTokens`、`sourcePath`、`shrunk`、`originalBytes`）→ 用 transaction 重新讀店家文件，把舊路徑換成新路徑（順序不變、只寫 `images`）→ 舊路徑已經不在 `images` 時跳過並刪掉剛上傳的新檔。原圖不動。同時最多 4 張；有 failed 時 exit code 為 1。
+- [ ] `Store`／`StoreDoc` 有 spec 列的 7 個 optional 欄位；`LISTING_TYPE`、`DIGITAL_ASSET_TYPE` 和型別 export 自 `types/`
+- [ ] `constant/digitalAsset.ts` 有類型標籤（8 種，順序同 prototype）、`REVENUE_DISCLAIMER`、交易說明文案、勿提供密碼警語、截圖說明
+- [ ] `utils/store.ts` 有 `isDigitalAsset()`、`formatPriceRange()`、`digitalAssetToCard()`、`toCard()`；`omitSellerContact()` 會把 `assetUrl` 清成 `""`、`verificationImages` 清成 `[]`（實體店面也照清，沒有就不加）
+- [ ] `StoreCard` 的 `SPEC_ICONS` 加 `clock`、`trendingUp`
 
-**Acceptance criteria:**
+**驗證**：
 
-- [x] 店家文件 `images` 換成新的 `.webp` 路徑、順序不變、`updateTime` 和其他欄位不變
-- [x] 原圖仍在原路徑；新檔有 token，server 端 `getDownloadURL` 拿得到穩定網址
-- [x] 不會覆寫任何既有的 Storage 物件
+- [ ] 用 scratchpad 的小腳本跑 `formatPriceRange`（用 repo 裡已有的 `jiti`，設定 `@/` alias；不另外裝套件）：`(500000, 1000000)` → `NT$ 50–100 萬`；`(8000, 12000)` → 跨單位格式；`(0, 0, true)` → 面議；`(300000, 0)` → 單一金額
+- [ ] `omitSellerContact` 對有 `assetUrl`／`verificationImages` 的物件回傳空值
 
-**Verification:**
+**Dependencies**：Task 1
+**Files**：`types/DigitalAsset.ts`、`types/Store.ts`、`types/index.ts`、`constant/digitalAsset.ts`、`utils/store.ts`、`components/refactored/StoreCard.tsx`
+**Scope**：M
 
-- [x] `mockStore --write`（SPEC #T8）：抽 3 家店比對跑前跑後的店家文件，只有 `images` 的路徑不同 — 35 家全比對：5 家只有 `images` 改變、順序不變，0 家有其他欄位改變
-- [x] 本機 dev（`NEXT_PUBLIC_ENV_VERSION=dev`）打開首頁、`/store-list`、2 個店家頁、my-listings、admin 店家 drawer：照片都正常、清楚，封面沒變 — 首頁、`/store-list`、3 個店家頁的照片網址都回 200 `image/webp`；my-listings、admin drawer 需要登入，改用它們實際呼叫的 Storage metadata API 確認新檔可讀、有 token
-- [x] 再跑一次 `mockStore --write`（SPEC #T9）：全部略過、0 寫入
-- [x] lint、build 通過 — 只改 `scripts/`，不在 lint 範圍、不影響 build；Checkpoint A 再整體跑一次
-- [x] 處理期間賣家刪照片：轉檔時另一個程序刪掉 `photo.png`，腳本記為「removed」、刪掉它的新檔，其他路徑照常替換
+### Task 3: 實體查詢排除數位、`getDigitalAssets()`、改用 `toCard()`
 
-**Dependencies:** Task 1
+**說明**：讓數位資產進資料庫後不會出現在任何實體店面的地方，並準備好數位資產自己的查詢。
 
-**Files likely touched:**
+**Acceptance criteria**：
 
-- `scripts/shrink-store-images.mjs`
+- [ ] `getStores`、`getHighlightedStores`、`getEmergencyStores`、`getSoldStores` 在 slice 之前排除數位資產
+- [ ] `getDigitalAssets({ statuses, limit, coverOnly })` 存在：`listingType` 和 `status`（單一用 `==`、多個用 `in`）都在查詢裡，依 `createTime` 由新到舊，有 `limit` 時套用；圖片網址在 limit 之後才產生
+- [ ] 查詢失敗時 `console.error` 並回傳 `[]`
+- [ ] `FeaturedListings`、`ResultsArea` 改呼叫 `toCard()`
+- [ ] `GET /api/stores/[storeId]/contact` 遇到數位資產回空值
+- [ ] grep 所有讀取 `COLLECTIONS.STORE` 的地方（sitemap、highlight API、analytics 等），逐一確認是否需要排除，結果寫在 PR 描述
 
-**Estimated scope:** S
+**驗證**：
 
-### Task 3: 還原模式
+- [ ] 用 scratchpad 腳本呼叫 `getDigitalAssets({ statuses: ["approved"], limit: 2 })`：只回傳 approved、最多 2 筆、由新到舊；`statuses: ["approved", "sold"]` 也成功（確認 `in` 用的是同一個 index）
+- [ ] 查詢失敗時回傳 `[]`、有錯誤 log、不會丟出例外（暫時把查詢改成沒有 index 的組合來觸發，驗證完改回來）
+- [ ] 用 Admin SDK 在 `mockStore` 手動放一筆 `listingType: "digital"`、tags 含 RECOMMENDED／EMERGENCY 的文件 → 首頁 01／02／03、`/store-list` 都不出現（T2）
+- [ ] 實體店面的數量和順序跟改之前一樣
 
-**Description:** 加上 `--rollback`：對店家文件裡每個帶 `sourcePath` 的路徑，確認原圖存在（不在原路徑但在 `backup/<sourcePath>` 就先複製回來）→ transaction 換回 `sourcePath` → 刪除轉好的檔。
+**Dependencies**：Task 2
+**Files**：`firebase/serverUtils/store.ts`、`app/(new)/_components/FeaturedListings.tsx`、`app/(new)/store-list/_components/ResultsArea.tsx`、`app/api/stores/[storeId]/contact/route.ts`
+**Scope**：M
 
-**Acceptance criteria:**
+### Task 4: 後台建立／編輯表單支援數位資產
 
-- [x] 還原後店家文件的 `images` 和轉檔前完全相同（含順序）
-- [x] 轉好的 `.webp` 被刪除；原圖仍在
-- [x] 還原後再跑轉檔模式，結果和第一次相同
+**說明**：管理員能建立和編輯數位資產。表單的數位欄位做成後台共用的元件，給建立頁和編輯頁一起用。
 
-**Verification:**
+**Acceptance criteria**：
 
-- [x] `mockStore --write --rollback --only <id>`（SPEC #T10）：和 Task 2 前存下的店家文件比對完全相同；本機 dev 店家頁照片正常
-- [x] 同一家店再轉一次，頁面正常
-- [x] 原圖已搬到 `backup/` 時：還原會先複製回原路徑，download token 和原本相同
-- [x] lint、build 通過
+- [ ] 建立頁有「實體店面／數位資產」切換；選數位時隱藏地點、坪數、租金、設備、行業，顯示類型（多選）、經營時間、平均月營收、價格上限、資產連結
+- [ ] 編輯頁依文件的 `listingType` 顯示對應欄位，沒有切換
+- [ ] 寫入的文件沒有 `undefined`；數位資產的地點類字串欄位是 `""`
 
-**Dependencies:** Task 2
+**驗證**：
 
-**Files likely touched:**
+- [ ] T1：建立一筆數位資產，Firestore 文件欄位正確
+- [ ] T3：編輯價格和類型，存檔後正確
+- [ ] 建立和編輯一筆實體店面，行為跟之前一樣
 
-- `scripts/shrink-store-images.mjs`
+**Dependencies**：Task 3
+**Files**：`app/admin/store/_components/DigitalAssetFields.tsx`、`app/admin/store/create/StoreBaseForm.tsx`、`app/admin/store/edit/[storeId]/page.tsx`
+**Scope**：M
 
-**Estimated scope:** S
+### Task 5: 後台列表的類型欄位與篩選、drawer 顯示數位欄位
 
-### Checkpoint A: mockStore 驗證完成
+**說明**：管理員在列表分得出實體和數位，打開 drawer 看得到數位欄位和資產連結。
 
-- [x] SPEC #T7–T10 通過（測試用的 `shrink-fixture` 店家和檔案已刪除；`mockStore` 其他 5 家店維持轉好的狀態）
-- [ ] 和你 review；通過後 commit（連同 `SPEC.md`、`tasks/`）並開 PR 1
+**Acceptance criteria**：
+
+- [ ] `list`、`drafts` 多一欄「類型」，可以篩選實體／數位
+- [ ] 數位資產在列表的地點欄顯示類型標籤，價格欄顯示區間
+- [ ] `StoreDetailDrawer` 對數位資產顯示類型、經營時間、平均月營收、價格區間、資產連結（另開分頁）
+
+**驗證**：
+
+- [ ] 篩選切換正確，實體店面列表沒有變化
+- [ ] drawer 的資產連結可以點開
+
+**Dependencies**：Task 4
+**Files**：`app/admin/store/list/page.tsx`、`app/admin/store/drafts/page.tsx`、`app/admin/store/_components/StoreDetailDrawer.tsx`
+**Scope**：M
+
+### Task 6: 核對截圖的 storage rule、測試、上傳 helper
+
+**說明**：建立核對截圖的儲存路徑和權限，以及上傳／刪除 helper（這一步還沒有 UI）。
+
+**Acceptance criteria**：
+
+- [ ] `storage.rules` 新增 `/{collectionName}/{storeId}/verification/{fileName}`，內容照 spec
+- [ ] `tests/rules/storage.test.ts` 涵蓋：刊登者／管理員可上傳、讀取；未登入／其他會員不能讀；超過 5 MB、SVG 不能上傳；draft／sold 時刊登者不能上傳、刪除
+- [ ] `resizeImageFile(file, { maxEdge })` 可選參數，預設行為不變
+- [ ] `constant/image.ts` 有 `VERIFICATION_IMAGE_MAX_EDGE = 2400`、`VERIFICATION_IMAGE_MAX_COUNT = 10`
+- [ ] `uploadVerificationImageByFile()`、`deleteVerificationImage()` 寫入或移除 `verificationImages`，不碰 `images`
+
+**驗證**：
+
+- [ ] `npm run test:rules` 全過（T5）
+- [ ] 一般照片上傳結果跟之前一樣（最長邊 1600）
+
+**Dependencies**：Task 2
+**Files**：`storage.rules`、`tests/rules/storage.test.ts`、`constant/image.ts`、`utils/image.ts`、`firebase/clientUtils/image.ts`
+**Scope**：M
+
+### Task 7: 後台核對截圖的上傳與檢視
+
+**說明**：管理員在後台圖片頁上傳／刪除核對截圖，在 drawer 放大檢視。
+
+**Acceptance criteria**：
+
+- [ ] 後台圖片頁對數位資產多一個「核對截圖」區塊，可以上傳、刪除，達到 10 張時不能再上傳
+- [ ] drawer 用 `Image.PreviewGroup` 顯示截圖，可放大、左右切換；沒有截圖時顯示「賣家還沒上傳核對截圖」警告，審核按鈕照常可用
+
+**驗證**：
+
+- [ ] 你部署 storage rules（`npx firebase deploy --only firestore:rules,firestore:indexes,storage --project bezold`，不加 `--force`）
+- [ ] T4：上傳 1170×2532 的手機長截圖 → 存在 `verification/`、最長邊 2400、數字清楚；刪除後檔案和路徑都消失
+
+**Dependencies**：Task 5、Task 6
+**Files**：`app/admin/store/edit/[storeId]/image/page.tsx`、`app/admin/store/_components/StoreDetailDrawer.tsx`
+**Scope**：S
+
+### Checkpoint: PR 1
+
+- [ ] lint、build、`npm run test:rules` 全過
+- [ ] `mockStore` 有 2–3 筆數位資產（不同類型、有區間和單一價格、有截圖、一筆 sold）
+- [ ] 你 review → commit → 開 PR
 
 ---
 
-## Phase 2: 正式資料
+## PR 2 — 詳細頁與詢問
 
-### Task 4: 單店試轉 + LINE / Facebook 預覽驗證
+### Task 8: 詳細頁上半部
 
-**Description:** 你選一家正式店家（見 plan 的 Open Questions），經你同意後執行 `--prefix prodStore --write --only <storeId>`。確認正式站店家頁照片正常，再請你在 LINE 和 Facebook 分享這家店的網址，確認預覽圖有出現。結果決定 `IMAGE_OUTPUT_TYPE`。
+**說明**：`/store/[storeId]` 對數位資產顯示數位版本的麵包屑、標題列、資訊列，並調整 metadata 和 JSON-LD。
 
-**Acceptance criteria:**
+**Acceptance criteria**：
 
-- [x] 正式站這家店的店家頁、列表卡片照片正常 — 試轉 `4fy20TpARRzvSzLt3N4F`（2026-10-22）：5 張、28.91 MB → 0.80 MB；`images` 順序不變、`updateTime` 不變
-- [x] LINE 和 Facebook 分享預覽都有圖（SPEC #T11）— 兩邊都顯示 `DSCF0151.webp` 封面，維持 WebP
-- [x] ~~如果任何一邊沒有圖~~（不需要）：如果任何一邊沒有圖：經你同意後 `--rollback --only <storeId>` → `IMAGE_OUTPUT_TYPE` 改成 `image/jpeg` → `mockStore` 重跑 Task 2、3 的驗證 → 再試轉這家店一次
+- [ ] `SiteNav activeLink="數位資產"`；麵包屑「首頁 / 數位資產 / 名稱」
+- [ ] 標題列有類型 Pill、「詳細資料需申請」Pill、副標「DIGITAL ASSET」
+- [ ] `DigitalStatsBar`：經營時間｜平均月營收＋`REVENUE_DISCLAIMER`｜頂讓金額；沒填顯示「—」
+- [ ] title「名稱｜數位資產頂讓」；有區間時 JSON-LD 用 `AggregateOffer`
 
-**Verification:**
+**驗證**：
 
-- [x] 正式站店家頁照片的回應 `Content-Type` 是 `IMAGE_OUTPUT_TYPE`、大小 ≤ 400 KB — 5 張都是 200 `image/webp`，89–193 KB
-- [x] Facebook Sharing Debugger「Scrape Again」顯示預覽圖
-- [x] LINE 聊天室分享網址（必要時加 `?v=1` 避開快取）顯示預覽圖（**你在手機上看**）
+- [ ] T7：Rich Results Test 沒有錯誤（用本機 HTML 貼進去）
+- [ ] 實體店面詳細頁跟之前一樣
 
-**Dependencies:** Checkpoint A
+**Dependencies**：PR 1
+**Files**：`app/(new)/store/[storeId]/page.tsx`、`_components/StoreBreadcrumb.tsx`、`_components/StoreTitleRow.tsx`、`_components/DigitalStatsBar.tsx`（+ module.css）
+**Scope**：M
 
-**Files likely touched:**
+### Task 9: 匿名持有人卡與交易說明
 
-- `constant/image.ts`（只有改成 JPEG 時）
+**說明**：數位資產用 `DigitalHolderCard` 取代 `StorePriceCard`，下方加 `DigitalTransferNotes`。詢問按鈕先放一個不能按的佔位，Task 11 再換掉。
 
-**Estimated scope:** XS
+**Acceptance criteria**：
 
-### Task 5: 全部正式資料轉檔
+- [ ] 持有人卡：匿名頭像、「數位資產持有人」、說明文字、頂讓金額、提醒框；沒有任何 `userInfo` 和 `SellerContactGate`
+- [ ] 交易說明的固定文案照 spec
+- [ ] 已售出的數位資產顯示「已頂讓」
 
-**Description:** 先存一份 `seo:audit` 基準，經你同意後執行 `--prefix prodStore --write`。記錄實際的處理前後總大小，確認正式站沒有破圖。
+**驗證**：
 
-**Acceptance criteria:**
+- [ ] T6：頁面原始碼和 RSC payload 搜不到 `assetUrl` 的值、`verification/`、賣家電話／email
+- [ ] 桌機和手機寬度版面正常
 
-- [x] 0 個 failed；參照照片總大小 ≤ 120 MB，p95 ≤ 400 KB（Success Criteria 1）— 2026-10-22：轉了 294 張（加上試轉 5 張共 299），490.29 MB → 94.63 MB，p95 0.33 MB、最大 0.53 MB
-- [x] 所有店家文件的 `images` 都指向存在的物件（Success Criteria 2）— 153 家、522 個參照全部存在；299 張新檔的原圖都還在；腳本沒有寫 `updateTime`（當天有 2 家的 `updateTime` 是賣家在轉檔前自己改的）
+**Dependencies**：Task 8
+**Files**：`app/(new)/store/[storeId]/page.tsx`、`_components/DigitalHolderCard.tsx`（+ css）、`_components/DigitalTransferNotes.tsx`（+ css）
+**Scope**：M
 
-**Verification:**
+### Task 10: 詢問的資料層與會員 API
 
-- [x] 正式站首頁、`/store-list`、5 個店家頁照片都正常（SPEC #T12）— 所有照片網址都回 200；剩下的 JPEG 是本來就在門檻內、沒有轉的
-- [x] `npm run seo:audit -- https://www.bezold.com.tw` 結果和基準一樣 — 跑前跑後都是 90 頁、0 個失敗
-- [x] 再跑一次 `prodStore` 試跑：全部略過 — 0 張要轉（299 已轉、222 在門檻內、1 轉完變大）
+**說明**：inquiries 集合、讀寫函式、`GET`／`POST /api/stores/[storeId]/inquiry`，以及確認 client 被擋住的 rules 測試。
 
-**Dependencies:** Task 4
+**Acceptance criteria**：
 
-**Files likely touched:** 無（只執行腳本）
+- [ ] `types/Inquiry.ts`、`COLLECTIONS.INQUIRY`、`firebase/serverUtils/inquiry.ts`
+- [ ] POST：數位且 approved 才收；文件 id `${storeId}_${uid}`；已存在時回 `alreadySubmitted`、不覆寫；訊息超過 500 字回 400
+- [ ] `tests/rules/firestore.test.ts`：會員、刊登者、管理員用 client SDK 讀寫 `mockInquiry` 都失敗
 
-**Estimated scope:** XS
+**驗證**：
 
-### Checkpoint B: 正式資料完成
+- [ ] T9：用 curl（帶 dev 帳號的 ID token）POST 兩次 → 第二次 `alreadySubmitted`、文件不變；對實體店面、pending 資產 → 400／404；沒有 token → 401
+- [ ] T11：`npm run test:rules` 全過
 
-- [ ] 實際數字（處理數、前後總大小、p95）寫進 PR 1 描述
-- [x] 記下完成日期，4 週後做 Phase 4 — 2026-10-22 完成，約 2026-11-19 之後清理
+**Dependencies**：PR 1
+**Files**：`types/Inquiry.ts`、`types/index.ts`、`firebase/constants.ts`、`firebase/serverUtils/inquiry.ts`、`app/api/stores/[storeId]/inquiry/route.ts`、`tests/rules/firestore.test.ts`
+**Scope**：M
+
+### Task 11: 詳細頁的詢問 CTA 與 GA4
+
+**說明**：`InquiryCta` 取代 Task 9 的佔位按鈕，處理未登入、可送出、已送過、失敗四種狀態。
+
+**Acceptance criteria**：
+
+- [ ] 未登入或 email 未驗證 → 開啟 `BuyerClubPopup`，source 是 `digital_inquiry`
+- [ ] 會員 → 展開訊息欄（選填）→ 送出 → 已送出；重新整理後仍是已送出（GET）
+- [ ] GA4 `digital_inquiry_click`、`digital_inquiry_submit`；`docs/analytics-events.md` 更新
+
+**驗證**：
+
+- [ ] T8：完整流程走一次，`mockInquiry` 出現文件
+- [ ] 送出失敗（關掉網路）時留在表單、顯示錯誤、可重試
+
+**Dependencies**：Task 9、Task 10
+**Files**：`_components/InquiryCta.tsx`（+ css）、`_components/DigitalHolderCard.tsx`、`atoms/BuyerClubAtom.ts`、`docs/analytics-events.md`
+**Scope**：M
+
+### Task 12: 買家俱樂部的數位資產偏好
+
+**說明**：買家俱樂部的類型多一個「數位資產」，選了之後地區選填；從詢問按鈕打開時預選。
+
+**Acceptance criteria**：
+
+- [ ] `BUYER_CLUB_CATEGORIES` 在 `constant/buyerClub.ts`；`STORE_CATEGORIES` 沒有改
+- [ ] popup 選數位資產時地區選填（寫 `""`）；source 是 `digital_inquiry` 時預選數位資產，註冊 source 保留 `digital_inquiry`
+- [ ] 後台買家偏好頁顯示「數位資產」；`BuyerProfile.city` 註解更新
+
+**驗證**：
+
+- [ ] T13：用新帳號從詢問按鈕註冊，使用者文件和後台顯示都正確
+- [ ] 用實體類型註冊：地區照舊必填，source 照舊
+
+**Dependencies**：Task 11
+**Files**：`constant/buyerClub.ts`、`app/(new)/store/[storeId]/_components/BuyerClubPopup.tsx`、`app/admin/buyer-profiles/page.tsx`、`types/User.ts`
+**Scope**：M
+
+### Task 13: 後台「詢問」頁
+
+**說明**：管理員列出詢問、更新狀態。
+
+**Acceptance criteria**：
+
+- [ ] `GET /api/admin/inquiries`、`PATCH /api/admin/inquiries/[inquiryId]`（只改 `status`、`updateTime`），都用 `verifyAdminToken`
+- [ ] `/admin/inquiries`：表格欄位照 spec；預設只顯示 `new` + `contacted`，可切換全部；改狀態立即 PATCH
+- [ ] `AdminSidebar` 有「詢問」入口
+
+**驗證**：
+
+- [ ] T10：看得到 Task 11 送出的詢問，改狀態後重新整理仍保持；一般會員打這兩個 API → 401／403
+
+**Dependencies**：Task 10
+**Files**：`app/api/admin/inquiries/route.ts`、`app/api/admin/inquiries/[inquiryId]/route.ts`、`app/admin/inquiries/page.tsx`、`components/AdminSidebar.tsx`
+**Scope**：M
+
+### Task 14: 側欄未處理詢問數量
+
+**說明**：側欄「詢問」旁邊顯示 `new` 的數量。
+
+**Acceptance criteria**：
+
+- [ ] `GET /api/admin/inquiries/count` → `{ new }`，用 `count()` aggregation
+- [ ] `newInquiryCountAtom`；側欄進後台和切換頁面時抓一次，0 不顯示
+- [ ] 詢問頁改狀態時直接加減 atom
+
+**驗證**：
+
+- [ ] T12：改成 `contacted` 數字立刻減 1；全部處理完數字消失；再送一筆後切換頁面數字出現
+
+**Dependencies**：Task 13
+**Files**：`app/api/admin/inquiries/count/route.ts`、`atoms/InquiryAtom.ts`、`components/AdminSidebar.tsx`、`app/admin/inquiries/page.tsx`
+**Scope**：S
+
+### Checkpoint: PR 2
+
+- [ ] lint、build、`npm run test:rules` 全過
+- [ ] 完整走過：未登入點詢問 → 加入買家俱樂部 → 驗證 email → 送出詢問 → 後台看到、改狀態、側欄數字變化
+- [ ] 你 review → commit → 開 PR
 
 ---
 
-## Phase 3: `upload-resize`（PR 2）
+## PR 3 — 瀏覽入口
 
-### Task 6: 上傳時縮圖 + 不撞名的檔名
+### Task 15: 首頁「04 數位資產頂讓」區塊
 
-**Description:** 新增 `utils/image.ts` 的 `resizeImageFile(file)`：`createImageBitmap(file, { imageOrientation: "from-image" })` → canvas 縮到最長邊 ≤ `IMAGE_MAX_EDGE` → `toBlob(IMAGE_OUTPUT_TYPE, IMAGE_QUALITY / 100)` → 回傳新的 `File`。`uploadStoreImageByFile` 上傳前呼叫它，存成 `<名稱>-<6 碼短 id>.<副檔名>`，並帶 `{ contentType }`。這個任務只處理主要路徑。
+**說明**：首頁加數位資產區塊，後面的區塊編號往後一號。
 
-**Acceptance criteria:**
+**Acceptance criteria**：
 
-- [x] `/sell` 上傳 4000×3000、約 5 MB 的 JPEG：Storage 裡是 `<名稱>-<id>.webp`，最長邊 1600、≤ 400 KB — 函式本身已驗證（瀏覽器內測 `resizeImageFile`，未上傳）：6.4 MB 4000×3000 → 1200×1600 WebP 261 KB；你在本機（`mockStore` 店家 `S8m4RyRNigobdZ0WxdI5`）實際上傳：`截圖 …-nlbwaa.webp` 112 KB 1600×1000、`截圖 …-5vkox5.webp` 144 KB 1108×1468
-- [ ] admin 圖片頁上傳同一張圖，結果相同 — **需要 admin 登入，等你測**
-- [ ] 同一家店先後上傳 `a.jpg`、`a.png`，兩張都在 `images` 裡 — `toUniqueFileName` 對兩個同名檔產生不同後綴；**實際上傳等你測**
-- [x] `StoreImageUpload.tsx` 和 admin 圖片頁不用改
+- [ ] `SectionTitle` 04、`NEW` Pill、副標、「看全部數位資產 →」
+- [ ] 讀最新 30 筆 approved（`limit: 30`）；類型分頁在 client 端篩選、不改網址，每個分頁最多 6 張
+- [ ] 分頁沒資料時顯示「這個類型目前沒有最新刊登」＋「到列表頁看看 →」（`/digital-assets?type=<類型>`）；完全沒資料時顯示整區空狀態
+- [ ] 底部「我也有數位資產想刊登 ↗」（`/sell?type=digital`）和警語
+- [ ] Categories 05、Districts 06、BrowseAll 07、HowItWorks 08、WhyUs 09、Faq 10（`Stories` 沒有掛載，不改）
+- [ ] `getDigitalAssets()` 出錯時區塊顯示空狀態，首頁不會壞
 
-**Verification:**
+**驗證**：
 
-- [x] ~~用 chrome-devtools MCP `upload_file` 測~~ 改用暫時的測試頁在瀏覽器裡直接跑 `resizeImageFile`（上傳頁需要登入）；測試頁和測試圖已刪除
-- [x] 上傳後縮圖顯示正常 — 店家頁照片以 WebP 載入（115 kB、147 kB）
-- [x] lint、build 通過
+- [ ] T14：分頁切換、空狀態、編號都正確；手機寬度分頁可以橫向捲動或換行，不撐破版面
 
-**Dependencies:** Task 4（輸出格式已確定）
+**Dependencies**：PR 2
+**Files**：`app/(new)/_components/DigitalAssets/index.tsx`、`DigitalAssets/TypeTabs.tsx`、`DigitalAssets/DigitalAssets.module.css`、`app/(new)/page.tsx`、6 個區塊元件的 `num`（每個只改一個字串）
+**Scope**：M（檔案多，但編號是機械式修改）
 
-**Files likely touched:**
+### Task 16: `/digital-assets` 列表頁
 
-- `utils/image.ts`
-- `firebase/clientUtils/image.ts`
+**說明**：專屬列表頁，網址參數決定類型。
 
-**Estimated scope:** S
+**Acceptance criteria**：
 
-### Task 7: 上傳縮圖的例外情況
+- [ ] 頁面殼照 CLAUDE.md；`?type=` 是唯一的篩選來源，分頁用 `router.push`；不認得的 type 當全部
+- [ ] `getDigitalAssets({ statuses: ["approved", "sold"] })`，不設 limit，類型在記憶體裡篩選；approved 在前、sold 在後（sold ribbon）
+- [ ] metadata、canonical；`sitemap.ts` 加這一頁
 
-**Description:** 補上 SPEC `upload-resize` 表格的其他情況：已在門檻內、`image/gif` / `image/svg+xml`、解碼失敗、轉完比原檔大 → 都回傳原檔；瀏覽器不支援 WebP 編碼（`blob.type` 不對）→ 改用 `image/jpeg`。任何例外都不能讓上傳失敗。
+**驗證**：
 
-**Acceptance criteria:**
+- [ ] T15：`?type=SOCIAL` 只顯示社群；切換分頁網址跟著變；重新整理保留；`?type=xyz` 當全部
 
-- [x] 小圖（< 300 KB、< 1600px）內容原封不動（SPEC #T3）（瀏覽器內測 `resizeImageFile`，未上傳）
-- [x] 帶 EXIF 方向的直拍照片方向正確（SPEC #T4）（瀏覽器內測 `resizeImageFile`，未上傳）：orientation 6 的 4000×3000 → 1200×1600
-- [x] 無法解碼的檔案（假的 `.heic`）照舊上傳原檔，沒有錯誤訊息（SPEC #T5）（瀏覽器內測 `resizeImageFile`，未上傳）：回傳原檔、沒有丟錯
-- [x] GIF 原封不動（瀏覽器內測 `resizeImageFile`，未上傳）
+**Dependencies**：Task 15（共用 TypeTabs 的樣式）
+**Files**：`app/(new)/digital-assets/page.tsx`、`digital-assets/_components/DigitalAssetResults.tsx`（+ css）、`app/sitemap.ts`
+**Scope**：M
 
-**Verification:**
+### Task 17: 導覽列「數位資產」
 
-- [x] ~~本機 dev 逐一上傳~~ 改用測試頁逐一跑上述測試檔；另外透明 PNG 轉 WebP 保留透明
-- [x] 不支援 WebP 的路徑：在瀏覽器暫時讓 `toBlob` 回傳 PNG（devtools 覆寫 `HTMLCanvasElement.prototype.toBlob`），確認改存 JPEG — 3 個大檔都改存 `.jpeg`，尺寸相同；透明 PNG 的透明處填白
-- [x] lint、build 通過
+**說明**：`navLinks` 在「我要找店」後面加「數位資產」。
 
-**Dependencies:** Task 6
+**Acceptance criteria**：
 
-**Files likely touched:**
+- [ ] 列表頁和數位詳細頁「數位資產」亮起；實體詳細頁仍是「我要找店」
+- [ ] 375px 手機選單 6 個連結都放得下
 
-- `utils/image.ts`
+**驗證**：
 
-**Estimated scope:** S
+- [ ] T16：桌機、平板、手機三種寬度截圖確認
 
-### Checkpoint C: 上傳縮圖上線
+**Dependencies**：Task 16
+**Files**：`app/(new)/_components/SiteNav.tsx`（必要時加它的樣式）
+**Scope**：XS
 
-- [ ] 和你 review；通過後 commit、開 PR 2
-- [ ] 確認 Vercel preview 連哪一組資料後，請你用 iPhone Safari 實機上傳（SPEC #T6）
-- [ ] PR 2 上線後：`prodStore` 試跑 → 經你同意後轉檔，補處理中間上傳的照片
-- [ ] 一週後看 Billing Reports 的 Cloud Storage 對外流量費用（Success Criteria 5）
+### Checkpoint: PR 3
+
+- [ ] lint、build 全過
+- [ ] 首頁 → 列表頁 → 詳細頁 → 詢問整條路都通，桌機和手機都檢查
+- [ ] 你 review → commit → 開 PR
 
 ---
 
-## Phase 4: 清理（PR 3，Task 5 完成約 4 週後）
+## PR 4 — 賣家刊登
 
-### Task 8: 清理模式 + 正式資料清理
+### Task 18: firestore rules 開放賣家寫入數位欄位
 
-**Description:** 加上 `--cleanup`：對店家文件裡每個帶 `sourcePath` 的路徑，把原圖複製到 `backup/<sourcePath>`、確認存在後刪除原路徑的原圖。先在 `mockStore` 跑，再經你同意後跑 `prodStore`。
+**說明**：先改 rules 和測試，後面的 UI 才有權限寫入。
 
-**Acceptance criteria:**
+**Acceptance criteria**：
 
-- [x] 原圖先有 `backup/` 複本才會被刪除 — 複製用 `ifGenerationMatch: 0`，比對 MD5 後才用原圖的 generation 條件刪除
-- [x] 清理後頁面照片都正常；`--rollback` 仍可從 `backup/` 還原
-- [x] `prodStore/` 只剩正在使用的檔案（Success Criteria 3）— 2026-10-22：522 個物件、94.63 MB，全部都有店家參照；`backup/prodStore/` 299 個、448.89 MB，全部帶 token；重跑搬 0 個
+- [ ] `sellFormKeys()`、`isNewSellerListing()`、`ownerEditableKeys()` 照 spec 修改；`listingType` 不在 owner 可編輯欄位裡
+- [ ] `tests/rules/stores.test.ts` 涵蓋 spec 列的 5 組情境
 
-**Verification:**
+**驗證**：
 
-- [x] `mockStore --cleanup --write`（SPEC #T13）：`backup/mockStore/` 檔案數等於被替換的原圖數；本機 dev 頁面正常；對一家店跑 `--rollback` 確認能從備份還原，再轉回來 — 搬了 5 個（7.36 MB），重跑 0 個；12 個參照都存在；`ANYD3IPHPZ7K6hadReoO` 還原 → 再轉 → 再清理都正常
-- [ ] ~~清理前抽查：LINE 預覽和 Google 搜尋結果裡的店家圖片已經是新網址~~ — 你決定 2026-10-22 就清理，不等 4 週；舊網址在爬蟲更新前會 404，必要時可從 `backup/` 複製回原路徑（token 不變）
-- [x] `prodStore --cleanup --write` 後，正式站首頁、`/store-list`、5 個店家頁照片正常 — 所有照片網址都回 200；舊原圖網址回 404（預期）；`seo:audit` 90 頁、0 個失敗
-- [x] lint、build 通過 — 只改 `scripts/`，不在 lint 範圍、不影響 build
+- [ ] T17：`npm run test:rules` 全過（含既有測試）
 
-**Dependencies:** Checkpoint B（原訂再等 4 週，你決定提前）
+**Dependencies**：PR 3
+**Files**：`firestore.rules`、`tests/rules/stores.test.ts`（必要時 `tests/rules/helpers.ts`）
+**Scope**：S
 
-**Files likely touched:**
+### Task 19: 共用表單的數位欄位與驗證
 
-- `scripts/shrink-store-images.mjs`
+**說明**：`/sell` 和 `/my-listings` 共用的表單層加上數位欄位和驗證，這一步還沒接到頁面。
 
-**Estimated scope:** S
+**Acceptance criteria**：
 
-### Checkpoint D: 完成
+- [ ] `StoreFields` 加 `listingType` 和數位欄位；`emptyStoreFields(listingType)`
+- [ ] `validateStoreForm()` 依類型分支，規則照 spec；實體分支行為不變
+- [ ] `DigitalFieldsSection`：類型多選 Pill、經營時間、平均月營收、價格下限／上限、資產連結＋說明、勿提供密碼警語
 
-- [ ] 和你 review；通過後 commit、開 PR 3
-- [ ] 一個月後決定是否刪除 `backup/`（刪除前先問你）
+**驗證**：
+
+- [ ] 用 scratchpad 腳本（同 Task 2 的 `jiti` 方式）跑 `validateStoreForm` 的數位情境：缺連結、非 http(s)、上限 < 下限、沒選類型都回錯誤；完整資料通過
+
+**Dependencies**：Task 18
+**Files**：`components/storeForm/formTypes.ts`、`components/storeForm/DigitalFieldsSection.tsx`、`components/storeForm/storeForm.module.css`
+**Scope**：M
+
+### Task 20: `/sell` 的類型切換與核對截圖步驟
+
+**說明**：賣家在 `/sell` 刊登數位資產，建立後的上傳畫面多一個核對截圖區塊，至少 1 張才能完成。
+
+**Acceptance criteria**：
+
+- [ ] 表單最上方有類型切換；`?type=digital` 預選；送出的 payload 只有 rules 允許的欄位
+- [ ] `VerificationImageUpload`：說明文字照 spec、最多 10 張、可刪除
+- [ ] 數位資產的上傳畫面：照片可略過，截圖 0 張時「完成刊登」不能按，也沒有「略過」
+- [ ] 實體店面的 `/sell` 跟之前一樣
+
+**驗證**：
+
+- [ ] T18：一般帳號刊登數位資產，驗證錯誤都擋下；成功後 `pending`，照片在 `images`、截圖在 `verificationImages`
+- [ ] T19：另一個一般帳號拿截圖路徑 `getDownloadURL` → permission-denied
+
+**Dependencies**：Task 19
+**Files**：`app/(new)/sell/_components/SellForm.tsx`、`app/(new)/sell/_components/StoreImageUpload.tsx`（加 `doneDisabled` 之類的 prop）、`components/storeForm/VerificationImageUpload.tsx`（+ css）、`app/(new)/sell/page.tsx`（`useSearchParams` 需要 Suspense 時）
+**Scope**：M
+
+### Task 21: `/my-listings` 的數位刊登卡片與編輯
+
+**說明**：賣家在我的刊登看到數位刊登、補截圖、編輯欄位。
+
+**Acceptance criteria**：
+
+- [ ] `ListingCard` 用 `toCard()`；數位刊登沒有截圖時顯示「請補上核對截圖」
+- [ ] `EditListingForm` 依類型顯示數位欄位和 `VerificationImageUpload`，沒有類型切換
+- [ ] 已上架的刊登改欄位、新增或刪除截圖 → 回到 `pending`（跟照片一樣）
+
+**驗證**：
+
+- [ ] T20：刪光截圖後卡片出現提示；補上後已上架刊登回到 `pending`；欄位編輯存檔正確
+- [ ] T21：實體店面的 `/sell`、`/my-listings`、詳細頁、`SellerContactGate`、照片上傳回歸檢查
+
+**Dependencies**：Task 20
+**Files**：`app/(new)/my-listings/_components/ListingCard.tsx`、`app/(new)/my-listings/edit/[storeId]/_components/EditListingForm.tsx`
+**Scope**：M
+
+### Checkpoint: 完成
+
+- [ ] lint、build、`npm run test:rules` 全過（T22）
+- [ ] spec 的 T1–T22 全部走過一次
+- [ ] 你部署 firestore rules
+- [ ] 你 review → commit → 開 PR

@@ -1,100 +1,112 @@
-# Implementation Plan: 店家照片瘦身
+# Implementation Plan: 數位資產頂讓
 
 Spec: [`SPEC.md`](../SPEC.md) · Tasks: [`tasks/todo.md`](todo.md)
 
 ## Overview
 
-2026-10-22 Google Cloud 預算通知觸發 100%，原因最可能是訪客直接從 Firebase Storage 下載原圖（`prodStore/` 522 檔、490 MB）。分三個 PR：
+讓電商、FB 社團、蝦皮賣場等數位資產也能在 Bezold 刊登與頂讓。資料跟實體店面放在同一個 Store 集合，用 `listingType` 區分。公開頁面匿名，買家送出詢問，由平台媒合。賣家必須上傳後台營收截圖，讓管理員核對。
 
-1. **PR 1 `image-backfill`**：共用參數 `constant/image.ts` + 腳本 `scripts/shrink-store-images.mjs`（試跑、轉檔、還原）。每張大圖轉成新的 `.webp`，店家文件的 `images` 換成新路徑，原圖暫時留著。先在 `mockStore` 完整跑過，再單店試轉正式資料並驗證 LINE / Facebook 預覽，最後跑全部。
-2. **PR 2 `upload-resize`**：`utils/image.ts` 的 `resizeImageFile()`，接在 `uploadStoreImageByFile` 裡，上傳時在瀏覽器先縮圖，檔名加短 id 避免撞名。上線後再跑一次 backfill，補中間這段時間上傳的照片。
-3. **PR 3 清理模式**：全部轉完約 4 週後，把原圖搬到 `backup/`，`prodStore/` 只留正在用的檔案。
+整個功能分成 4 個 PR，順序跟 spec 的 capability map 一樣。每個 PR 結束時都是可以上線、不會壞掉實體店面的狀態。
+
+| PR  | 模組                                 | Tasks | 上線前你要做的事                                          |
+| --- | ------------------------------------ | ----- | --------------------------------------------------------- |
+| 1   | `digital-model` + `digital-admin`    | 1–7   | 部署 storage rules 和 indexes（`firestore.indexes.json`） |
+| 2   | `digital-detail` + `digital-inquiry` | 8–14  | 無                                                        |
+| 3   | `digital-browse`                     | 15–17 | 無                                                        |
+| 4   | `digital-sell`                       | 18–21 | 部署 firestore rules                                      |
 
 ## Architecture Decisions
 
-- **新檔 + 更新 Firestore，不覆寫原檔**：檔名和內容一致（`.webp` 就是 WebP），每個 Storage 物件都不會被覆寫。新上傳的照片也是 `.webp`，新舊資料一致。代價是網址會變，所以原圖保留 4 週，讓 Google / LINE / Facebook 的快取有時間更新。
-- **以店家文件為單位處理**：只處理 `images` 裡實際用到的照片；Firestore 用 transaction 更新，順序不變，**不寫 `updateTime`**（已售出列表靠它排序，店家頁顯示「更新」日期）。
-- **原圖留在原路徑到清理為止**：還原只要把路徑換回去、刪掉新檔，不用搬任何東西。新檔的 metadata 記下 `sourcePath`，腳本靠它判斷「已經轉過」和「怎麼還原」。
-- **清理模式延後到 PR 3**：4 週內用不到，現在寫會讓 PR 1 變大，而且還沒有正式資料轉完的經驗。
-- **先做 backfill，再做上傳縮圖**：省最多錢的是既有的 490 MB；最大的風險（LINE 預覽能不能顯示 WebP）只能用正式店家驗證，而結果決定兩個模組共用的 `IMAGE_OUTPUT_TYPE`。
-- **試跑也真的轉檔（在記憶體裡）**：正式資料的試跑是唯讀的，寫入前就能拿到真實的處理後總大小。
-- **腳本直接 import `constant/image.ts`**：已確認 Node 24.21 可以從 `.mjs` import `.ts`，參數只有一份。
-- **上傳新檔一律 `ifGenerationMatch: 0`**：已確認 `@google-cloud/storage` 6.12 支援 `preconditionOpts`；名稱被佔用時寫入失敗，不會蓋掉任何東西。
-- **新檔帶 `firebaseStorageDownloadTokens`**：Admin SDK 上傳不會自動產生 token，沒有 token 的話 server 端 `getDownloadURL` 會失敗，退回每次都不同的 signed URL。
-
-## Dependency Graph
-
-```
-constant/image.ts (image-settings)
-    │
-    ├── scripts/shrink-store-images.mjs
-    │       試跑 → 轉檔 → 還原 → mockStore 驗證 → 單店試轉 + LINE 驗證 → 全部正式資料 → （4 週）→ 清理
-    │                                                        │
-    │                                          決定 IMAGE_OUTPUT_TYPE
-    │                                                        │
-    └── utils/image.ts → firebase/clientUtils/image.ts（uploadStoreImageByFile）
-                              ├── /sell、/my-listings（StoreImageUpload.tsx，不用改）
-                              └── /admin/store/edit/[storeId]/image（不用改）
-```
+- **`listingType` 沒有 = 實體**：舊資料不用遷移。所有判斷都經過 `isDigitalAsset()`，不要在各處自己比字串。
+- **實體查詢在記憶體裡排除數位**：不加 `where("listingType", "!=", …)`。`!=` 會排除沒有這個欄位的舊文件，等於把所有實體店面都濾掉。
+- **卡片共用 `StoreCard`**：`toCard()` 依類型分派，`digitalAssetToCard()` 回傳同一個形狀。不做新的卡片元件。
+- **私密欄位一律經過 `omitSellerContact()`**：`assetUrl`、`verificationImages` 跟賣家聯絡資料走同一條路，公開頁面只有這一個出口要守。
+- **核對截圖跟照片完全分開**：分開的欄位（`verificationImages`）、分開的 Storage 子資料夾（`verification/`）、分開的上傳 helper。`resolveStoreImages()` 只處理 `images`。
+- **詢問全部走 Admin SDK**：client 不碰 inquiries 集合，rules 的 catch-all 已經擋住，不用新增 rule。
+- **詳細頁沿用 `/store/[storeId]`**：在 `page.tsx` 依類型切換子元件。共用的部分（相簿、描述、買家俱樂部 popup）不複製。
+- **數位專用的 UI 放在使用它的 route 底下**：只有通用的（例如 `VerificationImageUpload` 給 `/sell` 和 `/my-listings` 共用）才放 `components/storeForm/`；`components/refactored/` 只改 `StoreCard` 的圖示。
 
 ## Task List
 
-### Phase 1: `image-backfill`（PR 1）
+### PR 1 — 資料模型與後台
 
-- [ ] Task 1: 共用參數 + 腳本試跑模式
-- [ ] Task 2: 轉檔模式（新檔 + Firestore transaction）
-- [ ] Task 3: 還原模式
+- [ ] Task 1: 合併 main（PR #90 rules）、index 改由 repo 管理、commit spec 和 plan
+- [ ] Task 2: 型別、常數、價格區間與卡片轉換
+- [ ] Task 3: 實體查詢排除數位、`getDigitalAssets()`、改用 `toCard()`
+- [ ] Task 4: 後台建立／編輯表單支援數位資產
+- [ ] Task 5: 後台列表的類型欄位與篩選、drawer 顯示數位欄位
+- [ ] Task 6: 核對截圖的 storage rule、測試、上傳 helper
+- [ ] Task 7: 後台核對截圖的上傳與檢視
 
-### Checkpoint A: mockStore 驗證完成
+### Checkpoint: PR 1
 
-- [ ] SPEC #T7–T10 通過；lint、build 通過
-- [ ] 和你 review → commit、開 PR 1
+- [ ] lint、build、`npm run test:rules` 全過
+- [ ] 你部署 storage rules（index 在 Task 1 之後已經部署）
+- [ ] 在 `mockStore` 建好 2–3 筆數位資產（含截圖），後面的 PR 都用這些資料
+- [ ] 實體店面首頁、`/store-list` 沒有變化
+- [ ] 你 review → commit → 開 PR
 
-### Phase 2: 正式資料
+### PR 2 — 詳細頁與詢問
 
-- [ ] Task 4: 單店試轉 + LINE / Facebook 預覽驗證（**需要你在手機上分享**）
-- [ ] Task 5: 全部正式資料轉檔
+- [ ] Task 8: 詳細頁上半部（麵包屑、標題列、資訊列、metadata、JSON-LD）
+- [ ] Task 9: 匿名持有人卡與交易說明
+- [ ] Task 10: 詢問的資料層與會員 API
+- [ ] Task 11: 詳細頁的詢問 CTA 與 GA4
+- [ ] Task 12: 買家俱樂部的數位資產偏好
+- [ ] Task 13: 後台「詢問」頁
+- [ ] Task 14: 側欄未處理詢問數量
 
-### Checkpoint B: 正式資料完成
+### Checkpoint: PR 2
 
-- [ ] 參照照片總大小 ≤ 120 MB、所有路徑都存在、正式站沒有破圖（SPEC #T12）
-- [ ] 實際數字寫進 PR 1；記下完成日期，4 週後做 Phase 4
+- [ ] lint、build、`npm run test:rules` 全過
+- [ ] 公開 HTML／RSC payload 沒有 `assetUrl`、`verification/`、賣家聯絡資料
+- [ ] 完整走過：未登入點詢問 → 加入買家俱樂部 → 驗證 email → 送出詢問 → 後台看到、改狀態、側欄數字變化
+- [ ] 你 review → commit → 開 PR
 
-### Phase 3: `upload-resize`（PR 2）
+### PR 3 — 瀏覽入口
 
-- [ ] Task 6: 上傳時縮圖 + 不撞名的檔名
-- [ ] Task 7: 例外情況（小圖、GIF/SVG、解碼失敗、轉完變大、不支援 WebP 編碼、EXIF 方向）
+- [ ] Task 15: 首頁「04 數位資產頂讓」區塊
+- [ ] Task 16: `/digital-assets` 列表頁
+- [ ] Task 17: 導覽列「數位資產」
 
-### Checkpoint C: 上傳縮圖上線
+### Checkpoint: PR 3
 
-- [ ] SPEC #T1–T5 通過；lint、build 通過；和你 review → commit、開 PR 2
-- [ ] iPhone Safari 實機上傳（SPEC #T6，**需要你測**）
-- [ ] 上線後 `prodStore` 試跑 → 經你同意後轉檔，補處理中間上傳的照片
-- [ ] 一週後看 Billing Reports（Success Criteria 5）
+- [ ] lint、build 全過
+- [ ] 首頁 → 列表頁 → 詳細頁 → 詢問整條路都通，桌機和手機都檢查
+- [ ] 你 review → commit → 開 PR
 
-### Phase 4: 清理（PR 3，Task 5 完成約 4 週後）
+### PR 4 — 賣家刊登
 
-- [ ] Task 8: 清理模式 + 正式資料清理
+- [ ] Task 18: firestore rules 開放賣家寫入數位欄位
+- [ ] Task 19: 共用表單的數位欄位與驗證
+- [ ] Task 20: `/sell` 的類型切換與核對截圖步驟
+- [ ] Task 21: `/my-listings` 的數位刊登卡片與編輯
 
-### Checkpoint D: 完成
+### Checkpoint: 完成
 
-- [ ] `prodStore/` 只剩正在使用的檔案；`backup/prodStore/` 有所有原圖（Success Criteria 3）
+- [ ] lint、build、`npm run test:rules` 全過
+- [ ] spec 的 T1–T22 全部走過一次
+- [ ] 實體店面回歸檢查（T21）
+- [ ] 你部署 firestore rules → review → commit → 開 PR
 
 ## Risks and Mitigations
 
-| Risk                                                                  | Impact | Mitigation                                                                                                        |
-| --------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------- |
-| LINE 分享預覽不顯示 WebP og:image                                     | 高     | Task 4 單店試轉就驗證；失敗就 `--rollback`，改 `IMAGE_OUTPUT_TYPE` 為 JPEG 後再試轉                               |
-| Firestore 更新出錯，店家頁破圖或封面順序改變                          | 高     | transaction 只換路徑、保留順序；mockStore 先驗證所有讀照片的頁面；單店試轉；原圖還在，`--rollback` 可以立刻還原   |
-| 不小心寫到 `updateTime`，已售出列表順序和「更新」日期跑掉             | 中     | 只寫 `images`；T7、T8 比對跑前跑後的 `updateTime`                                                                 |
-| 處理期間賣家刪除照片，腳本把路徑加回去                                | 中     | transaction 裡重新讀 `images`，舊路徑不在就跳過並刪掉新檔                                                         |
-| 舊網址被 Google / LINE / Facebook 快取，清理後變成破圖                | 中     | 原圖保留 4 週才清理；清理前抽查 Search Console 的圖片和 LINE 預覽是否已更新                                       |
-| LINE / Facebook 快取舊預覽，T11 看不出新圖                            | 中     | Facebook 用 Sharing Debugger「Scrape Again」；LINE 用 Page Poker 清快取，或分享帶 query string 的網址             |
-| 本機 dev 實際連到正式 Firestore，上傳測試寫進正式資料                 | 中     | 會寫入的瀏覽器測試前，先確認 `NEXT_PUBLIC_ENV_VERSION=dev`（`.env.development` 預設是 prod）                      |
-| 內建瀏覽器沒有選檔上傳的工具                                          | 低     | 用 chrome-devtools MCP 的 `upload_file` 測 T1–T5；測試圖用 sharp 產生在 scratchpad                                |
-| Safari 的 canvas 不支援 WebP 編碼                                     | 低     | `blob.type` 不是 webp 就改 JPEG；T6 用 iPhone 實機確認                                                            |
-| Vercel preview 不確定連哪一組資料，T6 在 preview 上傳可能寫進正式資料 | 低     | T6 之前先確認 preview 的 `NEXT_PUBLIC_ENV_VERSION`；如果是 prod，就用自己的測試刊登上傳、測完刪除，或等上線後再測 |
+| 風險                                                                    | 影響 | 對策                                                                                                                                              |
+| ----------------------------------------------------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| index 還沒部署或還沒建好，`getDigitalAssets()` 直接丟錯                 | 高   | Task 1 就部署 index，Task 3 開始前確認 console 上狀態是「已啟用」。`getDigitalAssets()` 出錯時回傳 `[]`，首頁區塊和列表頁顯示空狀態，不會整頁 500 |
+| 數位資產漏進實體列表（漏改某個查詢）                                    | 高   | Task 3 用 grep 列出所有 `COLLECTIONS.STORE` 的讀取點，逐一確認；T2 測試把數位資產設成精選、急售、已售出                                           |
+| 私密欄位外流到公開頁面                                                  | 高   | 全部經過 `omitSellerContact()`；每個 PR 的 checkpoint 都在頁面原始碼和 RSC payload 搜 `assetUrl` 的值和 `verification/`                           |
+| rules 沒部署就上線，賣家或管理員上傳時 `permission-denied`              | 中   | rules 改動都只增加權限、不收緊，可以先部署再合併 PR；PR 描述寫明部署步驟                                                                          |
+| 在 PR 2 上線前，有人在 `prodStore` 建了數位資產，舊詳細頁會當成實體顯示 | 中   | PR 1 只在 `mockStore` 測試；正式站建立第一筆要先問你                                                                                              |
+| 合併 main 時 `SPEC.md`、`tasks/*` 衝突（PR #90 也改過）                 | 低   | Task 1 保留這個分支的版本；PR #90 的 rules 文件已經寫進 CLAUDE.md，不會遺失                                                                       |
+| 第一次部署 index 時，CLI 要刪除或重建現有的 index                       | 高   | 檔案是從正式專案直接匯出的，理論上沒有差異。部署**不加 `--force`**；CLI 如果問要不要刪除任何 index，一律回答 No，停下來告訴我                     |
+| `BuyerClubPopup` 很大（約 570 行），改動可能影響實體店面的 popup        | 中   | Task 12 只動類型選項、地區必填判斷、source 三個點；實體類型的註冊流程照 T13 回歸檢查                                                              |
+| rules 測試需要 Java（emulator）                                         | 低   | PR #90 的前置條件：`brew install openjdk@21`。沒裝的話我會停下來告訴你                                                                            |
+
+## Parallelization
+
+Task 15–17（瀏覽）只依賴 PR 1，跟 PR 2 可以同時做。但 spec 刻意讓瀏覽入口在詢問功能之後上線，所以照順序做，不另開 session。每個 PR 內的 task 依序執行，不平行。
 
 ## Open Questions
 
-- Task 4 要用哪一家正式店家試轉？建議挑一家**你自己的刊登或已售出、流量低**的店，照片原圖偏大，效果最明顯（例如 `4fy20TpARRzvSzLt3N4F`，5 張共 28.9 MB）。
+目前沒有。
