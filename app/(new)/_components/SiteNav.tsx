@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 const navLinks = [
   { label: "我要找店", href: "/store-list" },
+  { label: "數位資產", href: "/digital-assets" },
   { label: "我要頂出", href: "/sell" },
   { label: "頂讓指南", href: "/store-guide" },
   { label: "部落格", href: "/blog" },
@@ -26,7 +27,7 @@ export default function SiteNav({ activeLink }: { activeLink?: string }) {
         <ul
           className={cn(
             "text-sm font-[var(--hand)]",
-            "hidden sm:flex gap-[22px]",
+            "hidden lg:flex gap-[22px]",
             "m-0 p-0",
             "list-none",
           )}
@@ -43,13 +44,15 @@ export default function SiteNav({ activeLink }: { activeLink?: string }) {
         </div>
       </div>
 
-      {/* Mobile-only nav row */}
+      {/* Second nav row below lg — six links don't fit beside the logo and
+          the auth buttons until ~850px. On phones a smaller size and a little
+          of the nav's side padding keep them apart at 375px. */}
       <ul
         className={cn(
-          "flex sm:hidden justify-around",
-          "m-0 p-0 mt-2.5 pt-2.5 list-none",
+          "flex lg:hidden justify-between sm:justify-center sm:gap-8",
+          "-mx-3 sm:mx-0 p-0 mb-0 mt-2.5 pt-2.5 list-none",
           "border-t border-dashed border-[var(--ink-2)]",
-          "text-sm",
+          "text-[13px] sm:text-sm",
         )}
       >
         {navLinks.map(({ label, href }) => (

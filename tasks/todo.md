@@ -314,16 +314,16 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria**：
 
-- [ ] `SectionTitle` 04、`NEW` Pill、副標、「看全部數位資產 →」
-- [ ] 讀最新 30 筆 approved（`limit: 30`）；類型分頁在 client 端篩選、不改網址，每個分頁最多 6 張
-- [ ] 分頁沒資料時顯示「這個類型目前沒有最新刊登」＋「到列表頁看看 →」（`/digital-assets?type=<類型>`）；完全沒資料時顯示整區空狀態
-- [ ] 底部「我也有數位資產想刊登 ↗」（`/sell?type=digital`）和警語
-- [ ] Categories 05、Districts 06、BrowseAll 07、HowItWorks 08、WhyUs 09、Faq 10（`Stories` 沒有掛載，不改）
-- [ ] `getDigitalAssets()` 出錯時區塊顯示空狀態，首頁不會壞
+- [x] `SectionTitle` 04、`NEW` Pill、副標、「看全部數位資產 →」
+- [x] 讀最新 30 筆 approved（`limit: 30`）；類型分頁在 client 端篩選、不改網址，每個分頁最多 6 張
+- [x] 分頁沒資料時顯示「這個類型目前沒有最新刊登」＋「到列表頁看看 →」（`/digital-assets?type=<類型>`）；完全沒資料時顯示整區空狀態
+- [x] 底部「我也有數位資產想刊登 ↗」（`/sell?type=digital`）和警語
+- [x] Categories 05、Districts 06、BrowseAll 07、HowItWorks 08、WhyUs 09、Faq 10（`Stories` 沒有掛載，不改）
+- [x] `getDigitalAssets()` 出錯時區塊顯示空狀態，首頁不會壞
 
 **驗證**：
 
-- [ ] T14：分頁切換、空狀態、編號都正確；手機寬度分頁可以橫向捲動或換行，不撐破版面
+- [x] T14：分頁切換、空狀態、編號都正確；手機寬度分頁可以橫向捲動或換行，不撐破版面
 
 **Dependencies**：PR 2
 **Files**：`app/(new)/_components/DigitalAssets/index.tsx`、`DigitalAssets/TypeTabs.tsx`、`DigitalAssets/DigitalAssets.module.css`、`app/(new)/page.tsx`、6 個區塊元件的 `num`（每個只改一個字串）
@@ -335,13 +335,13 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria**：
 
-- [ ] 頁面殼照 CLAUDE.md；`?type=` 是唯一的篩選來源，分頁用 `router.push`；不認得的 type 當全部
-- [ ] `getDigitalAssets({ statuses: ["approved", "sold"] })`，不設 limit，類型在記憶體裡篩選；approved 在前、sold 在後（sold ribbon）
-- [ ] metadata、canonical；`sitemap.ts` 加這一頁
+- [x] 頁面殼照 CLAUDE.md；`?type=` 是唯一的篩選來源，分頁用 `router.push`；不認得的 type 當全部
+- [x] `getDigitalAssets({ statuses: ["approved", "sold"] })`，不設 limit，類型在記憶體裡篩選；approved 在前、sold 在後（sold ribbon）
+- [x] metadata、canonical；`sitemap.ts` 加這一頁
 
 **驗證**：
 
-- [ ] T15：`?type=SOCIAL` 只顯示社群；切換分頁網址跟著變；重新整理保留；`?type=xyz` 當全部
+- [x] T15：`?type=SOCIAL` 只顯示社群；切換分頁網址跟著變；重新整理保留；`?type=xyz` 當全部
 
 **Dependencies**：Task 15（共用 TypeTabs 的樣式）
 **Files**：`app/(new)/digital-assets/page.tsx`、`digital-assets/_components/DigitalAssetResults.tsx`（+ css）、`app/sitemap.ts`
@@ -353,12 +353,12 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria**：
 
-- [ ] 列表頁和數位詳細頁「數位資產」亮起；實體詳細頁仍是「我要找店」
-- [ ] 375px 手機選單 6 個連結都放得下
+- [x] 列表頁和數位詳細頁「數位資產」亮起；實體詳細頁仍是「我要找店」
+- [x] 375px 手機選單 6 個連結都放得下
 
 **驗證**：
 
-- [ ] T16：桌機、平板、手機三種寬度截圖確認
+- [x] T16：桌機、平板、手機三種寬度截圖確認
 
 **Dependencies**：Task 16
 **Files**：`app/(new)/_components/SiteNav.tsx`（必要時加它的樣式）
@@ -366,7 +366,7 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 ### Checkpoint: PR 3
 
-- [ ] lint、build 全過
+- [x] lint、build 全過
 - [ ] 首頁 → 列表頁 → 詳細頁 → 詢問整條路都通，桌機和手機都檢查
 - [ ] 你 review → commit → 開 PR
 

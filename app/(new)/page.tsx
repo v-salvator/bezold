@@ -7,6 +7,7 @@ import HeroSplit from "./_components/HeroSplit";
 import AccelerationPromo from "./_components/AccelerationPromo";
 import TrustBar from "./_components/TrustBar";
 import FeaturedListings from "./_components/FeaturedListings";
+import DigitalAssets from "./_components/DigitalAssets";
 import Categories from "./_components/Categories";
 import Districts from "./_components/Districts";
 import BrowseAll from "./_components/BrowseAll";
@@ -22,6 +23,7 @@ import {
   getHighlightedStores,
   getEmergencyStores,
   getSoldStores,
+  getDigitalAssets,
 } from "@/firebase/serverUtils/store";
 import { STORE_STATUS } from "@/types";
 import { SOCIAL_LINKS } from "@/constant/socials";
@@ -40,11 +42,18 @@ export const metadata: Metadata = {
 };
 
 export default async function NewHomePage() {
-  const [highlightedStores, emergencyStores, soldStores] = await Promise.all([
-    getHighlightedStores(),
-    getEmergencyStores(),
-    getSoldStores(),
-  ]);
+  const [highlightedStores, emergencyStores, soldStores, digitalAssets] =
+    await Promise.all([
+      getHighlightedStores(),
+      getEmergencyStores(),
+      getSoldStores(),
+      // * the latest 30, so each type tab has something to filter
+      getDigitalAssets({
+        statuses: [STORE_STATUS.APPROVED],
+        limit: 30,
+        coverOnly: true,
+      }),
+    ]);
 
   return (
     <>
@@ -121,6 +130,7 @@ export default async function NewHomePage() {
           sub="— 這些店家已成功頂讓 —"
           more=""
         />
+        <DigitalAssets assets={digitalAssets} />
         <Categories />
         <Districts />
         <BrowseAll />
