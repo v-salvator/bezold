@@ -159,6 +159,49 @@ export function toCard(store: Store): StoreCard {
   return isDigitalAsset(store) ? digitalAssetToCard(store) : storeToCard(store);
 }
 
+// * ── Digital asset writes ──────────────────────────────────────────────────
+// * form inputs hold raw strings; numbers are parsed here so both admin forms
+// * (and later the seller form) write the same shape
+
+type DigitalAssetFormValues = Pick<
+  Partial<Store>,
+  "digitalTypes" | "assetUrl"
+> & {
+  operatingYears?: number | string;
+  monthlyRevenue?: number | string;
+  priceMax?: number | string;
+};
+
+// * "" / undefined / non-numeric → undefined, so the field is left out
+const parseOptionalNumber = (value?: number | string): number | undefined => {
+  if (value === undefined || String(value).trim() === "") return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
+// * digital assets have no location — strings are "" (never undefined, which
+// * updateDoc rejects) so physical queries and forms never match them
+export const DIGITAL_ASSET_EMPTY_LOCATION = {
+  city: "",
+  district: "",
+  location: "",
+  category: "",
+};
+
+export function digitalAssetWriteFields(values: DigitalAssetFormValues) {
+  const operatingYears = parseOptionalNumber(values.operatingYears);
+  const monthlyRevenue = parseOptionalNumber(values.monthlyRevenue);
+  return {
+    listingType: LISTING_TYPE.DIGITAL,
+    digitalTypes: values.digitalTypes ?? [],
+    assetUrl: (values.assetUrl ?? "").trim(),
+    // * 0 = no range — lets a cleared upper bound overwrite the old one
+    priceMax: parseOptionalNumber(values.priceMax) ?? 0,
+    ...(operatingYears !== undefined ? { operatingYears } : {}),
+    ...(monthlyRevenue !== undefined ? { monthlyRevenue } : {}),
+  };
+}
+
 export const genDefaultStore = () => {
   return {
     storeName: "",
