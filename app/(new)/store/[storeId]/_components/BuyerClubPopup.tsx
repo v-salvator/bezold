@@ -12,8 +12,9 @@ import EyeIcon from "@/app/(new)/_components/EyeIcon";
 import { cityItems, amountItems } from "@/components/SearchFilter/DropDowns";
 import { buyerClubOpenAtom, buyerClubSourceAtom } from "@/atoms/BuyerClubAtom";
 import {
-  BUYER_CLUB_COPY as copy,
+  BUYER_CLUB_COPY,
   BUYER_CLUB_CATEGORIES,
+  BUYER_CLUB_DIGITAL_COPY,
   BUYER_CLUB_DIGITAL_CATEGORY,
 } from "@/constant/buyerClub";
 import {
@@ -170,6 +171,9 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
   // not apply to it.
   const isVisitorOpened = isVisitorOpenedSource(source);
   const cityRequired = isBuyerCityRequired(category);
+  // Digital assets are anonymous — never promise the seller's contact details.
+  const copy =
+    source === "digital_inquiry" ? BUYER_CLUB_DIGITAL_COPY : BUYER_CLUB_COPY;
 
   // A digital-asset inquiry means the buyer is after a digital asset —
   // preselect it (an earlier choice in this page view is kept).
@@ -342,6 +346,7 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
             <VerifyStep
               redirectPath={pathname}
               verificationSent={signedUp.verificationSent}
+              context={copy.verifyContext}
               onDone={finishVerifyStep}
             />
           ) : (
@@ -548,10 +553,12 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
 function VerifyStep({
   redirectPath,
   verificationSent,
+  context,
   onDone,
 }: {
   redirectPath: string;
   verificationSent: boolean;
+  context: string;
   onDone: () => void;
 }) {
   const verification = useEmailVerification({
@@ -571,7 +578,7 @@ function VerifyStep({
     <VerifyEmailPanel
       verification={verification}
       title="差一步就完成"
-      context="驗證信箱後就能看到賣家的聯絡方式"
+      context={context}
       headingId="buyerClubTitle"
     >
       <button type="button" className={styles.browseBtn} onClick={onDone}>
