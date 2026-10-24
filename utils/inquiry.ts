@@ -34,3 +34,7 @@ export const parseInquiryStatus = (value: unknown): InquiryStatus | null =>
   typeof value === "string" && INQUIRY_STATUSES.includes(value)
     ? (value as InquiryStatus)
     : null;
+
+// * how one status change moves the sidebar's 未處理 (new) badge
+export const newCountDelta = (from: InquiryStatus, to: InquiryStatus) =>
+  (to === INQUIRY_STATUS.NEW ? 1 : 0) - (from === INQUIRY_STATUS.NEW ? 1 : 0);

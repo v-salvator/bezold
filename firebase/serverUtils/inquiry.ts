@@ -115,3 +115,14 @@ export const updateInquiryStatus = async (
     throw error;
   }
 };
+
+// * sidebar badge — a single-field aggregation: no composite index, billed as
+// * one read regardless of how many inquiries match
+export const countNewInquiries = async () => {
+  const snapshot = await db
+    .collection(COLLECTIONS.INQUIRY)
+    .where("status", "==", INQUIRY_STATUS.NEW)
+    .count()
+    .get();
+  return snapshot.data().count;
+};

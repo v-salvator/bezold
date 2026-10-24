@@ -12,11 +12,14 @@ import {
 import type { TableProps } from "antd";
 import dayjs from "dayjs";
 import Link from "next/link";
+import { useSetAtom } from "jotai";
 
 import { INQUIRY_STATUS, type Inquiry, type InquiryStatus } from "@/types";
 import { INQUIRY_STATUS_COLOR, INQUIRY_STATUS_LABEL } from "@/constant/inquiry";
 import { authedFetch } from "@/lib/authedFetch";
 import { useAdminAuth } from "@/hooks";
+import { newCountDelta } from "@/utils/inquiry";
+import { newInquiryCountAtom } from "@/atoms/InquiryAtom";
 
 // * timestamps arrive as epoch millis over JSON
 type InquiryRow = Omit<Inquiry, "createTime" | "updateTime"> & {
@@ -47,6 +50,7 @@ export default function AdminInquiriesPage() {
   const [loading, setLoading] = useState(true);
   const [scope, setScope] = useState<Scope>("open");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const setNewInquiryCount = useSetAtom(newInquiryCountAtom);
 
   const fetchInquiries = useCallback(async () => {
     if (!idToken) return;
@@ -93,6 +97,10 @@ export default function AdminInquiriesPage() {
             ? { ...row, status, updateTime: Date.now() }
             : row,
         ),
+      );
+      // * keep the sidebar badge in step without refetching the count
+      setNewInquiryCount((count) =>
+        Math.max(0, count + newCountDelta(inquiry.status, status)),
       );
       messageApi.success(`已更新為「${INQUIRY_STATUS_LABEL[status]}」`);
     } catch {
