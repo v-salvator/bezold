@@ -435,7 +435,7 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria**：
 
-- [ ] `ListingCard` 用 `toCard()`；數位刊登沒有截圖時顯示「請補上核對截圖」
+- [x] `ListingCard` 用 `toCard()`；數位刊登沒有截圖時顯示「請補上核對截圖」
 - [ ] `EditListingForm` 依類型顯示數位欄位和 `VerificationImageUpload`，沒有類型切換
 - [ ] 已上架的刊登改欄位、新增或刪除截圖 → 回到 `pending`（跟照片一樣）
 
@@ -450,7 +450,7 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 ### Checkpoint: 完成
 
-- [ ] lint、build、`npm run test:rules` 全過（T22）
+- [x] lint、build、`npm run test:rules` 全過（T22）
 - [ ] spec 的 T1–T22 全部走過一次
 - [ ] 你部署 firestore rules
 - [ ] 你 review → commit → 開 PR
