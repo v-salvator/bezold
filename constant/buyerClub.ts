@@ -1,10 +1,11 @@
 import { STORE_CATEGORIES } from "@/constant/storeType";
 
-// Copy for the buyer club popup. Physical-store entry points (the daily
-// auto-open, the FAB, an ad landing and the locks on the seller contact block)
-// all promise the seller's contact details, which is what joining unlocks.
-// A digital asset's inquiry button gets its own set: those listings are
-// anonymous, so joining leads to an inquiry and a platform match instead.
+// Copy for the buyer club popup, chosen by the listing the page shows. On a
+// physical store every entry point (the daily auto-open, the FAB, an ad
+// landing and the locks on the seller contact block) promises the seller's
+// contact details, which is what joining unlocks. Digital assets are
+// anonymous, so on their pages joining leads to an inquiry and a platform
+// match instead — whether the popup opened on its own or from 「我有興趣」.
 //
 // The entry point still matters elsewhere (analytics, and whether the daily
 // auto-open cap applies) — see atoms/BuyerClubAtom.ts.

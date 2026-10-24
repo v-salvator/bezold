@@ -132,7 +132,7 @@ export default async function StoreDetailPage({
         </div>
       </main>
       <SiteFooter />
-      <BuyerClubPopup forceOpen={forceOpenBuyerClub} />
+      <BuyerClubPopup forceOpen={forceOpenBuyerClub} isDigital={isDigital} />
     </>
   );
 }

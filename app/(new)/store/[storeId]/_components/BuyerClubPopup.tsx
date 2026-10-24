@@ -78,7 +78,13 @@ function markSuppressed(): void {
   }
 }
 
-export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
+export default function BuyerClubPopup({
+  forceOpen,
+  isDigital,
+}: {
+  forceOpen: boolean;
+  isDigital: boolean;
+}) {
   // Gate everything on the FIRST resolved auth callback — reading
   // auth.currentUser synchronously would flash the popup for logged-in members
   // while Firebase restores the persisted session.
@@ -171,9 +177,9 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
   // not apply to it.
   const isVisitorOpened = isVisitorOpenedSource(source);
   const cityRequired = isBuyerCityRequired(category);
-  // Digital assets are anonymous — never promise the seller's contact details.
-  const copy =
-    source === "digital_inquiry" ? BUYER_CLUB_DIGITAL_COPY : BUYER_CLUB_COPY;
+  // Digital assets are anonymous — never promise the seller's contact details,
+  // whichever entry point opened the popup on that page.
+  const copy = isDigital ? BUYER_CLUB_DIGITAL_COPY : BUYER_CLUB_COPY;
 
   // A digital-asset inquiry means the buyer is after a digital asset —
   // preselect it (an earlier choice in this page view is kept).
