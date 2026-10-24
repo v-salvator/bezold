@@ -1,5 +1,6 @@
 import { db } from "@/firebase/server";
 import {
+  LISTING_TYPE,
   Store,
   STORE_CATEGORY,
   STORE_STATUS,
@@ -9,6 +10,7 @@ import {
 import { getImagesByPath } from "./image";
 import { getUserById } from "./user";
 import { COLLECTIONS } from "@/firebase/constants";
+import { isDigitalAsset } from "@/utils/store";
 
 const COLLECTION = COLLECTIONS.STORE;
 
@@ -25,6 +27,12 @@ const mapDocsToStores = (
       updateTime: storeData.updateTime.toDate(),
     } as Store;
   });
+
+// * physical lists skip digital assets in memory — `where("listingType", "!=",
+// * "digital")` would also drop every legacy doc that has no listingType.
+// * Always filter before slicing so digital assets don't eat the count.
+const physicalOnly = (stores: Store[]): Store[] =>
+  stores.filter((store) => !isDigitalAsset(store));
 
 // * resolve raw Storage paths to visible download URLs, mutating in place.
 // * coverOnly: list cards only show images[0], so skip resolving (and
@@ -110,7 +118,7 @@ export const getStores = async (
 
   // * filter in memory — an extra `where` would need a new composite index —
   // * and before signing images, so hidden stores cost nothing
-  const stores = mapDocsToStores(snapshot).filter(
+  const stores = physicalOnly(mapDocsToStores(snapshot)).filter(
     (store) => !statuses || (!!store.status && statuses.includes(store.status)),
   );
   return resolveStoreImages(stores, { coverOnly });
@@ -153,7 +161,7 @@ export const getHighlightedStores = async () => {
 
   // * limit to 9 approved stores — filter before slicing so unapproved
   // * stores don't eat into the displayed count
-  const approvedStores = mapDocsToStores(snapshot)
+  const approvedStores = physicalOnly(mapDocsToStores(snapshot))
     .filter((store) => store.status === STORE_STATUS.APPROVED)
     .slice(0, 9);
 
@@ -170,7 +178,7 @@ export const getEmergencyStores = async () => {
 
   // * limit to 9 approved stores — filter before slicing so unapproved
   // * stores don't eat into the displayed count
-  const approvedStores = mapDocsToStores(snapshot)
+  const approvedStores = physicalOnly(mapDocsToStores(snapshot))
     .filter((store) => store.status === STORE_STATUS.APPROVED)
     .slice(0, 9);
 
@@ -187,11 +195,45 @@ export const getSoldStores = async () => {
 
   // * newest transfers first — updateTime records when the status flipped to
   // * sold (via updateStoreStatus), unlike createTime which is the listing date.
-  const soldStores = mapDocsToStores(snapshot)
+  const soldStores = physicalOnly(mapDocsToStores(snapshot))
     .sort((a, b) => b.updateTime.getTime() - a.updateTime.getTime())
     .slice(0, 9);
 
   return resolveStoreImages(soldStores, { coverOnly: true });
+};
+
+interface GetDigitalAssetsOptions {
+  statuses: StoreStatus[];
+  limit?: number;
+  coverOnly?: boolean;
+}
+
+// * status is part of the query so hidden (pending / draft / rejected) assets
+// * are never read. Needs the composite index listingType ASC, status ASC,
+// * createTime DESC (firestore.indexes.json) — `==` and `in` share it.
+export const getDigitalAssets = async ({
+  statuses,
+  limit,
+  coverOnly,
+}: GetDigitalAssetsOptions): Promise<Store[]> => {
+  try {
+    const digitalRef = db
+      .collection(COLLECTION)
+      .where("listingType", "==", LISTING_TYPE.DIGITAL);
+    const statusRef =
+      statuses.length === 1
+        ? digitalRef.where("status", "==", statuses[0])
+        : digitalRef.where("status", "in", statuses);
+    const orderedRef = statusRef.orderBy("createTime", "desc");
+    const snapshot = await (limit ? orderedRef.limit(limit) : orderedRef).get();
+
+    // * images resolve after the limit, so only displayed covers are signed
+    return await resolveStoreImages(mapDocsToStores(snapshot), { coverOnly });
+  } catch (error) {
+    // * e.g. index not built yet — callers render their empty state, not a 500
+    console.error("getDigitalAssets failed", error);
+    return [];
+  }
 };
 
 // TODO: create store

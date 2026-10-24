@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getStoreById } from "@/firebase/serverUtils";
 import { STORE_STATUS, type SellerContact } from "@/types";
 import { verifyUserToken } from "@/lib/verifyUserToken";
+import { isDigitalAsset } from "@/utils/store";
 
 interface ContactProps {
   params: { storeId: string };
@@ -27,10 +28,12 @@ export async function GET(req: NextRequest, { params }: ContactProps) {
   }
 
   // Sold listings are closed to enquiries, and drafts are only shown to the
-  // seller for approval — members get nothing for either.
+  // seller for approval — members get nothing for either. Digital assets are
+  // anonymous: buyers go through the inquiry flow, never direct contact.
   if (
     store.status === STORE_STATUS.SOLD ||
-    store.status === STORE_STATUS.DRAFT
+    store.status === STORE_STATUS.DRAFT ||
+    isDigitalAsset(store)
   ) {
     return NextResponse.json(EMPTY_CONTACT);
   }

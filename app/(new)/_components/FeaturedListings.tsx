@@ -4,7 +4,7 @@ import styles from "./FeaturedListings.module.css";
 import StoreCard from "@/components/refactored/StoreCard";
 import { cn } from "@/lib/utils";
 import { type Store, type StoreStatus, STORE_STATUS } from "@/types";
-import { storeToCard } from "@/utils/store";
+import { toCard } from "@/utils/store";
 
 type Props = {
   stores: Store[];
@@ -52,7 +52,7 @@ export default function FeaturedListings({
       />
       <div className={styles.listings}>
         {visibleStores.map((store) => {
-          const card = storeToCard(store);
+          const card = toCard(store);
           if (sold) card.ribbon = { label: "已頂讓", variant: "sold" };
           return (
             <a
