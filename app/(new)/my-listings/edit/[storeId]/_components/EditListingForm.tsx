@@ -26,6 +26,7 @@ import {
 import styles from "@/components/storeForm/storeForm.module.css";
 import { type Store, type EquipmentStatus, STORE_STATUS } from "@/types";
 import { normalizeThreadsId } from "@/utils/user";
+import { listingTypeOf } from "@/utils/store";
 
 export default function EditListingForm({ storeId }: { storeId: string }) {
   const router = useRouter();
@@ -78,6 +79,7 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
         }
 
         setStore({
+          listingType: listingTypeOf(fetchedStore),
           storeName: fetchedStore.storeName ?? "",
           city: fetchedStore.city ?? "",
           district: fetchedStore.district ?? "",
@@ -93,6 +95,12 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
               ? String(fetchedStore.monthlyRent)
               : "",
           equipment: fetchedStore.equipment ?? "",
+          digitalTypes: fetchedStore.digitalTypes ?? [],
+          operatingYears: toFieldString(fetchedStore.operatingYears),
+          monthlyRevenue: toFieldString(fetchedStore.monthlyRevenue),
+          // * 0 = no upper bound → an empty input
+          priceMax: fetchedStore.priceMax ? String(fetchedStore.priceMax) : "",
+          assetUrl: fetchedStore.assetUrl ?? "",
         });
         setExistingImages(fetchedStore.images ?? []);
         setCurrentStatus(fetchedStore.status ?? STORE_STATUS.PENDING);
@@ -262,6 +270,8 @@ export default function EditListingForm({ storeId }: { storeId: string }) {
     </Card>
   );
 }
+
+const toFieldString = (value?: number) => (value != null ? String(value) : "");
 
 // * approved: re-review after a change; rejected: the seller fixed it and resubmits
 function sendsBackToReview(status: Store["status"]) {

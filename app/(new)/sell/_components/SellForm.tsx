@@ -20,6 +20,7 @@ import {
   type BossFields,
   emptyStoreFields,
   emptyBossFields,
+  physicalFormFields,
   validateStoreForm,
 } from "@/components/storeForm/formTypes";
 import styles from "@/components/storeForm/storeForm.module.css";
@@ -107,7 +108,7 @@ export default function SellForm() {
 
     try {
       const storePayload = {
-        ...store,
+        ...physicalFormFields(store),
         tags: [],
         price: priceValue,
         currency: "TWD",

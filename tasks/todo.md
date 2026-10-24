@@ -397,13 +397,13 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria**：
 
-- [ ] `StoreFields` 加 `listingType` 和數位欄位；`emptyStoreFields(listingType)`
-- [ ] `validateStoreForm()` 依類型分支，規則照 spec；實體分支行為不變
-- [ ] `DigitalFieldsSection`：類型多選 Pill、經營時間、平均月營收、價格下限／上限、資產連結＋說明、勿提供密碼警語
+- [x] `StoreFields` 加 `listingType` 和數位欄位；`emptyStoreFields(listingType)`
+- [x] `validateStoreForm()` 依類型分支，規則照 spec；實體分支行為不變
+- [x] `DigitalFieldsSection`：類型多選 Pill、經營時間、平均月營收、價格下限／上限、資產連結＋說明、勿提供密碼警語
 
 **驗證**：
 
-- [ ] 用 scratchpad 腳本（同 Task 2 的 `jiti` 方式）跑 `validateStoreForm` 的數位情境：缺連結、非 http(s)、上限 < 下限、沒選類型都回錯誤；完整資料通過
+- [x] 用 scratchpad 腳本（同 Task 2 的 `jiti` 方式）跑 `validateStoreForm` 的數位情境：缺連結、非 http(s)、上限 < 下限、沒選類型都回錯誤；完整資料通過
 
 **Dependencies**：Task 18
 **Files**：`components/storeForm/formTypes.ts`、`components/storeForm/DigitalFieldsSection.tsx`、`components/storeForm/storeForm.module.css`
