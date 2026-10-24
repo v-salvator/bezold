@@ -5,7 +5,7 @@ import type { ColumnsType } from "antd/es/table";
 import { authedFetch } from "@/lib/authedFetch";
 import { useAdminAuth } from "@/hooks";
 import { cityItems, amountItems } from "@/components/SearchFilter/DropDowns";
-import { STORE_CATEGORIES } from "@/constant/storeType";
+import { BUYER_CLUB_CATEGORIES } from "@/constant/buyerClub";
 
 type BuyerProfileRow = {
   uid: string;
@@ -21,7 +21,10 @@ type BuyerProfileRow = {
 };
 
 // Key → readable label maps, reusing the same constants the popup writes from.
-const categoryLabels = new Map(STORE_CATEGORIES.map((c) => [c.key, c.label]));
+// * buyer-club categories include 數位資產, which STORE_CATEGORIES does not
+const categoryLabels = new Map(
+  BUYER_CLUB_CATEGORIES.map((c) => [c.key, c.label]),
+);
 const cityLabels = new Map(cityItems.map((c) => [c.key, c.label as string]));
 const budgetLabels = new Map(amountItems.map((a) => [a.key, a.label]));
 

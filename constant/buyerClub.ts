@@ -1,3 +1,5 @@
+import { STORE_CATEGORIES } from "@/constant/storeType";
+
 // Copy for the buyer club popup. One popup, one wording — it only ever renders
 // on a store detail page, so promising the seller's contact details reads
 // correctly for every entry point: the daily auto-open, the FAB, an ad landing
@@ -19,3 +21,13 @@ export const BUYER_CLUB_COPY = {
   submit: "免費加入並查看聯絡方式 →",
   submitLoading: "建立中…",
 };
+
+// * buyer-club only: a buyer may be looking for a digital asset, but a
+// * physical store can never be filed under 數位資產 — so this is NOT added
+// * to STORE_CATEGORIES (sell form, /store-list filters, HeroSplit, admin)
+export const BUYER_CLUB_DIGITAL_CATEGORY = "DIGITAL_ASSET";
+
+export const BUYER_CLUB_CATEGORIES = [
+  ...STORE_CATEGORIES,
+  { label: "數位資產", key: BUYER_CLUB_DIGITAL_CATEGORY },
+];

@@ -52,7 +52,7 @@ Spec: [`SPEC.md`](../SPEC.md) · Tasks: [`tasks/todo.md`](todo.md)
 - [x] Task 9: 匿名持有人卡與交易說明
 - [x] Task 10: 詢問的資料層與會員 API
 - [x] Task 11: 詳細頁的詢問 CTA 與 GA4
-- [ ] Task 12: 買家俱樂部的數位資產偏好
+- [x] Task 12: 買家俱樂部的數位資產偏好
 - [ ] Task 13: 後台「詢問」頁
 - [ ] Task 14: 側欄未處理詢問數量
 

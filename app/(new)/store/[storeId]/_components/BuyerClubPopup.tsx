@@ -10,13 +10,18 @@ import Dropdown from "@/components/refactored/Dropdown";
 import FormField from "@/components/refactored/FormField";
 import EyeIcon from "@/app/(new)/_components/EyeIcon";
 import { cityItems, amountItems } from "@/components/SearchFilter/DropDowns";
-import { STORE_CATEGORIES } from "@/constant/storeType";
+import { buyerClubOpenAtom, buyerClubSourceAtom } from "@/atoms/BuyerClubAtom";
 import {
-  buyerClubOpenAtom,
-  buyerClubSourceAtom,
-  CONTACT_GATE_PREFIX,
-} from "@/atoms/BuyerClubAtom";
-import { BUYER_CLUB_COPY as copy } from "@/constant/buyerClub";
+  BUYER_CLUB_COPY as copy,
+  BUYER_CLUB_CATEGORIES,
+  BUYER_CLUB_DIGITAL_CATEGORY,
+} from "@/constant/buyerClub";
+import {
+  buyerClubSignupSource,
+  buyerConditionsError,
+  isBuyerCityRequired,
+  isVisitorOpenedSource,
+} from "@/utils/buyerClub";
 import {
   signup,
   AUTH_ERRORS,
@@ -32,7 +37,7 @@ import styles from "./BuyerClubPopup.module.css";
 
 const SUPPRESS_KEY = "buyerClubPopupSeen";
 
-const categoryOptions = STORE_CATEGORIES.map((item) => ({
+const categoryOptions = BUYER_CLUB_CATEGORIES.map((item) => ({
   label: item.label,
   value: item.key,
 }));
@@ -160,9 +165,18 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, signedUp]);
 
-  // Opened from the locked seller contact block — the visitor asked for this
-  // one, so the daily auto-open cap does not apply to it.
-  const isContactGate = source.startsWith(CONTACT_GATE_PREFIX);
+  // Opened from the locked seller contact block or a digital asset's inquiry
+  // button — the visitor asked for this one, so the daily auto-open cap does
+  // not apply to it.
+  const isVisitorOpened = isVisitorOpenedSource(source);
+  const cityRequired = isBuyerCityRequired(category);
+
+  // A digital-asset inquiry means the buyer is after a digital asset —
+  // preselect it (an earlier choice in this page view is kept).
+  useEffect(() => {
+    if (open && source === "digital_inquiry")
+      setCategory((current) => current || BUYER_CLUB_DIGITAL_CATEGORY);
+  }, [open, source]);
   // Signing in always returns to the listing being read.
   const loginHref = `/login?redirect=${pathname}`;
 
@@ -182,7 +196,7 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
     setOpen(false);
     // A popup the visitor opened themselves must not consume the day's
     // auto-open allowance — the cap only governs uninvited interruptions.
-    if (!isContactGate) markSuppressed();
+    if (!isVisitorOpened) markSuppressed();
     trackEvent("buyer_club_popup_dismiss", { source });
   }
 
@@ -206,8 +220,9 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
       setError("密碼請至少使用 6 個字元");
       return;
     }
-    if (!category || !budgetKey || !city) {
-      setError("請完整填寫買家條件（類型、預算、地區）");
+    const conditionsError = buyerConditionsError({ category, budgetKey, city });
+    if (conditionsError) {
+      setError(conditionsError);
       return;
     }
     if (!phone.trim() && !lineId.trim()) {
@@ -228,7 +243,7 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
         password,
         phone,
         lineId,
-        source: isContactGate ? source : "buyer_club_popup",
+        source: buyerClubSignupSource(source),
         fromBuyerClub: true,
         buyerProfile: {
           category,
@@ -374,7 +389,12 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
                   </div>
                   <div className={styles.field}>
                     <span className={styles.fieldLabel}>
-                      <RequiredLabel>希望地區（縣市）</RequiredLabel>
+                      {cityRequired ? (
+                        <RequiredLabel>希望地區（縣市）</RequiredLabel>
+                      ) : (
+                        // * digital assets have no location — "" = 不限地區
+                        "希望地區（縣市，選填）"
+                      )}
                     </span>
                     <Dropdown
                       label="地區"
