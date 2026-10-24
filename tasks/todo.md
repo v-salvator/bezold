@@ -380,12 +380,12 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria**：
 
-- [ ] `sellFormKeys()`、`isNewSellerListing()`、`ownerEditableKeys()` 照 spec 修改；`listingType` 不在 owner 可編輯欄位裡
-- [ ] `tests/rules/stores.test.ts` 涵蓋 spec 列的 5 組情境
+- [x] `sellFormKeys()`、`isNewSellerListing()`、`ownerEditableKeys()` 照 spec 修改；`listingType` 不在 owner 可編輯欄位裡
+- [x] `tests/rules/stores.test.ts` 涵蓋 spec 列的 5 組情境
 
 **驗證**：
 
-- [ ] T17：`npm run test:rules` 全過（含既有測試）
+- [x] T17：`npm run test:rules` 全過（含既有測試）
 
 **Dependencies**：PR 3
 **Files**：`firestore.rules`、`tests/rules/stores.test.ts`（必要時 `tests/rules/helpers.ts`）

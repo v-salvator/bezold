@@ -46,21 +46,27 @@ service cloud.firestore {
           || (isSelf(userId) && !changedKeys().hasAny(['createTime'])));
     }
 
-    // * the fields SellForm sends to createStoreDoc — nothing else on create
+    // * the fields SellForm sends to createStoreDoc — nothing else on create.
+    // * verificationImages is left out on purpose: screenshots are uploaded
+    // * after the doc exists, like photos
     function sellFormKeys() {
       return ['storeName', 'city', 'district', 'location', 'description',
         'price', 'priceNegotiable', 'category', 'areaPing', 'monthlyRent',
         'equipment', 'tags', 'currency', 'user', 'images', 'status',
-        'createTime', 'updateTime'];
+        'createTime', 'updateTime',
+        'listingType', 'digitalTypes', 'operatingYears', 'monthlyRevenue',
+        'priceMax', 'assetUrl'];
     }
 
     // * a new listing always enters review: no tags (admin-only, e.g.
     // * RECOMMENDED), no photos yet (uploaded after the doc exists), and
-    // * server timestamps
+    // * server timestamps. Physical listings never write listingType (absent
+    // * = physical), so when it's there it can only say digital.
     function isNewSellerListing() {
       let data = request.resource.data;
       return signedIn()
         && data.keys().hasOnly(sellFormKeys())
+        && (!('listingType' in data) || data.listingType == 'digital')
         && data.user == request.auth.uid
         && data.status == 'pending'
         && data.tags == []
@@ -69,11 +75,15 @@ service cloud.firestore {
         && data.updateTime == request.time;
     }
 
-    // * what EditListingForm, the photo uploader and ListingCard write
+    // * what EditListingForm, the photo and screenshot uploaders and
+    // * ListingCard write. listingType is left out: a listing can never switch
+    // * between physical and digital, whatever the UI does
     function ownerEditableKeys() {
       return ['storeName', 'city', 'district', 'location', 'description',
         'price', 'priceNegotiable', 'category', 'areaPing', 'monthlyRent',
-        'equipment', 'images', 'status', 'updateTime'];
+        'equipment', 'images', 'status', 'updateTime',
+        'digitalTypes', 'operatingYears', 'monthlyRevenue', 'priceMax',
+        'assetUrl', 'verificationImages'];
     }
 
     // * sellers send listings back to review (any edit on approved/rejected)

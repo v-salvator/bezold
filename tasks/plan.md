@@ -77,7 +77,7 @@ Spec: [`SPEC.md`](../SPEC.md) · Tasks: [`tasks/todo.md`](todo.md)
 
 ### PR 4 — 賣家刊登
 
-- [ ] Task 18: firestore rules 開放賣家寫入數位欄位
+- [x] Task 18: firestore rules 開放賣家寫入數位欄位
 - [ ] Task 19: 共用表單的數位欄位與驗證
 - [ ] Task 20: `/sell` 的類型切換與核對截圖步驟
 - [ ] Task 21: `/my-listings` 的數位刊登卡片與編輯
