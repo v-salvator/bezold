@@ -1,4 +1,5 @@
 import { INQUIRY_MESSAGE_MAX_LENGTH } from "@/constant/inquiry";
+import { INQUIRY_STATUS, type InquiryStatus } from "@/types/Inquiry";
 
 // * the optional note a buyer sends with an inquiry — missing means ""
 export const parseInquiryMessage = (
@@ -25,3 +26,11 @@ export const inquiryErrorMessage = (status: number, error?: string) => {
   if (status === 401) return "登入狀態已過期，請重新登入後再試";
   return "送出失敗，請稍後再試";
 };
+
+const INQUIRY_STATUSES: string[] = Object.values(INQUIRY_STATUS);
+
+// * PATCH /api/admin/inquiries/[id] body — anything else is a 400
+export const parseInquiryStatus = (value: unknown): InquiryStatus | null =>
+  typeof value === "string" && INQUIRY_STATUSES.includes(value)
+    ? (value as InquiryStatus)
+    : null;

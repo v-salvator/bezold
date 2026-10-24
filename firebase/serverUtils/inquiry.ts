@@ -1,11 +1,18 @@
 import { FieldValue } from "firebase-admin/firestore";
 import { db } from "@/firebase/server";
 import { COLLECTIONS } from "@/firebase/constants";
-import { INQUIRY_STATUS, STORE_STATUS } from "@/types";
+import {
+  INQUIRY_STATUS,
+  STORE_STATUS,
+  type Inquiry,
+  type InquiryDoc,
+  type InquiryStatus,
+} from "@/types";
 import { getInquiryId } from "@/utils/inquiry";
 import { isDigitalAsset } from "@/utils/store";
 
-// * gRPC ALREADY_EXISTS — what DocumentReference.create() throws on a dupe
+// * gRPC codes DocumentReference.create() / update() throw
+const NOT_FOUND = 5;
 const ALREADY_EXISTS = 6;
 
 export const hasSubmittedInquiry = async (
@@ -69,6 +76,42 @@ export const submitInquiry = async ({
   } catch (error) {
     if ((error as { code?: number }).code === ALREADY_EXISTS)
       return "already_submitted";
+    throw error;
+  }
+};
+
+// * admin inbox — newest first. Single-field order, no composite index; the
+// * collection only holds a handful of requests per asset, so no paging yet.
+export const listInquiries = async (): Promise<Inquiry[]> => {
+  const snapshot = await db
+    .collection(COLLECTIONS.INQUIRY)
+    .orderBy("createTime", "desc")
+    .get();
+  return snapshot.docs.map((doc) => {
+    const data = doc.data() as InquiryDoc;
+    return {
+      ...data,
+      id: doc.id,
+      createTime: data.createTime.toDate(),
+      updateTime: data.updateTime.toDate(),
+    };
+  });
+};
+
+// * only status + updateTime ever change; update() fails on a missing doc,
+// * so a bad id can't create a stray inquiry. false = not found.
+export const updateInquiryStatus = async (
+  inquiryId: string,
+  status: InquiryStatus,
+) => {
+  try {
+    await db.collection(COLLECTIONS.INQUIRY).doc(inquiryId).update({
+      status,
+      updateTime: FieldValue.serverTimestamp(),
+    });
+    return true;
+  } catch (error) {
+    if ((error as { code?: number }).code === NOT_FOUND) return false;
     throw error;
   }
 };

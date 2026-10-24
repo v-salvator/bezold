@@ -28,6 +28,12 @@ const items: MenuItem[] = [
       { key: "buyer-profiles", label: "Buyer Profiles" },
     ],
   },
+  {
+    key: "digital-assets",
+    label: "Digital Assets",
+    type: "group",
+    children: [{ key: "inquiries", label: "詢問" }],
+  },
 ];
 
 export default function AdminSidebar() {
@@ -56,6 +62,9 @@ export default function AdminSidebar() {
         break;
       case "buyer-profiles":
         router.push("/admin/buyer-profiles");
+        break;
+      case "inquiries":
+        router.push("/admin/inquiries");
         break;
     }
   };
