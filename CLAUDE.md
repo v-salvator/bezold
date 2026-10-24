@@ -50,7 +50,7 @@ The only tests are the security-rules tests in `tests/rules/` (Node's built-in `
 
 Environment variables switch between dev and prod Firestore collections (`mockStore`/`mockUser` vs `prodStore`/`prodUser`). Never hardcode collection names — use `COLLECTIONS.STORE` / `COLLECTIONS.USER` from `firebase/constants.ts`.
 
-Queries that combine `where("field", "==", value)` with `orderBy("otherField")` require a **composite Firestore index**. If one is missing, Firestore logs an error with a direct link to create it in the console.
+Queries that combine `where("field", "==", value)` with `orderBy("otherField")` require a **composite Firestore index**. Indexes live in `firestore.indexes.json` (repo root) — add a new composite query's index there in the same PR, for both the `mock*` and `prod*` collections. Never create or delete indexes in the Firebase console.
 
 ### Firebase Storage images
 
@@ -74,7 +74,7 @@ Images in Firestore are stored as raw Storage paths (e.g. `mockStore/{storeId}/1
 
 - **A new client-side read or write needs a rule and a test.** Add an `assertSucceeds` test in `tests/rules/` that mirrors the exact payload the code sends — otherwise the call fails with `permission-denied` in production. Sellers can only write the fields listed in `sellFormKeys()` / `ownerEditableKeys()`, so a new seller-editable `Store` field must be added there too.
 - Store photo limits (JPG/PNG/WebP/GIF, < 5 MB) live in both `constant/image.ts` and `isAllowedImage()` in `storage.rules` — change them together.
-- Deploy (the user runs it): `npx firebase deploy --only firestore:rules,storage --project bezold`. One deploy covers dev and prod (same project). Indexes stay console-managed — don't add `firestore.indexes.json`.
+- Deploy (the user runs it): `npx firebase deploy --only firestore:rules,firestore:indexes,storage --project bezold`. One deploy covers dev and prod (same project). Never add `--force` — it deletes any index missing from `firestore.indexes.json`; if the CLI asks to delete an index, answer No.
 
 ## Styling rules
 
