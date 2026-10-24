@@ -3,6 +3,10 @@ import {
   type DigitalAssetType,
 } from "@/types/DigitalAsset";
 
+// * official 數位資產頂讓 launch (Taipei time). Before it, the entry points
+// * show a teaser; at this moment they switch on their own — no deploy needed.
+export const DIGITAL_ASSETS_LAUNCH_AT = "2026-10-29T22:00:00+08:00";
+
 // * display order of the type tabs / pills
 export const DIGITAL_ASSET_TYPES: { key: DigitalAssetType; label: string }[] = [
   { key: DIGITAL_ASSET_TYPE.SOCIAL, label: "社群" },
