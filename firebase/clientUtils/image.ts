@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { Store } from "@/types";
 import { COLLECTIONS } from "@/firebase/constants";
+import { VERIFICATION_IMAGE_MAX_EDGE } from "@/constant/image";
 import {
   assertUploadableImage,
   resizeImageFile,
@@ -61,6 +62,47 @@ export const delateStoreImage = async (
     updateTime: serverTimestamp(),
   });
   return snapshot;
+};
+
+// * digital-asset revenue screenshots — kept apart from `images` in their own
+// * field and Storage folder (storage.rules: admin + owner only), so no public
+// * page ever resolves them
+export const uploadVerificationImageByFile = async (
+  storeId: Store["id"],
+  file: File,
+) => {
+  const resizedFile = await resizeImageFile(file, {
+    maxEdge: VERIFICATION_IMAGE_MAX_EDGE,
+  });
+  // * throws before any Storage call — callers check isImageUploadLimitError
+  assertUploadableImage(resizedFile);
+  const storageRef = ref(
+    storage,
+    `${COLLECTION}/${storeId}/verification/${toUniqueFileName(resizedFile.name)}`,
+  );
+  const snapshot = await uploadBytes(
+    storageRef,
+    resizedFile,
+    resizedFile.type ? { contentType: resizedFile.type } : undefined,
+  );
+  const docRef = doc(db, COLLECTION, storeId);
+  await updateDoc(docRef, {
+    verificationImages: arrayUnion(snapshot.metadata.fullPath),
+    updateTime: serverTimestamp(),
+  });
+  return snapshot;
+};
+
+export const deleteVerificationImage = async (
+  storeId: Store["id"],
+  imagePath: string,
+) => {
+  await deleteObject(ref(storage, imagePath));
+  const docRef = doc(db, COLLECTION, storeId);
+  await updateDoc(docRef, {
+    verificationImages: arrayRemove(imagePath),
+    updateTime: serverTimestamp(),
+  });
 };
 
 export const getImagesByPath = async (imagesPath: string[]) => {

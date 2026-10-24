@@ -9,13 +9,24 @@ import {
   notification,
   Checkbox,
   Select,
+  Radio,
 } from "antd";
 import { useRouter, usePathname } from "next/navigation";
-import { genDefaultStore, formatPriceDisplay } from "@/utils/store";
+import {
+  genDefaultStore,
+  formatPriceRange,
+  digitalAssetWriteFields,
+  DIGITAL_ASSET_EMPTY_LOCATION,
+} from "@/utils/store";
 import { genDefaultUser, normalizeThreadsId } from "@/utils/user";
 
 import type { Store, User } from "@/types";
-import { STORE_STATUS, type StoreStatus } from "@/types";
+import {
+  LISTING_TYPE,
+  STORE_STATUS,
+  type ListingType,
+  type StoreStatus,
+} from "@/types";
 import { STORE_TAGS } from "@/constant/storeTags";
 import { STORE_CATEGORIES } from "@/constant/storeType";
 import { EQUIPMENT_OPTIONS } from "@/constant/storeEquipment";
@@ -23,10 +34,36 @@ import {
   getStoreCities,
   getStoreDistrictByCity,
 } from "@/constant/StoreLocation";
+import DigitalAssetFields from "../_components/DigitalAssetFields";
+
+// * fields only one listing type writes — switching type mid-form must not
+// * leak the other type's typed-in values into the new doc
+const PHYSICAL_ONLY_KEYS = [
+  "city",
+  "district",
+  "location",
+  "category",
+  "areaPing",
+  "monthlyRent",
+  "equipment",
+];
+const DIGITAL_ONLY_KEYS = [
+  "listingType",
+  "digitalTypes",
+  "operatingYears",
+  "monthlyRevenue",
+  "priceMax",
+  "assetUrl",
+];
 
 export default function StoreBaseForm() {
   const [store, setStore] = useState<Partial<Store>>(genDefaultStore());
   const [user, setUser] = useState<Partial<User>>(genDefaultUser());
+  // * chosen only here — an existing listing can never switch type
+  const [listingType, setListingType] = useState<ListingType>(
+    LISTING_TYPE.PHYSICAL,
+  );
+  const isDigital = listingType === LISTING_TYPE.DIGITAL;
   const [api, contextHolder] = notification.useNotification();
   const router = useRouter();
   const pathName = usePathname();
@@ -34,13 +71,21 @@ export default function StoreBaseForm() {
   const isValidateStore = () => {
     // * explicit required fields — a falsy price (0 = 免頂讓金) or an unchecked
     // * priceNegotiable flag must not fail validation.
-    const requiredFields = [
-      "storeName",
-      "location",
-      "description",
-    ] as (keyof Store)[];
+    const requiredFields = (
+      isDigital
+        ? ["storeName", "description", "assetUrl"]
+        : ["storeName", "location", "description"]
+    ) as (keyof Store)[];
     const allFilled = requiredFields.every((storeField) => !!store[storeField]);
-    return allFilled;
+    const hasDigitalType = !isDigital || (store.digitalTypes ?? []).length > 0;
+    // * physical keeps its old silent failure; digital explains what's missing
+    if (isDigital && (!allFilled || !hasDigitalType)) {
+      api.error({
+        message: "Some field is missing",
+        description: "數位資產需要名稱、描述、資產連結，並至少選一個類型",
+      });
+    }
+    return allFilled && hasDigitalType;
   };
   const isValidateUser = () => {
     const requiredFields = ["userName", "phone"] as (keyof User)[];
@@ -61,11 +106,17 @@ export default function StoreBaseForm() {
       threadsId: normalizeThreadsId(user.threadsId ?? ""),
     } as User);
     // * addDoc rejects undefined values — e.g. a Select cleared back to empty
+    const excludedKeys = isDigital ? PHYSICAL_ONLY_KEYS : DIGITAL_ONLY_KEYS;
     const definedStoreFields = Object.fromEntries(
-      Object.entries(store).filter(([, value]) => value !== undefined),
+      Object.entries(store).filter(
+        ([key, value]) => value !== undefined && !excludedKeys.includes(key),
+      ),
     );
     const storeRef = await createStoreDoc({
       ...definedStoreFields,
+      ...(isDigital
+        ? { ...DIGITAL_ASSET_EMPTY_LOCATION, ...digitalAssetWriteFields(store) }
+        : {}),
       price: Number(store.price) || 0,
       priceNegotiable: !!store.priceNegotiable,
       status,
@@ -127,7 +178,11 @@ export default function StoreBaseForm() {
   const previewValue = priceTrimmed ? Number(priceTrimmed) : 0;
   const pricePreview =
     !Number.isNaN(previewValue) && previewValue >= 0
-      ? formatPriceDisplay(previewValue, !!store.priceNegotiable)
+      ? formatPriceRange(
+          previewValue,
+          isDigital ? Number(store.priceMax) : undefined,
+          !!store.priceNegotiable,
+        )
       : null;
 
   return (
@@ -135,37 +190,53 @@ export default function StoreBaseForm() {
       <Divider orientation="left" orientationMargin="0">
         Store
       </Divider>
+      <Typography.Title level={5}>刊登類型 Listing Type</Typography.Title>
+      <Radio.Group
+        value={listingType}
+        onChange={(event) => setListingType(event.target.value)}
+        options={[
+          { label: "實體店面", value: LISTING_TYPE.PHYSICAL },
+          { label: "數位資產", value: LISTING_TYPE.DIGITAL },
+        ]}
+        optionType="button"
+      />
       <Typography.Title level={5}>Store Name</Typography.Title>
       <Input
         defaultValue={store?.storeName}
         onChange={(e) => handleStoreFieldChange("storeName", e.target.value)}
       ></Input>
-      <Typography.Title level={5}>City</Typography.Title>
-      <Select
-        defaultValue={store?.city}
-        style={{ width: "100%" }}
-        onChange={(val) => handleStoreFieldChange("city", val)}
-        options={getStoreCities()}
-      />
-      <Typography.Title level={5}>District</Typography.Title>
-      <Select
-        defaultValue={store?.district}
-        style={{ width: "100%" }}
-        onChange={(val) => handleStoreFieldChange("district", val)}
-        options={getStoreDistrictByCity(store?.city)}
-      />
-      <Typography.Title level={5}>Location</Typography.Title>
-      <Input
-        defaultValue={store?.location}
-        onChange={(e) => handleStoreFieldChange("location", e.target.value)}
-      ></Input>
+      {!isDigital && (
+        <>
+          <Typography.Title level={5}>City</Typography.Title>
+          <Select
+            defaultValue={store?.city}
+            style={{ width: "100%" }}
+            onChange={(val) => handleStoreFieldChange("city", val)}
+            options={getStoreCities()}
+          />
+          <Typography.Title level={5}>District</Typography.Title>
+          <Select
+            defaultValue={store?.district}
+            style={{ width: "100%" }}
+            onChange={(val) => handleStoreFieldChange("district", val)}
+            options={getStoreDistrictByCity(store?.city)}
+          />
+          <Typography.Title level={5}>Location</Typography.Title>
+          <Input
+            defaultValue={store?.location}
+            onChange={(e) => handleStoreFieldChange("location", e.target.value)}
+          ></Input>
+        </>
+      )}
       <Typography.Title level={5}>Description</Typography.Title>
       <Input.TextArea
         defaultValue={store?.description}
         autoSize={{ minRows: 4 }}
         onChange={(e) => handleStoreFieldChange("description", e.target.value)}
       ></Input.TextArea>
-      <Typography.Title level={5}>Price</Typography.Title>
+      <Typography.Title level={5}>
+        {isDigital ? "Price（區間下限）" : "Price"}
+      </Typography.Title>
       <Input
         defaultValue={store?.price}
         onChange={(e) => handleStoreFieldChange("price", e.target.value)}
@@ -194,6 +265,9 @@ export default function StoreBaseForm() {
           買家會看到：<Typography.Text strong>{pricePreview}</Typography.Text>
         </Typography.Paragraph>
       )}
+      {isDigital && (
+        <DigitalAssetFields values={store} onChange={handleStoreFieldChange} />
+      )}
       <Typography.Title level={5}>Currency</Typography.Title>
       <Input defaultValue={store?.currency} disabled></Input>
       <Typography.Title level={5}>Tags</Typography.Title>
@@ -212,53 +286,61 @@ export default function StoreBaseForm() {
           );
         })}
       </Checkbox.Group>
-      <Typography.Title level={5}>Category</Typography.Title>
-      <Select
-        defaultValue={store?.category}
-        style={{ width: "100%" }}
-        onChange={(val) => handleStoreFieldChange("category", val)}
-        options={STORE_CATEGORIES.map((category) => {
-          return {
-            label: category.label,
-            value: category.key,
-          };
-        })}
-      />
-      <Typography.Title level={5}>坪數 Area Ping (optional)</Typography.Title>
-      <Input
-        defaultValue={store?.areaPing}
-        placeholder="e.g. 25"
-        onChange={(event) =>
-          handleStoreFieldChange(
-            "areaPing",
-            Number(event.target.value) || undefined,
-          )
-        }
-      />
-      <Typography.Title level={5}>
-        租金 Monthly Rent TWD (optional)
-      </Typography.Title>
-      <Input
-        defaultValue={store?.monthlyRent}
-        placeholder="e.g. 50000"
-        onChange={(event) =>
-          handleStoreFieldChange(
-            "monthlyRent",
-            Number(event.target.value) || undefined,
-          )
-        }
-      />
-      <Typography.Title level={5}>設備 Equipment (optional)</Typography.Title>
-      <Select
-        defaultValue={store?.equipment}
-        allowClear
-        style={{ width: "100%" }}
-        onChange={(val) => handleStoreFieldChange("equipment", val)}
-        options={EQUIPMENT_OPTIONS.map((option) => ({
-          label: option.label,
-          value: option.value,
-        }))}
-      />
+      {!isDigital && (
+        <>
+          <Typography.Title level={5}>Category</Typography.Title>
+          <Select
+            defaultValue={store?.category}
+            style={{ width: "100%" }}
+            onChange={(val) => handleStoreFieldChange("category", val)}
+            options={STORE_CATEGORIES.map((category) => {
+              return {
+                label: category.label,
+                value: category.key,
+              };
+            })}
+          />
+          <Typography.Title level={5}>
+            坪數 Area Ping (optional)
+          </Typography.Title>
+          <Input
+            defaultValue={store?.areaPing}
+            placeholder="e.g. 25"
+            onChange={(event) =>
+              handleStoreFieldChange(
+                "areaPing",
+                Number(event.target.value) || undefined,
+              )
+            }
+          />
+          <Typography.Title level={5}>
+            租金 Monthly Rent TWD (optional)
+          </Typography.Title>
+          <Input
+            defaultValue={store?.monthlyRent}
+            placeholder="e.g. 50000"
+            onChange={(event) =>
+              handleStoreFieldChange(
+                "monthlyRent",
+                Number(event.target.value) || undefined,
+              )
+            }
+          />
+          <Typography.Title level={5}>
+            設備 Equipment (optional)
+          </Typography.Title>
+          <Select
+            defaultValue={store?.equipment}
+            allowClear
+            style={{ width: "100%" }}
+            onChange={(val) => handleStoreFieldChange("equipment", val)}
+            options={EQUIPMENT_OPTIONS.map((option) => ({
+              label: option.label,
+              value: option.value,
+            }))}
+          />
+        </>
+      )}
 
       <Divider orientation="left" orientationMargin="0">
         Boss

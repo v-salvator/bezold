@@ -6,6 +6,7 @@ import {
   Input,
   Modal,
   Progress,
+  Select,
   Space,
   Table,
   Tag,
@@ -25,9 +26,21 @@ import {
 } from "@/firebase/clientUtils";
 import { authedFetch } from "@/lib/authedFetch";
 import { useAdminAuth } from "@/hooks";
-import { formatPriceDisplay } from "@/utils/store";
+import {
+  formatDigitalTypes,
+  formatPriceRange,
+  isDigitalAsset,
+  listingTypeOf,
+} from "@/utils/store";
 import { getDraftChecklist, type DraftChecklist } from "@/utils/storeDraft";
-import { STATUS_COLOR, STATUS_LABEL } from "@/constant/adminStore";
+import {
+  LISTING_FILTER_OPTIONS,
+  LISTING_TYPE_COLOR,
+  LISTING_TYPE_LABEL,
+  STATUS_COLOR,
+  STATUS_LABEL,
+  type ListingFilter,
+} from "@/constant/adminStore";
 import { cn } from "@/lib/utils";
 import StoreDetailDrawer from "../_components/StoreDetailDrawer";
 
@@ -62,6 +75,7 @@ export default function DraftStores() {
   const [drafts, setDrafts] = useState<DraftRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [listingFilter, setListingFilter] = useState<ListingFilter>("all");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   // storeId being sent for review from its row.
   const [submittingId, setSubmittingId] = useState<string | null>(null);
@@ -227,8 +241,9 @@ export default function DraftStores() {
   const normalizedSearch = search.trim().toLowerCase();
   const filteredDrafts = drafts.filter(
     (draft) =>
-      !normalizedSearch ||
-      draft.storeName?.toLowerCase().includes(normalizedSearch),
+      (!normalizedSearch ||
+        draft.storeName?.toLowerCase().includes(normalizedSearch)) &&
+      (listingFilter === "all" || listingTypeOf(draft) === listingFilter),
   );
 
   const columns: TableProps<DraftRow>["columns"] = [
@@ -244,6 +259,18 @@ export default function DraftStores() {
         ),
     },
     {
+      title: "類型",
+      key: "listingType",
+      render: (_, store) => {
+        const listingType = listingTypeOf(store);
+        return (
+          <Tag color={LISTING_TYPE_COLOR[listingType]}>
+            {LISTING_TYPE_LABEL[listingType]}
+          </Tag>
+        );
+      },
+    },
+    {
       title: "完成度",
       key: "checklist",
       sorter: (left, right) => left.checklist.percent - right.checklist.percent,
@@ -257,10 +284,13 @@ export default function DraftStores() {
       ),
     },
     {
-      title: "城市／區域",
+      title: "城市／區域／類型",
       key: "area",
-      render: (_, { city, district }) =>
-        [city, district].filter(Boolean).join(" ") || "—",
+      // * digital assets have no location — show their asset types instead
+      render: (_, draft) =>
+        (isDigitalAsset(draft)
+          ? formatDigitalTypes(draft.digitalTypes)
+          : [draft.city, draft.district].filter(Boolean).join(" ")) || "—",
     },
     {
       title: "頂讓金",
@@ -268,7 +298,7 @@ export default function DraftStores() {
       key: "price",
       align: "right",
       render: (_, record) =>
-        formatPriceDisplay(record.price, record.priceNegotiable),
+        formatPriceRange(record.price, record.priceMax, record.priceNegotiable),
     },
     {
       title: "建立",
@@ -354,6 +384,12 @@ export default function DraftStores() {
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           className="w-[320px] max-w-full"
+        />
+        <Select
+          value={listingFilter}
+          onChange={setListingFilter}
+          options={LISTING_FILTER_OPTIONS}
+          className="w-[128px]"
         />
         <Link href="/admin/store/create">
           <AntButton type="primary">＋ 新增草稿</AntButton>

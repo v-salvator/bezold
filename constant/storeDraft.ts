@@ -25,3 +25,18 @@ export const DRAFT_SUGGESTED_STORE_FIELDS: DraftField<Store>[] = [
   { key: "category", label: "類別" },
   { key: "images", label: "圖片" },
 ];
+
+// Digital assets have no address — the admin create form requires these
+// instead (see StoreBaseForm).
+export const DIGITAL_DRAFT_REQUIRED_STORE_FIELDS: DraftField<Store>[] = [
+  { key: "storeName", label: "名稱" },
+  { key: "description", label: "描述" },
+  { key: "assetUrl", label: "資產連結" },
+  { key: "digitalTypes", label: "類型" },
+];
+
+export const DIGITAL_DRAFT_SUGGESTED_STORE_FIELDS: DraftField<Store>[] = [
+  { key: "operatingYears", label: "經營時間" },
+  { key: "monthlyRevenue", label: "平均月營收" },
+  { key: "images", label: "圖片" },
+];

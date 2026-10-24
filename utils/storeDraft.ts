@@ -1,9 +1,12 @@
 import type { Store, User } from "@/types";
 import {
+  DIGITAL_DRAFT_REQUIRED_STORE_FIELDS,
+  DIGITAL_DRAFT_SUGGESTED_STORE_FIELDS,
   DRAFT_REQUIRED_SELLER_FIELDS,
   DRAFT_REQUIRED_STORE_FIELDS,
   DRAFT_SUGGESTED_STORE_FIELDS,
 } from "@/constant/storeDraft";
+import { isDigitalAsset } from "@/utils/store";
 
 export interface DraftChecklist {
   done: number;
@@ -26,20 +29,28 @@ export const getDraftChecklist = (
   store: Store,
   seller?: Partial<User>,
 ): DraftChecklist => {
+  const isDigital = isDigitalAsset(store);
+  const requiredStoreFields = isDigital
+    ? DIGITAL_DRAFT_REQUIRED_STORE_FIELDS
+    : DRAFT_REQUIRED_STORE_FIELDS;
+  const suggestedStoreFields = isDigital
+    ? DIGITAL_DRAFT_SUGGESTED_STORE_FIELDS
+    : DRAFT_SUGGESTED_STORE_FIELDS;
+
   const missingRequired = [
-    ...DRAFT_REQUIRED_STORE_FIELDS.filter(({ key }) => !isFilled(store[key])),
+    ...requiredStoreFields.filter(({ key }) => !isFilled(store[key])),
     ...DRAFT_REQUIRED_SELLER_FIELDS.filter(
       ({ key }) => !isFilled(seller?.[key]),
     ),
   ].map(({ label }) => label);
-  const missingSuggestedCount = DRAFT_SUGGESTED_STORE_FIELDS.filter(
+  const missingSuggestedCount = suggestedStoreFields.filter(
     ({ key }) => !isFilled(store[key]),
   ).length;
 
   const total =
-    DRAFT_REQUIRED_STORE_FIELDS.length +
+    requiredStoreFields.length +
     DRAFT_REQUIRED_SELLER_FIELDS.length +
-    DRAFT_SUGGESTED_STORE_FIELDS.length;
+    suggestedStoreFields.length;
   const done = total - missingRequired.length - missingSuggestedCount;
 
   return {

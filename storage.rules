@@ -60,6 +60,19 @@ service firebase.storage {
         && (isAdmin() || isEditableByOwner(collectionName, storeId));
     }
 
+    // * seller-provided revenue / dashboard screenshots — admin review only,
+    // * never resolved to a public URL
+    match /{collectionName}/{storeId}/verification/{fileName} {
+      allow read: if isStoreCollection(collectionName)
+        && (isAdmin() || isStoreOwner(collectionName, storeId));
+      allow create: if resource == null
+        && isStoreCollection(collectionName)
+        && (isAdmin() || isEditableByOwner(collectionName, storeId))
+        && isAllowedImage();
+      allow delete: if isStoreCollection(collectionName)
+        && (isAdmin() || isEditableByOwner(collectionName, storeId));
+    }
+
     // * backup/ (shrink-store-images) and everything else: Admin SDK only
     match /{allPaths=**} {
       allow read, write: if false;

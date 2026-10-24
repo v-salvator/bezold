@@ -204,6 +204,132 @@ for (const collectionName of STORE_COLLECTIONS) {
   });
 }
 
+// * verification/ — seller revenue screenshots, admin review only
+for (const collectionName of STORE_COLLECTIONS) {
+  const storePath = `${collectionName}/store1`;
+  const newShot = `${collectionName}/store1/verification/revenue-a1b2c3.webp`;
+  const existingShot = `${collectionName}/store1/verification/revenue-old.webp`;
+
+  describe(`${collectionName} storage — verification screenshots`, () => {
+    for (const status of ["pending", "approved", "rejected"]) {
+      it(`owner can upload, read and delete on a ${status} listing`, async () => {
+        await seed(env, storePath, storeDoc({ status }));
+        await seedFile(env, existingShot);
+        const sellerStorage = actors(env).seller.storage();
+        await assertSucceeds(
+          uploadBytes(ref(sellerStorage, newShot), imageBytes, {
+            contentType: "image/webp",
+          }),
+        );
+        await assertSucceeds(getDownloadURL(ref(sellerStorage, newShot)));
+        await assertSucceeds(deleteObject(ref(sellerStorage, existingShot)));
+      });
+    }
+
+    for (const status of ["draft", "sold"]) {
+      it(`owner can read but not change screenshots on a ${status} listing`, async () => {
+        await seed(env, storePath, storeDoc({ status }));
+        await seedFile(env, existingShot);
+        const sellerStorage = actors(env).seller.storage();
+        await assertSucceeds(getMetadata(ref(sellerStorage, existingShot)));
+        await assertFails(
+          uploadBytes(ref(sellerStorage, newShot), imageBytes, {
+            contentType: "image/webp",
+          }),
+        );
+        await assertFails(deleteObject(ref(sellerStorage, existingShot)));
+      });
+    }
+
+    it("owner cannot upload a 5 MB file or an SVG", async () => {
+      await seed(env, storePath, storeDoc());
+      const sellerStorage = actors(env).seller.storage();
+      await assertFails(
+        uploadBytes(ref(sellerStorage, newShot), new Uint8Array(FIVE_MB), {
+          contentType: "image/png",
+        }),
+      );
+      await assertFails(
+        uploadBytes(ref(sellerStorage, newShot), imageBytes, {
+          contentType: "image/svg+xml",
+        }),
+      );
+    });
+
+    it("an admin can upload, read and delete on any listing", async () => {
+      await seed(env, storePath, storeDoc({ status: "draft" }));
+      await seedFile(env, existingShot);
+      const adminStorage = actors(env).admin.storage();
+      await assertSucceeds(
+        uploadBytes(ref(adminStorage, newShot), imageBytes, {
+          contentType: "image/webp",
+        }),
+      );
+      await assertSucceeds(getDownloadURL(ref(adminStorage, existingShot)));
+      await assertSucceeds(deleteObject(ref(adminStorage, existingShot)));
+    });
+
+    it("an admin is held to the same type and size limits", async () => {
+      await seed(env, storePath, storeDoc());
+      const adminStorage = actors(env).admin.storage();
+      await assertFails(
+        uploadBytes(ref(adminStorage, newShot), new Uint8Array(FIVE_MB), {
+          contentType: "image/png",
+        }),
+      );
+      await assertFails(
+        uploadBytes(ref(adminStorage, newShot), imageBytes, {
+          contentType: "image/svg+xml",
+        }),
+      );
+    });
+
+    it("a member or another seller cannot read, upload or delete", async () => {
+      await seed(env, storePath, storeDoc());
+      await seedFile(env, existingShot);
+      const { member, otherSeller } = actors(env);
+      for (const context of [member, otherSeller]) {
+        const otherStorage = context.storage();
+        await assertFails(getDownloadURL(ref(otherStorage, existingShot)));
+        await assertFails(getMetadata(ref(otherStorage, existingShot)));
+        await assertFails(
+          uploadBytes(ref(otherStorage, newShot), imageBytes, {
+            contentType: "image/webp",
+          }),
+        );
+        await assertFails(deleteObject(ref(otherStorage, existingShot)));
+      }
+    });
+
+    it("an anonymous visitor cannot read or upload", async () => {
+      await seed(env, storePath, storeDoc());
+      await seedFile(env, existingShot);
+      const anonymousStorage = actors(env).anonymous.storage();
+      await assertFails(getDownloadURL(ref(anonymousStorage, existingShot)));
+      await assertFails(
+        uploadBytes(ref(anonymousStorage, newShot), imageBytes, {
+          contentType: "image/webp",
+        }),
+      );
+    });
+
+    it("folders below verification/ stay closed", async () => {
+      await seed(env, storePath, storeDoc());
+      const { admin } = actors(env);
+      await assertFails(
+        uploadBytes(
+          ref(
+            admin.storage(),
+            `${collectionName}/store1/verification/deeper/a.webp`,
+          ),
+          imageBytes,
+          { contentType: "image/webp" },
+        ),
+      );
+    });
+  });
+}
+
 describe("paths outside store photos", () => {
   // * shrink-store-images backups — Admin SDK only
   it("nobody can read or write backup/", async () => {

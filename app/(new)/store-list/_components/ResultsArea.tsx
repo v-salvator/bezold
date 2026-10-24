@@ -9,7 +9,7 @@ import Dropdown, {
   type DropdownOption,
 } from "@/components/refactored/Dropdown";
 import { type Store, STORE_STATUS } from "@/types";
-import { storeToCard } from "@/utils/store";
+import { toCard } from "@/utils/store";
 
 const sortOptions: DropdownOption[] = [
   { label: "頂讓金：低 → 高", value: "price-asc" },
@@ -60,7 +60,7 @@ export default function ResultsArea({ stores }: { stores: Store[] }) {
             className={styles.cardLink}
           >
             <StoreCard
-              card={storeToCard(store)}
+              card={toCard(store)}
               priority={index < ABOVE_THE_FOLD_CARDS}
               titleTag="h2"
             />

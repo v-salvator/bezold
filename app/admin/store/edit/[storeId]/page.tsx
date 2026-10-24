@@ -9,11 +9,16 @@ import {
   notification,
   Checkbox,
   Select,
+  Tag,
 } from "antd";
 import { useRouter, usePathname } from "next/navigation";
 
 import type { Store } from "@/types";
-import { formatPriceDisplay } from "@/utils/store";
+import {
+  formatPriceRange,
+  isDigitalAsset,
+  digitalAssetWriteFields,
+} from "@/utils/store";
 import { STORE_TAGS } from "@/constant/storeTags";
 import { STORE_CATEGORIES } from "@/constant/storeType";
 import { EQUIPMENT_OPTIONS } from "@/constant/storeEquipment";
@@ -21,6 +26,7 @@ import {
   getStoreCities,
   getStoreDistrictByCity,
 } from "@/constant/StoreLocation";
+import DigitalAssetFields from "../../_components/DigitalAssetFields";
 
 interface EditStoreProps {
   params: { storeId: Store["id"] };
@@ -47,7 +53,21 @@ export default function EditStore({ params }: EditStoreProps) {
   }, [store]);
 
   const handleUpdateStore = async () => {
-    if (storeCloned) {
+    if (storeCloned && isDigitalAsset(storeCloned)) {
+      // * listingType is fixed after creation; location fields stay ""
+      await editStoreById(params.storeId, {
+        storeName: storeCloned.storeName,
+        description: storeCloned.description,
+        price: Number(storeCloned.price) || 0,
+        priceNegotiable: !!storeCloned.priceNegotiable,
+        tags: storeCloned.tags ?? [],
+        ...digitalAssetWriteFields(storeCloned),
+      });
+      api.success({
+        message: "Successfuly update store",
+        description: `Successfuly update store ${store?.storeName}`,
+      });
+    } else if (storeCloned) {
       await editStoreById(params.storeId, {
         storeName: storeCloned.storeName,
         location: storeCloned.location,
@@ -94,47 +114,63 @@ export default function EditStore({ params }: EditStoreProps) {
     );
   }
 
+  const isDigital = isDigitalAsset(storeCloned);
+
   // * live preview of the buyer-facing 頂讓金 label (invalid input → no preview)
   const priceTrimmed = String(storeCloned.price ?? "").trim();
   const previewValue = priceTrimmed ? Number(priceTrimmed) : 0;
   const pricePreview =
     !Number.isNaN(previewValue) && previewValue >= 0
-      ? formatPriceDisplay(previewValue, !!storeCloned.priceNegotiable)
+      ? formatPriceRange(
+          previewValue,
+          isDigital ? Number(storeCloned.priceMax) : undefined,
+          !!storeCloned.priceNegotiable,
+        )
       : null;
 
   return (
     <div className="p-[16px]">
+      <Typography.Title level={5}>刊登類型 Listing Type</Typography.Title>
+      <Tag color={isDigital ? "purple" : "default"}>
+        {isDigital ? "數位資產" : "實體店面"}
+      </Tag>
       <Typography.Title level={5}>Store Name</Typography.Title>
       <Input
         defaultValue={storeCloned?.storeName}
         onChange={(e) => handleStoreFieldChange("storeName", e.target.value)}
       ></Input>
-      <Typography.Title level={5}>City</Typography.Title>
-      <Select
-        defaultValue={storeCloned?.city}
-        style={{ width: "100%" }}
-        onChange={(val) => handleStoreFieldChange("city", val)}
-        options={getStoreCities()}
-      />
-      <Typography.Title level={5}>District</Typography.Title>
-      <Select
-        defaultValue={storeCloned?.district}
-        style={{ width: "100%" }}
-        onChange={(val) => handleStoreFieldChange("district", val)}
-        options={getStoreDistrictByCity(storeCloned?.city)}
-      />
-      <Typography.Title level={5}>Location</Typography.Title>
-      <Input
-        defaultValue={storeCloned?.location}
-        onChange={(e) => handleStoreFieldChange("location", e.target.value)}
-      ></Input>
+      {!isDigital && (
+        <>
+          <Typography.Title level={5}>City</Typography.Title>
+          <Select
+            defaultValue={storeCloned?.city}
+            style={{ width: "100%" }}
+            onChange={(val) => handleStoreFieldChange("city", val)}
+            options={getStoreCities()}
+          />
+          <Typography.Title level={5}>District</Typography.Title>
+          <Select
+            defaultValue={storeCloned?.district}
+            style={{ width: "100%" }}
+            onChange={(val) => handleStoreFieldChange("district", val)}
+            options={getStoreDistrictByCity(storeCloned?.city)}
+          />
+          <Typography.Title level={5}>Location</Typography.Title>
+          <Input
+            defaultValue={storeCloned?.location}
+            onChange={(e) => handleStoreFieldChange("location", e.target.value)}
+          ></Input>
+        </>
+      )}
       <Typography.Title level={5}>Description</Typography.Title>
       <Input.TextArea
         defaultValue={storeCloned?.description}
         autoSize={{ minRows: 4 }}
         onChange={(e) => handleStoreFieldChange("description", e.target.value)}
       ></Input.TextArea>
-      <Typography.Title level={5}>Price</Typography.Title>
+      <Typography.Title level={5}>
+        {isDigital ? "Price（區間下限）" : "Price"}
+      </Typography.Title>
       <Input
         defaultValue={storeCloned?.price}
         onChange={(e) => handleStoreFieldChange("price", e.target.value)}
@@ -163,6 +199,12 @@ export default function EditStore({ params }: EditStoreProps) {
           買家會看到：<Typography.Text strong>{pricePreview}</Typography.Text>
         </Typography.Paragraph>
       )}
+      {isDigital && (
+        <DigitalAssetFields
+          values={storeCloned}
+          onChange={handleStoreFieldChange}
+        />
+      )}
       <Typography.Title level={5}>Currency</Typography.Title>
       <Input defaultValue={storeCloned?.currency} disabled></Input>
       <Typography.Title level={5}>Tags</Typography.Title>
@@ -181,53 +223,61 @@ export default function EditStore({ params }: EditStoreProps) {
           );
         })}
       </Checkbox.Group>
-      <Typography.Title level={5}>Category</Typography.Title>
-      <Select
-        defaultValue={storeCloned?.category}
-        style={{ width: "100%" }}
-        onChange={(val) => handleStoreFieldChange("category", val)}
-        options={STORE_CATEGORIES.map((category) => {
-          return {
-            label: category.label,
-            value: category.key,
-          };
-        })}
-      />
-      <Typography.Title level={5}>坪數 Area Ping (optional)</Typography.Title>
-      <Input
-        defaultValue={storeCloned?.areaPing}
-        placeholder="e.g. 25"
-        onChange={(event) =>
-          handleStoreFieldChange(
-            "areaPing",
-            Number(event.target.value) || undefined,
-          )
-        }
-      />
-      <Typography.Title level={5}>
-        租金 Monthly Rent TWD (optional)
-      </Typography.Title>
-      <Input
-        defaultValue={storeCloned?.monthlyRent}
-        placeholder="e.g. 50000"
-        onChange={(event) =>
-          handleStoreFieldChange(
-            "monthlyRent",
-            Number(event.target.value) || undefined,
-          )
-        }
-      />
-      <Typography.Title level={5}>設備 Equipment (optional)</Typography.Title>
-      <Select
-        defaultValue={storeCloned?.equipment}
-        allowClear
-        style={{ width: "100%" }}
-        onChange={(val) => handleStoreFieldChange("equipment", val)}
-        options={EQUIPMENT_OPTIONS.map((option) => ({
-          label: option.label,
-          value: option.value,
-        }))}
-      />
+      {!isDigital && (
+        <>
+          <Typography.Title level={5}>Category</Typography.Title>
+          <Select
+            defaultValue={storeCloned?.category}
+            style={{ width: "100%" }}
+            onChange={(val) => handleStoreFieldChange("category", val)}
+            options={STORE_CATEGORIES.map((category) => {
+              return {
+                label: category.label,
+                value: category.key,
+              };
+            })}
+          />
+          <Typography.Title level={5}>
+            坪數 Area Ping (optional)
+          </Typography.Title>
+          <Input
+            defaultValue={storeCloned?.areaPing}
+            placeholder="e.g. 25"
+            onChange={(event) =>
+              handleStoreFieldChange(
+                "areaPing",
+                Number(event.target.value) || undefined,
+              )
+            }
+          />
+          <Typography.Title level={5}>
+            租金 Monthly Rent TWD (optional)
+          </Typography.Title>
+          <Input
+            defaultValue={storeCloned?.monthlyRent}
+            placeholder="e.g. 50000"
+            onChange={(event) =>
+              handleStoreFieldChange(
+                "monthlyRent",
+                Number(event.target.value) || undefined,
+              )
+            }
+          />
+          <Typography.Title level={5}>
+            設備 Equipment (optional)
+          </Typography.Title>
+          <Select
+            defaultValue={storeCloned?.equipment}
+            allowClear
+            style={{ width: "100%" }}
+            onChange={(val) => handleStoreFieldChange("equipment", val)}
+            options={EQUIPMENT_OPTIONS.map((option) => ({
+              label: option.label,
+              value: option.value,
+            }))}
+          />
+        </>
+      )}
 
       <div className="flex justify-end gap-[8px] mt-[16px]">
         <Button type="primary" onClick={handleUpdateStore}>

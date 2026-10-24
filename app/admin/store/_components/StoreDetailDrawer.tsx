@@ -16,10 +16,17 @@ import Link from "next/link";
 import type { Store } from "@/types";
 import { STORE_STATUS, type StoreStatus } from "@/types";
 import { getImageByPath } from "@/firebase/clientUtils";
-import { formatPriceDisplay } from "@/utils/store";
+import {
+  formatDigitalTypes,
+  formatPrice,
+  formatPriceDisplay,
+  formatPriceRange,
+  isDigitalAsset,
+} from "@/utils/store";
 import { STORE_CATEGORIES } from "@/constant/storeType";
 import { EQUIPMENT_LABEL } from "@/constant/storeEquipment";
 import { STATUS_LABEL, TAG_COLOR } from "@/constant/adminStore";
+import VerificationImageGallery from "./VerificationImageGallery";
 
 // Appending this to a store URL force-opens the buyer club popup for
 // logged-out visitors (see app/(new)/store/[storeId]/page.tsx).
@@ -98,6 +105,15 @@ export default function StoreDetailDrawer({
             />
           </DrawerSection>
 
+          {isDigitalAsset(store) && (
+            // * a missing screenshot warns but never blocks approval
+            <DrawerSection title="核對截圖">
+              <VerificationImageGallery
+                paths={store.verificationImages ?? []}
+              />
+            </DrawerSection>
+          )}
+
           <DrawerSection title="店家連結">
             <StoreLinks storeId={store.id} onCopy={onCopyLink} />
           </DrawerSection>
@@ -140,6 +156,8 @@ export function StoreStatusControls({
 }
 
 function buildDetailItems(store: Store) {
+  if (isDigitalAsset(store)) return buildDigitalDetailItems(store);
+
   const categoryLabel =
     STORE_CATEGORIES.find((category) => category.key === store.category)
       ?.label ?? store.category;
@@ -170,6 +188,13 @@ function buildDetailItems(store: Store) {
       label: "設備",
       children: store.equipment ? EQUIPMENT_LABEL[store.equipment] : "—",
     },
+    ...buildCommonDetailItems(store),
+  ];
+}
+
+// * tags / seller / timestamps rows shared by both listing types
+function buildCommonDetailItems(store: Store) {
+  return [
     {
       key: "tags",
       label: "標籤",
@@ -198,6 +223,60 @@ function buildDetailItems(store: Store) {
       label: "更新",
       children: dayjs(store.updateTime).format("YYYY-MM-DD HH:mm"),
     },
+  ];
+}
+
+function buildDigitalDetailItems(store: Store) {
+  return [
+    {
+      key: "listingType",
+      label: "刊登類型",
+      children: <Tag color="cyan">數位資產</Tag>,
+    },
+    {
+      key: "price",
+      label: "頂讓金",
+      children: formatPriceRange(
+        store.price,
+        store.priceMax,
+        store.priceNegotiable,
+      ),
+    },
+    {
+      key: "digitalTypes",
+      label: "類型",
+      children: formatDigitalTypes(store.digitalTypes) || "—",
+    },
+    {
+      key: "operatingYears",
+      label: "經營時間",
+      children:
+        store.operatingYears != null ? `${store.operatingYears} 年` : "—",
+    },
+    {
+      key: "monthlyRevenue",
+      label: "平均月營收",
+      children:
+        store.monthlyRevenue != null ? formatPrice(store.monthlyRevenue) : "—",
+    },
+    {
+      key: "assetUrl",
+      label: "資產連結",
+      // * admin-only — sellers' links are checked against the screenshots
+      children: store.assetUrl ? (
+        <a
+          href={store.assetUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="break-all"
+        >
+          {store.assetUrl}
+        </a>
+      ) : (
+        "—"
+      ),
+    },
+    ...buildCommonDetailItems(store),
   ];
 }
 
