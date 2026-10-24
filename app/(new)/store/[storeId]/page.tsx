@@ -3,8 +3,8 @@ import { notFound } from "next/navigation";
 import { getStoreById } from "@/firebase/serverUtils";
 import { STORE_STATUS, type StoreStatus } from "@/types";
 import { BASE_OPEN_GRAPH } from "@/constant/seo";
-import { toMetaDescription } from "@/utils/seo";
-import { omitSellerContact } from "@/utils/store";
+import { storeOffer, storePageTitle, toMetaDescription } from "@/utils/seo";
+import { isDigitalAsset, omitSellerContact } from "@/utils/store";
 import LaunchBanner from "@/app/(new)/_components/LaunchBanner";
 import SiteNav from "@/app/(new)/_components/SiteNav";
 import SiteFooter from "@/app/(new)/_components/SiteFooter";
@@ -13,6 +13,9 @@ import StoreGallery from "./_components/StoreGallery";
 import StoreTitleRow from "./_components/StoreTitleRow";
 import StoreDescription from "./_components/StoreDescription";
 import StorePriceCard from "./_components/StorePriceCard";
+import DigitalStatsBar from "./_components/DigitalStatsBar";
+import DigitalHolderCard from "./_components/DigitalHolderCard";
+import DigitalTransferNotes from "./_components/DigitalTransferNotes";
 import BuyerClubPopup from "./_components/BuyerClubPopup";
 import JsonLd from "@/app/(new)/_components/JsonLd";
 import styles from "./page.module.css";
@@ -46,7 +49,7 @@ export async function generateMetadata(
 
   if (!store) notFound();
 
-  const storeTitle = `${store.storeName}｜${store.city ?? ""}店面頂讓`;
+  const storeTitle = storePageTitle(store);
 
   return {
     title: storeTitle,
@@ -89,11 +92,12 @@ export default async function StoreDetailPage({
   const storeUrl = `${appUrl}/store/${storeId}`;
   // * 面議 (price 0 + negotiable) has no price to advertise, and a Product
   // * without offers is an invalid rich result — skip the JSON-LD entirely
-  const isPriceNegotiable = store.price === 0 && store.priceNegotiable;
+  const offer = storeOffer(store, storeUrl);
+  const isDigital = isDigitalAsset(store);
 
   return (
     <>
-      {!isPriceNegotiable && (
+      {offer && (
         <JsonLd
           data={{
             "@context": "https://schema.org",
@@ -104,29 +108,27 @@ export default async function StoreDetailPage({
               ? store.images
               : [`${appUrl}/bezold-og.png`],
             url: storeUrl,
-            offers: {
-              "@type": "Offer",
-              priceCurrency: store.currency,
-              price: store.price,
-              // * sold listings stay indexed as closed deals
-              availability:
-                store.status === STORE_STATUS.SOLD
-                  ? "https://schema.org/SoldOut"
-                  : "https://schema.org/InStock",
-              url: storeUrl,
-            },
+            offers: offer,
           }}
         />
       )}
       <LaunchBanner />
-      <SiteNav activeLink="我要找店" />
+      <SiteNav activeLink={isDigital ? "數位資產" : "我要找店"} />
       <main className={styles.main}>
         <StoreBreadcrumb store={store} />
         <StoreGallery images={store.images} tags={store.tags} />
         <StoreTitleRow store={store} />
+        {isDigital && <DigitalStatsBar store={store} />}
         <div className={styles.mainCol}>
           <StoreDescription description={store.description} />
-          <StorePriceCard store={store} />
+          {isDigital ? (
+            <>
+              <DigitalHolderCard store={store} />
+              <DigitalTransferNotes />
+            </>
+          ) : (
+            <StorePriceCard store={store} />
+          )}
         </div>
       </main>
       <SiteFooter />

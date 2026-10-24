@@ -1,12 +1,16 @@
 "use client";
+import { useEffect } from "react";
 import type { MenuProps } from "antd";
-import { Menu } from "antd";
+import { Badge, Menu } from "antd";
+import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
-import { useAdminMenuKey } from "@/hooks";
+import { useAdminAuth, useAdminMenuKey } from "@/hooks";
+import { authedFetch } from "@/lib/authedFetch";
+import { newInquiryCountAtom } from "@/atoms/InquiryAtom";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
-const items: MenuItem[] = [
+const buildItems = (newInquiryCount: number): MenuItem[] => [
   {
     key: "store-management",
     label: "Store Management",
@@ -28,11 +32,47 @@ const items: MenuItem[] = [
       { key: "buyer-profiles", label: "Buyer Profiles" },
     ],
   },
+  {
+    key: "digital-assets",
+    label: "Digital Assets",
+    type: "group",
+    children: [
+      {
+        key: "inquiries",
+        label: (
+          <span className="flex items-center justify-between gap-[8px]">
+            詢問
+            {/* Badge hides itself at 0 */}
+            <Badge count={newInquiryCount} size="small" />
+          </span>
+        ),
+      },
+    ],
+  },
 ];
 
 export default function AdminSidebar() {
   const router = useRouter();
   const menuKey = useAdminMenuKey();
+  const { idToken } = useAdminAuth();
+  const [newInquiryCount, setNewInquiryCount] = useAtom(newInquiryCountAtom);
+
+  // Refetch on entering admin and on each admin page change — no polling.
+  // menuKey (not idToken) drives it so the hourly token refresh doesn't refetch.
+  useEffect(() => {
+    if (!idToken) return;
+    let active = true;
+    authedFetch(idToken, "/api/admin/inquiries/count")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        if (active && data) setNewInquiryCount(data.new);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [menuKey, Boolean(idToken)]);
 
   const handleMenuClick: MenuProps["onClick"] = (e) => {
     switch (e.key) {
@@ -57,6 +97,9 @@ export default function AdminSidebar() {
       case "buyer-profiles":
         router.push("/admin/buyer-profiles");
         break;
+      case "inquiries":
+        router.push("/admin/inquiries");
+        break;
     }
   };
 
@@ -66,7 +109,7 @@ export default function AdminSidebar() {
       style={{ width: 256 }}
       defaultSelectedKeys={[menuKey]}
       mode="inline"
-      items={items}
+      items={buildItems(newInquiryCount)}
     />
   );
 }

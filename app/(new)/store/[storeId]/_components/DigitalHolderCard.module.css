@@ -1,0 +1,24 @@
+.holder {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px dashed var(--paper-3);
+}
+
+.anonymousAvatar {
+  color: var(--ink-2);
+}
+
+/* a range ("NT$ 50–100 萬") is wider than one amount — keep it on one line */
+.rangePrice {
+  font-size: 44px;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .rangePrice {
+    font-size: 32px;
+  }
+}

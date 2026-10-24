@@ -6,8 +6,8 @@ import type { Timestamp } from "firebase/firestore";
 // a subcollection (users/{uid}/favorites/...) to avoid rewriting/reading the
 // whole user doc on every mutation.
 export interface BuyerProfile {
-  category: string; // STORE_CATEGORIES key
-  city: string; // cityItems key
+  category: string; // BUYER_CLUB_CATEGORIES key (STORE_CATEGORIES + DIGITAL_ASSET)
+  city: string; // cityItems key; "" = 不限地區 (allowed only for DIGITAL_ASSET)
   budgetKey: string; // amountItems key
   // Contact is NOT here — a buyer's phone/lineId live on the top-level User
   // fields (same as the sell form's contact section), and email is the account

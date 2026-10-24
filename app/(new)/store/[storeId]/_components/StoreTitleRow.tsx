@@ -1,8 +1,10 @@
 import dayjs from "dayjs";
-import { MapPin } from "lucide-react";
+import { Globe, MapPin } from "lucide-react";
 import Pill from "@/components/refactored/Pill";
 import type { Store } from "@/types";
 import { STORE_TAG } from "@/types/StoreTags";
+import { DIGITAL_ASSET_TYPE_LABEL } from "@/constant/digitalAsset";
+import { isDigitalAsset } from "@/utils/store";
 import styles from "./StoreTitleRow.module.css";
 
 const TAG_VARIANT = {
@@ -23,7 +25,9 @@ export default function StoreTitleRow({ store }: { store: Store }) {
     category,
     createTime,
     updateTime,
+    digitalTypes,
   } = store;
+  const isDigital = isDigitalAsset(store);
 
   return (
     <div className={styles.row}>
@@ -37,17 +41,34 @@ export default function StoreTitleRow({ store }: { store: Store }) {
               {tag === STORE_TAG.DETAILED_DATA && "資料完整"}
             </Pill>
           ))}
-          {category && <Pill>{category}</Pill>}
+          {isDigital ? (
+            <>
+              {digitalTypes?.map((type) => (
+                <Pill key={type}>{DIGITAL_ASSET_TYPE_LABEL[type]}</Pill>
+              ))}
+              <Pill variant="mus">詳細資料需申請</Pill>
+            </>
+          ) : (
+            category && <Pill>{category}</Pill>
+          )}
         </div>
         <h1 className={styles.name}>
-          {city && <>{city} · </>}
+          {!isDigital && city && <>{city} · </>}
           <em>{storeName}</em>
         </h1>
-        <div className={styles.loc}>
-          <MapPin size={18} strokeWidth={2.5} className={styles.pin} />
-          {city}
-          {district} · {location}
-        </div>
+        {isDigital ? (
+          // * no location — the asset itself is only revealed after matching
+          <div className={styles.loc}>
+            <Globe size={18} strokeWidth={2.5} className={styles.pin} />
+            DIGITAL ASSET
+          </div>
+        ) : (
+          <div className={styles.loc}>
+            <MapPin size={18} strokeWidth={2.5} className={styles.pin} />
+            {city}
+            {district} · {location}
+          </div>
+        )}
       </div>
       <div className={styles.meta}>
         <b>#{id.slice(-5)}</b>
