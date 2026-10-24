@@ -1,0 +1,189 @@
+.crumbs {
+  padding: 14px 28px;
+  border-bottom: 1.5px solid var(--ink);
+  background: var(--paper-2);
+}
+
+.inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.trail {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink-2);
+  letter-spacing: 0.05em;
+
+  & a {
+    color: var(--ink-2);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--accent);
+    }
+  }
+}
+
+.title {
+  font-family: var(--display);
+  font-size: 36px;
+  margin: 4px 0 0;
+  font-weight: 700;
+  line-height: 1;
+
+  & em {
+    font-style: normal;
+    color: var(--accent);
+  }
+}
+
+.sub {
+  font-family: var(--note);
+  font-size: 14px;
+  color: var(--ink-2);
+  margin: 6px 0 0;
+}
+
+.area {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 18px 24px 32px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  transition: opacity 0.15s ease;
+}
+
+.gridPending {
+  opacity: 0.5;
+}
+
+.cardLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  /* let single-line ellipsis text shrink instead of widening the grid column */
+  min-width: 0;
+}
+
+/* Sold listings read as social proof — muted, but brighten on hover so a
+   curious buyer can still inspect the detail page. */
+.soldCard {
+  opacity: 0.72;
+  filter: grayscale(0.35);
+  transition:
+    opacity 0.2s ease,
+    filter 0.2s ease;
+
+  &:hover {
+    opacity: 1;
+    filter: grayscale(0);
+  }
+}
+
+.empty {
+  border: 1.5px dashed var(--ink);
+  border-radius: 4px;
+  background: #fff;
+  padding: 32px 18px;
+  text-align: center;
+}
+
+.emptyText {
+  font-family: var(--hand);
+  font-size: 15px;
+  color: var(--ink-2);
+  margin: 0;
+}
+
+.emptyLink {
+  display: inline-block;
+  margin-top: 8px;
+  font-family: var(--hand);
+  font-size: 13px;
+  color: var(--ink);
+  text-decoration: underline wavy var(--accent);
+  text-underline-offset: 3px;
+
+  &:hover {
+    color: var(--accent);
+  }
+}
+
+.sellCta {
+  margin-top: 24px;
+  border: 1.5px dashed var(--ink);
+  padding: 16px 18px;
+  border-radius: 4px;
+  background: var(--paper-2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.sellCtaTitle {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.sellCtaSub {
+  font-family: var(--hand);
+  font-size: 13px;
+  color: var(--ink-2);
+  margin: 4px 0 0;
+}
+
+.sellCtaBtn {
+  font-family: var(--hand);
+  font-weight: 700;
+  font-size: 14px;
+  border: 1.5px solid var(--ink);
+  padding: 8px 16px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 2px 2px 0 var(--ink);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+
+  &:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+}
+
+@media (max-width: 768px) {
+  .area {
+    padding: 14px 16px 24px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .crumbs {
+    padding: 12px 16px;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+}

@@ -89,13 +89,15 @@ The funnel `sign_up` → `verification_email_sent` (`trigger: "signup"`) →
 
 ### `sell_cta_click` — `cta_location` values
 
-| `cta_location`         | Placement                         | Component                                                                               |
-| ---------------------- | --------------------------------- | --------------------------------------------------------------------------------------- |
-| `nav`                  | Nav bar "＋ 限時免費刊登" button  | [`SellButton.tsx`](<../app/(new)/_components/SellButton.tsx>)                           |
-| `hero`                 | Homepage hero "立即免費刊登" link | [`HeroSplit/index.tsx`](<../app/(new)/_components/HeroSplit/index.tsx>)                 |
-| `seller_cta_section`   | "搶早鳥免費刊登" section button   | [`SellerCta.tsx`](<../app/(new)/_components/SellerCta.tsx>)                             |
-| `store_example_banner` | Store-example page banner link    | [`ExampleBanner.tsx`](<../app/(new)/store-example/_components/ExampleBanner.tsx>)       |
-| `my_listings_empty`    | My-listings empty-state link      | [`MyListingsContent.tsx`](<../app/(new)/my-listings/_components/MyListingsContent.tsx>) |
+| `cta_location`         | Placement                                     | Component                                                                                      |
+| ---------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `nav`                  | Nav bar "＋ 限時免費刊登" button              | [`SellButton.tsx`](<../app/(new)/_components/SellButton.tsx>)                                  |
+| `hero`                 | Homepage hero "立即免費刊登" link             | [`HeroSplit/index.tsx`](<../app/(new)/_components/HeroSplit/index.tsx>)                        |
+| `seller_cta_section`   | "搶早鳥免費刊登" section button               | [`SellerCta.tsx`](<../app/(new)/_components/SellerCta.tsx>)                                    |
+| `store_example_banner` | Store-example page banner link                | [`ExampleBanner.tsx`](<../app/(new)/store-example/_components/ExampleBanner.tsx>)              |
+| `my_listings_empty`    | My-listings empty-state link                  | [`MyListingsContent.tsx`](<../app/(new)/my-listings/_components/MyListingsContent.tsx>)        |
+| `home_digital_assets`  | Homepage 04 「我也有數位資產想刊登 ↗」        | [`DigitalAssets/index.tsx`](<../app/(new)/_components/DigitalAssets/index.tsx>)                |
+| `digital_assets_list`  | `/digital-assets` 「免費刊登數位資產」 button | [`DigitalAssetResults.tsx`](<../app/(new)/digital-assets/_components/DigitalAssetResults.tsx>) |
 
 Plain-link CTAs use the shared [`SellCtaLink`](<../app/(new)/_components/SellCtaLink.tsx>)
 component (NextLink + `trackEvent`). The two auth-branching buttons

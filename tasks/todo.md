@@ -335,13 +335,13 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria**：
 
-- [ ] 頁面殼照 CLAUDE.md；`?type=` 是唯一的篩選來源，分頁用 `router.push`；不認得的 type 當全部
-- [ ] `getDigitalAssets({ statuses: ["approved", "sold"] })`，不設 limit，類型在記憶體裡篩選；approved 在前、sold 在後（sold ribbon）
-- [ ] metadata、canonical；`sitemap.ts` 加這一頁
+- [x] 頁面殼照 CLAUDE.md；`?type=` 是唯一的篩選來源，分頁用 `router.push`；不認得的 type 當全部
+- [x] `getDigitalAssets({ statuses: ["approved", "sold"] })`，不設 limit，類型在記憶體裡篩選；approved 在前、sold 在後（sold ribbon）
+- [x] metadata、canonical；`sitemap.ts` 加這一頁
 
 **驗證**：
 
-- [ ] T15：`?type=SOCIAL` 只顯示社群；切換分頁網址跟著變；重新整理保留；`?type=xyz` 當全部
+- [x] T15：`?type=SOCIAL` 只顯示社群；切換分頁網址跟著變；重新整理保留；`?type=xyz` 當全部
 
 **Dependencies**：Task 15（共用 TypeTabs 的樣式）
 **Files**：`app/(new)/digital-assets/page.tsx`、`digital-assets/_components/DigitalAssetResults.tsx`（+ css）、`app/sitemap.ts`
