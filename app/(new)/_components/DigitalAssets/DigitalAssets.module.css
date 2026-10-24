@@ -1,46 +1,16 @@
-/* Type tabs — also used by /digital-assets */
-.tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 16px;
-}
-
-.tab {
-  flex-shrink: 0;
-  padding: 0;
-  border: 0;
-  border-radius: 99px;
-  background: none;
-  white-space: nowrap;
-  cursor: pointer;
-
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-
-  &[aria-pressed="false"]:hover > span {
-    background: var(--paper-3);
-  }
-}
-
-@media (max-width: 640px) {
-  /* one swipeable row instead of three wrapped ones */
-  .tabs {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    /* keep the row's full width out of the page's min-content width — the
-       flex layout root would otherwise widen the whole page to fit it */
-    contain: inline-size;
-    /* room for the focus outline, which overflow would otherwise clip */
-    padding: 4px 2px 6px;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  }
+/* NEW — mono like the card ribbons; the handwriting font slants Latin caps */
+.newBadge {
+  align-self: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  color: #fff;
+  background: var(--accent);
+  border: 1.5px solid var(--ink);
+  border-radius: 2px;
+  padding: 4px 8px;
 }
 
 .listings {
@@ -69,7 +39,6 @@
   min-width: 0;
 }
 
-.tabEmpty,
 .empty {
   border: 1.5px dashed var(--ink);
   border-radius: 4px;
@@ -93,26 +62,7 @@
   margin: 0;
 }
 
-.emptyLink {
-  display: inline-block;
-  margin-top: 8px;
-  font-family: var(--hand);
-  font-size: 13px;
-  color: var(--ink);
-  text-decoration: underline wavy var(--accent);
-  text-underline-offset: 3px;
-
-  &:hover {
-    color: var(--accent);
-  }
-}
-
 .footer {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 8px 18px;
-  flex-wrap: wrap;
   margin-top: 18px;
 }
 
@@ -127,11 +77,4 @@
   &:hover {
     opacity: 0.8;
   }
-}
-
-.notice {
-  font-family: var(--note);
-  font-size: 12px;
-  color: var(--ink-2);
-  margin: 0;
 }

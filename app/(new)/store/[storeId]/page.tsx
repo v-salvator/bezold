@@ -116,7 +116,11 @@ export default async function StoreDetailPage({
       <SiteNav activeLink={isDigital ? "數位資產" : "我要找店"} />
       <main className={styles.main}>
         <StoreBreadcrumb store={store} />
-        <StoreGallery images={store.images} tags={store.tags} />
+        <StoreGallery
+          images={store.images}
+          tags={store.tags}
+          isDigital={isDigital}
+        />
         <StoreTitleRow store={store} />
         {isDigital && <DigitalStatsBar store={store} />}
         <div className={styles.mainCol}>

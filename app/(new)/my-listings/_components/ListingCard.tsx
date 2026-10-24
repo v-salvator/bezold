@@ -9,7 +9,7 @@ import { updateStoreStatus } from "@/firebase/clientUtils";
 import { cn } from "@/lib/utils";
 import { type Store, STORE_STATUS } from "@/types";
 import { STORE_CATEGORIES } from "@/constant/storeType";
-import { formatPriceDisplay } from "@/utils/store";
+import { isDigitalAsset, toCard } from "@/utils/store";
 import StatusBadge from "./StatusBadge";
 import styles from "./ListingCard.module.css";
 
@@ -36,12 +36,17 @@ export default function ListingCard({ store }: { store: Store }) {
       .then(setCoverImage)
       .catch(() => {});
   }, [rawPath]);
+  const isDigital = isDigitalAsset(store);
+  const card = toCard(store);
   const categoryEntry = STORE_CATEGORIES.find(
     (cat) => cat.key === store.category,
   );
   const categoryLabel = categoryEntry?.label ?? "";
-  const location = [store.city, store.district].filter(Boolean).join(" · ");
-  const price = formatPriceDisplay(store.price, store.priceNegotiable);
+  // * digital: the type labels stand in for city · district · category
+  const meta = isDigital
+    ? (card.location ?? "")
+    : [store.city, store.district, categoryLabel].filter(Boolean).join(" · ");
+  const thumbLabel = isDigital ? "封面圖" : "店面照";
 
   const [status, setStatus] = useState(store.status ?? STORE_STATUS.PENDING);
   const [confirmingSold, setConfirmingSold] = useState(false);
@@ -54,6 +59,10 @@ export default function ListingCard({ store }: { store: Store }) {
     status === STORE_STATUS.PENDING ||
     status === STORE_STATUS.APPROVED ||
     status === STORE_STATUS.REJECTED;
+  // * the seller left the /sell upload step before adding one — admins can't
+  // * check the listing without it
+  const needsScreenshots =
+    isDigital && canEdit && (store.verificationImages ?? []).length === 0;
 
   const openConfirm = () => {
     setSoldError(false);
@@ -84,9 +93,14 @@ export default function ListingCard({ store }: { store: Store }) {
     <div className={styles.card}>
       <div className={styles.thumb}>
         {coverImage ? (
-          <Image src={coverImage} fill alt="店面照" className={styles.img} />
+          <Image
+            src={coverImage}
+            fill
+            alt={thumbLabel}
+            className={styles.img}
+          />
         ) : (
-          <span className={styles.thumbPlaceholder}>店面照</span>
+          <span className={styles.thumbPlaceholder}>{thumbLabel}</span>
         )}
       </div>
 
@@ -96,13 +110,18 @@ export default function ListingCard({ store }: { store: Store }) {
           <StatusBadge status={status} />
         </div>
 
-        {(location || categoryLabel) && (
-          <p className={styles.meta}>
-            {[location, categoryLabel].filter(Boolean).join(" · ")}
-          </p>
-        )}
+        {meta && <p className={styles.meta}>{meta}</p>}
 
-        <p className={styles.price}>{price}</p>
+        <p className={styles.price}>{card.price}</p>
+
+        {needsScreenshots && (
+          <NextLink
+            href={`/my-listings/edit/${store.id}`}
+            className={styles.screenshotHint}
+          >
+            ⚠ 請補上核對截圖 →
+          </NextLink>
+        )}
 
         <div className={styles.footer}>
           <span className={styles.date}>{formatDate(store.createTime)}</span>

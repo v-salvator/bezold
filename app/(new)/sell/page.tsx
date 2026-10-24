@@ -4,6 +4,7 @@ import SiteNav from "@/app/(new)/_components/SiteNav";
 import SiteFooter from "@/app/(new)/_components/SiteFooter";
 import EmailVerifiedGate from "@/app/(new)/_components/EmailVerifiedGate";
 import SellForm from "./_components/SellForm";
+import { LISTING_TYPE } from "@/types";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = pageMetadata({
@@ -12,7 +13,15 @@ export const metadata: Metadata = pageMetadata({
   path: "/sell",
 });
 
-export default function SellPage() {
+export default function SellPage({
+  searchParams,
+}: {
+  searchParams: { type?: string | string[] };
+}) {
+  // * the homepage / list page 「刊登數位資產」 links land on ?type=digital
+  const isDigital = searchParams.type === LISTING_TYPE.DIGITAL;
+  const sellPath = isDigital ? "/sell?type=digital" : "/sell";
+
   return (
     <>
       <SiteNav activeLink="我要頂出" />
@@ -25,11 +34,19 @@ export default function SellPage() {
         </p>
         <EmailVerifiedGate
           source="sell_gate"
-          redirectPath="/sell"
+          redirectPath={sellPath}
           title="刊登前請先驗證信箱"
-          context="驗證完成後就能刊登你的店面"
+          context={
+            isDigital
+              ? "驗證完成後就能刊登你的數位資產"
+              : "驗證完成後就能刊登你的店面"
+          }
         >
-          <SellForm />
+          <SellForm
+            initialListingType={
+              isDigital ? LISTING_TYPE.DIGITAL : LISTING_TYPE.PHYSICAL
+            }
+          />
         </EmailVerifiedGate>
       </main>
       <SiteFooter />

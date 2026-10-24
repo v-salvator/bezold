@@ -72,6 +72,22 @@
   margin: 0;
 }
 
+.screenshotHint {
+  align-self: flex-start;
+  font-family: var(--hand);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+  border: 1.5px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--paper));
+  padding: 0.125rem 0.5rem;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .footer {
   display: flex;
   align-items: center;

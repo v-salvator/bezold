@@ -5,11 +5,14 @@ import { useRouter } from "next/navigation";
 import StoreCard, {
   type StoreCard as StoreCardType,
 } from "@/components/refactored/StoreCard";
-import TypeTabs from "@/app/(new)/_components/DigitalAssets/TypeTabs";
+import Dropdown from "@/components/refactored/Dropdown";
 import SellCtaLink from "@/app/(new)/_components/SellCtaLink";
-import { TRANSFER_RISK_NOTICE } from "@/constant/digitalAsset";
+import {
+  DIGITAL_ASSET_TYPES,
+  TRANSFER_RISK_NOTICE,
+} from "@/constant/digitalAsset";
 import { type DigitalAssetTab, ALL_DIGITAL_ASSET_TYPES } from "@/types";
-import { digitalAssetListHref } from "@/utils/digitalAsset";
+import { digitalAssetListHref, toDigitalAssetTab } from "@/utils/digitalAsset";
 import { cn } from "@/lib/utils";
 import styles from "./DigitalAssetResults.module.css";
 
@@ -22,6 +25,12 @@ export type DigitalAssetResult = {
 // * the first row on mobile and desktop — loaded eagerly as LCP candidates
 const ABOVE_THE_FOLD_CARDS = 2;
 
+// * "" (the Dropdown's 不限) = 全部
+const TYPE_OPTIONS = DIGITAL_ASSET_TYPES.map(({ key, label }) => ({
+  label,
+  value: key,
+}));
+
 export default function DigitalAssetResults({
   results,
   approvedCount,
@@ -33,15 +42,21 @@ export default function DigitalAssetResults({
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  // * highlight the clicked tab right away, while the server filters
+  // * show the picked type right away, while the server filters
   const [pendingTab, setPendingTab] = useState<DigitalAssetTab | null>(null);
   const shownTab = isPending && pendingTab ? pendingTab : activeTab;
 
-  const handleSelect = (tab: DigitalAssetTab) => {
+  // * one filter, so it applies on pick — no 搜尋 button like /store-list
+  const handleSelect = (value: string) => {
+    const tab = toDigitalAssetTab(value);
     if (tab === activeTab) return;
     setPendingTab(tab);
     startTransition(() => {
       router.push(digitalAssetListHref(tab), { scroll: false });
+      // * same as /store-list's SearchBar: the client router cache can hand
+      // * back a stale payload for another ?type= of this page (e.g. back to
+      // * 全部), so make the server component re-run with the new params
+      router.refresh();
     });
   };
 
@@ -61,9 +76,18 @@ export default function DigitalAssetResults({
         </div>
       </div>
 
-      <div className={styles.area}>
-        <TypeTabs activeTab={shownTab} onSelect={handleSelect} />
+      <div className={styles.filterBar}>
+        <div className={styles.filterInner}>
+          <Dropdown
+            label="類型"
+            options={TYPE_OPTIONS}
+            value={shownTab === ALL_DIGITAL_ASSET_TYPES ? "" : shownTab}
+            onChange={handleSelect}
+          />
+        </div>
+      </div>
 
+      <div className={styles.area}>
         {results.length > 0 ? (
           <div className={cn(styles.grid, isPending && styles.gridPending)}>
             {results.map(({ id, sold, card }, index) => (

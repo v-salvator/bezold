@@ -380,12 +380,12 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria**：
 
-- [ ] `sellFormKeys()`、`isNewSellerListing()`、`ownerEditableKeys()` 照 spec 修改；`listingType` 不在 owner 可編輯欄位裡
-- [ ] `tests/rules/stores.test.ts` 涵蓋 spec 列的 5 組情境
+- [x] `sellFormKeys()`、`isNewSellerListing()`、`ownerEditableKeys()` 照 spec 修改；`listingType` 不在 owner 可編輯欄位裡
+- [x] `tests/rules/stores.test.ts` 涵蓋 spec 列的 5 組情境
 
 **驗證**：
 
-- [ ] T17：`npm run test:rules` 全過（含既有測試）
+- [x] T17：`npm run test:rules` 全過（含既有測試）
 
 **Dependencies**：PR 3
 **Files**：`firestore.rules`、`tests/rules/stores.test.ts`（必要時 `tests/rules/helpers.ts`）
@@ -397,13 +397,13 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria**：
 
-- [ ] `StoreFields` 加 `listingType` 和數位欄位；`emptyStoreFields(listingType)`
-- [ ] `validateStoreForm()` 依類型分支，規則照 spec；實體分支行為不變
-- [ ] `DigitalFieldsSection`：類型多選 Pill、經營時間、平均月營收、價格下限／上限、資產連結＋說明、勿提供密碼警語
+- [x] `StoreFields` 加 `listingType` 和數位欄位；`emptyStoreFields(listingType)`
+- [x] `validateStoreForm()` 依類型分支，規則照 spec；實體分支行為不變
+- [x] `DigitalFieldsSection`：類型多選 Pill、經營時間、平均月營收、價格下限／上限、資產連結＋說明、勿提供密碼警語
 
 **驗證**：
 
-- [ ] 用 scratchpad 腳本（同 Task 2 的 `jiti` 方式）跑 `validateStoreForm` 的數位情境：缺連結、非 http(s)、上限 < 下限、沒選類型都回錯誤；完整資料通過
+- [x] 用 scratchpad 腳本（同 Task 2 的 `jiti` 方式）跑 `validateStoreForm` 的數位情境：缺連結、非 http(s)、上限 < 下限、沒選類型都回錯誤；完整資料通過
 
 **Dependencies**：Task 18
 **Files**：`components/storeForm/formTypes.ts`、`components/storeForm/DigitalFieldsSection.tsx`、`components/storeForm/storeForm.module.css`
@@ -415,14 +415,14 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria**：
 
-- [ ] 表單最上方有類型切換；`?type=digital` 預選；送出的 payload 只有 rules 允許的欄位
-- [ ] `VerificationImageUpload`：說明文字照 spec、最多 10 張、可刪除
-- [ ] 數位資產的上傳畫面：照片可略過，截圖 0 張時「完成刊登」不能按，也沒有「略過」
-- [ ] 實體店面的 `/sell` 跟之前一樣
+- [x] 表單最上方有類型切換；`?type=digital` 預選；送出的 payload 只有 rules 允許的欄位
+- [x] `VerificationImageUpload`：說明文字照 spec、最多 10 張、可刪除
+- [x] 數位資產的上傳畫面：照片可略過，截圖 0 張時「完成刊登」不能按，也沒有「略過」
+- [x] 實體店面的 `/sell` 跟之前一樣
 
 **驗證**：
 
-- [ ] T18：一般帳號刊登數位資產，驗證錯誤都擋下；成功後 `pending`，照片在 `images`、截圖在 `verificationImages`
+- [x] T18：一般帳號刊登數位資產，驗證錯誤都擋下；成功後 `pending`，照片在 `images`、截圖在 `verificationImages`
 - [ ] T19：另一個一般帳號拿截圖路徑 `getDownloadURL` → permission-denied
 
 **Dependencies**：Task 19
@@ -435,14 +435,14 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria**：
 
-- [ ] `ListingCard` 用 `toCard()`；數位刊登沒有截圖時顯示「請補上核對截圖」
-- [ ] `EditListingForm` 依類型顯示數位欄位和 `VerificationImageUpload`，沒有類型切換
-- [ ] 已上架的刊登改欄位、新增或刪除截圖 → 回到 `pending`（跟照片一樣）
+- [x] `ListingCard` 用 `toCard()`；數位刊登沒有截圖時顯示「請補上核對截圖」
+- [x] `EditListingForm` 依類型顯示數位欄位和 `VerificationImageUpload`，沒有類型切換
+- [x] 已上架的刊登改欄位、新增或刪除截圖 → 回到 `pending`（跟照片一樣）
 
 **驗證**：
 
-- [ ] T20：刪光截圖後卡片出現提示；補上後已上架刊登回到 `pending`；欄位編輯存檔正確
-- [ ] T21：實體店面的 `/sell`、`/my-listings`、詳細頁、`SellerContactGate`、照片上傳回歸檢查
+- [x] T20：刪光截圖後卡片出現提示；補上後已上架刊登回到 `pending`；欄位編輯存檔正確
+- [x] T21：實體店面的 `/sell`、`/my-listings`、詳細頁、`SellerContactGate`、照片上傳回歸檢查
 
 **Dependencies**：Task 20
 **Files**：`app/(new)/my-listings/_components/ListingCard.tsx`、`app/(new)/my-listings/edit/[storeId]/_components/EditListingForm.tsx`
@@ -450,7 +450,7 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 ### Checkpoint: 完成
 
-- [ ] lint、build、`npm run test:rules` 全過（T22）
+- [x] lint、build、`npm run test:rules` 全過（T22）
 - [ ] spec 的 T1–T22 全部走過一次
-- [ ] 你部署 firestore rules
+- [x] 你部署 firestore rules
 - [ ] 你 review → commit → 開 PR

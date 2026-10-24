@@ -417,3 +417,205 @@ for (const collectionName of STORE_COLLECTIONS) {
     });
   });
 }
+
+// * ── Digital assets (/sell 數位資產, /my-listings edit) ──────────────────
+
+// * SellForm's digital submit: DIGITAL_ASSET_EMPTY_LOCATION +
+// * digitalAssetWriteFields — no areaPing / monthlyRent / equipment, and no
+// * verificationImages until the upload step
+const digitalSellFormPayload = (overrides: Record<string, unknown> = {}) => ({
+  storeName: "手作飾品蝦皮賣場",
+  description: "賣家刊登的數位資產",
+  price: 500000,
+  priceNegotiable: false,
+  city: "",
+  district: "",
+  location: "",
+  category: "",
+  listingType: "digital",
+  digitalTypes: ["ECOMMERCE", "SOCIAL"],
+  assetUrl: "https://shopee.tw/example-shop",
+  priceMax: 1000000,
+  operatingYears: 3,
+  monthlyRevenue: 80000,
+  tags: [],
+  currency: "TWD",
+  user: UID.seller,
+  images: [],
+  status: "pending",
+  createTime: serverTimestamp(),
+  updateTime: serverTimestamp(),
+  ...overrides,
+});
+
+// * an existing digital listing, as the admin SDK or SellForm left it
+const digitalStoreDoc = (overrides: Record<string, unknown> = {}) =>
+  storeDoc({
+    city: "",
+    district: "",
+    location: "",
+    category: "",
+    areaPing: null,
+    monthlyRent: null,
+    equipment: null,
+    listingType: "digital",
+    digitalTypes: ["ECOMMERCE"],
+    assetUrl: "https://shopee.tw/example-shop",
+    priceMax: 0,
+    verificationImages: [],
+    ...overrides,
+  });
+
+// * EditListingForm's digital submit (before the optional status)
+const digitalEditFormPayload = () => ({
+  storeName: "改過的賣場名稱",
+  description: "賣家更新描述",
+  price: 400000,
+  priceNegotiable: true,
+  digitalTypes: ["SOCIAL"],
+  assetUrl: "https://www.facebook.com/groups/example",
+  priceMax: 600000,
+  operatingYears: 4,
+  monthlyRevenue: 90000,
+  updateTime: serverTimestamp(),
+});
+
+for (const collectionName of STORE_COLLECTIONS) {
+  const storePath = `${collectionName}/store1`;
+  const screenshotPath = `${collectionName}/store1/verification/rev-a1b2c3.webp`;
+
+  describe(`${collectionName} digital create`, () => {
+    it("a seller can submit a digital asset", async () => {
+      const { seller } = actors(env);
+      await assertSucceeds(
+        addDoc(
+          collection(seller.firestore(), collectionName),
+          digitalSellFormPayload(),
+        ),
+      );
+    });
+
+    // * optional 經營時間 / 平均月營收 left out, no upper bound (priceMax 0)
+    it("a seller can submit with only the required digital fields", async () => {
+      const {
+        operatingYears: _operatingYears,
+        monthlyRevenue: _monthlyRevenue,
+        ...requiredOnly
+      } = digitalSellFormPayload({ priceMax: 0 });
+      const { seller } = actors(env);
+      await assertSucceeds(
+        addDoc(collection(seller.firestore(), collectionName), requiredOnly),
+      );
+    });
+
+    const deniedPayloads: [string, Record<string, unknown>][] = [
+      ["listingType physical", { listingType: "physical" }],
+      ["an unknown listingType", { listingType: "franchise" }],
+      ["verification screenshots", { verificationImages: [screenshotPath] }],
+      ["an empty verificationImages", { verificationImages: [] }],
+    ];
+    for (const [label, overrides] of deniedPayloads) {
+      it(`a seller cannot create with ${label}`, async () => {
+        const { seller } = actors(env);
+        await assertFails(
+          addDoc(
+            collection(seller.firestore(), collectionName),
+            digitalSellFormPayload(overrides),
+          ),
+        );
+      });
+    }
+  });
+
+  describe(`${collectionName} digital update — owner`, () => {
+    for (const status of ["pending", "approved", "rejected"]) {
+      it(`can edit the digital fields on a ${status} listing`, async () => {
+        await seed(env, storePath, digitalStoreDoc({ status }));
+        const { seller } = actors(env);
+        await assertSucceeds(
+          updateDoc(doc(seller.firestore(), storePath), {
+            ...digitalEditFormPayload(),
+            ...(status === "pending" ? {} : { status: "pending" }),
+          }),
+        );
+      });
+
+      // * uploadVerificationImageByFile / deleteVerificationImage
+      it(`can add and remove screenshots on a ${status} listing`, async () => {
+        await seed(env, storePath, digitalStoreDoc({ status }));
+        const sellerDb = actors(env).seller.firestore();
+        await assertSucceeds(
+          updateDoc(doc(sellerDb, storePath), {
+            verificationImages: arrayUnion(screenshotPath),
+            updateTime: serverTimestamp(),
+          }),
+        );
+        await assertSucceeds(
+          updateDoc(doc(sellerDb, storePath), {
+            verificationImages: arrayRemove(screenshotPath),
+            updateTime: serverTimestamp(),
+          }),
+        );
+      });
+    }
+
+    it("cannot switch a digital listing to physical", async () => {
+      await seed(env, storePath, digitalStoreDoc({ status: "pending" }));
+      const { seller } = actors(env);
+      await assertFails(
+        updateDoc(doc(seller.firestore(), storePath), {
+          listingType: "physical",
+          updateTime: serverTimestamp(),
+        }),
+      );
+    });
+
+    it("cannot switch a physical listing to digital", async () => {
+      await seed(env, storePath, storeDoc({ status: "pending" }));
+      const { seller } = actors(env);
+      await assertFails(
+        updateDoc(doc(seller.firestore(), storePath), {
+          listingType: "digital",
+          updateTime: serverTimestamp(),
+        }),
+      );
+    });
+
+    for (const status of ["draft", "sold"]) {
+      it(`cannot add screenshots to a ${status} listing`, async () => {
+        await seed(env, storePath, digitalStoreDoc({ status }));
+        const { seller } = actors(env);
+        await assertFails(
+          updateDoc(doc(seller.firestore(), storePath), {
+            verificationImages: arrayUnion(screenshotPath),
+            updateTime: serverTimestamp(),
+          }),
+        );
+      });
+    }
+  });
+
+  describe(`${collectionName} digital update — others`, () => {
+    it("another seller cannot edit the digital fields", async () => {
+      await seed(env, storePath, digitalStoreDoc({ status: "pending" }));
+      const { otherSeller } = actors(env);
+      await assertFails(
+        updateDoc(
+          doc(otherSeller.firestore(), storePath),
+          digitalEditFormPayload(),
+        ),
+      );
+    });
+
+    it("another seller cannot add screenshots", async () => {
+      await seed(env, storePath, digitalStoreDoc({ status: "pending" }));
+      const { otherSeller } = actors(env);
+      await assertFails(
+        updateDoc(doc(otherSeller.firestore(), storePath), {
+          verificationImages: arrayUnion(screenshotPath),
+          updateTime: serverTimestamp(),
+        }),
+      );
+    });
+  });
+}

@@ -47,10 +47,10 @@ export default async function NewHomePage() {
       getHighlightedStores(),
       getEmergencyStores(),
       getSoldStores(),
-      // * the latest 30, so each type tab has something to filter
+      // * one grid's worth — filtering by type lives on /digital-assets
       getDigitalAssets({
         statuses: [STORE_STATUS.APPROVED],
-        limit: 30,
+        limit: 6,
         coverOnly: true,
       }),
     ]);

@@ -38,11 +38,26 @@
   }
 }
 
+/* --hand, not --note: Gloria's Latin (App) reads as a scrawl in a sentence */
 .sub {
-  font-family: var(--note);
+  font-family: var(--hand);
   font-size: 14px;
   color: var(--ink-2);
   margin: 6px 0 0;
+}
+
+/* same band as /store-list's SearchBar */
+.filterBar {
+  padding: 14px 28px;
+  border-bottom: 1.5px solid var(--ink);
+  background: var(--paper);
+}
+
+.filterInner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 320px);
 }
 
 .area {
@@ -179,8 +194,13 @@
 }
 
 @media (max-width: 640px) {
-  .crumbs {
+  .crumbs,
+  .filterBar {
     padding: 12px 16px;
+  }
+
+  .filterInner {
+    grid-template-columns: 1fr;
   }
 
   .title {

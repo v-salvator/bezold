@@ -14,34 +14,69 @@ import StoreImageUpload from "./StoreImageUpload";
 import Button from "@/components/refactored/Button";
 import Card from "@/components/refactored/Card";
 import StoreFieldsSection from "@/components/storeForm/StoreFieldsSection";
+import DigitalFieldsSection from "@/components/storeForm/DigitalFieldsSection";
 import ContactFieldsSection from "@/components/storeForm/ContactFieldsSection";
+import VerificationImageUpload from "@/components/storeForm/VerificationImageUpload";
 import {
   type StoreFields,
   type BossFields,
   emptyStoreFields,
   emptyBossFields,
+  physicalFormFields,
   validateStoreForm,
 } from "@/components/storeForm/formTypes";
 import styles from "@/components/storeForm/storeForm.module.css";
-import { type Store, STORE_STATUS } from "@/types";
+import {
+  type ListingType,
+  type Store,
+  LISTING_TYPE,
+  STORE_STATUS,
+} from "@/types";
 import { normalizeThreadsId } from "@/utils/user";
+import {
+  DIGITAL_ASSET_EMPTY_LOCATION,
+  digitalAssetWriteFields,
+} from "@/utils/store";
 
-export default function SellForm() {
+const LISTING_TYPE_OPTIONS: {
+  value: ListingType;
+  label: string;
+  glyph: string;
+}[] = [
+  { value: LISTING_TYPE.PHYSICAL, label: "實體店面", glyph: "店" },
+  { value: LISTING_TYPE.DIGITAL, label: "數位資產", glyph: "網" },
+];
+
+export default function SellForm({
+  initialListingType = LISTING_TYPE.PHYSICAL,
+}: {
+  /** From /sell?type=digital — the seller can still switch before submitting. */
+  initialListingType?: ListingType;
+}) {
   const router = useRouter();
   const [authUser, setAuthUser] = useState<FirebaseUser | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
 
-  const [store, setStore] = useState<StoreFields>(emptyStoreFields());
+  const [store, setStore] = useState<StoreFields>(() =>
+    emptyStoreFields(initialListingType),
+  );
   const [boss, setBoss] = useState<BossFields>(emptyBossFields());
+  const isDigital = store.listingType === LISTING_TYPE.DIGITAL;
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createdStoreId, setCreatedStoreId] = useState<string | null>(null);
+  const [screenshotCount, setScreenshotCount] = useState(0);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
-        router.push("/login?redirect=/sell");
+        // * come back to the same form type after signing in
+        const sellPath =
+          initialListingType === LISTING_TYPE.DIGITAL
+            ? "/sell?type=digital"
+            : "/sell";
+        router.push(`/login?${new URLSearchParams({ redirect: sellPath })}`);
         return;
       }
       setAuthUser(firebaseUser);
@@ -59,7 +94,7 @@ export default function SellForm() {
       setAuthLoading(false);
     });
     return () => unsubscribe();
-  }, [router]);
+  }, [router, initialListingType]);
 
   function setStoreField<K extends keyof StoreFields>(
     key: K,
@@ -106,29 +141,47 @@ export default function SellForm() {
     }
 
     try {
-      const storePayload = {
-        ...store,
+      const sharedFields = {
         tags: [],
-        price: priceValue,
         currency: "TWD",
         user: authUser.uid,
         images: [],
         status: STORE_STATUS.PENDING,
-        ...(store.areaPing ? { areaPing: Number(store.areaPing) } : {}),
-        ...(store.monthlyRent
-          ? { monthlyRent: Number(store.monthlyRent) }
-          : {}),
-        ...(store.equipment ? { equipment: store.equipment } : {}),
       };
+      // * digital: exactly the keys firestore.rules sellFormKeys() allows —
+      // * no location (""), no physical extras, screenshots come later
+      const storePayload = isDigital
+        ? {
+            storeName: store.storeName,
+            description: store.description,
+            price: priceValue,
+            priceNegotiable: store.priceNegotiable,
+            ...DIGITAL_ASSET_EMPTY_LOCATION,
+            ...digitalAssetWriteFields(store),
+            ...sharedFields,
+          }
+        : {
+            ...physicalFormFields(store),
+            ...sharedFields,
+            price: priceValue,
+            ...(store.areaPing ? { areaPing: Number(store.areaPing) } : {}),
+            ...(store.monthlyRent
+              ? { monthlyRent: Number(store.monthlyRent) }
+              : {}),
+            ...(store.equipment ? { equipment: store.equipment } : {}),
+          };
       const storeRef = await createStoreDoc(storePayload as unknown as Store);
       trackEvent("store_listing_submit", {
         store_id: storeRef.id,
         category: store.category || "unspecified",
         city: store.city || "unspecified",
+        listing_type: store.listingType,
       });
       setCreatedStoreId(storeRef.id);
     } catch {
-      setError("刊登店面失敗，請稍後再試");
+      setError(
+        isDigital ? "刊登數位資產失敗，請稍後再試" : "刊登店面失敗，請稍後再試",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -139,6 +192,40 @@ export default function SellForm() {
       <div className={styles.loadingWrap}>
         <div className={styles.spinner} />
       </div>
+    );
+  }
+
+  if (createdStoreId && isDigital) {
+    // * photos are optional, the revenue screenshots are not — there is no
+    // * 略過 here, and 完成刊登 waits for the first screenshot
+    return (
+      <Card className="w-full max-w-[640px]">
+        <div className={styles.form}>
+          <StoreImageUpload
+            storeId={createdStoreId}
+            heading="上傳封面照片（選填）"
+            note="資產資料已送出！可上傳賣場、社群或網站的封面圖讓買家更了解，也可略過。請勿上傳含帳號或個資的畫面。"
+          />
+          <VerificationImageUpload
+            storeId={createdStoreId}
+            onImagesChanged={setScreenshotCount}
+          />
+          {screenshotCount === 0 && (
+            <p className={styles.readonlyNote}>
+              至少上傳 1 張核對截圖，才能完成刊登。
+            </p>
+          )}
+          <div className={styles.actions}>
+            <Button
+              variant="mus"
+              disabled={screenshotCount === 0}
+              onClick={() => router.push("/my-listings")}
+            >
+              完成刊登
+            </Button>
+          </div>
+        </div>
+      </Card>
     );
   }
 
@@ -156,35 +243,71 @@ export default function SellForm() {
   return (
     <Card className="w-full max-w-[640px]">
       <form className={styles.form} onSubmit={handleSubmit}>
-        <StoreFieldsSection store={store} onChange={setStoreField} showTags />
+        <div className={styles.field}>
+          <span className={styles.label} id="listingTypeLabel">
+            我要頂讓
+          </span>
+          <div
+            className={styles.typeSwitch}
+            role="radiogroup"
+            aria-labelledby="listingTypeLabel"
+          >
+            {LISTING_TYPE_OPTIONS.map(({ value, label, glyph }) => (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                aria-checked={store.listingType === value}
+                className={styles.typeOption}
+                onClick={() => {
+                  setError(null);
+                  setStoreField("listingType", value);
+                }}
+              >
+                <span className={styles.typeGlyph} aria-hidden>
+                  {glyph}
+                </span>
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {isDigital ? (
+          <DigitalFieldsSection store={store} onChange={setStoreField} />
+        ) : (
+          <StoreFieldsSection store={store} onChange={setStoreField} showTags />
+        )}
 
         <ContactFieldsSection boss={boss} onChange={setBossField} />
 
-        <div className={styles.featuredCallout}>
-          <span className={styles.featuredIcon} aria-hidden>
-            ✦
-          </span>
-          <div className={styles.featuredBody}>
-            <p className={styles.featuredTitle}>
-              想登上首頁 <span className={styles.featuredHl}>「編輯精選」</span>
-              ？
-            </p>
-            <p className={styles.featuredText}>
-              上傳至少 5 張清晰照片、完整填寫資料與聯絡方式，即有機會獲選。
-            </p>
-            <a
-              href="/policy/editor-pick"
-              className={styles.featuredLink}
-              onClick={() =>
-                trackEvent("editor_pick_guide_click", {
-                  location: "sell_form",
-                })
-              }
-            >
-              查看完整入選條件 →
-            </a>
+        {!isDigital && (
+          <div className={styles.featuredCallout}>
+            <span className={styles.featuredIcon} aria-hidden>
+              ✦
+            </span>
+            <div className={styles.featuredBody}>
+              <p className={styles.featuredTitle}>
+                想登上首頁{" "}
+                <span className={styles.featuredHl}>「編輯精選」</span>？
+              </p>
+              <p className={styles.featuredText}>
+                上傳至少 5 張清晰照片、完整填寫資料與聯絡方式，即有機會獲選。
+              </p>
+              <a
+                href="/policy/editor-pick"
+                className={styles.featuredLink}
+                onClick={() =>
+                  trackEvent("editor_pick_guide_click", {
+                    location: "sell_form",
+                  })
+                }
+              >
+                查看完整入選條件 →
+              </a>
+            </div>
           </div>
-        </div>
+        )}
 
         {error && <p className={styles.errorMsg}>{error}</p>}
 
@@ -192,7 +315,9 @@ export default function SellForm() {
           <Button
             type="button"
             variant="ghost"
-            onClick={() => router.push("/store-list")}
+            onClick={() =>
+              router.push(isDigital ? "/digital-assets" : "/store-list")
+            }
           >
             取消
           </Button>
