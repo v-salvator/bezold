@@ -26,6 +26,7 @@ import {
 import { STORE_CATEGORIES } from "@/constant/storeType";
 import { EQUIPMENT_LABEL } from "@/constant/storeEquipment";
 import { STATUS_LABEL, TAG_COLOR } from "@/constant/adminStore";
+import VerificationImageGallery from "./VerificationImageGallery";
 
 // Appending this to a store URL force-opens the buyer club popup for
 // logged-out visitors (see app/(new)/store/[storeId]/page.tsx).
@@ -103,6 +104,15 @@ export default function StoreDetailDrawer({
               items={buildDetailItems(store)}
             />
           </DrawerSection>
+
+          {isDigitalAsset(store) && (
+            // * a missing screenshot warns but never blocks approval
+            <DrawerSection title="核對截圖">
+              <VerificationImageGallery
+                paths={store.verificationImages ?? []}
+              />
+            </DrawerSection>
+          )}
 
           <DrawerSection title="店家連結">
             <StoreLinks storeId={store.id} onCopy={onCopyLink} />
