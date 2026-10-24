@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Share2, Link2, Facebook } from "lucide-react";
+import ThreadsIcon from "@/components/icon/ThreadsIcon";
 import styles from "./ShareButton.module.css";
 
 export default function ShareButton() {
@@ -47,6 +48,15 @@ export default function ShareButton() {
     setOpen(false);
   }
 
+  // * Threads web intent — opens a new post with this page's link attached
+  function shareToThreads() {
+    window.open(
+      `https://www.threads.com/intent/post?url=${encodeURIComponent(window.location.href)}`,
+      "_blank",
+    );
+    setOpen(false);
+  }
+
   return (
     <div ref={wrapperRef} className={styles.wrapper}>
       <button
@@ -70,6 +80,10 @@ export default function ShareButton() {
           <button onClick={shareToFacebook} className={styles.item}>
             <Facebook size={13} />
             Facebook
+          </button>
+          <button onClick={shareToThreads} className={styles.item}>
+            <ThreadsIcon style={{ fontSize: 13 }} />
+            Threads
           </button>
         </div>
       )}
