@@ -27,7 +27,7 @@ Prototype（首頁區塊、詳細頁）只是參考內容與資訊架構，樣�
 | 誰能刊登       | 賣家從 `/sell` 刊登（走 pending 審核），管理員也能從後台建立                                                                                           |
 | 聯絡方式       | 匿名、經平台媒合；買家送出詢問，存進新的 inquiries 集合，後台處理                                                                                      |
 | 新詢問通知     | **v1 不寄 email**，管理員到後台「詢問」頁查看                                                                                                          |
-| 瀏覽入口       | 首頁「04 數位資產頂讓」區塊（最新 6 筆）＋專屬列表頁 `/digital-assets`（類型分頁）                                                                     |
+| 瀏覽入口       | 首頁「04 數位資產頂讓」區塊（最新 6 筆）＋專屬列表頁 `/digital-assets`（依類型篩選）                                                                   |
 | 詳細頁網址     | 沿用 `/store/[storeId]`，依 `listingType` 顯示數位版本                                                                                                 |
 | 資產連結       | 必填 `assetUrl`。Firestore rules 只讓管理員和刊登者本人讀店家文件，公開頁面又經過 `omitSellerContact()`，所以買家拿不到                                |
 | 核對截圖       | 賣家**必須**上傳 1–10 張後台營收／數據截圖，存在 `verification/` 子資料夾；只有管理員和刊登者本人看得到，絕不出現在公開頁面                            |
@@ -316,13 +316,13 @@ interface InquiryDoc {
 - `SectionTitle`：`num="04"`、`title="數位資產頂讓"`、`NEW` 標籤（等寬字體，跟卡片的「精選」「急售」標籤同一種樣式；`Pill` 的手寫字體會讓英文大寫歪斜）、`sub="— 讓線上的心血，也有下一章 —"`、右側「看全部數位資產 →」連到 `/digital-assets`
 - 不放類型分頁：首頁直接顯示全部類型的最新刊登，依類型篩選留給 `/digital-assets`。
 - 資料：`getDigitalAssets({ statuses: ["approved"], limit: 6, coverOnly: true })`，最多 6 張卡片，由新到舊。
-- 區塊底部：「我也有數位資產想刊登 ↗」連到 `/sell?type=digital`；警語「刊登與移轉方式須依資產權利及相關平台規範確認。填寫表單時，請勿提供密碼、驗證碼或其他登入資訊。」
+- 區塊底部：「我也有數位資產想刊登 ↗」連到 `/sell?type=digital`。不放警語：首頁沒有要填的東西，「請勿提供密碼、驗證碼」放在 `/sell` 數位表單、詳細頁和 `/digital-assets` 的刊登 CTA。
 - 完全沒有 approved 資料時整個區塊照樣顯示，內容換成空狀態＋刊登 CTA（避免編號跳號）。
 
 **列表頁** `/digital-assets`：
 
 - 頁面殼照 CLAUDE.md：`LaunchBanner` → `SiteNav activeLink="數位資產"` → `<div className="flex-1">` → `SiteFooter`
-- 網址參數 `?type=ECOMMERCE` 是篩選狀態的唯一來源（跟 `/store-list` 同一個原則）；分頁按下去用 `router.push` 改網址。不認得的 `type` 當作「全部」。
+- 網址參數 `?type=ECOMMERCE` 是篩選狀態的唯一來源（跟 `/store-list` 同一個原則）。篩選列跟 `/store-list` 的 SearchBar 同一個樣式：一個「類型」`Dropdown`（不限＝全部），只有一個條件，所以選了就用 `router.push` 改網址，不需要「搜尋」按鈕。不認得的 `type` 當作「全部」。
 - 資料：`getDigitalAssets({ statuses: ["approved", "sold"], coverOnly: true })`，不設 limit；類型在記憶體裡篩選。approved 在前、sold 在後（sold ribbon），跟 `/store-list` 一致。
 - 之後如果數量多到要分頁，就要加上 `digitalTypes` 的 `array-contains` 條件和 cursor 分頁，那時會需要另一個 index。這次不做。
 - metadata：title「數位資產頂讓｜電商、社群、網站轉讓 - Bezold」、canonical `/digital-assets`；加進 `sitemap.ts` 的靜態頁。
@@ -416,7 +416,7 @@ App 本身沒有測試框架，這次也**不新增**。Rules 用 PR #90 建好�
 | T12 | 側欄「詢問」顯示未處理數量；在詢問頁把一筆改成 `contacted` → 數字立刻減 1；全部處理完 → 數字消失；再送一筆新詢問後切換後台頁面 → 數字出現                                                                                                 | `digital-inquiry` |
 | T13 | 從數位資產詢問按鈕打開買家俱樂部：類型已預選「數位資產」、地區不填也能註冊；使用者文件 `buyerProfile.category = "DIGITAL_ASSET"`、`city = ""`，註冊 source 是 `digital_inquiry`；後台買家偏好頁顯示「數位資產」。選實體類型時地區照舊必填 | `digital-inquiry` |
 | T14 | 首頁 04 區塊：顯示最新 6 筆（不分類型）、沒有資料時顯示空狀態；後面區塊編號是 05–10                                                                                                                                                       | `digital-browse`  |
-| T15 | `/digital-assets?type=SOCIAL` 只顯示社群；改分頁網址跟著變；重新整理後分頁狀態保留；`?type=xyz` 當作全部                                                                                                                                  | `digital-browse`  |
+| T15 | `/digital-assets?type=SOCIAL` 只顯示社群；改「類型」選項網址跟著變；重新整理後選項保留；`?type=xyz` 當作全部                                                                                                                              | `digital-browse`  |
 | T16 | 導覽列在桌機與手機寬度（375px）都正常，「數位資產」在列表頁與詳細頁亮起                                                                                                                                                                   | `digital-browse`  |
 | T17 | `npm run test:rules`：賣家建立／編輯數位資產、新增核對截圖路徑的新測試和既有測試全過                                                                                                                                                      | `digital-sell`    |
 | T18 | 用一般帳號在 `/sell?type=digital` 刊登：缺資產連結、連結不是 http(s)、上限小於下限都擋下；上傳畫面沒有截圖時「完成刊登」不能按；成功後 `pending`，照片在 `images`、截圖在 `verificationImages`，後台看得到                                | `digital-sell`    |
