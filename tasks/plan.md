@@ -67,11 +67,11 @@ Spec: [`SPEC.md`](../SPEC.md) · Tasks: [`tasks/todo.md`](todo.md)
 
 - [x] Task 15: 首頁「04 數位資產頂讓」區塊
 - [x] Task 16: `/digital-assets` 列表頁
-- [ ] Task 17: 導覽列「數位資產」
+- [x] Task 17: 導覽列「數位資產」
 
 ### Checkpoint: PR 3
 
-- [ ] lint、build 全過
+- [x] lint、build 全過
 - [ ] 首頁 → 列表頁 → 詳細頁 → 詢問整條路都通，桌機和手機都檢查
 - [ ] 你 review → commit → 開 PR
 

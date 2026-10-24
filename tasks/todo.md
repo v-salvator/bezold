@@ -353,12 +353,12 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 **Acceptance criteria**：
 
-- [ ] 列表頁和數位詳細頁「數位資產」亮起；實體詳細頁仍是「我要找店」
-- [ ] 375px 手機選單 6 個連結都放得下
+- [x] 列表頁和數位詳細頁「數位資產」亮起；實體詳細頁仍是「我要找店」
+- [x] 375px 手機選單 6 個連結都放得下
 
 **驗證**：
 
-- [ ] T16：桌機、平板、手機三種寬度截圖確認
+- [x] T16：桌機、平板、手機三種寬度截圖確認
 
 **Dependencies**：Task 16
 **Files**：`app/(new)/_components/SiteNav.tsx`（必要時加它的樣式）
@@ -366,7 +366,7 @@ Spec: [`SPEC.md`](../SPEC.md) · Plan: [`tasks/plan.md`](plan.md)
 
 ### Checkpoint: PR 3
 
-- [ ] lint、build 全過
+- [x] lint、build 全過
 - [ ] 首頁 → 列表頁 → 詳細頁 → 詢問整條路都通，桌機和手機都檢查
 - [ ] 你 review → commit → 開 PR
 
