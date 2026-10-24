@@ -129,36 +129,35 @@
   cursor: not-allowed;
 }
 
-/* /sell 「我要頂讓：實體店面／數位資產」 — create only */
+/* /sell 「我要頂讓」 實體店面／數位資產 — a two-part switch, create only */
 .typeSwitch {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1.5px dashed var(--ink);
-}
-
-.typeSwitchLabel {
-  font-family: var(--hand);
-  font-size: 0.9375rem;
-  font-weight: 700;
-  color: var(--ink);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 3px 3px 0 var(--ink);
 }
 
 .typeOption {
-  font-family: var(--hand);
-  font-size: 0.9375rem;
-  font-weight: 700;
-  padding: 0.5rem 1rem;
-  border: 1.5px solid var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 0.5rem;
+  border: 0;
   border-radius: 4px;
-  background: var(--paper);
+  background: transparent;
+  font-family: var(--hand);
+  font-size: 1rem;
+  font-weight: 700;
   color: var(--ink);
   cursor: pointer;
   transition:
     background 0.15s,
-    box-shadow 0.15s;
+    color 0.15s;
 
   &:hover {
     background: var(--paper-2);
@@ -167,13 +166,22 @@
   &[aria-checked="true"] {
     background: var(--ink);
     color: var(--paper);
-    box-shadow: 2px 2px 0 var(--accent);
   }
 
   &:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
+}
+
+/* small boxed 店 / 網 that follows the option's text colour */
+.typeGlyph {
+  font-family: var(--mono);
+  font-size: 0.6875rem;
+  line-height: 1.2;
+  padding: 1px 4px;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
 }
 
 /* 數位資產 — never ask for passwords or verification codes */

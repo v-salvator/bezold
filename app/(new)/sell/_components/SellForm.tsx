@@ -38,9 +38,13 @@ import {
   digitalAssetWriteFields,
 } from "@/utils/store";
 
-const LISTING_TYPE_OPTIONS: { value: ListingType; label: string }[] = [
-  { value: LISTING_TYPE.PHYSICAL, label: "實體店面" },
-  { value: LISTING_TYPE.DIGITAL, label: "數位資產" },
+const LISTING_TYPE_OPTIONS: {
+  value: ListingType;
+  label: string;
+  glyph: string;
+}[] = [
+  { value: LISTING_TYPE.PHYSICAL, label: "實體店面", glyph: "店" },
+  { value: LISTING_TYPE.DIGITAL, label: "數位資產", glyph: "網" },
 ];
 
 export default function SellForm({
@@ -239,27 +243,34 @@ export default function SellForm({
   return (
     <Card className="w-full max-w-[640px]">
       <form className={styles.form} onSubmit={handleSubmit}>
-        <div
-          className={styles.typeSwitch}
-          role="radiogroup"
-          aria-label="刊登類型"
-        >
-          <span className={styles.typeSwitchLabel}>我要頂讓：</span>
-          {LISTING_TYPE_OPTIONS.map(({ value, label }) => (
-            <button
-              key={value}
-              type="button"
-              role="radio"
-              aria-checked={store.listingType === value}
-              className={styles.typeOption}
-              onClick={() => {
-                setError(null);
-                setStoreField("listingType", value);
-              }}
-            >
-              {label}
-            </button>
-          ))}
+        <div className={styles.field}>
+          <span className={styles.label} id="listingTypeLabel">
+            我要頂讓
+          </span>
+          <div
+            className={styles.typeSwitch}
+            role="radiogroup"
+            aria-labelledby="listingTypeLabel"
+          >
+            {LISTING_TYPE_OPTIONS.map(({ value, label, glyph }) => (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                aria-checked={store.listingType === value}
+                className={styles.typeOption}
+                onClick={() => {
+                  setError(null);
+                  setStoreField("listingType", value);
+                }}
+              >
+                <span className={styles.typeGlyph} aria-hidden>
+                  {glyph}
+                </span>
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {isDigital ? (
