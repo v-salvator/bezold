@@ -64,3 +64,35 @@ describe("anonymous", () => {
     });
   }
 });
+
+// * inquiries go through the Admin SDK only (/api/stores/[id]/inquiry and
+// * /api/admin/inquiries) — no client role may touch them, admins included
+for (const collectionName of ["mockInquiry", "prodInquiry"]) {
+  describe(`${collectionName} — client access`, () => {
+    const inquiryPath = `${collectionName}/store1_${UID.member}`;
+    const inquiryDoc = {
+      storeId: "store1",
+      storeName: "Shop",
+      buyerUid: UID.member,
+      buyerName: "Buyer",
+      buyerEmail: "buyer@example.com",
+      buyerPhone: "0900",
+      message: "",
+      status: "new",
+    };
+
+    for (const actorName of ["member", "seller", "admin"] as const) {
+      it(`${actorName} cannot read or write`, async () => {
+        await seed(env, inquiryPath, inquiryDoc);
+        const firestore = actors(env)[actorName].firestore();
+        await assertFails(getDoc(doc(firestore, inquiryPath)));
+        await assertFails(
+          setDoc(doc(firestore, `${collectionName}/store1_${actorName}`), {
+            ...inquiryDoc,
+            buyerUid: actorName,
+          }),
+        );
+      });
+    }
+  });
+}
