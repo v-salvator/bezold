@@ -12,8 +12,9 @@ import EyeIcon from "@/app/(new)/_components/EyeIcon";
 import { cityItems, amountItems } from "@/components/SearchFilter/DropDowns";
 import { buyerClubOpenAtom, buyerClubSourceAtom } from "@/atoms/BuyerClubAtom";
 import {
-  BUYER_CLUB_COPY as copy,
+  BUYER_CLUB_COPY,
   BUYER_CLUB_CATEGORIES,
+  BUYER_CLUB_DIGITAL_COPY,
   BUYER_CLUB_DIGITAL_CATEGORY,
 } from "@/constant/buyerClub";
 import {
@@ -77,7 +78,13 @@ function markSuppressed(): void {
   }
 }
 
-export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
+export default function BuyerClubPopup({
+  forceOpen,
+  isDigital,
+}: {
+  forceOpen: boolean;
+  isDigital: boolean;
+}) {
   // Gate everything on the FIRST resolved auth callback — reading
   // auth.currentUser synchronously would flash the popup for logged-in members
   // while Firebase restores the persisted session.
@@ -170,6 +177,9 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
   // not apply to it.
   const isVisitorOpened = isVisitorOpenedSource(source);
   const cityRequired = isBuyerCityRequired(category);
+  // Digital assets are anonymous — never promise the seller's contact details,
+  // whichever entry point opened the popup on that page.
+  const copy = isDigital ? BUYER_CLUB_DIGITAL_COPY : BUYER_CLUB_COPY;
 
   // A digital-asset inquiry means the buyer is after a digital asset —
   // preselect it (an earlier choice in this page view is kept).
@@ -342,6 +352,7 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
             <VerifyStep
               redirectPath={pathname}
               verificationSent={signedUp.verificationSent}
+              context={copy.verifyContext}
               onDone={finishVerifyStep}
             />
           ) : (
@@ -548,10 +559,12 @@ export default function BuyerClubPopup({ forceOpen }: { forceOpen: boolean }) {
 function VerifyStep({
   redirectPath,
   verificationSent,
+  context,
   onDone,
 }: {
   redirectPath: string;
   verificationSent: boolean;
+  context: string;
   onDone: () => void;
 }) {
   const verification = useEmailVerification({
@@ -571,7 +584,7 @@ function VerifyStep({
     <VerifyEmailPanel
       verification={verification}
       title="差一步就完成"
-      context="驗證信箱後就能看到賣家的聯絡方式"
+      context={context}
       headingId="buyerClubTitle"
     >
       <button type="button" className={styles.browseBtn} onClick={onDone}>
