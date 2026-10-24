@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import StoreCard, {
   type StoreCard as StoreCardType,
 } from "@/components/refactored/StoreCard";
-import TypeTabs from "@/app/(new)/_components/DigitalAssets/TypeTabs";
+import TypeTabs from "./TypeTabs";
 import SellCtaLink from "@/app/(new)/_components/SellCtaLink";
 import { TRANSFER_RISK_NOTICE } from "@/constant/digitalAsset";
 import { type DigitalAssetTab, ALL_DIGITAL_ASSET_TYPES } from "@/types";

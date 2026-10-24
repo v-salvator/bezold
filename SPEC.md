@@ -27,7 +27,7 @@ Prototype（首頁區塊、詳細頁）只是參考內容與資訊架構，樣�
 | 誰能刊登       | 賣家從 `/sell` 刊登（走 pending 審核），管理員也能從後台建立                                                                                           |
 | 聯絡方式       | 匿名、經平台媒合；買家送出詢問，存進新的 inquiries 集合，後台處理                                                                                      |
 | 新詢問通知     | **v1 不寄 email**，管理員到後台「詢問」頁查看                                                                                                          |
-| 瀏覽入口       | 首頁「04 數位資產頂讓」區塊（類型分頁）＋專屬列表頁 `/digital-assets`                                                                                  |
+| 瀏覽入口       | 首頁「04 數位資產頂讓」區塊（最新 6 筆）＋專屬列表頁 `/digital-assets`（類型分頁）                                                                     |
 | 詳細頁網址     | 沿用 `/store/[storeId]`，依 `listingType` 顯示數位版本                                                                                                 |
 | 資產連結       | 必填 `assetUrl`。Firestore rules 只讓管理員和刊登者本人讀店家文件，公開頁面又經過 `omitSellerContact()`，所以買家拿不到                                |
 | 核對截圖       | 賣家**必須**上傳 1–10 張後台營收／數據截圖，存在 `verification/` 子資料夾；只有管理員和刊登者本人看得到，絕不出現在公開頁面                            |
@@ -104,7 +104,7 @@ utils/store.ts                         → formatPriceRange()、digitalAssetToCa
 components/refactored/StoreCard.tsx    → 新增 spec 圖示（clock、trendingUp）；其餘不變
 components/storeForm/                  → formTypes 加數位欄位與驗證分支；新增 DigitalFieldsSection.tsx、VerificationImageUpload.tsx
 
-app/(new)/_components/DigitalAssets/   → 首頁區塊（index.tsx + TypeTabs，client 端依類型切換）
+app/(new)/_components/DigitalAssets/   → 首頁區塊（index.tsx，最新 6 筆，沒有類型分頁）
 app/(new)/digital-assets/              → 列表頁（page.tsx + _components/）
 app/(new)/store/[storeId]/_components/ → DigitalStatsBar、DigitalHolderCard、DigitalTransferNotes、InquiryCta
 app/(new)/sell/_components/SellForm.tsx → 實體／數位切換（?type=digital 預選）、核對截圖步驟
@@ -313,10 +313,9 @@ interface InquiryDoc {
 
 **首頁區塊**（`app/(new)/_components/DigitalAssets/`）放在「03 已頂讓店家」後面，編號 `04`；後面的 Categories、Districts、BrowseAll、HowItWorks、WhyUs、Faq 編號各往後一號。
 
-- `SectionTitle`：`num="04"`、`title="數位資產頂讓"`、`NEW` Pill、`sub="— 讓線上的心血，也有下一章 —"`、右側「看全部數位資產 →」連到 `/digital-assets`
-- 類型分頁：「全部」＋ 8 個類型，用現有 `Pill`／`Button` 樣式。在 client 端用已載入的資料篩選，**不改網址**（首頁不是篩選頁）。
-- 資料：`getDigitalAssets({ statuses: ["approved"], limit: 30, coverOnly: true })`。讀最新 30 筆，讓每個分頁都有東西可以篩選；每個分頁最多顯示 6 張卡片，由新到舊。
-- 某個分頁在這 30 筆裡沒有資料時，顯示「這個類型目前沒有最新刊登」和「到列表頁看看 →」（連到 `/digital-assets?type=<類型>`）。分頁是用最新 30 筆篩出來的，所以不能說「還沒有刊登」。
+- `SectionTitle`：`num="04"`、`title="數位資產頂讓"`、`NEW` 標籤（等寬字體，跟卡片的「精選」「急售」標籤同一種樣式；`Pill` 的手寫字體會讓英文大寫歪斜）、`sub="— 讓線上的心血，也有下一章 —"`、右側「看全部數位資產 →」連到 `/digital-assets`
+- 不放類型分頁：首頁直接顯示全部類型的最新刊登，依類型篩選留給 `/digital-assets`。
+- 資料：`getDigitalAssets({ statuses: ["approved"], limit: 6, coverOnly: true })`，最多 6 張卡片，由新到舊。
 - 區塊底部：「我也有數位資產想刊登 ↗」連到 `/sell?type=digital`；警語「刊登與移轉方式須依資產權利及相關平台規範確認。填寫表單時，請勿提供密碼、驗證碼或其他登入資訊。」
 - 完全沒有 approved 資料時整個區塊照樣顯示，內容換成空狀態＋刊登 CTA（避免編號跳號）。
 
@@ -416,7 +415,7 @@ App 本身沒有測試框架，這次也**不新增**。Rules 用 PR #90 建好�
 | T11 | `npm run test:rules`：inquiries 對所有 client 角色都拒絕；既有測試全過                                                                                                                                                                    | `digital-inquiry` |
 | T12 | 側欄「詢問」顯示未處理數量；在詢問頁把一筆改成 `contacted` → 數字立刻減 1；全部處理完 → 數字消失；再送一筆新詢問後切換後台頁面 → 數字出現                                                                                                 | `digital-inquiry` |
 | T13 | 從數位資產詢問按鈕打開買家俱樂部：類型已預選「數位資產」、地區不填也能註冊；使用者文件 `buyerProfile.category = "DIGITAL_ASSET"`、`city = ""`，註冊 source 是 `digital_inquiry`；後台買家偏好頁顯示「數位資產」。選實體類型時地區照舊必填 | `digital-inquiry` |
-| T14 | 首頁 04 區塊：分頁切換正確、空類型顯示空狀態；後面區塊編號是 05–10                                                                                                                                                                        | `digital-browse`  |
+| T14 | 首頁 04 區塊：顯示最新 6 筆（不分類型）、沒有資料時顯示空狀態；後面區塊編號是 05–10                                                                                                                                                       | `digital-browse`  |
 | T15 | `/digital-assets?type=SOCIAL` 只顯示社群；改分頁網址跟著變；重新整理後分頁狀態保留；`?type=xyz` 當作全部                                                                                                                                  | `digital-browse`  |
 | T16 | 導覽列在桌機與手機寬度（375px）都正常，「數位資產」在列表頁與詳細頁亮起                                                                                                                                                                   | `digital-browse`  |
 | T17 | `npm run test:rules`：賣家建立／編輯數位資產、新增核對截圖路徑的新測試和既有測試全過                                                                                                                                                      | `digital-sell`    |

@@ -1,15 +1,15 @@
 import Pill from "@/components/refactored/Pill";
 import { DIGITAL_ASSET_TYPES } from "@/constant/digitalAsset";
 import { type DigitalAssetTab, ALL_DIGITAL_ASSET_TYPES } from "@/types";
-import styles from "./DigitalAssets.module.css";
+import styles from "./TypeTabs.module.css";
 
 const TABS: { key: DigitalAssetTab; label: string }[] = [
   { key: ALL_DIGITAL_ASSET_TYPES, label: "全部" },
   ...DIGITAL_ASSET_TYPES,
 ];
 
-// * shared by the homepage section (local state) and /digital-assets (URL) —
-// * the caller decides what selecting a tab does
+// * the ?type= filter on /digital-assets — the caller decides what selecting
+// * a tab does
 export default function TypeTabs({
   activeTab,
   onSelect,

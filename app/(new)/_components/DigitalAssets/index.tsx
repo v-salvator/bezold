@@ -1,35 +1,39 @@
 import Section from "../Section";
 import SellCtaLink from "../SellCtaLink";
 import SectionTitle from "@/components/refactored/SectionTitle";
-import Pill from "@/components/refactored/Pill";
+import StoreCard from "@/components/refactored/StoreCard";
 import { TRANSFER_RISK_NOTICE } from "@/constant/digitalAsset";
 import type { Store } from "@/types";
 import { toCard } from "@/utils/store";
-import LatestAssets from "./LatestAssets";
 import styles from "./DigitalAssets.module.css";
 
 // * always rendered, even with no approved assets — the 04 slot stays put so
-// * the section numbers after it never skip
+// * the section numbers after it never skip. Filtering by type lives on
+// * /digital-assets; the homepage just shows the latest.
 export default function DigitalAssets({ assets }: { assets: Store[] }) {
-  const latestAssets = assets.map((store) => ({
-    id: store.id,
-    digitalTypes: store.digitalTypes,
-    card: toCard(store),
-  }));
-
   return (
     <Section variant="alt">
       <SectionTitle
         num="04"
         title="數位資產頂讓"
-        badge={<Pill variant="warm">NEW</Pill>}
+        badge={<span className={styles.newBadge}>NEW</span>}
         sub="— 讓線上的心血，也有下一章 —"
         more="看全部數位資產 →"
         moreHref="/digital-assets"
       />
 
-      {latestAssets.length > 0 ? (
-        <LatestAssets assets={latestAssets} />
+      {assets.length > 0 ? (
+        <div className={styles.listings}>
+          {assets.map((store) => (
+            <a
+              key={store.id}
+              href={`/store/${store.id}`}
+              className={styles.cardLink}
+            >
+              <StoreCard card={toCard(store)} />
+            </a>
+          ))}
+        </div>
       ) : (
         <div className={styles.empty}>
           <p className={styles.emptyTitle}>數位資產刊登即將上架</p>
