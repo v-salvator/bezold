@@ -462,6 +462,15 @@ App 本身沒有測試框架，這次也**不新增**。Rules 用 PR #90 建好�
 7. Rules 測試全過：賣家改不了 `listingType`，client 讀不到 inquiries，只有刊登者和管理員讀得到核對截圖（T5、T11、T17）。
 8. 所有 PR 通過 lint 和 build（T22）。
 
+## 上線預告
+
+正式上線：**2026/10/29（四）晚上 10 點**（台北時間），設定在 `constant/digitalAsset.ts` 的 `DIGITAL_ASSETS_LAUNCH_AT`，時間一到自動切換，當天不用部署。
+
+- **伺服器端判斷**（`isDigitalAssetsLaunched()`）：首頁 04 區塊（上線前是預告卡＋倒數，不查 Firestore；首頁每 60 秒 revalidate）、`/digital-assets`（上線前是預告頁，不顯示篩選列和列表）、`/sell` 選數位資產時的「搶先刊登」說明。
+- **瀏覽器端判斷**（`useDigitalAssetsLaunched()`，從伺服器的答案開始，時間到自動翻轉）：頂部輪播橫幅、導覽列「數位資產」旁的日期標籤。這兩個出現在建置時就產生的靜態頁上，所以要在瀏覽器判斷。
+- **不跟著時間切換**：賣家資料解鎖費的文案（表單、詳細頁、買家俱樂部、`/faq`、`/terms`），因為賣家現在就能刊登。潛在買家支付解鎖費（價格下限 0.5%，最低 500、最多 5,000 元，面議 500 元）後，Bezold 私訊提供核對截圖、資產連結和賣家聯絡方式；網站本身不收款。
+- **上線後**：另開小 PR 移除預告（`DigitalAssetsLaunch/`、`DigitalAssetsTeaser`、`NavLaunchBadge`、`/sell` 的說明、橫幅的上線前訊息）。
+
 ## Open Questions
 
 目前沒有。
