@@ -49,7 +49,7 @@ Spec: [`SPEC.md`](../SPEC.md) · Tasks: [`tasks/todo.md`](todo.md)
 ### PR 2 — 詳細頁與詢問
 
 - [x] Task 8: 詳細頁上半部（麵包屑、標題列、資訊列、metadata、JSON-LD）
-- [ ] Task 9: 匿名持有人卡與交易說明
+- [x] Task 9: 匿名持有人卡與交易說明
 - [ ] Task 10: 詢問的資料層與會員 API
 - [ ] Task 11: 詳細頁的詢問 CTA 與 GA4
 - [ ] Task 12: 買家俱樂部的數位資產偏好

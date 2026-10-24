@@ -235,10 +235,12 @@ const EMPTY_CONTACT: SellerContact = {
 };
 
 // * assetUrl (admin-only) and verificationImages (admin/owner-only) go through
-// * the same gate — blanked when present, never added when absent
+// * the same gate — blanked when present, never added when absent. Digital
+// * assets are anonymous: even the seller's name is dropped.
 export function omitSellerContact(store: Store): Store {
   const publicStore = { ...store };
-  if (store.userInfo)
+  if (isDigitalAsset(store)) delete publicStore.userInfo;
+  else if (store.userInfo)
     publicStore.userInfo = { ...store.userInfo, ...EMPTY_CONTACT };
   if (store.assetUrl !== undefined) publicStore.assetUrl = "";
   if (store.verificationImages !== undefined)

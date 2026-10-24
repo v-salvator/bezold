@@ -14,6 +14,8 @@ import StoreTitleRow from "./_components/StoreTitleRow";
 import StoreDescription from "./_components/StoreDescription";
 import StorePriceCard from "./_components/StorePriceCard";
 import DigitalStatsBar from "./_components/DigitalStatsBar";
+import DigitalHolderCard from "./_components/DigitalHolderCard";
+import DigitalTransferNotes from "./_components/DigitalTransferNotes";
 import BuyerClubPopup from "./_components/BuyerClubPopup";
 import JsonLd from "@/app/(new)/_components/JsonLd";
 import styles from "./page.module.css";
@@ -119,7 +121,14 @@ export default async function StoreDetailPage({
         {isDigital && <DigitalStatsBar store={store} />}
         <div className={styles.mainCol}>
           <StoreDescription description={store.description} />
-          <StorePriceCard store={store} />
+          {isDigital ? (
+            <>
+              <DigitalHolderCard store={store} />
+              <DigitalTransferNotes />
+            </>
+          ) : (
+            <StorePriceCard store={store} />
+          )}
         </div>
       </main>
       <SiteFooter />
