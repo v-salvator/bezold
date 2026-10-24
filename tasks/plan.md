@@ -79,14 +79,14 @@ Spec: [`SPEC.md`](../SPEC.md) · Tasks: [`tasks/todo.md`](todo.md)
 
 - [x] Task 18: firestore rules 開放賣家寫入數位欄位
 - [x] Task 19: 共用表單的數位欄位與驗證
-- [ ] Task 20: `/sell` 的類型切換與核對截圖步驟
-- [ ] Task 21: `/my-listings` 的數位刊登卡片與編輯
+- [x] Task 20: `/sell` 的類型切換與核對截圖步驟
+- [x] Task 21: `/my-listings` 的數位刊登卡片與編輯
 
 ### Checkpoint: 完成
 
-- [ ] lint、build、`npm run test:rules` 全過
+- [x] lint、build、`npm run test:rules` 全過
 - [ ] spec 的 T1–T22 全部走過一次
-- [ ] 實體店面回歸檢查（T21）
+- [x] 實體店面回歸檢查（T21）
 - [ ] 你部署 firestore rules → review → commit → 開 PR
 
 ## Risks and Mitigations
