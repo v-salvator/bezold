@@ -2,6 +2,8 @@ import { type StoreCard } from "@/components/refactored/StoreCard";
 import {
   type Store,
   type SellerContact,
+  type DigitalAssetType,
+  type ListingType,
   LISTING_TYPE,
   STORE_STATUS,
 } from "@/types";
@@ -70,6 +72,17 @@ export function formatPriceRange(
 export const isDigitalAsset = (store: Pick<Store, "listingType">) =>
   store.listingType === LISTING_TYPE.DIGITAL;
 
+export const listingTypeOf = (
+  store: Pick<Store, "listingType">,
+): ListingType =>
+  isDigitalAsset(store) ? LISTING_TYPE.DIGITAL : LISTING_TYPE.PHYSICAL;
+
+// * "電商 · 社群" — the digital stand-in for a store's location line
+export const formatDigitalTypes = (digitalTypes?: DigitalAssetType[]) =>
+  (digitalTypes ?? [])
+    .map((type) => DIGITAL_ASSET_TYPE_LABEL[type])
+    .join(" · ");
+
 function tagRibbon(store: Store): StoreCard["ribbon"] {
   const tags = store.tags ?? [];
   const ribbonTag = RIBBON_PRIORITY.find((tag) => tags.includes(tag));
@@ -122,10 +135,6 @@ export function digitalAssetToCard(store: Store): StoreCard {
       ? { label: "已頂讓", variant: "sold" }
       : tagRibbon(store);
 
-  const typeLabels = (store.digitalTypes ?? []).map(
-    (type) => DIGITAL_ASSET_TYPE_LABEL[type],
-  );
-
   const specs: StoreCard["specs"] = [
     {
       iconName: "clock",
@@ -148,7 +157,7 @@ export function digitalAssetToCard(store: Store): StoreCard {
     image: store.images?.[0],
     photoLabel: "數位資產",
     title: store.storeName,
-    location: typeLabels.length > 0 ? typeLabels.join(" · ") : undefined,
+    location: formatDigitalTypes(store.digitalTypes) || undefined,
     description: store.description || undefined,
     specs,
     price: formatPriceRange(store.price, store.priceMax, store.priceNegotiable),

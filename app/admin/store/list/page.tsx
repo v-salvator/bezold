@@ -22,9 +22,21 @@ import Link from "next/link";
 import type { TableProps } from "antd";
 import type { Store } from "@/types";
 import { STORE_STATUS, type StoreStatus } from "@/types";
-import { formatPriceDisplay } from "@/utils/store";
+import {
+  formatDigitalTypes,
+  formatPriceRange,
+  isDigitalAsset,
+  listingTypeOf,
+} from "@/utils/store";
 import { STORE_CATEGORIES } from "@/constant/storeType";
-import { STATUS_COLOR, STATUS_LABEL } from "@/constant/adminStore";
+import {
+  LISTING_FILTER_OPTIONS,
+  LISTING_TYPE_COLOR,
+  LISTING_TYPE_LABEL,
+  STATUS_COLOR,
+  STATUS_LABEL,
+  type ListingFilter,
+} from "@/constant/adminStore";
 import { authedFetch } from "@/lib/authedFetch";
 import { useAdminAuth, useStoreAnalytics } from "@/hooks";
 import { cn } from "@/lib/utils";
@@ -79,6 +91,7 @@ export default function List() {
   const confirmOpenRef = useRef(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [listingFilter, setListingFilter] = useState<ListingFilter>("all");
   const [dateRange, setDateRange] = useState<
     [Dayjs | null, Dayjs | null] | null
   >(null);
@@ -118,12 +131,15 @@ export default function List() {
       statusFilter === "all" ||
       (store.status ?? STORE_STATUS.PENDING) === statusFilter;
 
+    const matchesListing =
+      listingFilter === "all" || listingTypeOf(store) === listingFilter;
+
     const createdAt = store.createTime ? dayjs(store.createTime) : null;
     const matchesDate =
       (!rangeStart || (createdAt && !createdAt.isBefore(rangeStart, "day"))) &&
       (!rangeEnd || (createdAt && !createdAt.isAfter(rangeEnd, "day")));
 
-    return matchesSearch && matchesStatus && matchesDate;
+    return matchesSearch && matchesStatus && matchesListing && matchesDate;
   });
 
   const fetchStores = async () => {
@@ -327,10 +343,26 @@ export default function List() {
       },
     },
     {
-      title: "城市",
+      title: "類型",
+      key: "listingType",
+      render: (_, store) => {
+        const listingType = listingTypeOf(store);
+        return (
+          <Tag color={LISTING_TYPE_COLOR[listingType]}>
+            {LISTING_TYPE_LABEL[listingType]}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: "城市／類型",
       dataIndex: "city",
       key: "city",
-      render: (_, { city }) => city || "—",
+      // * digital assets have no city — show their asset types instead
+      render: (_, store) =>
+        (isDigitalAsset(store)
+          ? formatDigitalTypes(store.digitalTypes)
+          : store.city) || "—",
     },
     {
       title: "區域",
@@ -353,7 +385,7 @@ export default function List() {
       align: "right",
       sorter: (left, right) => (left.price ?? 0) - (right.price ?? 0),
       render: (_, record) =>
-        formatPriceDisplay(record.price, record.priceNegotiable),
+        formatPriceRange(record.price, record.priceMax, record.priceNegotiable),
     },
     {
       title: "坪數",
@@ -484,6 +516,12 @@ export default function List() {
           value={statusFilter}
           onChange={setStatusFilter}
           options={STATUS_FILTER_OPTIONS}
+          className="w-[128px]"
+        />
+        <Select
+          value={listingFilter}
+          onChange={setListingFilter}
+          options={LISTING_FILTER_OPTIONS}
           className="w-[128px]"
         />
         <DatePicker.RangePicker
