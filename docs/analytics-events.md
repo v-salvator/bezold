@@ -18,27 +18,29 @@ history events" **off**, or every client-side navigation is counted twice.
 
 ## Event reference
 
-| Event                         | When it fires                                                                  | Parameters                                   | Fired from                                                                                         |
-| ----------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `page_view`                   | Every client-side route change (App Router). Excludes `/admin/*`.              | `page_path`, `page_location`, `page_title`   | [`AnalyticsTracker.tsx`](../components/AnalyticsTracker.tsx)                                       |
-| `sell_cta_click`              | User clicks any "免費刊登" CTA                                                 | `cta_location`                               | See CTA table below                                                                                |
-| `store_listing_submit`        | A store listing is **successfully created** (after the Firestore write)        | `store_id`, `category`, `city`               | [`SellForm.tsx`](<../app/(new)/sell/_components/SellForm.tsx>)                                     |
-| `store_listing_edit`          | A store listing is **successfully updated** (after the Firestore write)        | `store_id`, `category`, `city`               | [`EditListingForm.tsx`](<../app/(new)/my-listings/edit/[storeId]/_components/EditListingForm.tsx>) |
-| `sign_up`                     | An account is **successfully created** (auth + user doc)                       | `method` (`"email"`), `source`               | [`signup.ts`](../lib/auth/signup.ts) (every signup surface)                                        |
-| `verification_email_sent`     | A verification email is sent (signup or resend)                                | `trigger`, `source`                          | [`verification.ts`](../lib/auth/verification.ts)                                                   |
-| `email_verified`              | The first time this page session sees the account flip to verified             | `detected_by` (`page_load` / `manual_check`) | [`useEmailVerification.ts`](../hooks/useEmailVerification.ts)                                      |
-| `newsletter_view`             | The homepage newsletter block scrolls into view                                | `location` (`"home_after_hero"`)             | [`Newsletter.tsx`](<../app/(new)/_components/Newsletter.tsx>)                                      |
-| `acceleration_cta_click`      | User clicks any 頂讓加速包 (acceleration package) CTA                          | `plan`                                       | See CTA table below                                                                                |
-| `editor_pick_guide_click`     | User clicks a link to the 編輯精選 rules page (`/policy/editor-pick`)          | `location`                                   | See location table below                                                                           |
-| `editor_pick_extend_click`    | On the 編輯精選 page, user clicks "了解延長精選" (→ LINE)                      | —                                            | [`EpExposure.tsx`](<../app/(new)/policy/editor-pick/_components/EpExposure.tsx>)                   |
-| `editor_pick_cta_click`       | On the 編輯精選 page, user clicks the final CTA "前往我的刊登"                 | `cta_location` (`"final"`)                   | [`EpFinalCta.tsx`](<../app/(new)/policy/editor-pick/_components/EpFinalCta.tsx>)                   |
-| `buyer_club_popup_impression` | The buyer club popup opens, however it was opened                              | `source`                                     | [`BuyerClubPopup.tsx`](<../app/(new)/store/[storeId]/_components/BuyerClubPopup.tsx>)              |
-| `buyer_club_popup_dismiss`    | The popup is closed without signing up                                         | `source`                                     | [`BuyerClubPopup.tsx`](<../app/(new)/store/[storeId]/_components/BuyerClubPopup.tsx>)              |
-| `contact_gate_view`           | A logged-out visitor sees the locked seller contact block (once per page view) | `store_id`                                   | [`SellerContactGate.tsx`](<../app/(new)/store/[storeId]/_components/SellerContactGate.tsx>)        |
-| `contact_gate_click`          | One of the three locks on the seller contact block is clicked                  | `store_id`, `trigger`                        | [`SellerContactGate.tsx`](<../app/(new)/store/[storeId]/_components/SellerContactGate.tsx>)        |
-| `seller_contact_phone`        | A **signed-in** member taps 「撥打賣家電話」 (unlocked)                        | `store_id`                                   | [`SellerContactGate.tsx`](<../app/(new)/store/[storeId]/_components/SellerContactGate.tsx>)        |
-| `seller_contact_line`         | A **signed-in** member taps 「加 LINE 聯繫」 (unlocked)                        | `store_id`                                   | [`SellerContactGate.tsx`](<../app/(new)/store/[storeId]/_components/SellerContactGate.tsx>)        |
-| `seller_contact_threads`      | A **signed-in** member taps 「到 Threads 私訊賣家」 (unlocked)                 | `store_id`                                   | [`SellerContactGate.tsx`](<../app/(new)/store/[storeId]/_components/SellerContactGate.tsx>)        |
+| Event                         | When it fires                                                                                     | Parameters                                   | Fired from                                                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `page_view`                   | Every client-side route change (App Router). Excludes `/admin/*`.                                 | `page_path`, `page_location`, `page_title`   | [`AnalyticsTracker.tsx`](../components/AnalyticsTracker.tsx)                                       |
+| `sell_cta_click`              | User clicks any "免費刊登" CTA                                                                    | `cta_location`                               | See CTA table below                                                                                |
+| `store_listing_submit`        | A store listing is **successfully created** (after the Firestore write)                           | `store_id`, `category`, `city`               | [`SellForm.tsx`](<../app/(new)/sell/_components/SellForm.tsx>)                                     |
+| `store_listing_edit`          | A store listing is **successfully updated** (after the Firestore write)                           | `store_id`, `category`, `city`               | [`EditListingForm.tsx`](<../app/(new)/my-listings/edit/[storeId]/_components/EditListingForm.tsx>) |
+| `sign_up`                     | An account is **successfully created** (auth + user doc)                                          | `method` (`"email"`), `source`               | [`signup.ts`](../lib/auth/signup.ts) (every signup surface)                                        |
+| `verification_email_sent`     | A verification email is sent (signup or resend)                                                   | `trigger`, `source`                          | [`verification.ts`](../lib/auth/verification.ts)                                                   |
+| `email_verified`              | The first time this page session sees the account flip to verified                                | `detected_by` (`page_load` / `manual_check`) | [`useEmailVerification.ts`](../hooks/useEmailVerification.ts)                                      |
+| `newsletter_view`             | The homepage newsletter block scrolls into view                                                   | `location` (`"home_after_hero"`)             | [`Newsletter.tsx`](<../app/(new)/_components/Newsletter.tsx>)                                      |
+| `acceleration_cta_click`      | User clicks any 頂讓加速包 (acceleration package) CTA                                             | `plan`                                       | See CTA table below                                                                                |
+| `editor_pick_guide_click`     | User clicks a link to the 編輯精選 rules page (`/policy/editor-pick`)                             | `location`                                   | See location table below                                                                           |
+| `editor_pick_extend_click`    | On the 編輯精選 page, user clicks "了解延長精選" (→ LINE)                                         | —                                            | [`EpExposure.tsx`](<../app/(new)/policy/editor-pick/_components/EpExposure.tsx>)                   |
+| `editor_pick_cta_click`       | On the 編輯精選 page, user clicks the final CTA "前往我的刊登"                                    | `cta_location` (`"final"`)                   | [`EpFinalCta.tsx`](<../app/(new)/policy/editor-pick/_components/EpFinalCta.tsx>)                   |
+| `buyer_club_popup_impression` | The buyer club popup opens, however it was opened                                                 | `source`                                     | [`BuyerClubPopup.tsx`](<../app/(new)/store/[storeId]/_components/BuyerClubPopup.tsx>)              |
+| `buyer_club_popup_dismiss`    | The popup is closed without signing up                                                            | `source`                                     | [`BuyerClubPopup.tsx`](<../app/(new)/store/[storeId]/_components/BuyerClubPopup.tsx>)              |
+| `contact_gate_view`           | A logged-out visitor sees the locked seller contact block (once per page view)                    | `store_id`                                   | [`SellerContactGate.tsx`](<../app/(new)/store/[storeId]/_components/SellerContactGate.tsx>)        |
+| `contact_gate_click`          | One of the three locks on the seller contact block is clicked                                     | `store_id`, `trigger`                        | [`SellerContactGate.tsx`](<../app/(new)/store/[storeId]/_components/SellerContactGate.tsx>)        |
+| `seller_contact_phone`        | A **signed-in** member taps 「撥打賣家電話」 (unlocked)                                           | `store_id`                                   | [`SellerContactGate.tsx`](<../app/(new)/store/[storeId]/_components/SellerContactGate.tsx>)        |
+| `seller_contact_line`         | A **signed-in** member taps 「加 LINE 聯繫」 (unlocked)                                           | `store_id`                                   | [`SellerContactGate.tsx`](<../app/(new)/store/[storeId]/_components/SellerContactGate.tsx>)        |
+| `seller_contact_threads`      | A **signed-in** member taps 「到 Threads 私訊賣家」 (unlocked)                                    | `store_id`                                   | [`SellerContactGate.tsx`](<../app/(new)/store/[storeId]/_components/SellerContactGate.tsx>)        |
+| `digital_inquiry_click`       | 「我有興趣，想申請了解」 is clicked on a digital asset (logged out it opens the buyer club popup) | `store_id`, `signed_in`                      | [`InquiryCta.tsx`](<../app/(new)/store/[storeId]/_components/InquiryCta.tsx>)                      |
+| `digital_inquiry_submit`      | A member's digital-asset inquiry is **successfully saved** (POST 2xx)                             | `store_id`, `has_message`                    | [`InquiryCta.tsx`](<../app/(new)/store/[storeId]/_components/InquiryCta.tsx>)                      |
 
 > Conversion events (`store_listing_submit`, `sign_up`) fire **only on success**,
 > so failed or invalid attempts are not counted.
@@ -49,14 +51,15 @@ One popup serves two jobs: the daily invitation to join the buyer club, and the
 unlock step for a seller's contact details. `source` is what separates them —
 in GA4 it answers "does the contact gate convert better than the auto-open?".
 
-| Value                    | Where it comes from                       |
-| ------------------------ | ----------------------------------------- |
-| `auto`                   | The popup's once-per-day auto-open        |
-| `url_force`              | `?modal=buyer-club` (paid ad landings)    |
-| `fab`                    | The floating button shown after a dismiss |
-| `contact_gate_blur`      | The lock over the blurred contact lines   |
-| `contact_gate_cta_phone` | The locked "撥打賣家電話" button          |
-| `contact_gate_cta_line`  | The locked "加 LINE 聯繫" button          |
+| Value                    | Where it comes from                                |
+| ------------------------ | -------------------------------------------------- |
+| `auto`                   | The popup's once-per-day auto-open                 |
+| `url_force`              | `?modal=buyer-club` (paid ad landings)             |
+| `fab`                    | The floating button shown after a dismiss          |
+| `contact_gate_blur`      | The lock over the blurred contact lines            |
+| `contact_gate_cta_phone` | The locked "撥打賣家電話" button                   |
+| `contact_gate_cta_line`  | The locked "加 LINE 聯繫" button                   |
+| `digital_inquiry`        | A digital asset's 「我有興趣」 button (logged out) |
 
 The same three `contact_gate_*` values are the `trigger` on
 `contact_gate_click`, and a signup that starts there carries them on `sign_up`

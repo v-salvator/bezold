@@ -14,3 +14,14 @@ export const parseInquiryMessage = (
 
 export const getInquiryId = (storeId: string, buyerUid: string) =>
   `${storeId}_${buyerUid}`;
+
+// * POST /api/stores/[id]/inquiry failure → what the CTA tells the buyer.
+// * status 0 = the request never got a response (offline).
+export const inquiryErrorMessage = (status: number, error?: string) => {
+  if (error === "message_too_long")
+    return `訊息最多 ${INQUIRY_MESSAGE_MAX_LENGTH} 字`;
+  if (status === 404 || error === "not_digital_asset")
+    return "這個資產目前不開放申請";
+  if (status === 401) return "登入狀態已過期，請重新登入後再試";
+  return "送出失敗，請稍後再試";
+};

@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { UserRound } from "lucide-react";
-import Button from "@/components/refactored/Button";
 import { cn } from "@/lib/utils";
 import { type Store, STORE_STATUS } from "@/types";
 import { STORE_TAG } from "@/types/StoreTags";
 import { NO_CREDENTIALS_WARNING } from "@/constant/digitalAsset";
 import { formatPriceRange } from "@/utils/store";
+import InquiryCta from "./InquiryCta";
 import priceCardStyles from "./StorePriceCard.module.css";
 import styles from "./DigitalHolderCard.module.css";
 
@@ -60,14 +60,7 @@ export default function DigitalHolderCard({ store }: { store: Store }) {
         )}
       </div>
 
-      {!isSold && (
-        // * placeholder until the inquiry CTA ships (Task 11)
-        <div className={styles.cta}>
-          <Button className={styles.ctaButton} disabled>
-            我有興趣，想申請了解
-          </Button>
-        </div>
-      )}
+      {!isSold && <InquiryCta storeId={store.id} />}
 
       <div className={priceCardStyles.trust}>
         <b>資訊與交易提醒</b>

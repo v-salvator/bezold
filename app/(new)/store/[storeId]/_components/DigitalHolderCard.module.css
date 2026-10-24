@@ -17,15 +17,6 @@
   white-space: nowrap;
 }
 
-.cta {
-  margin-top: 16px;
-}
-
-.ctaButton {
-  width: 100%;
-  justify-content: center;
-}
-
 @media (max-width: 480px) {
   .rangePrice {
     font-size: 32px;
