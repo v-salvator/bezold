@@ -17,3 +17,8 @@ export const IMAGE_UPLOAD_TYPES = [
   "image/webp",
   "image/gif",
 ];
+
+// * digital-asset revenue screenshots (verification/): long phone screenshots
+// * shrunk to 1600px blur the numbers admins need to read
+export const VERIFICATION_IMAGE_MAX_EDGE = 2400;
+export const VERIFICATION_IMAGE_MAX_COUNT = 10;

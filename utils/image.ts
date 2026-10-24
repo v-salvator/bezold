@@ -25,10 +25,13 @@ const splitFileName = (fileName: string) => {
   };
 };
 
-// * shrink a photo before it reaches Storage (longest edge ≤ IMAGE_MAX_EDGE,
+// * shrink a photo before it reaches Storage (longest edge ≤ maxEdge,
 // * WebP). Any failure returns the original file so a seller is never
 // * blocked from uploading.
-export const resizeImageFile = async (file: File): Promise<File> => {
+export const resizeImageFile = async (
+  file: File,
+  { maxEdge = IMAGE_MAX_EDGE }: { maxEdge?: number } = {},
+): Promise<File> => {
   if (PASSTHROUGH_TYPES.includes(file.type)) return file;
 
   try {
@@ -37,12 +40,12 @@ export const resizeImageFile = async (file: File): Promise<File> => {
       imageOrientation: "from-image",
     });
     const longestEdge = Math.max(bitmap.width, bitmap.height);
-    if (longestEdge <= IMAGE_MAX_EDGE && file.size <= IMAGE_SKIP_BYTES) {
+    if (longestEdge <= maxEdge && file.size <= IMAGE_SKIP_BYTES) {
       bitmap.close();
       return file;
     }
 
-    const scale = Math.min(1, IMAGE_MAX_EDGE / longestEdge);
+    const scale = Math.min(1, maxEdge / longestEdge);
     const canvas = document.createElement("canvas");
     canvas.width = Math.round(bitmap.width * scale);
     canvas.height = Math.round(bitmap.height * scale);
