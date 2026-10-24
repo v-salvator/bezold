@@ -32,11 +32,11 @@ Spec: [`SPEC.md`](../SPEC.md) · Tasks: [`tasks/todo.md`](todo.md)
 
 - [x] Task 1: 合併 main（PR #90 rules）、index 改由 repo 管理、commit spec 和 plan
 - [x] Task 2: 型別、常數、價格區間與卡片轉換
-- [ ] Task 3: 實體查詢排除數位、`getDigitalAssets()`、改用 `toCard()`
+- [x] Task 3: 實體查詢排除數位、`getDigitalAssets()`、改用 `toCard()`
 - [x] Task 4: 後台建立／編輯表單支援數位資產
 - [x] Task 5: 後台列表的類型欄位與篩選、drawer 顯示數位欄位
 - [x] Task 6: 核對截圖的 storage rule、測試、上傳 helper
-- [ ] Task 7: 後台核對截圖的上傳與檢視
+- [x] Task 7: 後台核對截圖的上傳與檢視
 
 ### Checkpoint: PR 1
 
