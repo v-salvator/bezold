@@ -21,6 +21,7 @@ const buildItems = (newInquiryCount: number): MenuItem[] => [
       { key: "store-drafts", label: "Draft Stores" },
       { key: "store-batch", label: "Batch Stores" },
       { key: "store-analytics", label: "Store Analytics" },
+      { key: "store-feedback", label: "Sold Feedback" },
     ],
   },
   {
@@ -90,6 +91,9 @@ export default function AdminSidebar() {
         break;
       case "store-analytics":
         router.push("/admin/store/analytics");
+        break;
+      case "store-feedback":
+        router.push("/admin/store/feedback");
         break;
       case "user-list":
         router.push("/admin/users");

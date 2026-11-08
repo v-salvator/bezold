@@ -46,6 +46,8 @@ interface StoreDetailDrawerProps {
   statusSection: React.ReactNode;
   /** Store List's 追蹤信 section (follow-up emails); drafts have none. */
   followUpSection?: React.ReactNode;
+  /** Store List's 頂讓回饋 section, for sold stores only. */
+  feedbackSection?: React.ReactNode;
   onClose: () => void;
   onDelete: (store: Store) => void;
   onCopyLink: (url: string) => void;
@@ -57,6 +59,7 @@ export default function StoreDetailDrawer({
   deleting,
   statusSection,
   followUpSection,
+  feedbackSection,
   onClose,
   onDelete,
   onCopyLink,
@@ -110,6 +113,10 @@ export default function StoreDetailDrawer({
 
           {followUpSection && (
             <DrawerSection title="追蹤信">{followUpSection}</DrawerSection>
+          )}
+
+          {feedbackSection && (
+            <DrawerSection title="頂讓回饋">{feedbackSection}</DrawerSection>
           )}
 
           {isDigitalAsset(store) && (

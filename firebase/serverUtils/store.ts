@@ -39,6 +39,12 @@ export const mapStoreDoc = (
   } as Store;
 };
 
+// * the stored doc only — no image signing, no seller join. Server-side checks.
+export const getRawStoreById = async (storeId: string) => {
+  const snapshot = await db.collection(COLLECTION).doc(storeId).get();
+  return snapshot.exists ? mapStoreDoc(snapshot) : null;
+};
+
 const mapDocsToStores = (
   snapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>,
 ): Store[] => snapshot.docs.map(mapStoreDoc);

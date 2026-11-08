@@ -153,11 +153,13 @@ _Done. Checked on dev while signed in as admin: the column shows counts, last se
 
 **Acceptance criteria:**
 
-- [ ] `utils/soldFeedback.ts` `parseSoldFeedback(body)` per SPEC (enums, 萬 → NT$, 1–5, ≤ 500 chars, extra keys rejected, all-empty flagged). `constant/soldFeedback.ts` holds the Chinese labels.
-- [ ] `POST /api/sold-feedback` with `{ token, … }`: valid only if the follow-up's `lastAnswer` is sold, within 7 days, and the store is sold. `create()` → 409 on a second submit. Snapshots `storeName`, `listedPrice`, `listedPriceNegotiable`, `soldVia`.
-- [ ] `tests/unit/soldFeedback.test.ts` per SPEC.
+- [x] `utils/soldFeedback.ts` `parseSoldFeedback(body)` per SPEC (enums, 萬 → NT$, 1–5, ≤ 500 chars, extra keys rejected, all-empty flagged). `constant/soldFeedback.ts` holds the Chinese labels.
+- [x] `POST /api/sold-feedback` with `{ token, … }`: valid only if the follow-up's `lastAnswer` is sold, within 7 days, and the store is sold. `create()` → 409 on a second submit. Snapshots `storeName`, `listedPrice`, `listedPriceNegotiable`, `soldVia`.
+- [x] `tests/unit/soldFeedback.test.ts` per SPEC.
 
 **Verification:** `npm run test:unit` · dev: curl with a fresh sold token → 201. Again → 409. All-empty → 400. A token answered 8 days ago → 410.
+_Done. The form sends the price in 萬 as `finalPriceWan`; the parser also accepts `token` and `storeId` (the two auth paths) and rejects any other key. Checked on dev: 410 before the store is sold, 400 for empty or invalid input, 401 with no token, 201 on a valid submit (listed price snapshotted), 409 on a replay, and 410 eight days after the sold answer versus 201 at six._
+
 **Dependencies:** 5
 **Files:** `utils/soldFeedback.ts`, `constant/soldFeedback.ts`, `firebase/serverUtils/soldFeedback.ts`, `app/api/sold-feedback/route.ts`, `tests/unit/soldFeedback.test.ts`
 **Scope:** M
@@ -168,11 +170,13 @@ _Done. Checked on dev while signed in as admin: the column shows counts, last se
 
 **Acceptance criteria:**
 
-- [ ] `app/(new)/_components/SoldFeedbackForm/` matches the prototype (pills, 萬 input with listed-price hint, stars + label, textarea + counter). 送出 is disabled until something is filled. 略過 is a link. Inline error keeps the input.
-- [ ] Built from `components/refactored/` primitives where they fit. CSS Modules for paint, Tailwind for layout only.
-- [ ] `/listing-check` sold success shows it. Submit → thanks state, skip → 恭喜成交 state. No GA here (analytics is off on `/listing-check`).
+- [x] `app/(new)/_components/SoldFeedbackForm/` matches the prototype (pills, 萬 input with listed-price hint, stars + label, textarea + counter). 送出 is disabled until something is filled. 略過 is a link. Inline error keeps the input.
+- [x] Built from `components/refactored/` primitives where they fit. CSS Modules for paint, Tailwind for layout only.
+- [x] `/listing-check` sold success shows it. Submit → thanks state, skip → 恭喜成交 state. No GA here (analytics is off on `/listing-check`).
 
 **Verification:** dev, desktop + 375 px, compared with the prototype: submit saves one doc, skip saves none.
+_Done. The answer chips are real `<button aria-pressed>`s, because `Pill` is a clickable `<span>` that keyboards can't use; 送出 is the shared `Button`. Checked on dev at 375 px: confirm sold, then the form with clicks and typing (the price input strips stray characters; the comment counter counts an emoji as one). Submitting saved one doc and showed thanks; skipping showed 恭喜成交 and saved nothing. No GA (analytics stays off on this page)._
+
 **Dependencies:** 8
 **Files:** `app/(new)/_components/SoldFeedbackForm/index.tsx` + `.module.css`, `app/(new)/listing-check/_components/ListingCheck.tsx`
 **Scope:** M
@@ -183,27 +187,31 @@ _Done. Checked on dev while signed in as admin: the column shows counts, last se
 
 **Acceptance criteria:**
 
-- [ ] `POST /api/sold-feedback` also accepts `Authorization: Bearer <idToken>` + `{ storeId, … }`: `verifyUserToken`, `store.user === uid`, store sold. `soldVia: "my-listings"`.
-- [ ] `ListingCard`: after 「確認」 succeeds, a Radix dialog opens with the form. Close = skip. Submit → toast 「謝謝您的回饋！」.
+- [x] `POST /api/sold-feedback` also accepts `Authorization: Bearer <idToken>` + `{ storeId, … }`: `verifyUserToken`, `store.user === uid`, store sold. `soldVia: "my-listings"`.
+- [x] `ListingCard`: after 「確認」 succeeds, a Radix dialog opens with the form. Close = skip. Submit → toast 「謝謝您的回饋！」.
 
 **Verification:** dev, signed in as a mock seller: mark sold → dialog → submit → doc saved. Another store → close → nothing saved. Another seller's storeId → 403.
+_Done. The dialog portals into the site root so it keeps the `--hand` font, and its thanks state replaces the planned toast. A not-yet-sold store gets 422, not 409, because the client reads 409 as "already saved". Checked on dev, signed in as the owner of a mock store: mark sold, the dialog opens, submit saves a doc with `soldVia: my-listings`, and closing leaves the card at 已頂讓. No auth or a bad token gets 401. The ownership check (403) was read in code, not exercised; it needs a second seller account._
+
 **Dependencies:** 9
 **Files:** `app/api/sold-feedback/route.ts`, `app/(new)/my-listings/_components/ListingCard.tsx` (+ `.module.css`)
 **Scope:** S
 
 ### Checkpoint C
 
-- [ ] Both seller paths save feedback once. Skip saves nothing. Replay → 409.
-- [ ] `test:unit`, `test:rules`, build pass
+- [x] Both seller paths save feedback once. Skip saves nothing. Replay → 409.
+- [x] `test:unit`, `test:rules`, build pass
 
 ### Task 11: Admin drawer 頂讓回饋 section
 
 **Acceptance criteria:**
 
-- [ ] `GET /api/admin/sold-feedback/[storeId]` (`verifyAdminToken`).
-- [ ] Drawer shows the five answers with labels, the listed price and %, stars, comment, time, or 「賣家未填寫」, for sold stores only.
+- [x] `GET /api/admin/sold-feedback/[storeId]` (`verifyAdminToken`).
+- [x] Drawer shows the five answers with labels, the listed price and %, stars, comment, time, or 「賣家未填寫」, for sold stores only.
 
 **Verification:** dev: sold mock store with and without feedback, compared with the prototype.
+_Done. The ratio is `priceRatioPercent` (unit-tested; null for 面議 / 免頂讓金). `SoldFeedbackDetails` is shared with the Sold Feedback page. Checked on dev: a sold store with feedback shows its answers, a sold store without shows 賣家未填寫, and an approved store has no section._
+
 **Dependencies:** 8
 **Files:** `app/api/admin/sold-feedback/[storeId]/route.ts`, `firebase/serverUtils/soldFeedback.ts`, `app/admin/store/_components/StoreDetailDrawer.tsx`
 **Scope:** S
@@ -212,18 +220,20 @@ _Done. Checked on dev while signed in as admin: the column shows counts, last se
 
 **Acceptance criteria:**
 
-- [ ] `GET /api/admin/sold-feedback` → all feedback, newest first, plus `soldStoreCount`.
-- [ ] `app/admin/store/feedback/page.tsx`: 4 stat cards, 2 bar charts with 未填, table with expandable rows linking to `/admin/store/list?store={id}`, client-side filters (買家來源, 標記方式, date range). 面議/免頂讓金 show no ratio.
-- [ ] `components/AdminSidebar.tsx`: 「Sold Feedback」 under Store Management. Store List opens the drawer from `?store=`.
+- [x] `GET /api/admin/sold-feedback` → all feedback, newest first, plus `soldStoreIds` (the fill rate counts only stores still sold).
+- [x] `app/admin/store/feedback/page.tsx`: 4 stat cards, 2 bar charts with 未填, table with expandable rows linking to `/admin/store/list?store={id}`, client-side filters (買家來源, 標記方式, date range). 面議/免頂讓金 show no ratio.
+- [x] `components/AdminSidebar.tsx`: 「Sold Feedback」 under Store Management. Store List opens the drawer from `?store=`.
 
 **Verification:** dev with ~6 seeded feedback docs: the numbers match a hand count, filters narrow the table and stats, and the row link opens the right drawer.
+_Done. Stats come from `summarizeSoldFeedback` (unit-tested; each average counts only feedback that answered that question). The sold-store count uses a Firestore `count()` aggregation. Checked on dev with 4 seeded docs plus 1 real one: every card and bar matched a hand count. The 買家來源 filter recalculates the cards. Expanding a row and following its link opens the right drawer in Store List. The table uses a fixed `scroll.x` like the other admin tables, because `max-content` let long comments widen the whole layout._
+
 **Dependencies:** 11
 **Files:** `app/api/admin/sold-feedback/route.ts`, `firebase/serverUtils/soldFeedback.ts`, `app/admin/store/feedback/page.tsx`, `components/AdminSidebar.tsx`, `app/admin/store/list/page.tsx`
 **Scope:** M
 
 ### Checkpoint D — PR 2
 
-- [ ] Full SPEC Testing Strategy passes, including feedback
+- [x] Full SPEC Testing Strategy passes, including feedback
 - [ ] Screenshots: form (both paths), drawer section, Sold Feedback page
 - [ ] **The user reviews → push → PR 2**
 

@@ -1,0 +1,71 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(28, 26, 23, 0.55);
+}
+
+.content {
+  position: fixed;
+  z-index: 1001;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100vw - 2rem);
+  max-width: 560px;
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: 8px;
+  box-shadow: 5px 5px 0 var(--ink);
+  padding: 1.75rem 1.375rem 1.5rem;
+  font-family: var(--hand);
+  color: var(--ink);
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.close {
+  position: absolute;
+  top: 0.625rem;
+  right: 0.75rem;
+  background: none;
+  border: 0;
+  font-size: 1.2rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.banner {
+  margin: 0 0 1.25rem;
+  background: var(--accent-2);
+  color: #fff;
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  padding: 0.75rem 0.875rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.thanks {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.875rem;
+}
+
+.thanksTitle {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.thanksText {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.8;
+}

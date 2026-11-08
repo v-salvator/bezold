@@ -170,3 +170,23 @@
   background: var(--paper-3);
   color: var(--ink);
 }
+
+.successBanner {
+  display: flex;
+  gap: 0.625rem;
+  background: var(--accent-2);
+  color: #fff;
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.textLink {
+  font-family: var(--hand);
+  font-size: 0.95rem;
+  color: var(--muted);
+  text-decoration: underline;
+}

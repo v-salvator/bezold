@@ -250,3 +250,39 @@ export const listFollowUpSummaries = async () => {
 export const setFollowUpPaused = async (storeId: string, paused: boolean) => {
   await followUps().doc(storeId).set({ storeId, paused }, { merge: true });
 };
+
+// * how long after confirming sold from the email the same link may still
+// * submit 頂讓回饋
+export const SOLD_FEEDBACK_WINDOW_DAYS = 7;
+
+// * the store a sold-confirming link belongs to, for the feedback form. The
+// * token is already used by then; it authorizes feedback only, never another
+// * status change.
+export const findSoldStoreByToken = async (
+  token: unknown,
+  now = new Date(),
+): Promise<Store | null> => {
+  if (!isWellFormedToken(token)) return null;
+  const snapshot = await followUps()
+    .where("tokenHash", "==", hashToken(token))
+    .limit(1)
+    .get();
+  if (snapshot.empty) return null;
+
+  const followUp = snapshot.docs[0].data() as FollowUpDoc;
+  const answeredAt = toDate(followUp.lastAnswerTime);
+  const withinWindow =
+    answeredAt !== null &&
+    now.getTime() <= addDays(answeredAt, SOLD_FEEDBACK_WINDOW_DAYS).getTime();
+  if (followUp.lastAnswer !== FOLLOW_UP_ANSWER.SOLD || !withinWindow) {
+    return null;
+  }
+
+  const storeSnapshot = await db
+    .collection(COLLECTIONS.STORE)
+    .doc(snapshot.docs[0].id)
+    .get();
+  if (!storeSnapshot.exists) return null;
+  const store = mapStoreDoc(storeSnapshot);
+  return store.status === STORE_STATUS.SOLD ? store : null;
+};
