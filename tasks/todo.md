@@ -97,8 +97,8 @@ _Done. Checked on dev: 還在頂讓 leaves the store untouched and kills the lin
 
 ### Checkpoint A
 
-- [ ] `npm run test:unit`, `npm run test:rules`, `npm run build` pass
-- [ ] Both answers work end to end from a hand-seeded token
+- [x] `npm run test:unit`, `npm run test:rules`, `npm run build` pass
+- [x] Both answers work end to end from a hand-seeded token
 
 ### Task 6: Cron route, kill switch, dry run, `vercel.json`
 
@@ -138,7 +138,7 @@ _Done. Checked on dev while signed in as admin: the column shows counts, last se
 
 ### Checkpoint B — PR 1
 
-- [ ] Full dev loop from SPEC → Testing Strategy (minus feedback) passes
+- [x] Full dev loop from SPEC → Testing Strategy (minus feedback) passes
 - [ ] Email checked in Gmail web + iOS Mail
 - [ ] Before/after screenshots for admin list + drawer, and screenshots of the new `/listing-check` page
 - [ ] **The user reviews → push → PR 1**
