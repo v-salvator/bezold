@@ -1,6 +1,7 @@
 import {
   LISTING_TYPE,
   STORE_TAG,
+  type FollowUpAnswer,
   type ListingType,
   type StoreStatus,
   type StoreTag,
@@ -50,4 +51,10 @@ export const LISTING_TYPE_LABEL: Record<ListingType, string> = {
 export const LISTING_TYPE_COLOR: Record<ListingType, string> = {
   physical: "default",
   digital: "cyan",
+};
+
+// * the seller's answer to the listing follow-up email
+export const FOLLOW_UP_ANSWER_LABEL: Record<FollowUpAnswer, string> = {
+  still_selling: "還在頂讓",
+  sold: "已頂讓",
 };

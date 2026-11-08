@@ -37,3 +37,13 @@ export interface FollowUpState {
   lastAnswerTime: Date | null;
   paused: boolean;
 }
+
+// * what /api/admin/follow-ups sends the admin UI — times in epoch ms
+export interface FollowUpSummary {
+  sentCount: number;
+  lastSentTime: number | null;
+  lastAnswer: FollowUpAnswer | null;
+  lastAnswerTime: number | null;
+  paused: boolean;
+  lastError: string;
+}

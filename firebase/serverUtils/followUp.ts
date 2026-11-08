@@ -8,6 +8,7 @@ import {
   type FollowUpAnswer,
   type FollowUpDoc,
   type FollowUpState,
+  type FollowUpSummary,
   type Store,
 } from "@/types";
 import { hashToken, isWellFormedToken } from "@/lib/followUp/token";
@@ -221,4 +222,31 @@ export const recordFollowUpError = async (storeId: string, error: string) => {
   await followUps()
     .doc(storeId)
     .set({ storeId, lastError: error.slice(0, 300) }, { merge: true });
+};
+
+const toMillis = (value: FirebaseFirestore.Timestamp | null | undefined) =>
+  value ? value.toMillis() : null;
+
+// * every store's follow-up state for the admin list (a few hundred docs)
+export const listFollowUpSummaries = async () => {
+  const snapshot = await followUps().get();
+  return Object.fromEntries(
+    snapshot.docs.map((doc) => {
+      const followUp = doc.data() as Partial<FollowUpDoc>;
+      const summary: FollowUpSummary = {
+        sentCount: followUp.sentCount ?? 0,
+        lastSentTime: toMillis(followUp.lastSentTime),
+        lastAnswer: followUp.lastAnswer ?? null,
+        lastAnswerTime: toMillis(followUp.lastAnswerTime),
+        paused: followUp.paused ?? false,
+        lastError: followUp.lastError ?? "",
+      };
+      return [doc.id, summary];
+    }),
+  );
+};
+
+// * admin switch; upserts so a store never emailed can be paused in advance
+export const setFollowUpPaused = async (storeId: string, paused: boolean) => {
+  await followUps().doc(storeId).set({ storeId, paused }, { merge: true });
 };

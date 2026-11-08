@@ -124,12 +124,14 @@ _Done. Checked on dev: no or wrong secret gives 401, the switch off gives `{disa
 
 **Acceptance criteria:**
 
-- [ ] `GET /api/admin/follow-ups` (summary map) and `PATCH /api/admin/follow-ups/[storeId]` `{ paused }` (upsert), both `verifyAdminToken`.
-- [ ] Store List: 追蹤信 column (count, last send date, 已停止 / 無信箱 tags, 「—」 before the first email), matching the prototype.
-- [ ] Drawer: 首次上架 row, 追蹤信 section (sent, last sent, last answer, next send, switch, no-email warning, sold-via-email note).
-- [ ] Toggling the switch persists and the cron skips paused stores.
+- [x] `GET /api/admin/follow-ups` (summary map) and `PATCH /api/admin/follow-ups/[storeId]` `{ paused }` (upsert), both `verifyAdminToken`.
+- [x] Store List: 追蹤信 column (count, last send date, 已停止 / 無信箱 tags, 「—」 before the first email), matching the prototype.
+- [x] Drawer: 首次上架 row, 追蹤信 section (sent, last sent, last answer, next send, switch, no-email warning, sold-via-email note).
+- [x] Toggling the switch persists and the cron skips paused stores.
 
 **Verification:** dev: column and drawer match the prototype for the mock cases. Pause a due store → dry run no longer lists it. Before/after screenshots.
+_Done. Checked on dev while signed in as admin: the column shows counts, last send, 已停止 / 無信箱 / 寄送失敗, and 「—」 before the first email. The drawer shows sent, last sent, last answer, next send (overdue reads 已到期), the pause switch, the no-email warning, and the sold-via-email note. Pausing persists, the cron dry run skips the paused store, and it picks it up again once unpaused. Before/after screenshots happen at PR time._
+
 **Dependencies:** 1, 6
 **Files:** `app/api/admin/follow-ups/route.ts`, `app/api/admin/follow-ups/[storeId]/route.ts`, `firebase/serverUtils/followUp.ts`, `app/admin/store/list/page.tsx`, `app/admin/store/_components/StoreDetailDrawer.tsx`
 **Scope:** M
