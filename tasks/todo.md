@@ -83,12 +83,14 @@ _Done. The page is one client component, `ListingCheck`, with every state includ
 
 **Acceptance criteria:**
 
-- [ ] `POST /api/listing-check` `{ token, answer }` runs the SPEC transaction. Sold sets store `status/soldTime/soldVia/updateTime` and the follow-up answer fields. Still-selling sets the follow-up only. Both mark the token used. Invalid → 410 `link_invalid`, bad body → 400.
-- [ ] `ListingCheck` (client, built in task 4) posts and shows the success states. No GA on this page.
-- [ ] Sold sends `soldConfirmationEmail` after commit (best-effort, logged on failure).
-- [ ] `docs/analytics-events.md` notes that `/listing-check` is untracked, and why.
+- [x] `POST /api/listing-check` `{ token, answer }` runs the SPEC transaction. Sold sets store `status/soldTime/soldVia/updateTime` and the follow-up answer fields. Still-selling sets the follow-up only. Both mark the token used. Invalid → 410 `link_invalid`, bad body → 400.
+- [x] `ListingCheck` (client, built in task 4) posts and shows the success states. No GA on this page.
+- [x] Sold sends `soldConfirmationEmail` after commit (best-effort, logged on failure).
+- [x] `docs/analytics-events.md` notes that `/listing-check` is untracked, and why.
 
 **Verification:** dev: answer still-selling → store unchanged, reopen → 失效. New token → answer sold → store `sold` on `/store/[id]` + admin, confirmation email arrives. Double-submit (two tabs) → one wins, the other gets 410.
+_Done. Checked on dev: 還在頂讓 leaves the store untouched and kills the link. 已頂讓 sets sold, `soldTime` and `soldVia`, the store page renders, and the confirmation email sends without errors. Three simultaneous POSTs on one token gave one 200 and two 410s. A bad answer gets 400; an unknown token gets 410. Recipients come from `resolveSellerRecipients` (user doc, then Auth email, then listing contact), and dev always delivers to `FOLLOW_UP_TEST_RECIPIENT` via `lib/followUp/delivery.ts`._
+
 **Dependencies:** 3, 4
 **Files:** `app/api/listing-check/route.ts`, `firebase/serverUtils/followUp.ts`, `lib/followUp/listingRows.ts`, `docs/analytics-events.md`
 **Scope:** M
