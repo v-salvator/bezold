@@ -1,0 +1,13 @@
+# bezold
+
+> Official repository and documentation index for v-salvator/bezold.
+
+## Core Resources
+
+- [GitHub Repository](https://github.com/v-salvator/bezold): Source code, documentation, and issue tracker.
+- [Website](https://bezold.vercel.app): Official website and documentation.
+
+## AI Agent & LLM Indexing
+
+- Structured following the standard /llms.txt specification for AI search engines and coding assistants.
+- Validated via [AccessGuard AI-Readiness Suite](https://ronanchnlps-bit.github.io/).
