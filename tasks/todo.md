@@ -48,12 +48,14 @@ _Done. `StoreBaseForm` only ever creates pending or draft stores, so Store List 
 
 **Acceptance criteria:**
 
-- [ ] `lib/followUp/emailTemplates.ts`: `followUpEmail(store, links)` and `soldConfirmationEmail(store, meta)` return `{ subject, html, text }`, matching the prototype. Physical/digital rows skip empty fields. Money uses the site formatters (passed in as strings so the module stays alias-free). All store text HTML-escaped.
-- [ ] `lib/email/brevo.ts`: `sendEmail({ to, subject, html, text })` → Brevo `POST /v3/smtp/email`, sender `Bezold 頂讓必售 <hello@bezold.com.tw>`. Throws with Brevo's error message on non-2xx.
-- [ ] `public/email/bezold-email-header.png` cropped with `sharp` from `public/bezold-avatar-v2.png` (text band + padding, dark `#1c1a17` background kept). **The user approves the preview before it's saved.**
-- [ ] Unit tests: subject/heading contain the store name; both answer links carry the token and answer; no phone/LINE in the output; `<script>` in a store name comes out escaped.
+- [x] `lib/followUp/emailTemplates.ts`: `followUpEmail(store, links)` and `soldConfirmationEmail(store, meta)` return `{ subject, html, text }`, matching the prototype. Physical/digital rows skip empty fields. Money uses the site formatters (passed in as strings so the module stays alias-free). All store text HTML-escaped.
+- [x] `lib/email/brevo.ts`: `sendEmail({ to, subject, html, text })` → Brevo `POST /v3/smtp/email`, sender `Bezold 頂讓必售 <hello@bezold.com.tw>`. Throws with Brevo's error message on non-2xx.
+- [x] `public/email/bezold-email-header.png` cropped with `sharp` from `public/bezold-avatar-v2.png` (text band + padding, dark `#1c1a17` background kept). **The user approves the preview before it's saved.**
+- [x] Unit tests: subject/heading contain the store name; both answer links carry the token and answer; no phone/LINE in the output; `<script>` in a store name comes out escaped.
 
 **Verification:** `npm run test:unit` · a dev script sends one real email of each template to `FOLLOW_UP_TEST_RECIPIENT` → check in Gmail web + iOS Mail.
+_Done. Both templates were sent through Brevo to the test inbox on 2026-11-08 and accepted. The Gmail and iOS Mail look is checked at Checkpoint B; the header image loads from production, so it only appears after deploy. Row formatting lives in `lib/followUp/listingRows.ts`, which uses the site formatters._
+
 **Dependencies:** 1
 **Files:** `lib/followUp/emailTemplates.ts`, `lib/email/brevo.ts`, `public/email/bezold-email-header.png`, `tests/unit/followUp.test.ts`
 **Scope:** M
