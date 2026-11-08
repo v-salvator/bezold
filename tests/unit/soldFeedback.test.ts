@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   parseSoldFeedback,
   priceRatioPercent,
+  summarizeFillRate,
   summarizeSoldFeedback,
 } from "../../utils/soldFeedback.ts";
 
@@ -163,16 +164,10 @@ describe("summarizeSoldFeedback", () => {
     }),
   ] as Parameters<typeof summarizeSoldFeedback>[0];
 
-  const soldStoreIds = new Set(
-    Array.from({ length: 10 }, (_, index) => `sold-${index + 1}`),
-  );
-  const summary = summarizeSoldFeedback(rows, soldStoreIds);
+  const summary = summarizeSoldFeedback(rows);
 
-  it("counts every feedback, but the fill rate only over stores still sold", () => {
+  it("counts every feedback, the reverted store's too", () => {
     assert.equal(summary.count, 4);
-    assert.equal(summary.soldWithFeedback, 3);
-    assert.equal(summary.soldStoreCount, 10);
-    assert.equal(summary.fillRatePercent, 30);
   });
 
   it("measures the Bezold share among answers that named a buyer source", () => {
@@ -197,10 +192,38 @@ describe("summarizeSoldFeedback", () => {
   });
 
   it("reports nothing to average for an empty list", () => {
-    const empty = summarizeSoldFeedback([], new Set());
-    assert.equal(empty.fillRatePercent, null);
+    const empty = summarizeSoldFeedback([]);
     assert.equal(empty.viaBezold.percent, null);
     assert.equal(empty.satisfaction.average, null);
     assert.equal(empty.priceRatio.averagePercent, null);
+  });
+});
+
+describe("summarizeFillRate", () => {
+  const soldStoreIds = new Set(
+    Array.from({ length: 10 }, (_, index) => `sold-${index + 1}`),
+  );
+
+  it("counts feedback only for stores still sold", () => {
+    const feedback = [
+      { storeId: "sold-1" },
+      { storeId: "sold-2" },
+      { storeId: "sold-3" },
+      // * an admin switched this store back to approved
+      { storeId: "reverted" },
+    ];
+    assert.deepEqual(summarizeFillRate(feedback, soldStoreIds), {
+      soldStoreCount: 10,
+      soldWithFeedback: 3,
+      percent: 30,
+    });
+  });
+
+  it("has no rate without sold stores", () => {
+    assert.deepEqual(summarizeFillRate([{ storeId: "sold-1" }], new Set()), {
+      soldStoreCount: 0,
+      soldWithFeedback: 0,
+      percent: null,
+    });
   });
 });

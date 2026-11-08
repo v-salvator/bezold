@@ -39,6 +39,9 @@ export const SATISFACTION_LABELS = [
   "非常滿意",
 ];
 
+// * the day the 頂讓回饋 form went live (PR #117) — no feedback before it
+export const SOLD_FEEDBACK_LAUNCH_DATE = "2026/11/08";
+
 export const SOLD_VIA_LABEL: Record<SoldVia, string> = {
   "follow-up-email": "追蹤信",
   "my-listings": "我的刊登",
