@@ -162,16 +162,30 @@ const countBy = <Key extends string>(
     ]),
   ) as Record<Key, number>;
 
-// * the Sold Feedback page's stat cards and bars. Each average only counts
-// * the feedback that answered that question. The fill rate only counts
-// * stores that are still sold — an admin may have switched one back.
-export const summarizeSoldFeedback = (
-  feedback: SummaryInput[],
+// * share of the stores sold right now that have feedback. Pass every
+// * feedback, never the page's filtered rows: the filters don't narrow the
+// * sold stores, so a filtered numerator would make the rate meaningless.
+// * Feedback for a store an admin switched back from sold doesn't count.
+// * The denominator includes stores sold before the form existed (they have
+// * no reliable marker), so the page labels the rate as such.
+export const summarizeFillRate = (
+  feedback: { storeId: string }[],
   soldStoreIds: ReadonlySet<string>,
 ) => {
   const soldWithFeedback = feedback.filter((item) =>
     soldStoreIds.has(item.storeId),
   ).length;
+  return {
+    soldStoreCount: soldStoreIds.size,
+    soldWithFeedback,
+    percent: percentOf(soldWithFeedback, soldStoreIds.size),
+  };
+};
+
+// * the Sold Feedback page's stat cards and bars, over whatever rows the
+// * filters leave. Each average only counts the feedback that answered that
+// * question.
+export const summarizeSoldFeedback = (feedback: SummaryInput[]) => {
   const withSource = feedback.filter((item) => item.buyerSource !== null);
   const viaBezold = withSource.filter(
     (item) => item.buyerSource === BUYER_SOURCE.BEZOLD,
@@ -187,9 +201,6 @@ export const summarizeSoldFeedback = (
 
   return {
     count: feedback.length,
-    soldStoreCount: soldStoreIds.size,
-    soldWithFeedback,
-    fillRatePercent: percentOf(soldWithFeedback, soldStoreIds.size),
     viaBezold: {
       count: viaBezold,
       answered: withSource.length,

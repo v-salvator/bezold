@@ -11,6 +11,7 @@ import {
   Statistic,
   Table,
   Tag,
+  Tooltip,
   type TableProps,
 } from "antd";
 import dayjs, { type Dayjs } from "dayjs";
@@ -22,10 +23,15 @@ import {
   BUYER_SOURCE_OPTIONS,
   SOLD_DURATION_LABEL,
   SOLD_DURATION_OPTIONS,
+  SOLD_FEEDBACK_LAUNCH_DATE,
   SOLD_VIA_LABEL,
 } from "@/constant/soldFeedback";
 import { formatPrice } from "@/utils/store";
-import { priceRatioPercent, summarizeSoldFeedback } from "@/utils/soldFeedback";
+import {
+  priceRatioPercent,
+  summarizeFillRate,
+  summarizeSoldFeedback,
+} from "@/utils/soldFeedback";
 
 const ALL = "all";
 
@@ -83,8 +89,12 @@ export default function SoldFeedbackPage() {
     );
   }, [data, sourceFilter, viaFilter, dateRange]);
 
-  const soldStoreIds = useMemo(() => new Set(data?.soldStoreIds ?? []), [data]);
-  const summary = summarizeSoldFeedback(rows, soldStoreIds);
+  const summary = summarizeSoldFeedback(rows);
+  // * over all feedback, whatever the filters say — see summarizeFillRate
+  const fillRate = useMemo(
+    () => summarizeFillRate(data?.feedback ?? [], new Set(data?.soldStoreIds)),
+    [data],
+  );
 
   const columns: TableProps<SoldFeedbackSummary>["columns"] = [
     {
@@ -213,14 +223,33 @@ export default function SoldFeedbackPage() {
       <div className="grid grid-cols-2 gap-[12px] lg:grid-cols-4">
         <Card size="small" loading={loading}>
           <Statistic
-            title="回饋數"
+            title={
+              <span className="inline-flex items-center gap-[4px]">
+                回饋數
+                <Tooltip
+                  title={<FillRateHelp />}
+                  placement="bottomLeft"
+                  overlayStyle={{ maxWidth: 340 }}
+                >
+                  <span
+                    className="cursor-help"
+                    aria-label="回饋數與填寫率的算法"
+                  >
+                    ⓘ
+                  </span>
+                </Tooltip>
+              </span>
+            }
             value={summary.count}
             suffix={<span className="text-[14px] text-black/45">則</span>}
           />
           <div className="text-[12px] text-black/45">
-            已頂讓 {summary.soldStoreCount} 家，{summary.soldWithFeedback}{" "}
-            家有填（{summary.fillRatePercent ?? "—"}
-            {summary.fillRatePercent !== null && "%"}）
+            已頂讓 {fillRate.soldStoreCount} 家，{fillRate.soldWithFeedback}{" "}
+            家有填（{fillRate.percent ?? "—"}
+            {fillRate.percent !== null && "%"}）
+          </div>
+          <div className="text-[12px] text-black/45">
+            含功能上線前就頂讓的店，不受篩選影響
           </div>
         </Card>
         <Card size="small" loading={loading}>
@@ -314,6 +343,24 @@ export default function SoldFeedbackPage() {
         標記方式：「追蹤信」= 賣家從追蹤信的連結按已頂讓；「我的刊登」=
         賣家登入後在我的刊登管理自己按。統計只算有回答該題的回饋。
       </p>
+    </div>
+  );
+}
+
+function FillRateHelp() {
+  return (
+    <div className="flex flex-col gap-[6px] text-[12px]">
+      <div>
+        <b>回饋數</b>：符合目前篩選條件的回饋則數。每家店最多一則。
+      </div>
+      <div>
+        <b>填寫率</b>：有填回饋、且現在仍是已頂讓的店 ÷
+        現在所有已頂讓的店。不受篩選影響。
+      </div>
+      <div>
+        頂讓回饋表單從 {SOLD_FEEDBACK_LAUNCH_DATE} 上線，回饋從這天開始收集。
+        分母也包含這天之前就頂讓的店，那些賣家沒看過表單，所以填寫率會偏低。
+      </div>
     </div>
   );
 }
