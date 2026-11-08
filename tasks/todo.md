@@ -153,11 +153,13 @@ _Done. Checked on dev while signed in as admin: the column shows counts, last se
 
 **Acceptance criteria:**
 
-- [ ] `utils/soldFeedback.ts` `parseSoldFeedback(body)` per SPEC (enums, 萬 → NT$, 1–5, ≤ 500 chars, extra keys rejected, all-empty flagged). `constant/soldFeedback.ts` holds the Chinese labels.
-- [ ] `POST /api/sold-feedback` with `{ token, … }`: valid only if the follow-up's `lastAnswer` is sold, within 7 days, and the store is sold. `create()` → 409 on a second submit. Snapshots `storeName`, `listedPrice`, `listedPriceNegotiable`, `soldVia`.
-- [ ] `tests/unit/soldFeedback.test.ts` per SPEC.
+- [x] `utils/soldFeedback.ts` `parseSoldFeedback(body)` per SPEC (enums, 萬 → NT$, 1–5, ≤ 500 chars, extra keys rejected, all-empty flagged). `constant/soldFeedback.ts` holds the Chinese labels.
+- [x] `POST /api/sold-feedback` with `{ token, … }`: valid only if the follow-up's `lastAnswer` is sold, within 7 days, and the store is sold. `create()` → 409 on a second submit. Snapshots `storeName`, `listedPrice`, `listedPriceNegotiable`, `soldVia`.
+- [x] `tests/unit/soldFeedback.test.ts` per SPEC.
 
 **Verification:** `npm run test:unit` · dev: curl with a fresh sold token → 201. Again → 409. All-empty → 400. A token answered 8 days ago → 410.
+_Done. The form sends the price in 萬 as `finalPriceWan`; the parser also accepts `token` and `storeId` (the two auth paths) and rejects any other key. Checked on dev: 410 before the store is sold, 400 for empty or invalid input, 401 with no token, 201 on a valid submit (listed price snapshotted), 409 on a replay, and 410 eight days after the sold answer versus 201 at six._
+
 **Dependencies:** 5
 **Files:** `utils/soldFeedback.ts`, `constant/soldFeedback.ts`, `firebase/serverUtils/soldFeedback.ts`, `app/api/sold-feedback/route.ts`, `tests/unit/soldFeedback.test.ts`
 **Scope:** M
