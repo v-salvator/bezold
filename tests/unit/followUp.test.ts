@@ -8,6 +8,7 @@ import {
   isLinkUsable,
   nextFollowUpDate,
   parseMaxPerRun,
+  planFollowUpRun,
   pickRecipient,
 } from "../../utils/followUp.ts";
 import {
@@ -272,5 +273,71 @@ describe("Taipei date labels", () => {
       formatTaipeiDateTime(new Date("2026-11-08T06:32:00Z")),
       "2026/11/08 14:32",
     );
+  });
+});
+
+describe("planFollowUpRun", () => {
+  const candidate = (
+    storeId: string,
+    dueDaysAgo: number,
+    email: string | null,
+  ) => ({
+    storeId,
+    dueDate: daysAgo(dueDaysAgo),
+    email,
+  });
+
+  it("sends the longest-overdue stores first", () => {
+    const plan = planFollowUpRun(
+      [
+        candidate("recent", 1, "a@x.tw"),
+        candidate("oldest", 40, "b@x.tw"),
+        candidate("middle", 10, "c@x.tw"),
+      ],
+      10,
+    );
+    assert.deepEqual(
+      plan.toSend.map((item) => item.storeId),
+      ["oldest", "middle", "recent"],
+    );
+  });
+
+  it("caps the sends and leaves the rest for the next run", () => {
+    const plan = planFollowUpRun(
+      [
+        candidate("a", 3, "a@x.tw"),
+        candidate("b", 2, "b@x.tw"),
+        candidate("c", 1, "c@x.tw"),
+      ],
+      2,
+    );
+    assert.deepEqual(
+      plan.toSend.map((item) => item.storeId),
+      ["a", "b"],
+    );
+    assert.deepEqual(
+      plan.deferred.map((item) => item.storeId),
+      ["c"],
+    );
+  });
+
+  it("sets aside stores with no email without using up the cap", () => {
+    const plan = planFollowUpRun(
+      [
+        candidate("noEmail", 9, null),
+        candidate("a", 3, "a@x.tw"),
+        candidate("b", 2, "b@x.tw"),
+      ],
+      2,
+    );
+    assert.deepEqual(
+      plan.noEmail.map((item) => item.storeId),
+      ["noEmail"],
+    );
+    assert.deepEqual(
+      plan.toSend.map((item) => item.storeId),
+      ["a", "b"],
+    );
+    assert.equal(plan.deferred.length, 0);
   });
 });

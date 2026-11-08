@@ -117,3 +117,26 @@ export const formatTaipeiDateTime = (date: Date) => {
   const { date: day, time } = taipeiParts(date);
   return `${day} ${time}`;
 };
+
+export interface FollowUpCandidate {
+  storeId: string;
+  dueDate: Date;
+  email: string | null;
+}
+
+// * one cron run: longest-overdue first. Stores without an email are set
+// * aside (they don't use up the cap); the rest past the cap wait a day.
+export const planFollowUpRun = <Candidate extends FollowUpCandidate>(
+  candidates: Candidate[],
+  maxPerRun: number,
+) => {
+  const byDueDate = [...candidates].sort(
+    (left, right) => left.dueDate.getTime() - right.dueDate.getTime(),
+  );
+  const sendable = byDueDate.filter((candidate) => candidate.email);
+  return {
+    toSend: sendable.slice(0, maxPerRun),
+    deferred: sendable.slice(maxPerRun),
+    noEmail: byDueDate.filter((candidate) => !candidate.email),
+  };
+};

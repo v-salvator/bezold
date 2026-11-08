@@ -17,6 +17,8 @@ The only tests are the security-rules tests in `tests/rules/` (Node's built-in `
 
 `.env` / `.env.development` (gitignored). `NEXT_PUBLIC_ENV_VERSION=dev` points at the mock collections; anything else uses prod. Client SDK reads `NEXT_PUBLIC_FIREBASE_*`; Admin SDK reads `FIREBASE_SERVER_*`. `NEXT_PUBLIC_APP_URL` builds absolute URLs (sitemap, robots, metadata, JSON-LD), and its hostname is the GA4 hostname filter for admin store analytics. `GA4_PROPERTY_ID` (server-only) enables `/api/admin/store-analytics`, which reads GA4 with the Admin SDK service account — see `docs/analytics-events.md` → Admin reporting.
 
+Listing follow-up email (server-only): `BREVO_API_KEY` sends through Brevo; `CRON_SECRET` guards `/api/cron/listing-follow-up` (Vercel Cron, daily); `FOLLOW_UP_ENABLED=true` is the kill switch (anything else sends nothing; `?dryRun=1` still works); `FOLLOW_UP_MAX_PER_RUN` caps sends per run (default 100). In dev every follow-up email goes to `FOLLOW_UP_TEST_RECIPIENT` and the cron refuses to send without it — mock stores point at real people's accounts.
+
 ## Architecture
 
 **Bezold** is a Next.js 14 (App Router) marketplace for buying/selling startup businesses, targeting Taiwan. TypeScript throughout.

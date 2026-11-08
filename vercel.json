@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/listing-follow-up",
+      "schedule": "0 2 * * *"
+    }
+  ]
+}

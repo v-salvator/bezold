@@ -1,4 +1,4 @@
-import { Timestamp } from "firebase-admin/firestore";
+import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { db } from "@/firebase/server";
 import { COLLECTIONS } from "@/firebase/constants";
 import {
@@ -11,7 +11,13 @@ import {
   type Store,
 } from "@/types";
 import { hashToken, isWellFormedToken } from "@/lib/followUp/token";
-import { isLinkUsable, pickRecipient } from "@/utils/followUp";
+import {
+  addDays,
+  FOLLOW_UP_LINK_DAYS,
+  isLinkUsable,
+  nextFollowUpDate,
+  pickRecipient,
+} from "@/utils/followUp";
 import { mapStoreDoc } from "./store";
 import { getUsersByIds } from "./user";
 
@@ -151,4 +157,68 @@ export const resolveSellerRecipients = async (
       ];
     }),
   );
+};
+
+export interface DueFollowUp {
+  store: Store;
+  dueDate: Date;
+}
+
+// * every approved store whose follow-up email is due now, with its due date
+export const findDueFollowUps = async (now = new Date()) => {
+  const storeSnapshot = await db
+    .collection(COLLECTIONS.STORE)
+    .where("status", "==", STORE_STATUS.APPROVED)
+    .get();
+  const stores = storeSnapshot.docs.map(mapStoreDoc);
+  if (stores.length === 0) return [];
+
+  const followUpSnapshots = await db.getAll(
+    ...stores.map((store) => followUps().doc(store.id)),
+  );
+  const followUpById = new Map(
+    followUpSnapshots
+      .filter((snapshot) => snapshot.exists)
+      .map((snapshot) => [
+        snapshot.id,
+        toFollowUpState(snapshot.data() as FollowUpDoc),
+      ]),
+  );
+
+  return stores.flatMap((store): DueFollowUp[] => {
+    const dueDate = nextFollowUpDate(store, followUpById.get(store.id) ?? null);
+    return dueDate && dueDate.getTime() <= now.getTime()
+      ? [{ store, dueDate }]
+      : [];
+  });
+};
+
+// * after Brevo accepted the email: the new link replaces the old one.
+// * merge keeps paused / lastAnswer, which only admins and sellers change.
+export const recordFollowUpSent = async (
+  storeId: string,
+  tokenHash: string,
+  now = new Date(),
+) => {
+  await followUps()
+    .doc(storeId)
+    .set(
+      {
+        storeId,
+        sentCount: FieldValue.increment(1),
+        lastSentTime: Timestamp.fromDate(now),
+        tokenHash,
+        tokenExpireTime: Timestamp.fromDate(addDays(now, FOLLOW_UP_LINK_DAYS)),
+        tokenUsed: false,
+        lastError: "",
+      },
+      { merge: true },
+    );
+};
+
+// * why this store wasn't emailed (shown in admin); counters stay as they are
+export const recordFollowUpError = async (storeId: string, error: string) => {
+  await followUps()
+    .doc(storeId)
+    .set({ storeId, lastError: error.slice(0, 300) }, { merge: true });
 };

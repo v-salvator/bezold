@@ -106,12 +106,14 @@ _Done. Checked on dev: 還在頂讓 leaves the store untouched and kills the lin
 
 **Acceptance criteria:**
 
-- [ ] `GET /api/cron/listing-follow-up`: bearer `CRON_SECRET` (else 401). Sends nothing unless `FOLLOW_UP_ENABLED=true` (returns `{ disabled: true }`). The dry run works with the switch off. In dev, refuses without `FOLLOW_UP_TEST_RECIPIENT` and sends only there.
-- [ ] Loads approved stores + follow-ups + recipients (`getUsersByIds`). Picks due stores oldest-first, caps at `FOLLOW_UP_MAX_PER_RUN` (default 100; a non-numeric or < 1 value falls back to 100), sends, then writes `recordSend` (new token hash, count +1). Failures write `lastError`. Missing email → `lastError: "no_email"`, not counted. Responds and logs `{ due, sent, skipped, failed }`.
-- [ ] `?dryRun=1` returns the due list (id, name, recipient domain) and writes nothing.
-- [ ] `vercel.json` schedules `0 2 * * *`. `maxDuration = 60`.
+- [x] `GET /api/cron/listing-follow-up`: bearer `CRON_SECRET` (else 401). Sends nothing unless `FOLLOW_UP_ENABLED=true` (returns `{ disabled: true }`). The dry run works with the switch off. In dev, refuses without `FOLLOW_UP_TEST_RECIPIENT` and sends only there.
+- [x] Loads approved stores + follow-ups + recipients (`getUsersByIds`). Picks due stores oldest-first, caps at `FOLLOW_UP_MAX_PER_RUN` (default 100; a non-numeric or < 1 value falls back to 100), sends, then writes `recordSend` (new token hash, count +1). Failures write `lastError`. Missing email → `lastError: "no_email"`, not counted. Responds and logs `{ due, sent, skipped, failed }`.
+- [x] `?dryRun=1` returns the due list (id, name, recipient domain) and writes nothing.
+- [x] `vercel.json` schedules `0 2 * * *`. `maxDuration = 60`.
 
 **Verification:** dev with `FOLLOW_UP_ENABLED=true`: backdate a mock store's `approvedTime` 61 days → dry run lists it → real run sends one email to the test inbox → second run sends 0. No secret → 401. Flag off → nothing sent.
+_Done. Checked on dev: no or wrong secret gives 401, the switch off gives `{disabled:true}`, and the dry run lists due stores with recipient domains only. A real run sent 2 (both to the test inbox) and marked 3 「無信箱」. A second run sent 0. The selection logic is `planFollowUpRun` (unit-tested: oldest first, cap, no-email stores don't use the cap). Env vars are documented in CLAUDE.md._
+
 **Dependencies:** 2, 3, 5
 **Files:** `app/api/cron/listing-follow-up/route.ts`, `firebase/serverUtils/followUp.ts`, `vercel.json`, `SPEC.md` (env table)
 **Scope:** M
