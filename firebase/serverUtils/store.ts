@@ -25,19 +25,23 @@ const followUpDates = (storeData: FirebaseFirestore.DocumentData) => ({
 });
 
 // * shared shape mapping — Firestore Timestamps → Date, doc id folded in.
+// * Raw doc: images stay Storage paths, userInfo is not joined.
+export const mapStoreDoc = (
+  doc: FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>,
+): Store => {
+  const storeData = doc.data()!;
+  return {
+    id: doc.id,
+    ...storeData,
+    createTime: storeData.createTime.toDate(),
+    updateTime: storeData.updateTime.toDate(),
+    ...followUpDates(storeData),
+  } as Store;
+};
+
 const mapDocsToStores = (
   snapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>,
-): Store[] =>
-  snapshot.docs.map((doc) => {
-    const storeData = doc.data();
-    return {
-      id: doc.id,
-      ...storeData,
-      createTime: storeData.createTime.toDate(),
-      updateTime: storeData.updateTime.toDate(),
-      ...followUpDates(storeData),
-    } as Store;
-  });
+): Store[] => snapshot.docs.map(mapStoreDoc);
 
 // * physical lists skip digital assets in memory — `where("listingType", "!=",
 // * "digital")` would also drop every legacy doc that has no listingType.

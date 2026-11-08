@@ -1,0 +1,172 @@
+.panel {
+  width: 100%;
+  max-width: 600px;
+  font-family: var(--hand);
+  color: var(--ink);
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+}
+
+.title {
+  margin: 0.625rem 0 1.25rem;
+  font-size: 1.75rem;
+  line-height: 1.35;
+  font-weight: 800;
+  text-wrap: balance;
+
+  @media (max-width: 480px) {
+    font-size: 1.45rem;
+  }
+}
+
+.accent {
+  display: block;
+  font-style: normal;
+  color: var(--accent);
+}
+
+.storeCard {
+  display: flex;
+  gap: 0.875rem;
+  background: #fff;
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  padding: 0.75rem;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.thumb {
+  width: 96px;
+  height: 72px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.thumbEmpty {
+  width: 96px;
+  height: 72px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  background: linear-gradient(135deg, var(--paper-2), var(--paper-3));
+}
+
+.storeName {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.storeMeta {
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.note {
+  margin-top: 1.25rem;
+  border-left: 4px solid var(--accent);
+  background: var(--paper-2);
+  padding: 0.75rem 0.875rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
+
+  &.noteSage {
+    border-left-color: var(--accent-2);
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.125rem;
+  margin-top: 1.5rem;
+}
+
+.textButton {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: var(--hand);
+  font-size: 0.95rem;
+  color: var(--muted);
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.primaryLink,
+.ghostLink {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--hand);
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 4px;
+  padding: 0.625rem 1.25rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.primaryLink {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.ghostLink {
+  background: #fff;
+}
+
+.error {
+  margin: 0.875rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.fine {
+  margin: 1.125rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.lead {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.mark,
+.markGray {
+  width: 3.5rem;
+  height: 3.5rem;
+  display: grid;
+  place-items: center;
+  margin-bottom: 1.125rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  box-shadow: 3px 3px 0 var(--ink);
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.mark {
+  background: var(--accent-2);
+  color: #fff;
+}
+
+.markGray {
+  background: var(--paper-3);
+  color: var(--ink);
+}

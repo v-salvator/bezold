@@ -220,7 +220,7 @@ Body `{ token: string, answer: "sold" | "still_selling" }`. Server re-validates 
 
 After the transaction commits, `sold` sends the confirmation email (best-effort: a failure is logged, not surfaced). The response returns `{ answer, storeName }`.
 
-GA: `trackEvent("listing_check_answer", { answer })` on the client after success. Document it in `docs/analytics-events.md`.
+**No GA on `/listing-check`.** The URL carries the token, and gtag attaches the full URL to every hit, so `getAnalyticsClient()` returns null on that path. No page view, no custom events, and gtag never loads there. Answers are recorded in Firestore and shown in admin instead. The page also sets `referrer: no-referrer`.
 
 ### 頂讓回饋 form — shared component
 
@@ -236,7 +236,7 @@ Title 「恭喜成交！花一分鐘跟我們分享經驗」, subtitle 「全部
 | 您對 Bezold 的滿意度         | 5 tappable stars (1–5)                                                          |
 | 有什麼建議或想對我們說的？   | Textarea, max 500, counter                                                      |
 
-Buttons: 「送出」 (disabled until at least one field has a value) and text link 「略過」. Errors show inline as 「送出失敗，請重試」 and the form keeps what was typed. GA: `trackEvent("sold_feedback_submit", { via, has_comment })` / `sold_feedback_skip`.
+Buttons: 「送出」 (disabled until at least one field has a value) and text link 「略過」. Errors show inline as 「送出失敗，請重試」 and the form keeps what was typed. GA: `trackEvent("sold_feedback_submit", { via, has_comment })` / `sold_feedback_skip` fire on `/my-listings` only. On `/listing-check` analytics is off (see above).
 
 **Where it appears**
 
@@ -319,7 +319,7 @@ app/robots.ts                                → disallow /listing-check
 tests/unit/followUp.test.ts                  → due logic, recipient, templates, token hash
 tests/unit/soldFeedback.test.ts              → parseSoldFeedback
 tests/rules/firestore.test.ts                → clients denied on mockFollowUp, mockSoldFeedback
-docs/analytics-events.md                     → listing_check_answer, sold_feedback_submit/skip
+docs/analytics-events.md                     → sold_feedback_submit/skip (/my-listings); /listing-check untracked
 ```
 
 ## Code Style

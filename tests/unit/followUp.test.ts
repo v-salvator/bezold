@@ -1,6 +1,8 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
+  formatTaipeiDate,
+  formatTaipeiDateTime,
   followUpAnchor,
   isFollowUpDue,
   isLinkUsable,
@@ -253,5 +255,22 @@ describe("token", () => {
     for (const value of ["", "short", "x".repeat(44), `${"a".repeat(42)}!`]) {
       assert.equal(isWellFormedToken(value), false, value);
     }
+  });
+});
+
+describe("Taipei date labels", () => {
+  // * 2026-07-04 17:30 UTC is already 2026-07-05 01:30 in Taipei
+  const lateUtc = new Date("2026-07-04T17:30:00Z");
+
+  it("formats the date in Asia/Taipei, not the server's zone", () => {
+    assert.equal(formatTaipeiDate(lateUtc), "2026/07/05");
+  });
+
+  it("formats date and time in Asia/Taipei with a 24-hour clock", () => {
+    assert.equal(formatTaipeiDateTime(lateUtc), "2026/07/05 01:30");
+    assert.equal(
+      formatTaipeiDateTime(new Date("2026-11-08T06:32:00Z")),
+      "2026/11/08 14:32",
+    );
   });
 });

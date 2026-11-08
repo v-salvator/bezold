@@ -66,11 +66,13 @@ _Done. Both templates were sent through Brevo to the test inbox on 2026-11-08 an
 
 **Acceptance criteria:**
 
-- [ ] `firebase/serverUtils/followUp.ts`: `findFollowUpByTokenHash(hash)` returns the doc + store, or null.
-- [ ] `app/(new)/listing-check/page.tsx` renders the prototype's states for `answer=sold` / `answer=still_selling` / no answer / invalid (missing, unknown, expired, used, store not approved → one 「此連結已失效」 message). Standard page shell, `noindex`, no seller contact in the payload.
-- [ ] `app/robots.ts` disallows `/listing-check`. Not in the sitemap.
+- [x] `firebase/serverUtils/followUp.ts`: `findFollowUpByTokenHash(hash)` returns the doc + store, or null.
+- [x] `app/(new)/listing-check/page.tsx` renders the prototype's states for `answer=sold` / `answer=still_selling` / no answer / invalid (missing, unknown, expired, used, store not approved → one 「此連結已失效」 message). Standard page shell, `noindex`, no seller contact in the payload.
+- [x] `app/robots.ts` disallows `/listing-check`. Not in the sitemap.
 
 **Verification:** dev: hand-seed a `mockFollowUp` doc with a known token's hash → open each URL variant and compare with the prototype at desktop + 375 px. Opening it changes nothing in Firestore.
+_Done. The page is one client component, `ListingCheck`, with every state including the POST wiring (the API lands in task 5), plus `LinkInvalid`. Dates are Taipei time (`formatTaipeiDate`). Analytics is switched off on this path because the URL carries the token. Checked on dev with seeded tokens: valid physical and digital stores, expired, malformed and missing tokens, desktop and 375 px. No GA requests went out._
+
 **Dependencies:** 1, 2
 **Files:** `firebase/serverUtils/followUp.ts`, `app/(new)/listing-check/page.tsx`, `app/(new)/listing-check/_components/ListingCheckView.tsx` + `.module.css`, `app/robots.ts`
 **Scope:** M
@@ -82,13 +84,13 @@ _Done. Both templates were sent through Brevo to the test inbox on 2026-11-08 an
 **Acceptance criteria:**
 
 - [ ] `POST /api/listing-check` `{ token, answer }` runs the SPEC transaction. Sold sets store `status/soldTime/soldVia/updateTime` and the follow-up answer fields. Still-selling sets the follow-up only. Both mark the token used. Invalid → 410 `link_invalid`, bad body → 400.
-- [ ] `ListingCheckActions` (client) posts, shows the success states, and switches between the sold and still-selling confirms. Fires `listing_check_answer`.
+- [ ] `ListingCheck` (client, built in task 4) posts and shows the success states. No GA on this page.
 - [ ] Sold sends `soldConfirmationEmail` after commit (best-effort, logged on failure).
-- [ ] `docs/analytics-events.md` documents `listing_check_answer`.
+- [ ] `docs/analytics-events.md` notes that `/listing-check` is untracked, and why.
 
 **Verification:** dev: answer still-selling → store unchanged, reopen → 失效. New token → answer sold → store `sold` on `/store/[id]` + admin, confirmation email arrives. Double-submit (two tabs) → one wins, the other gets 410.
 **Dependencies:** 3, 4
-**Files:** `app/api/listing-check/route.ts`, `firebase/serverUtils/followUp.ts`, `app/(new)/listing-check/_components/ListingCheckActions.tsx` + `.module.css`, `docs/analytics-events.md`
+**Files:** `app/api/listing-check/route.ts`, `firebase/serverUtils/followUp.ts`, `lib/followUp/listingRows.ts`, `docs/analytics-events.md`
 **Scope:** M
 
 ### Checkpoint A
@@ -162,11 +164,11 @@ _Done. Both templates were sent through Brevo to the test inbox on 2026-11-08 an
 
 - [ ] `app/(new)/_components/SoldFeedbackForm/` matches the prototype (pills, 萬 input with listed-price hint, stars + label, textarea + counter). 送出 is disabled until something is filled. 略過 is a link. Inline error keeps the input.
 - [ ] Built from `components/refactored/` primitives where they fit. CSS Modules for paint, Tailwind for layout only.
-- [ ] `/listing-check` sold success shows it. Submit → thanks state, skip → 恭喜成交 state. Fires `sold_feedback_submit` / `sold_feedback_skip` (documented).
+- [ ] `/listing-check` sold success shows it. Submit → thanks state, skip → 恭喜成交 state. No GA here (analytics is off on `/listing-check`).
 
 **Verification:** dev, desktop + 375 px, compared with the prototype: submit saves one doc, skip saves none.
 **Dependencies:** 8
-**Files:** `app/(new)/_components/SoldFeedbackForm/index.tsx` + `.module.css`, `app/(new)/listing-check/_components/ListingCheckActions.tsx`, `docs/analytics-events.md`
+**Files:** `app/(new)/_components/SoldFeedbackForm/index.tsx` + `.module.css`, `app/(new)/listing-check/_components/ListingCheck.tsx`
 **Scope:** M
 
 ### Task 10: `/my-listings` dialog + member-auth path

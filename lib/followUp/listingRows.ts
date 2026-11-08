@@ -35,3 +35,12 @@ export const listingRows = (store: Store): [string, string][] => {
 
   return rows.filter((row): row is [string, string] => Boolean(row[1]));
 };
+
+// * one line for the /listing-check store card, e.g.
+// * 雲林縣西螺鎮 · 坪數 18 坪 · 月租 NT$ 4 萬 · 頂讓金 NT$ 45 萬
+export const listingSummary = (store: Store) =>
+  listingRows(store)
+    .map(([label, value]) =>
+      label === "地區" || label === "類型" ? value : `${label} ${value}`,
+    )
+    .join(" · ");

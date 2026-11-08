@@ -89,3 +89,31 @@ export const isLinkUsable = (
   link.tokenExpireTime !== null &&
   link.tokenExpireTime.getTime() > now.getTime() &&
   storeStatus === STORE_STATUS.APPROVED;
+
+// * Vercel runs in UTC — every date shown to sellers and admins is Taipei time
+const taipeiParts = (date: Date) => {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Taipei",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(date);
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((item) => item.type === type)?.value ?? "";
+  return {
+    date: `${part("year")}/${part("month")}/${part("day")}`,
+    time: `${part("hour")}:${part("minute")}`,
+  };
+};
+
+// * 2026/07/05
+export const formatTaipeiDate = (date: Date) => taipeiParts(date).date;
+
+// * 2026/07/05 14:32
+export const formatTaipeiDateTime = (date: Date) => {
+  const { date: day, time } = taipeiParts(date);
+  return `${day} ${time}`;
+};
