@@ -7,7 +7,11 @@ import { getImageByPath } from "@/firebase/serverUtils/image";
 import { listingSummary } from "@/lib/followUp/listingRows";
 import { FOLLOW_UP_ANSWER, type FollowUpAnswer, type Store } from "@/types";
 import { followUpAnchor, formatTaipeiDate } from "@/utils/followUp";
-import { isDigitalAsset } from "@/utils/store";
+import {
+  formatPriceDisplay,
+  formatPriceRange,
+  isDigitalAsset,
+} from "@/utils/store";
 import ListingCheck, {
   type ListingCheckStore,
 } from "./_components/ListingCheck";
@@ -39,6 +43,10 @@ const toCheckStore = async (store: Store): Promise<ListingCheckStore> => {
     summary: listingSummary(store),
     listedSince: formatTaipeiDate(followUpAnchor(store)),
     imageUrl: imageUrl && imageUrl !== "no-image" ? imageUrl : null,
+    listedPriceLabel: isDigitalAsset(store)
+      ? formatPriceRange(store.price, store.priceMax, store.priceNegotiable)
+      : formatPriceDisplay(store.price, store.priceNegotiable),
+    listedPriceWan: store.price > 0 ? store.price / 10_000 : null,
   };
 };
 

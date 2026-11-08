@@ -170,11 +170,13 @@ _Done. The form sends the price in 萬 as `finalPriceWan`; the parser also accep
 
 **Acceptance criteria:**
 
-- [ ] `app/(new)/_components/SoldFeedbackForm/` matches the prototype (pills, 萬 input with listed-price hint, stars + label, textarea + counter). 送出 is disabled until something is filled. 略過 is a link. Inline error keeps the input.
-- [ ] Built from `components/refactored/` primitives where they fit. CSS Modules for paint, Tailwind for layout only.
-- [ ] `/listing-check` sold success shows it. Submit → thanks state, skip → 恭喜成交 state. No GA here (analytics is off on `/listing-check`).
+- [x] `app/(new)/_components/SoldFeedbackForm/` matches the prototype (pills, 萬 input with listed-price hint, stars + label, textarea + counter). 送出 is disabled until something is filled. 略過 is a link. Inline error keeps the input.
+- [x] Built from `components/refactored/` primitives where they fit. CSS Modules for paint, Tailwind for layout only.
+- [x] `/listing-check` sold success shows it. Submit → thanks state, skip → 恭喜成交 state. No GA here (analytics is off on `/listing-check`).
 
 **Verification:** dev, desktop + 375 px, compared with the prototype: submit saves one doc, skip saves none.
+_Done. The answer chips are real `<button aria-pressed>`s, because `Pill` is a clickable `<span>` that keyboards can't use; 送出 is the shared `Button`. Checked on dev at 375 px: confirm sold, then the form with clicks and typing (the price input strips stray characters; the comment counter counts an emoji as one). Submitting saved one doc and showed thanks; skipping showed 恭喜成交 and saved nothing. No GA (analytics stays off on this page)._
+
 **Dependencies:** 8
 **Files:** `app/(new)/_components/SoldFeedbackForm/index.tsx` + `.module.css`, `app/(new)/listing-check/_components/ListingCheck.tsx`
 **Scope:** M
