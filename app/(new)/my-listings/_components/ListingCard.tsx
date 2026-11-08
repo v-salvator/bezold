@@ -11,6 +11,7 @@ import { type Store, STORE_STATUS } from "@/types";
 import { STORE_CATEGORIES } from "@/constant/storeType";
 import { isDigitalAsset, toCard } from "@/utils/store";
 import StatusBadge from "./StatusBadge";
+import SoldFeedbackDialog from "./SoldFeedbackDialog";
 import styles from "./ListingCard.module.css";
 
 function formatDate(date: Date): string {
@@ -52,6 +53,8 @@ export default function ListingCard({ store }: { store: Store }) {
   const [confirmingSold, setConfirmingSold] = useState(false);
   const [markingSold, setMarkingSold] = useState(false);
   const [soldError, setSoldError] = useState(false);
+  // * 頂讓回饋 dialog, opened right after marking the listing sold
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   // * sellers may edit pending/approved listings and resubmit rejected ones;
   // * sold listings are final
@@ -81,6 +84,7 @@ export default function ListingCard({ store }: { store: Store }) {
       await updateStoreStatus(store.id, STORE_STATUS.SOLD);
       setStatus(STORE_STATUS.SOLD);
       setConfirmingSold(false);
+      setFeedbackOpen(true);
     } catch {
       // * surface the failure so the seller knows to retry, not assume success
       setSoldError(true);
@@ -179,6 +183,15 @@ export default function ListingCard({ store }: { store: Store }) {
           </div>
         </div>
       </div>
+
+      <SoldFeedbackDialog
+        open={feedbackOpen}
+        storeId={store.id}
+        storeName={store.storeName}
+        listedPriceLabel={card.price}
+        listedPriceWan={store.price > 0 ? store.price / 10_000 : null}
+        onClose={() => setFeedbackOpen(false)}
+      />
     </div>
   );
 }

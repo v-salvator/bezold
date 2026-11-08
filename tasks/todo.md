@@ -187,10 +187,12 @@ _Done. The answer chips are real `<button aria-pressed>`s, because `Pill` is a c
 
 **Acceptance criteria:**
 
-- [ ] `POST /api/sold-feedback` also accepts `Authorization: Bearer <idToken>` + `{ storeId, … }`: `verifyUserToken`, `store.user === uid`, store sold. `soldVia: "my-listings"`.
-- [ ] `ListingCard`: after 「確認」 succeeds, a Radix dialog opens with the form. Close = skip. Submit → toast 「謝謝您的回饋！」.
+- [x] `POST /api/sold-feedback` also accepts `Authorization: Bearer <idToken>` + `{ storeId, … }`: `verifyUserToken`, `store.user === uid`, store sold. `soldVia: "my-listings"`.
+- [x] `ListingCard`: after 「確認」 succeeds, a Radix dialog opens with the form. Close = skip. Submit → toast 「謝謝您的回饋！」.
 
 **Verification:** dev, signed in as a mock seller: mark sold → dialog → submit → doc saved. Another store → close → nothing saved. Another seller's storeId → 403.
+_Done. The dialog portals into the site root so it keeps the `--hand` font, and its thanks state replaces the planned toast. A not-yet-sold store gets 422, not 409, because the client reads 409 as "already saved". Checked on dev, signed in as the owner of a mock store: mark sold, the dialog opens, submit saves a doc with `soldVia: my-listings`, and closing leaves the card at 已頂讓. No auth or a bad token gets 401. The ownership check (403) was read in code, not exercised; it needs a second seller account._
+
 **Dependencies:** 9
 **Files:** `app/api/sold-feedback/route.ts`, `app/(new)/my-listings/_components/ListingCard.tsx` (+ `.module.css`)
 **Scope:** S
