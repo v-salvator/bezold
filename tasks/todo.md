@@ -33,9 +33,9 @@ _Done. `StoreBaseForm` only ever creates pending or draft stores, so Store List 
 
 **Acceptance criteria:**
 
-- [ ] `utils/followUp.ts`: `followUpAnchor`, `isFollowUpDue`, `nextFollowUpDate`, `pickRecipient({ userEmail, userInfoEmail })`. Alias-free imports.
-- [ ] `lib/followUp/token.ts`: `createToken()` (32 random bytes, base64url, 43 chars), `hashToken(token)` (sha256 hex).
-- [ ] `tests/unit/followUp.test.ts` covers the SPEC table: day 59/60, createTime fallback, paused, non-approved statuses, 29/30 days after the last send, a `still_selling` answer pushing the next email, sold, recipient fallbacks, token uniqueness/length, hash determinism.
+- [x] `utils/followUp.ts`: `followUpAnchor`, `isFollowUpDue`, `nextFollowUpDate`, `pickRecipient({ userEmail, userInfoEmail })`, `parseMaxPerRun`, `isLinkUsable`. Alias-free imports.
+- [x] `lib/followUp/token.ts`: `createToken()` (32 random bytes, base64url, 43 chars), `hashToken(token)` (sha256 hex), `isWellFormedToken`.
+- [x] `tests/unit/followUp.test.ts` covers the SPEC table: day 59/60, createTime fallback, paused, non-approved statuses, 29/30 days after the last send, a `still_selling` answer pushing the next email, sold, recipient fallbacks, token uniqueness/length, hash determinism.
 
 **Verification:** `npm run test:unit`
 **Dependencies:** 1
