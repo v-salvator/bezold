@@ -58,19 +58,19 @@ export const getSoldFeedback = async (storeId: string) => {
   return snapshot.exists ? toSummary(snapshot) : null;
 };
 
-// * every 頂讓回饋, newest first, plus how many stores are sold (the fill-rate
-// * denominator). A few hundred docs at most — read them all.
+// * every 頂讓回饋, newest first, plus the ids of the stores sold right now
+// * (the fill-rate denominator). A few hundred docs at most — read them all.
 export const listSoldFeedback = async () => {
-  const [feedbackSnapshot, soldCount] = await Promise.all([
+  const [feedbackSnapshot, soldSnapshot] = await Promise.all([
     soldFeedback().orderBy("createTime", "desc").get(),
     db
       .collection(COLLECTIONS.STORE)
       .where("status", "==", STORE_STATUS.SOLD)
-      .count()
+      .select()
       .get(),
   ]);
   return {
     feedback: feedbackSnapshot.docs.map(toSummary),
-    soldStoreCount: soldCount.data().count,
+    soldStoreIds: soldSnapshot.docs.map((doc) => doc.id),
   };
 };

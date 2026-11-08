@@ -259,8 +259,8 @@ One route, two ways to prove the caller is the seller:
 - **Store list** (`app/admin/store/list/page.tsx`): new column 「追蹤信」 = `sentCount` (and 「已停止」 tag when paused, 「無信箱」 when `lastError === "no_email"`).
 - **Store drawer** (`StoreDetailDrawer.tsx`): section 「追蹤信」 with sent count, last sent date, last answer + date, and an antd `Switch` 「自動寄送追蹤信」 (on = not paused). Sold-via-email stores show 「由追蹤信標記已頂讓 · YYYY/MM/DD」.
 - **Feedback in the drawer**: for sold stores, section 「頂讓回饋」 with the five answers in Chinese labels, or 「賣家未填寫」. Data comes from `GET /api/admin/sold-feedback/[storeId]` (`verifyAdminToken`).
-- **Sold Feedback page** (`app/admin/store/feedback/page.tsx`, new 「Sold Feedback」 item under Store Management in `components/AdminSidebar.tsx`), heading 「頂讓回饋」. Data comes from `GET /api/admin/sold-feedback` (`verifyAdminToken`), which returns every feedback doc newest first plus `soldStoreCount` (number of `sold` stores). The page has:
-  - **Stat cards** computed from answered fields only: 回饋數 / 已頂讓店數 (fill rate), 透過 Bezold 成交 % (of feedback that answered buyer source), 平均滿意度, average 成交價 ÷ 刊登價 (feedback with a final price and a listed price > 0).
+- **Sold Feedback page** (`app/admin/store/feedback/page.tsx`, new 「Sold Feedback」 item under Store Management in `components/AdminSidebar.tsx`), heading 「頂讓回饋」. Data comes from `GET /api/admin/sold-feedback` (`verifyAdminToken`), which returns every feedback doc newest first plus `soldStoreIds` (stores sold right now). The page has:
+  - **Stat cards** computed from answered fields only: 回饋數, and the fill rate = sold stores with feedback ÷ sold stores (a store an admin switched back from sold no longer counts), 透過 Bezold 成交 % (of feedback that answered buyer source), 平均滿意度, average 成交價 ÷ 刊登價 (feedback with a final price and a listed price > 0).
   - **Two bar charts**: 花了多久 and 買家來源 counts, each with an 「未填」 bar.
   - **Table**: 店名 + city, 標記方式 (追蹤信 / 我的刊登), 花了多久, 買家來源, 成交頂讓金 (with listed price and %), 滿意度 stars, 建議 (truncated), 填寫時間. Clicking a row expands the full comment with a link that opens the store in Store List's drawer (`/admin/store/list?store={id}`).
   - **Filters** (client-side): 買家來源, 標記方式, 填寫日期 range.
@@ -304,7 +304,7 @@ app/api/listing-check/route.ts               → POST answer
 app/api/sold-feedback/route.ts               → POST feedback (token or member auth)
 app/api/admin/follow-ups/route.ts            → GET summary map
 app/api/admin/follow-ups/[storeId]/route.ts  → PATCH paused
-app/api/admin/sold-feedback/route.ts         → GET all feedback + soldStoreCount
+app/api/admin/sold-feedback/route.ts         → GET all feedback + soldStoreIds
 app/api/admin/sold-feedback/[storeId]/route.ts → GET one store's feedback
 app/admin/store/feedback/page.tsx            → Sold Feedback page (stats, bars, table)
 components/AdminSidebar.tsx                  → + Sold Feedback menu item

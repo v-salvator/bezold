@@ -127,6 +127,7 @@ describe("priceRatioPercent", () => {
 
 describe("summarizeSoldFeedback", () => {
   const feedback = (overrides: Record<string, unknown>) => ({
+    storeId: "sold-1",
     soldDuration: null,
     buyerSource: null,
     finalPrice: null,
@@ -142,23 +143,36 @@ describe("summarizeSoldFeedback", () => {
       finalPrice: 450_000,
     }),
     feedback({
+      storeId: "sold-2",
       soldDuration: "1_to_3m",
       buyerSource: "referral",
       satisfaction: 3,
     }),
     feedback({
+      storeId: "sold-3",
       soldDuration: "under_1m",
       buyerSource: "bezold",
       finalPrice: 400_000,
     }),
-    feedback({ satisfaction: 4, finalPrice: 300_000, listedPrice: 0 }),
+    // * an admin switched this store back to approved; its feedback stays
+    feedback({
+      storeId: "reverted",
+      satisfaction: 4,
+      finalPrice: 300_000,
+      listedPrice: 0,
+    }),
   ] as Parameters<typeof summarizeSoldFeedback>[0];
 
-  const summary = summarizeSoldFeedback(rows, 10);
+  const soldStoreIds = new Set(
+    Array.from({ length: 10 }, (_, index) => `sold-${index + 1}`),
+  );
+  const summary = summarizeSoldFeedback(rows, soldStoreIds);
 
-  it("counts feedback against every sold store", () => {
+  it("counts every feedback, but the fill rate only over stores still sold", () => {
     assert.equal(summary.count, 4);
-    assert.equal(summary.fillRatePercent, 40);
+    assert.equal(summary.soldWithFeedback, 3);
+    assert.equal(summary.soldStoreCount, 10);
+    assert.equal(summary.fillRatePercent, 30);
   });
 
   it("measures the Bezold share among answers that named a buyer source", () => {
@@ -183,7 +197,7 @@ describe("summarizeSoldFeedback", () => {
   });
 
   it("reports nothing to average for an empty list", () => {
-    const empty = summarizeSoldFeedback([], 0);
+    const empty = summarizeSoldFeedback([], new Set());
     assert.equal(empty.fillRatePercent, null);
     assert.equal(empty.viaBezold.percent, null);
     assert.equal(empty.satisfaction.average, null);

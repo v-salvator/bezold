@@ -135,6 +135,7 @@ export const priceRatioPercent = ({
     : Math.round((finalPrice / listedPrice) * 100);
 
 type SummaryInput = {
+  storeId: string;
   soldDuration: SoldDuration | null;
   buyerSource: BuyerSource | null;
   finalPrice: number | null;
@@ -162,11 +163,15 @@ const countBy = <Key extends string>(
   ) as Record<Key, number>;
 
 // * the Sold Feedback page's stat cards and bars. Each average only counts
-// * the feedback that answered that question.
+// * the feedback that answered that question. The fill rate only counts
+// * stores that are still sold — an admin may have switched one back.
 export const summarizeSoldFeedback = (
   feedback: SummaryInput[],
-  soldStoreCount: number,
+  soldStoreIds: ReadonlySet<string>,
 ) => {
+  const soldWithFeedback = feedback.filter((item) =>
+    soldStoreIds.has(item.storeId),
+  ).length;
   const withSource = feedback.filter((item) => item.buyerSource !== null);
   const viaBezold = withSource.filter(
     (item) => item.buyerSource === BUYER_SOURCE.BEZOLD,
@@ -182,7 +187,9 @@ export const summarizeSoldFeedback = (
 
   return {
     count: feedback.length,
-    fillRatePercent: percentOf(feedback.length, soldStoreCount),
+    soldStoreCount: soldStoreIds.size,
+    soldWithFeedback,
+    fillRatePercent: percentOf(soldWithFeedback, soldStoreIds.size),
     viaBezold: {
       count: viaBezold,
       answered: withSource.length,

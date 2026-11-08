@@ -220,7 +220,7 @@ _Done. The ratio is `priceRatioPercent` (unit-tested; null for 面議 / 免頂�
 
 **Acceptance criteria:**
 
-- [x] `GET /api/admin/sold-feedback` → all feedback, newest first, plus `soldStoreCount`.
+- [x] `GET /api/admin/sold-feedback` → all feedback, newest first, plus `soldStoreIds` (the fill rate counts only stores still sold).
 - [x] `app/admin/store/feedback/page.tsx`: 4 stat cards, 2 bar charts with 未填, table with expandable rows linking to `/admin/store/list?store={id}`, client-side filters (買家來源, 標記方式, date range). 面議/免頂讓金 show no ratio.
 - [x] `components/AdminSidebar.tsx`: 「Sold Feedback」 under Store Management. Store List opens the drawer from `?store=`.
 

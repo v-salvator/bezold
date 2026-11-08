@@ -31,7 +31,7 @@ const ALL = "all";
 
 interface SoldFeedbackResponse {
   feedback: SoldFeedbackSummary[];
-  soldStoreCount: number;
+  soldStoreIds: string[];
 }
 
 const NOT_ANSWERED = <span className="text-black/45">未填</span>;
@@ -83,7 +83,8 @@ export default function SoldFeedbackPage() {
     );
   }, [data, sourceFilter, viaFilter, dateRange]);
 
-  const summary = summarizeSoldFeedback(rows, data?.soldStoreCount ?? 0);
+  const soldStoreIds = useMemo(() => new Set(data?.soldStoreIds ?? []), [data]);
+  const summary = summarizeSoldFeedback(rows, soldStoreIds);
 
   const columns: TableProps<SoldFeedbackSummary>["columns"] = [
     {
@@ -214,15 +215,12 @@ export default function SoldFeedbackPage() {
           <Statistic
             title="回饋數"
             value={summary.count}
-            suffix={
-              <span className="text-[14px] text-black/45">
-                / {data?.soldStoreCount ?? 0} 家已頂讓
-              </span>
-            }
+            suffix={<span className="text-[14px] text-black/45">則</span>}
           />
           <div className="text-[12px] text-black/45">
-            填寫率 {summary.fillRatePercent ?? "—"}
-            {summary.fillRatePercent !== null && "%"}
+            已頂讓 {summary.soldStoreCount} 家，{summary.soldWithFeedback}{" "}
+            家有填（{summary.fillRatePercent ?? "—"}
+            {summary.fillRatePercent !== null && "%"}）
           </div>
         </Card>
         <Card size="small" loading={loading}>
