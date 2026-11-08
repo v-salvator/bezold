@@ -15,6 +15,15 @@ import { pickRelatedStores } from "@/utils/relatedStores";
 
 const COLLECTION = COLLECTIONS.STORE;
 
+// * follow-up Timestamps → Date, only when present. A raw Timestamp can't be
+// * passed from a server component to a client component.
+const followUpDates = (storeData: FirebaseFirestore.DocumentData) => ({
+  ...(storeData.approvedTime && {
+    approvedTime: storeData.approvedTime.toDate(),
+  }),
+  ...(storeData.soldTime && { soldTime: storeData.soldTime.toDate() }),
+});
+
 // * shared shape mapping — Firestore Timestamps → Date, doc id folded in.
 const mapDocsToStores = (
   snapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>,
@@ -26,6 +35,7 @@ const mapDocsToStores = (
       ...storeData,
       createTime: storeData.createTime.toDate(),
       updateTime: storeData.updateTime.toDate(),
+      ...followUpDates(storeData),
     } as Store;
   });
 
@@ -182,6 +192,7 @@ export const getStoreById = async (storeId: string) => {
       ...storeData,
       createTime: storeData!.createTime.toDate(),
       updateTime: storeData!.updateTime.toDate(),
+      ...followUpDates(storeData!),
       images: images,
       userInfo: userData,
     } as Store;

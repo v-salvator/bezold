@@ -14,12 +14,14 @@ Every task: acceptance criteria below + the matching SPEC section · verify with
 
 **Acceptance criteria:**
 
-- [ ] `types/FollowUp.ts`, `types/SoldFeedback.ts` per SPEC (incl. `listedPrice`, `listedPriceNegotiable`). `Store`/`StoreDoc` gain `approvedTime`, `soldTime`, `soldVia`. `COLLECTIONS.FOLLOW_UP` and `COLLECTIONS.SOLD_FEEDBACK` (mock/prod).
-- [ ] Approving in Store List (single + bulk) and creating as approved in `StoreBaseForm` write `approvedTime: serverTimestamp()` only when the store has none. Re-approving keeps the original.
-- [ ] Client `storeConverter` and server mappers (`mapDocsToStores`, `getStoreById`) turn `approvedTime`/`soldTime` into `Date` (or leave absent).
-- [ ] `tests/rules/firestore.test.ts`: member/seller/admin can't read or write `mock|prodFollowUp` and `mock|prodSoldFeedback`. `tests/rules/stores.test.ts`: a seller can't write `approvedTime`, `soldTime` or `soldVia` on their own store.
+- [x] `types/FollowUp.ts`, `types/SoldFeedback.ts` per SPEC (incl. `listedPrice`, `listedPriceNegotiable`). `Store`/`StoreDoc` gain `approvedTime`, `soldTime`, `soldVia`. `COLLECTIONS.FOLLOW_UP` and `COLLECTIONS.SOLD_FEEDBACK` (mock/prod).
+- [x] Approving in Store List (single + bulk) writes `approvedTime: serverTimestamp()` only when the store has none. Re-approving keeps the original.
+- [x] Client `storeConverter` and server mappers (`mapDocsToStores`, `getStoreById`) turn `approvedTime`/`soldTime` into `Date` (or leave absent).
+- [x] `tests/rules/firestore.test.ts`: member/seller/admin can't read or write `mock|prodFollowUp` and `mock|prodSoldFeedback`. `tests/rules/stores.test.ts`: a seller can't write `approvedTime`, `soldTime` or `soldVia` on their own store.
 
 **Verification:** `npm run test:rules` · `npm run build` · dev: approve a pending mock store in admin → Firestore shows `approvedTime`; re-approve after edit → unchanged; open `/store/[id]` and the admin list without errors.
+
+_Done. `StoreBaseForm` only ever creates pending or draft stores, so Store List is the only place that approves; the create form was left untouched._
 
 **Dependencies:** None
 **Files:** `types/FollowUp.ts`, `types/SoldFeedback.ts`, `types/Store.ts`, `firebase/constants.ts`, `firebase/clientUtils/store.ts`, `firebase/serverUtils/store.ts`, `app/admin/store/list/page.tsx`, `app/admin/store/create/StoreBaseForm.tsx`, `tests/rules/*.test.ts`

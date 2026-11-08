@@ -96,3 +96,59 @@ for (const collectionName of ["mockInquiry", "prodInquiry"]) {
     }
   });
 }
+
+// * listing follow-up state and 頂讓回饋 go through the Admin SDK only (cron,
+// * /api/listing-check, /api/sold-feedback, /api/admin/*) — no client role,
+// * admins included, may touch them
+const adminSdkOnlyCollections: [string, Record<string, unknown>][] = [
+  [
+    "FollowUp",
+    {
+      storeId: "store1",
+      sentCount: 1,
+      lastSentTime: null,
+      lastAnswer: null,
+      lastAnswerTime: null,
+      paused: false,
+      tokenHash: "abc",
+      tokenExpireTime: null,
+      tokenUsed: false,
+      lastError: "",
+    },
+  ],
+  [
+    "SoldFeedback",
+    {
+      storeId: "store1",
+      storeName: "Shop",
+      listedPrice: 450000,
+      listedPriceNegotiable: false,
+      soldVia: "follow-up-email",
+      soldDuration: "1_to_3m",
+      buyerSource: "bezold",
+      finalPrice: 400000,
+      satisfaction: 5,
+      comment: "",
+    },
+  ],
+];
+
+for (const [suffix, sampleDoc] of adminSdkOnlyCollections) {
+  for (const collectionName of [`mock${suffix}`, `prod${suffix}`]) {
+    describe(`${collectionName} — client access`, () => {
+      const docPath = `${collectionName}/store1`;
+
+      for (const actorName of ["member", "seller", "admin"] as const) {
+        it(`${actorName} cannot read or write`, async () => {
+          await seed(env, docPath, sampleDoc);
+          const firestore = actors(env)[actorName].firestore();
+          await assertFails(getDoc(doc(firestore, docPath)));
+          await assertFails(setDoc(doc(firestore, docPath), sampleDoc));
+          await assertFails(
+            setDoc(doc(firestore, `${collectionName}/store2`), sampleDoc),
+          );
+        });
+      }
+    });
+  }
+}
