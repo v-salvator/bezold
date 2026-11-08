@@ -44,6 +44,8 @@ interface StoreDetailDrawerProps {
   deleting: boolean;
   /** The 狀態 section — each admin list supplies its own controls. */
   statusSection: React.ReactNode;
+  /** Store List's 追蹤信 section (follow-up emails); drafts have none. */
+  followUpSection?: React.ReactNode;
   onClose: () => void;
   onDelete: (store: Store) => void;
   onCopyLink: (url: string) => void;
@@ -54,6 +56,7 @@ export default function StoreDetailDrawer({
   store,
   deleting,
   statusSection,
+  followUpSection,
   onClose,
   onDelete,
   onCopyLink,
@@ -104,6 +107,10 @@ export default function StoreDetailDrawer({
               items={buildDetailItems(store)}
             />
           </DrawerSection>
+
+          {followUpSection && (
+            <DrawerSection title="追蹤信">{followUpSection}</DrawerSection>
+          )}
 
           {isDigitalAsset(store) && (
             // * a missing screenshot warns but never blocks approval
@@ -217,6 +224,16 @@ function buildCommonDetailItems(store: Store) {
       key: "createTime",
       label: "建立",
       children: dayjs(store.createTime).format("YYYY-MM-DD HH:mm"),
+    },
+    {
+      key: "approvedTime",
+      label: "首次上架",
+      // * stores approved before approvedTime existed count from 建立
+      children: store.approvedTime ? (
+        dayjs(store.approvedTime).format("YYYY-MM-DD HH:mm")
+      ) : (
+        <span className="text-black/45">—（追蹤信以建立時間計算）</span>
+      ),
     },
     {
       key: "updateTime",

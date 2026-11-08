@@ -348,6 +348,10 @@ for (const collectionName of STORE_COLLECTIONS) {
       ["createTime", Timestamp.fromDate(new Date("2020-01-01"))],
       ["currency", "USD"],
       ["featured", true],
+      // * listing follow-up fields — written only by admins / the Admin SDK
+      ["approvedTime", Timestamp.fromDate(new Date("2020-01-01"))],
+      ["soldTime", Timestamp.fromDate(new Date("2020-01-01"))],
+      ["soldVia", "follow-up-email"],
     ];
     for (const [field, value] of protectedFields) {
       it(`cannot change ${field}`, async () => {

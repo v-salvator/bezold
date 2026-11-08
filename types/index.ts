@@ -7,3 +7,5 @@ export * from "./StoreStatus";
 export * from "./StoreAnalytics";
 export * from "./DigitalAsset";
 export * from "./Inquiry";
+export * from "./FollowUp";
+export * from "./SoldFeedback";

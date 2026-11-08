@@ -1,0 +1,2576 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>追蹤信 Prototype</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Noto+Sans+TC:wght@400;700;800&family=Rubik+Mono+One&display=swap"
+      rel="stylesheet"
+    />
+    <!--
+      Design prototype for SPEC.md (listing follow-up email).
+      - The two emails are real email-safe markup (tables + inline styles) and
+        are the reference for lib/followUp/emailTemplates.ts.
+      - The admin screens are a hand-drawn mock of the Ant Design admin, not
+        the real components. New parts are outlined in orange.
+      Open directly in a browser — no build step.
+    -->
+    <style>
+      :root {
+        --ink: #1c1a17;
+        --paper: #f6f2e9;
+        --paper-2: #ece5d3;
+        --accent: #b33a1d;
+        --muted: #736b61;
+        --new: #ff8a3d;
+        --ant-primary: #ff4a31;
+        --ant-border: #f0f0f0;
+        --ant-text: rgba(0, 0, 0, 0.88);
+        --ant-text-2: rgba(0, 0, 0, 0.45);
+        --sans:
+          -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC",
+          "Microsoft JhengHei", "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: #f5f5f5;
+        color: var(--ant-text);
+        font-family: var(--sans);
+        font-size: 14px;
+      }
+
+      /* ── page chrome ── */
+      .page-head {
+        background: var(--ink);
+        color: var(--paper);
+        padding: 20px 24px 0;
+      }
+
+      .page-head h1 {
+        margin: 0 0 4px;
+        font-size: 20px;
+      }
+
+      .page-head p {
+        margin: 0 0 16px;
+        color: #c9c0b0;
+        font-size: 13px;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+      }
+
+      .tabs button {
+        border: 0;
+        background: transparent;
+        color: #c9c0b0;
+        padding: 10px 16px;
+        font: inherit;
+        cursor: pointer;
+        border-radius: 6px 6px 0 0;
+      }
+
+      .tabs button[aria-selected="true"] {
+        background: #f5f5f5;
+        color: var(--ink);
+        font-weight: 600;
+      }
+
+      .panel {
+        display: none;
+        padding: 24px;
+      }
+
+      .panel.active {
+        display: block;
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      .seg {
+        display: inline-flex;
+        background: rgba(0, 0, 0, 0.06);
+        border-radius: 6px;
+        padding: 2px;
+      }
+
+      .seg button {
+        border: 0;
+        background: transparent;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font: inherit;
+        font-size: 13px;
+        cursor: pointer;
+        color: var(--ant-text-2);
+      }
+
+      .seg button[aria-pressed="true"] {
+        background: #fff;
+        color: var(--ant-text);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+      }
+
+      .toolbar label {
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        font-size: 13px;
+        color: var(--ant-text-2);
+      }
+
+      .note {
+        font-size: 13px;
+        color: var(--ant-text-2);
+        line-height: 1.7;
+        max-width: 760px;
+      }
+
+      .note b {
+        color: var(--ant-text);
+      }
+
+      /* ── inbox frame around each email ── */
+      .inbox {
+        background: #fff;
+        border: 1px solid #e5e5e5;
+        border-radius: 10px;
+        margin: 0 auto;
+        overflow: hidden;
+        transition: width 0.2s;
+      }
+
+      .inbox-meta {
+        padding: 14px 18px;
+        border-bottom: 1px solid #eee;
+        font-size: 13px;
+        line-height: 1.7;
+      }
+
+      .inbox-meta .subject {
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .inbox-meta .dim {
+        color: var(--ant-text-2);
+      }
+
+      .inbox iframe {
+        display: block;
+        width: 100%;
+        border: 0;
+      }
+
+      /* ── admin mock ── */
+      .admin {
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        background: #fff;
+        border: 1px solid #e5e5e5;
+        border-radius: 10px;
+        overflow: hidden;
+        min-height: 720px;
+      }
+
+      .sider {
+        background: #001529;
+        color: rgba(255, 255, 255, 0.65);
+        padding: 16px 0;
+        font-size: 14px;
+      }
+
+      .sider .logo {
+        color: #fff;
+        font-weight: 700;
+        padding: 0 20px 16px;
+        letter-spacing: 1px;
+      }
+
+      .sider div.item {
+        padding: 10px 20px;
+      }
+
+      .sider div.item.on {
+        background: var(--ant-primary);
+        color: #fff;
+      }
+
+      .admin-main {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 400px;
+        min-width: 0;
+      }
+
+      .admin-content {
+        padding: 16px;
+        min-width: 0;
+        overflow-x: auto;
+      }
+
+      .fake-input {
+        border: 1px solid #d9d9d9;
+        border-radius: 6px;
+        padding: 4px 11px;
+        color: rgba(0, 0, 0, 0.25);
+        background: #fff;
+        font-size: 14px;
+      }
+
+      table.ant {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 14px;
+        white-space: nowrap;
+      }
+
+      table.ant th {
+        background: #fafafa;
+        text-align: left;
+        font-weight: 600;
+        padding: 12px 10px;
+        border-bottom: 1px solid var(--ant-border);
+      }
+
+      table.ant td {
+        padding: 12px 10px;
+        border-bottom: 1px solid var(--ant-border);
+        vertical-align: top;
+      }
+
+      table.ant tr.row {
+        cursor: pointer;
+      }
+
+      table.ant tr.row:hover td {
+        background: #fafafa;
+      }
+
+      table.ant tr.row.selected td {
+        background: #fff1ee;
+      }
+
+      .right {
+        text-align: right;
+      }
+
+      .dim {
+        color: var(--ant-text-2);
+      }
+
+      .small {
+        font-size: 12px;
+      }
+
+      .tag {
+        display: inline-block;
+        font-size: 12px;
+        line-height: 20px;
+        padding: 0 7px;
+        border-radius: 4px;
+        border: 1px solid #d9d9d9;
+        background: #fafafa;
+        margin-right: 4px;
+      }
+
+      .tag.green {
+        color: #389e0d;
+        background: #f6ffed;
+        border-color: #b7eb8f;
+      }
+
+      .tag.orange {
+        color: #d46b08;
+        background: #fff7e6;
+        border-color: #ffd591;
+      }
+
+      .tag.red {
+        color: #cf1322;
+        background: #fff1f0;
+        border-color: #ffa39e;
+      }
+
+      .tag.cyan {
+        color: #08979c;
+        background: #e6fffb;
+        border-color: #87e8de;
+      }
+
+      .tag.blue {
+        color: #0958d9;
+        background: #e6f4ff;
+        border-color: #91caff;
+      }
+
+      /* new parts — orange outline, toggled off with .hide-new */
+      .is-new {
+        outline: 2px dashed var(--new);
+        outline-offset: 2px;
+        border-radius: 4px;
+        position: relative;
+      }
+
+      th.is-new,
+      td.is-new {
+        outline-offset: -3px;
+        background: #fff8f1 !important;
+      }
+
+      .new-badge {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 700;
+        color: #fff;
+        background: var(--new);
+        border-radius: 3px;
+        padding: 0 4px;
+        margin-left: 6px;
+        vertical-align: 1px;
+        letter-spacing: 0.5px;
+      }
+
+      .hide-new .is-new {
+        outline: 0;
+      }
+
+      .hide-new th.is-new,
+      .hide-new td.is-new {
+        background: transparent !important;
+      }
+
+      .hide-new .new-badge {
+        display: none;
+      }
+
+      /* drawer */
+      .drawer {
+        border-left: 1px solid var(--ant-border);
+        box-shadow: -6px 0 16px rgba(0, 0, 0, 0.06);
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        background: #fff;
+      }
+
+      .drawer-head {
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--ant-border);
+        font-weight: 600;
+        font-size: 16px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .drawer-head .close {
+        color: var(--ant-text-2);
+        font-weight: 400;
+      }
+
+      .drawer-body {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        overflow-y: auto;
+        flex: 1;
+      }
+
+      .drawer-foot {
+        padding: 10px 16px;
+        border-top: 1px solid var(--ant-border);
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .btn {
+        border: 1px solid #d9d9d9;
+        background: #fff;
+        border-radius: 6px;
+        padding: 4px 15px;
+        font: inherit;
+        font-size: 14px;
+      }
+
+      .btn.primary {
+        background: var(--ant-primary);
+        border-color: var(--ant-primary);
+        color: #fff;
+      }
+
+      .btn.danger {
+        color: #ff4d4f;
+        border-color: #ff4d4f;
+      }
+
+      .cover {
+        height: 160px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #e9e2d2, #d6ccb6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(0, 0, 0, 0.3);
+      }
+
+      .section h4 {
+        margin: 0 0 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--ant-text-2);
+      }
+
+      .segmented {
+        display: flex;
+        background: rgba(0, 0, 0, 0.04);
+        border-radius: 6px;
+        padding: 2px;
+        font-size: 13px;
+      }
+
+      .segmented span {
+        flex: 1;
+        text-align: center;
+        padding: 4px 0;
+        border-radius: 4px;
+        color: var(--ant-text-2);
+      }
+
+      .segmented span.on {
+        background: #fff;
+        color: var(--ant-text);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+      }
+
+      dl.desc {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        margin: 0;
+        font-size: 14px;
+        row-gap: 8px;
+      }
+
+      dl.desc dt {
+        color: var(--ant-text-2);
+      }
+
+      dl.desc dd {
+        margin: 0;
+      }
+
+      .switch-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        border: 1px solid var(--ant-border);
+        border-radius: 8px;
+        margin-top: 10px;
+      }
+
+      .switch {
+        width: 44px;
+        height: 22px;
+        border-radius: 11px;
+        background: rgba(0, 0, 0, 0.25);
+        border: 0;
+        position: relative;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: background 0.2s;
+      }
+
+      .switch::after {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #fff;
+        transition: left 0.2s;
+      }
+
+      .switch[aria-checked="true"] {
+        background: var(--ant-primary);
+      }
+
+      .switch[aria-checked="true"]::after {
+        left: 24px;
+      }
+
+      .alert {
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 13px;
+        line-height: 1.6;
+        margin-top: 10px;
+      }
+
+      .alert.warning {
+        background: #fffbe6;
+        border: 1px solid #ffe58f;
+      }
+
+      .alert.info {
+        background: #e6f4ff;
+        border: 1px solid #91caff;
+      }
+
+      .stars {
+        color: #fadb14;
+        letter-spacing: 1px;
+      }
+
+      .stars .off {
+        color: #e5e5e5;
+      }
+
+      .quote {
+        background: #fafafa;
+        border-radius: 6px;
+        padding: 8px 10px;
+        line-height: 1.6;
+        white-space: normal;
+      }
+
+      /* ── admin 頂讓回饋 page ── */
+      .sider [data-view] {
+        cursor: pointer;
+      }
+
+      .sider .group {
+        padding: 14px 20px 4px;
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.4);
+      }
+
+      .sider .item {
+        padding-left: 32px;
+      }
+
+      .sider [data-view]:not(.on):hover {
+        color: #fff;
+      }
+
+      .admin-feedback {
+        padding: 20px 24px 28px;
+        min-width: 0;
+      }
+
+      .admin-feedback[hidden],
+      .admin-main[hidden] {
+        display: none;
+      }
+
+      .fbp-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .fbp-head h2 {
+        margin: 0;
+        font-size: 20px;
+      }
+
+      .fbp-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .stat-card {
+        border: 1px solid var(--ant-border);
+        border-radius: 8px;
+        padding: 16px;
+        background: #fff;
+      }
+
+      .stat-title {
+        font-size: 13px;
+        color: var(--ant-text-2);
+      }
+
+      .stat-value {
+        font-size: 26px;
+        font-weight: 600;
+        margin: 6px 0 2px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .stat-value small {
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--ant-text-2);
+        margin-left: 4px;
+      }
+
+      .stat-sub {
+        font-size: 12px;
+        color: var(--ant-text-2);
+      }
+
+      .fbp-dist {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin: 12px 0 20px;
+      }
+
+      .bar-row {
+        display: grid;
+        grid-template-columns: 96px 1fr 56px;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        margin-top: 10px;
+      }
+
+      .bar-track {
+        height: 10px;
+        border-radius: 5px;
+        background: #f5f5f5;
+        overflow: hidden;
+      }
+
+      .bar-fill {
+        height: 100%;
+        border-radius: 5px;
+        background: var(--ant-primary);
+      }
+
+      .bar-fill.muted {
+        background: #d9d9d9;
+      }
+
+      .bar-count {
+        text-align: right;
+        color: var(--ant-text-2);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .comment-cell {
+        max-width: 170px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      tr.expand-row td {
+        background: #fafafa;
+        white-space: normal;
+        line-height: 1.7;
+      }
+
+      .link {
+        color: var(--ant-primary);
+        cursor: pointer;
+      }
+
+      @media (max-width: 1100px) {
+        .fbp-stats,
+        .fbp-dist {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      /* ── seller-facing pages (public site look) ── */
+      .seg.wrap {
+        flex-wrap: wrap;
+      }
+
+      .browser {
+        margin: 0 auto;
+        max-width: 100%;
+        border: 1px solid #d9d9d9;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #fff;
+        transition: width 0.2s;
+      }
+
+      .browser-bar {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding: 8px 12px;
+        background: #ececec;
+        font-size: 12px;
+      }
+
+      .browser-bar .dots {
+        color: #c4c4c4;
+        letter-spacing: 2px;
+      }
+
+      .browser-bar .url {
+        flex: 1;
+        min-width: 0;
+        background: #fff;
+        border-radius: 6px;
+        padding: 4px 10px;
+        color: #555;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .site {
+        --hand: "Kalam", "Noto Sans TC", sans-serif;
+        --ink: #1c1a17;
+        --paper: #f6f2e9;
+        --paper-2: #ece5d3;
+        --paper-3: #e0d6bc;
+        --accent: #b33a1d;
+        --accent-2: #2a6f4d;
+        --accent-3: #e6b833;
+        --muted: #736b61;
+        font-family: var(--hand);
+        background: var(--paper);
+        color: var(--ink);
+        position: relative;
+      }
+
+      .site-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 20px;
+        border-bottom: 1.5px solid var(--ink);
+      }
+
+      .site-logo {
+        font-family: "Rubik Mono One", monospace;
+        font-size: 20px;
+        text-shadow: 1.5px 1.5px 0 var(--accent);
+      }
+
+      .site-nav .links {
+        display: flex;
+        gap: 18px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      .narrow .site-nav .links {
+        display: none;
+      }
+
+      .site-main {
+        padding: 40px 20px 56px;
+      }
+
+      .site-inner {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .site-eyebrow {
+        font-size: 12px;
+        letter-spacing: 2px;
+        color: var(--accent);
+      }
+
+      .site h1 {
+        font-size: 28px;
+        line-height: 1.35;
+        margin: 10px 0 20px;
+        font-weight: 800;
+      }
+
+      .narrow .site h1 {
+        font-size: 23px;
+      }
+
+      .site h1 em {
+        display: block;
+        font-style: normal;
+        color: var(--accent);
+      }
+
+      .store-card {
+        display: flex;
+        gap: 14px;
+        background: #fff;
+        border: 1.5px solid var(--ink);
+        border-radius: 6px;
+        padding: 12px;
+        box-shadow: 3px 3px 0 var(--ink);
+      }
+
+      .store-card .thumb {
+        width: 96px;
+        height: 72px;
+        border-radius: 4px;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, #e9e2d2, #c9bb9c);
+      }
+
+      .store-card .name {
+        font-weight: 700;
+        font-size: 17px;
+      }
+
+      .store-card .meta {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .warn-box {
+        margin-top: 20px;
+        border-left: 4px solid var(--accent);
+        background: var(--paper-2);
+        padding: 12px 14px;
+        font-size: 15px;
+        line-height: 1.7;
+      }
+
+      .site-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 18px;
+        margin-top: 24px;
+      }
+
+      .s-btn {
+        font-family: var(--hand);
+        font-weight: 700;
+        font-size: 16px;
+        border: 1.5px solid var(--ink);
+        padding: 10px 22px;
+        border-radius: 4px;
+        background: var(--accent);
+        color: #fff;
+        box-shadow: 3px 3px 0 var(--ink);
+        cursor: pointer;
+      }
+
+      .s-btn.sage {
+        background: var(--accent-2);
+      }
+
+      .s-btn.ghost {
+        background: #fff;
+        color: var(--ink);
+        box-shadow: none;
+      }
+
+      .s-btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .text-link {
+        background: none;
+        border: 0;
+        padding: 0;
+        font-family: var(--hand);
+        font-size: 15px;
+        color: var(--muted);
+        text-decoration: underline;
+        cursor: pointer;
+      }
+
+      .fine {
+        margin-top: 18px;
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.7;
+      }
+
+      .success-banner {
+        display: flex;
+        gap: 10px;
+        background: var(--accent-2);
+        color: #fff;
+        border: 1.5px solid var(--ink);
+        border-radius: 6px;
+        padding: 14px 16px;
+        font-size: 16px;
+        line-height: 1.6;
+      }
+
+      .fb-card {
+        margin-top: 24px;
+        background: #fff;
+        border: 1.5px solid var(--ink);
+        border-radius: 8px;
+        padding: 24px 22px;
+      }
+
+      .fb-card.flat {
+        margin-top: 0;
+        border: 0;
+        padding: 0;
+        background: transparent;
+      }
+
+      .fb-card h2 {
+        margin: 0;
+        font-size: 21px;
+        line-height: 1.4;
+      }
+
+      .fb-card .sub {
+        margin: 6px 0 0;
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      .fb-field {
+        margin-top: 22px;
+      }
+
+      .fb-field .label {
+        display: block;
+        font-weight: 700;
+        font-size: 15px;
+        margin-bottom: 10px;
+      }
+
+      .pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .s-pill {
+        font-family: var(--hand);
+        font-size: 14px;
+        border: 1.5px solid var(--ink);
+        padding: 6px 14px;
+        border-radius: 99px;
+        background: #fff;
+        color: var(--ink);
+        cursor: pointer;
+      }
+
+      .s-pill[aria-pressed="true"] {
+        background: var(--ink);
+        color: var(--paper);
+      }
+
+      .price-input {
+        display: flex;
+        align-items: center;
+        width: 220px;
+        max-width: 100%;
+        border: 1.5px solid var(--ink);
+        border-radius: 4px;
+        background: #fff;
+      }
+
+      .price-input span {
+        padding: 0 10px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .price-input input {
+        flex: 1;
+        min-width: 0;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        font-family: var(--hand);
+        font-size: 16px;
+        padding: 8px 0;
+      }
+
+      .hint {
+        margin-top: 6px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .star-row {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+      }
+
+      .star {
+        background: none;
+        border: 0;
+        padding: 0 2px;
+        font-size: 30px;
+        line-height: 1;
+        color: var(--paper-3);
+        cursor: pointer;
+      }
+
+      .star.on {
+        color: var(--accent-3);
+      }
+
+      .star-label {
+        margin-left: 8px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      .s-textarea {
+        width: 100%;
+        min-height: 96px;
+        border: 1.5px solid var(--ink);
+        border-radius: 4px;
+        padding: 10px 12px;
+        background: #fff;
+        font-family: var(--hand);
+        font-size: 15px;
+        resize: vertical;
+      }
+
+      .counter {
+        text-align: right;
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+
+      .fb-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 18px;
+        margin-top: 26px;
+      }
+
+      .big-mark {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        border: 1.5px solid var(--ink);
+        box-shadow: 3px 3px 0 var(--ink);
+        background: var(--accent-2);
+        color: #fff;
+        font-size: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 18px;
+      }
+
+      .big-mark.gray {
+        background: var(--paper-3);
+        color: var(--ink);
+      }
+
+      .lead {
+        font-size: 16px;
+        line-height: 1.8;
+        margin: 0;
+      }
+
+      .site-foot {
+        background: var(--ink);
+        color: #c9c0b0;
+        font-size: 12px;
+        padding: 18px 20px;
+        text-align: center;
+      }
+
+      .ml-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .ml-card {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        background: #fff;
+        border: 1.5px solid var(--ink);
+        border-radius: 6px;
+        padding: 10px 12px;
+      }
+
+      .ml-card .thumb {
+        width: 72px;
+        height: 54px;
+        border-radius: 4px;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, #e9e2d2, #c9bb9c);
+      }
+
+      .ml-card .grow {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .badge {
+        display: inline-block;
+        font-size: 12px;
+        border: 1.5px solid var(--ink);
+        border-radius: 99px;
+        padding: 1px 10px;
+        background: var(--paper-3);
+      }
+
+      .badge.green {
+        background: var(--accent-2);
+        color: #fff;
+      }
+
+      .overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(28, 26, 23, 0.55);
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 40px 16px;
+        overflow: auto;
+      }
+
+      .dialog {
+        position: relative;
+        width: 100%;
+        max-width: 560px;
+        background: var(--paper);
+        border: 1.5px solid var(--ink);
+        border-radius: 8px;
+        box-shadow: 5px 5px 0 var(--ink);
+        padding: 26px 22px 24px;
+      }
+
+      .dialog .close-x {
+        position: absolute;
+        top: 10px;
+        right: 12px;
+        background: none;
+        border: 0;
+        font-size: 20px;
+        cursor: pointer;
+        color: var(--muted);
+      }
+
+      .toast {
+        position: absolute;
+        top: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--ink);
+        color: var(--paper);
+        border-radius: 6px;
+        padding: 8px 16px;
+        font-size: 14px;
+        white-space: nowrap;
+      }
+
+      @media (max-width: 1100px) {
+        .admin {
+          grid-template-columns: 1fr;
+        }
+
+        .sider {
+          display: none;
+        }
+
+        .admin-main {
+          grid-template-columns: 1fr;
+        }
+
+        .drawer {
+          border-left: 0;
+          border-top: 1px solid var(--ant-border);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="page-head">
+      <h1>追蹤信 Prototype</h1>
+      <p>
+        SPEC.md 的設計稿：兩封
+        email、賣家點信裡按鈕後看到的頁面（含頂讓回饋表單），和 admin
+        商店列表會多出來的東西。資料都是假的。
+      </p>
+      <nav class="tabs" role="tablist">
+        <button role="tab" aria-selected="true" data-tab="follow-up">
+          追蹤信 Email
+        </button>
+        <button role="tab" aria-selected="false" data-tab="sold">
+          已頂讓確認信
+        </button>
+        <button role="tab" aria-selected="false" data-tab="seller">
+          賣家頁面・頂讓回饋
+        </button>
+        <button role="tab" aria-selected="false" data-tab="admin">
+          Admin 商店列表
+        </button>
+      </nav>
+    </header>
+
+    <!-- ── 1. follow-up email ── -->
+    <section class="panel active" id="panel-follow-up">
+      <div class="toolbar">
+        <div class="seg" data-group="followUpWidth">
+          <button aria-pressed="true" data-value="600">桌機 600px</button>
+          <button aria-pressed="false" data-value="375">手機 375px</button>
+        </div>
+        <div class="seg" data-group="followUpVariant">
+          <button aria-pressed="true" data-value="physical">實體店面</button>
+          <button aria-pressed="false" data-value="digital">數位資產</button>
+        </div>
+      </div>
+      <p class="note">
+        每家店<b>第一封在上架滿 60 天</b>寄出，之後每 30
+        天一封（從最後一次寄信或回覆「還在頂讓」算起）。兩個按鈕都會打開
+        <code>/listing-check</code>
+        並預先選好答案，賣家在頁面上再按一次確認才會真的寫入，因為信箱的掃毒程式會自動打開信裡的每個連結。
+        <br />
+        標頭的 BEZOLD 字標在正式信件裡是一張
+        PNG（大部分信箱不載入網頁字型），這裡用網頁字型示意。
+      </p>
+      <div class="inbox" id="follow-up-inbox">
+        <div class="inbox-meta">
+          <div class="subject" id="follow-up-subject"></div>
+          <div>
+            <b>Bezold</b>
+            <span class="dim">&lt;hello@bezold.com.tw&gt;</span>
+          </div>
+          <div class="dim">寄給 王老闆 · 2026/11/08 10:02</div>
+        </div>
+        <iframe id="follow-up-frame" title="追蹤信預覽"></iframe>
+      </div>
+    </section>
+
+    <!-- ── 2. sold confirmation email ── -->
+    <section class="panel" id="panel-sold">
+      <div class="toolbar">
+        <div class="seg" data-group="soldWidth">
+          <button aria-pressed="true" data-value="600">桌機 600px</button>
+          <button aria-pressed="false" data-value="375">手機 375px</button>
+        </div>
+      </div>
+      <p class="note">
+        賣家從追蹤信按「已頂讓」並確認後，立刻寄出這封。目的是讓本人知道狀態改了：如果是別人拿到轉寄的連結誤按，賣家回信後
+        admin 可以在抽屜裡把狀態改回來。在
+        <code>/my-listings</code> 自己按已頂讓的<b>不寄</b>這封。
+      </p>
+      <div class="inbox" id="sold-inbox">
+        <div class="inbox-meta">
+          <div class="subject">「西螺日式拉麵店」已改成已頂讓</div>
+          <div>
+            <b>Bezold</b>
+            <span class="dim">&lt;hello@bezold.com.tw&gt;</span>
+          </div>
+          <div class="dim">寄給 王老闆 · 2026/11/08 14:32</div>
+        </div>
+        <iframe id="sold-frame" title="已頂讓確認信預覽"></iframe>
+      </div>
+    </section>
+
+    <!-- ── 3. seller pages ── -->
+    <section class="panel" id="panel-seller">
+      <div class="toolbar">
+        <div class="seg" data-group="sellerWidth">
+          <button aria-pressed="true" data-value="1000">桌機</button>
+          <button aria-pressed="false" data-value="375">手機 375px</button>
+        </div>
+        <div class="seg wrap" data-group="sellerStep">
+          <button aria-pressed="true" data-value="confirm-sold">
+            ① 按了「已經頂讓了」
+          </button>
+          <button aria-pressed="false" data-value="feedback">
+            ② 頂讓回饋表單
+          </button>
+          <button aria-pressed="false" data-value="thanks">③ 送出後</button>
+          <button aria-pressed="false" data-value="confirm-still">
+            按了「還在頂讓」
+          </button>
+          <button aria-pressed="false" data-value="still-done">
+            還在頂讓・完成
+          </button>
+          <button aria-pressed="false" data-value="invalid">連結失效</button>
+          <button aria-pressed="false" data-value="my-listings">
+            /my-listings 彈窗
+          </button>
+        </div>
+      </div>
+      <p class="note">
+        <b>頂讓回饋表單出現在哪：</b>從追蹤信按「已經頂讓了」→ 在
+        <code>/listing-check</code> 按「確認已頂讓」→
+        <b>同一頁</b>換成「恭喜成交」和回饋表單（②），不會跳到別的網址。賣家在
+        <code>/my-listings</code>
+        自己按已頂讓的，表單則以<b>彈窗</b>出現。兩邊是同一個元件，全部選填，可以略過。
+        <br />
+        頁面裡的按鈕都可以點，會照實際流程往下走。
+      </p>
+      <div class="browser" id="seller-browser">
+        <div class="browser-bar">
+          <span class="dots">●●●</span>
+          <span class="url" id="seller-url"></span>
+        </div>
+        <div class="site" id="seller-site"></div>
+      </div>
+    </section>
+
+    <!-- ── 4. admin ── -->
+    <section class="panel" id="panel-admin">
+      <div class="toolbar">
+        <label
+          ><input type="checkbox" id="toggle-new" checked /> 標示新增部分</label
+        >
+      </div>
+      <p class="note">
+        左側選單可切換兩頁：<b>商店列表</b>（點表格的列切換右側抽屜。<b>追蹤信</b>欄顯示寄過幾封，抽屜裡多了「追蹤信」，含停止寄送的開關，以及單店的「頂讓回饋」。其他欄位如區域、類別、坪數、月租、點擊率沒變，這裡先省略）；新頁面
+        <b>頂讓回饋</b
+        >：所有賣家填過的回饋集中在一頁，上面是統計，下面是每一則回饋（點列可展開完整建議）。
+      </p>
+      <div class="admin" id="admin">
+        <aside class="sider">
+          <div class="logo">BEZOLD ADMIN</div>
+          <div class="group">Store Management</div>
+          <div class="item">Store Create</div>
+          <div class="item on" data-view="stores">Store List</div>
+          <div class="item">Draft Stores</div>
+          <div class="item">Batch Stores</div>
+          <div class="item">Store Analytics</div>
+          <div class="item" data-view="feedback">
+            Sold Feedback<span class="new-badge">NEW</span>
+          </div>
+          <div class="group">User Management</div>
+          <div class="item">User List</div>
+          <div class="item">Buyer Profiles</div>
+          <div class="group">Digital Assets</div>
+          <div class="item">Inquiries</div>
+        </aside>
+        <div class="admin-feedback" id="admin-feedback" hidden></div>
+        <div class="admin-main" id="admin-stores">
+          <div class="admin-content">
+            <div class="toolbar">
+              <span class="fake-input" style="width: 260px"
+                >Search by store name or user ID</span
+              >
+              <span class="fake-input" style="color: var(--ant-text)"
+                >全部狀態 ▾</span
+              >
+              <span class="fake-input" style="color: var(--ant-text)"
+                >全部類型 ▾</span
+              >
+            </div>
+            <table class="ant">
+              <thead>
+                <tr>
+                  <th>店名</th>
+                  <th>狀態</th>
+                  <th class="is-new">
+                    追蹤信<span class="new-badge">NEW</span>
+                  </th>
+                  <th>類型</th>
+                  <th>城市／類型</th>
+                  <th class="right">頂讓金</th>
+                  <th class="right">總瀏覽數</th>
+                  <th>建立</th>
+                </tr>
+              </thead>
+              <tbody id="store-rows"></tbody>
+            </table>
+            <p class="note small" style="margin-top: 12px">
+              追蹤信欄：「—」= 還沒到第一封（上架未滿 60
+              天）。灰色小字是最後一次寄出的日期。
+            </p>
+          </div>
+          <aside class="drawer" id="drawer"></aside>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      // ─────────────────────────── email templates ───────────────────────────
+      // * reference markup for lib/followUp/emailTemplates.ts — tables and
+      // * inline styles only, since mail clients drop <style>, flex and fonts
+      const COLOR = {
+        ink: "#1c1a17",
+        paper: "#f6f2e9",
+        paper2: "#ece5d3",
+        accent: "#b33a1d",
+        muted: "#736b61",
+        footerText: "#d8d0c0",
+      };
+      const FONT =
+        "-apple-system,BlinkMacSystemFont,'PingFang TC','Noto Sans TC','Microsoft JhengHei',sans-serif";
+      const APP_URL = "https://www.bezold.com.tw";
+
+      const escapeHtml = (text) =>
+        String(text).replace(
+          /[&<>"']/g,
+          (character) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[character],
+        );
+
+      const emailShell = ({ preheader, body }) => `<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">
+<!-- prototype only: the real header is public/email/bezold-email-header.png -->
+<link href="https://fonts.googleapis.com/css2?family=Rubik+Mono+One&display=swap" rel="stylesheet">
+</head>
+<body style="margin:0;padding:0;background:${COLOR.paper2};">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">${escapeHtml(preheader)}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${COLOR.paper2};">
+<tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:${COLOR.paper};border:1px solid ${COLOR.ink};border-radius:6px;overflow:hidden;font-family:${FONT};color:${COLOR.ink};">
+  <tr><td align="center" style="background:${COLOR.ink};padding:40px 24px 36px;">
+    <div style="font-family:'Rubik Mono One',${FONT};font-size:34px;line-height:1;color:${COLOR.paper};text-shadow:2px 2px 0 ${COLOR.accent};letter-spacing:1px;">BEZOLD</div>
+    <div style="margin-top:8px;font-size:14px;font-weight:700;letter-spacing:2px;"><span style="color:${COLOR.accent};">必售！</span><span style="color:#9c9384;">頂讓創業平台</span></div>
+  </td></tr>
+  ${body}
+  <tr><td align="center" style="background:${COLOR.ink};padding:28px 24px;font-size:13px;line-height:1.9;color:${COLOR.footerText};">
+    Bezold 必售！｜台灣店面頂讓媒合平台<br>真實刊登 · 買賣直接聯絡
+    <div style="margin:14px 0;">
+      <a href="${APP_URL}/store-guide" style="color:${COLOR.paper};text-decoration:underline;">頂讓指南</a>
+      <span style="color:#5c564d;">&nbsp;·&nbsp;</span>
+      <a href="https://line.me/ti/p/~bezoldtw" style="color:${COLOR.paper};text-decoration:underline;">LINE 客服：bezoldtw</a>
+    </div>
+    <span style="font-size:12px;color:#9c9384;">不想再收到 Bezold 的通知，回覆「取消」即可</span>
+  </td></tr>
+</table>
+</td></tr></table>
+</body></html>`;
+
+      const heading = (storeName, accentLine, eyebrow) => `
+  <tr><td style="padding:32px 28px 0;">
+    <div style="font-size:12px;letter-spacing:2px;color:${COLOR.accent};">BEZOLD&nbsp; ${escapeHtml(eyebrow)}</div>
+    <div style="margin-top:12px;font-size:28px;line-height:1.35;font-weight:800;">「${escapeHtml(storeName)}」</div>
+    <div style="font-size:28px;line-height:1.35;font-weight:800;color:${COLOR.accent};">${escapeHtml(accentLine)}</div>
+  </td></tr>`;
+
+      const paragraph = (html, extraStyle = "") =>
+        `<p style="margin:0 0 14px;font-size:16px;line-height:1.8;${extraStyle}">${html}</p>`;
+
+      const infoCard = (label, title, rows, link) => `
+  <tr><td style="padding:8px 28px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${COLOR.paper2};border:1px dashed ${COLOR.ink};border-radius:4px;">
+      <tr><td style="padding:20px 22px;">
+        <div style="font-size:12px;letter-spacing:2px;color:${COLOR.accent};">${escapeHtml(label)}</div>
+        <div style="margin:10px 0 12px;font-size:19px;font-weight:600;">${escapeHtml(title)}</div>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="font-size:15px;line-height:1.6;">
+          ${rows
+            .map(
+              ([rowLabel, rowValue]) =>
+                `<tr><td style="padding:4px 18px 4px 0;color:${COLOR.muted};white-space:nowrap;vertical-align:top;">${escapeHtml(rowLabel)}</td><td style="padding:4px 0;font-weight:700;">${escapeHtml(rowValue)}</td></tr>`,
+            )
+            .join("")}
+        </table>
+        ${link ? `<div style="margin-top:14px;"><a href="${link.href}" style="color:${COLOR.ink};font-weight:700;font-size:15px;text-decoration:underline;">${escapeHtml(link.label)}</a></div>` : ""}
+      </td></tr>
+    </table>
+  </td></tr>`;
+
+      // * "bulletproof" buttons: the link fills a table cell, so Outlook
+      // * still renders a clickable block
+      const primaryButton = (href, label) => `
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 12px;"><tr>
+  <td style="background:${COLOR.accent};border:2px solid ${COLOR.ink};border-radius:4px;box-shadow:4px 4px 0 ${COLOR.ink};">
+    <a href="${href}" style="display:inline-block;padding:13px 30px;font-size:17px;font-weight:800;color:#ffffff;text-decoration:none;font-family:${FONT};">${escapeHtml(label)}</a>
+  </td></tr></table>`;
+
+      const secondaryButton = (href, label) => `
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 4px;"><tr>
+  <td style="background:#ffffff;border:1.5px solid ${COLOR.ink};border-radius:4px;">
+    <a href="${href}" style="display:inline-block;padding:12px 26px;font-size:16px;font-weight:700;color:${COLOR.ink};text-decoration:none;font-family:${FONT};">${escapeHtml(label)}</a>
+  </td></tr></table>`;
+
+      const signOff = (html) => `
+  <tr><td style="padding:24px 28px 32px;">
+    <div style="border-top:2px solid ${COLOR.ink};padding-top:22px;font-size:16px;line-height:1.8;">${html}<br><b>Bezold 團隊</b></div>
+  </td></tr>`;
+
+      const STORES = {
+        physical: {
+          id: "Xk29fLq0",
+          storeName: "西螺日式拉麵店",
+          userName: "王老闆",
+          rows: [
+            ["地區", "雲林縣西螺鎮"],
+            ["坪數", "18 坪"],
+            ["月租", "NT$ 3.5 萬"],
+            ["頂讓金", "NT$ 45 萬"],
+          ],
+        },
+        digital: {
+          id: "Dg71pQa4",
+          storeName: "好好吃烘焙 IG 帳號",
+          userName: "林小姐",
+          rows: [
+            ["類型", "社群帳號、電商"],
+            ["平均月營收", "NT$ 8 萬"],
+            ["經營年數", "3 年"],
+            ["頂讓金", "NT$ 30–40 萬"],
+          ],
+        },
+      };
+
+      const followUpEmail = (store) => {
+        const checkUrl = (answer) =>
+          `${APP_URL}/listing-check?t=TOKEN&amp;answer=${answer}`;
+        return {
+          subject: `「${store.storeName}」還在頂讓嗎？`,
+          html: emailShell({
+            preheader: "點一下告訴我們，不用登入。",
+            body: `
+  ${heading(store.storeName, "還在頂讓嗎？", "刊登狀態確認")}
+  <tr><td style="padding:24px 28px 8px;">
+    ${paragraph(`${escapeHtml(store.userName)} 您好，`)}
+    ${paragraph("為了讓買家看到的資訊都是正確的，我們每 30 天會跟您確認一次刊登狀態。點下面其中一個按鈕就好，不用登入。")}
+  </td></tr>
+  ${infoCard("您的刊登", store.storeName, store.rows, { href: `${APP_URL}/store/${store.id}`, label: "查看刊登頁 →" })}
+  <tr><td style="padding:24px 28px 0;">
+    ${primaryButton(checkUrl("still_selling"), "還在頂讓 →")}
+    ${secondaryButton(checkUrl("sold"), "已經頂讓了")}
+    <div style="margin-top:18px;font-size:13px;line-height:1.9;color:${COLOR.muted};">
+      ※ 選「已經頂讓了」，刊登會立即改成「已頂讓」，之後不再寄確認信。<br>
+      ※ 沒有回覆的話，刊登會照常顯示。<br>
+      ※ 連結 30 天內有效，只能使用一次。
+    </div>
+  </td></tr>
+  ${signOff("資料有變動（租金、頂讓金、照片），也可以直接回信告訴我們。")}`,
+          }),
+        };
+      };
+
+      const soldConfirmationEmail = (store) =>
+        emailShell({
+          preheader: "您的刊登已改成已頂讓。如非本人操作，請直接回覆此信。",
+          body: `
+  ${heading(store.storeName, "恭喜成交！", "刊登狀態更新")}
+  <tr><td style="padding:24px 28px 8px;">
+    ${paragraph(`${escapeHtml(store.userName)} 您好，`)}
+    ${paragraph("我們已依照您的回覆，把刊登改成「已頂讓」。刊登頁會標示已頂讓，也不會再顯示您的聯絡方式，之後不會再寄確認信給您。")}
+  </td></tr>
+  ${infoCard(
+    "刊登狀態",
+    store.storeName,
+    [
+      ["狀態", "已頂讓"],
+      ["更新時間", "2026/11/08 14:32"],
+      ["更新方式", "回覆追蹤信"],
+    ],
+    { href: `${APP_URL}/store/${store.id}`, label: "查看刊登頁 →" },
+  )}
+  <tr><td style="padding:20px 28px 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-left:4px solid ${COLOR.accent};background:#ffffff;">
+      <tr><td style="padding:14px 16px;font-size:15px;line-height:1.8;">
+        <b>不是您本人操作的？</b><br>請直接回覆這封信，我們會幫您恢復刊登。
+      </td></tr>
+    </table>
+  </td></tr>
+  ${signOff("謝謝您使用 Bezold，祝新的開始一切順利！")}`,
+        });
+
+      // ─────────────────────────── preview wiring ───────────────────────────
+      const state = {
+        followUpWidth: "600",
+        followUpVariant: "physical",
+        soldWidth: "600",
+        sellerWidth: "1000",
+        sellerStep: "confirm-sold",
+      };
+
+      const fitFrame = (frame) => {
+        const resize = () => {
+          const doc = frame.contentDocument;
+          if (doc?.body) frame.style.height = `${doc.body.scrollHeight}px`;
+        };
+        frame.onload = () => {
+          resize();
+          // * the web font loads after onload — re-measure once it lands
+          setTimeout(resize, 400);
+        };
+      };
+
+      const renderFollowUp = () => {
+        const email = followUpEmail(STORES[state.followUpVariant]);
+        document.getElementById("follow-up-subject").textContent =
+          email.subject;
+        document.getElementById("follow-up-inbox").style.width =
+          `${Number(state.followUpWidth) + 2}px`;
+        const frame = document.getElementById("follow-up-frame");
+        fitFrame(frame);
+        frame.srcdoc = email.html;
+      };
+
+      const renderSold = () => {
+        document.getElementById("sold-inbox").style.width =
+          `${Number(state.soldWidth) + 2}px`;
+        const frame = document.getElementById("sold-frame");
+        fitFrame(frame);
+        frame.srcdoc = soldConfirmationEmail(STORES.physical);
+      };
+
+      document.querySelectorAll(".seg[data-group]").forEach((group) => {
+        group.addEventListener("click", (event) => {
+          const button = event.target.closest("button");
+          if (!button) return;
+          group
+            .querySelectorAll("button")
+            .forEach((item) =>
+              item.setAttribute("aria-pressed", String(item === button)),
+            );
+          state[group.dataset.group] = button.dataset.value;
+          const groupName = group.dataset.group;
+          if (groupName.startsWith("followUp")) renderFollowUp();
+          else if (groupName.startsWith("seller")) renderSeller();
+          else renderSold();
+        });
+      });
+
+      document.querySelectorAll(".tabs button").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          document
+            .querySelectorAll(".tabs button")
+            .forEach((item) =>
+              item.setAttribute("aria-selected", String(item === tab)),
+            );
+          document
+            .querySelectorAll(".panel")
+            .forEach((panel) =>
+              panel.classList.toggle(
+                "active",
+                panel.id === `panel-${tab.dataset.tab}`,
+              ),
+            );
+          // * hidden iframes measure 0 — re-render when shown
+          if (tab.dataset.tab === "follow-up") renderFollowUp();
+          if (tab.dataset.tab === "sold") renderSold();
+          if (tab.dataset.tab === "seller") renderSeller();
+        });
+      });
+
+      // ─────────────────────────── admin mock ───────────────────────────
+      const ADMIN_STORES = [
+        {
+          id: "Xk29fLq0",
+          storeName: "西螺日式拉麵店",
+          status: "approved",
+          listingType: "physical",
+          city: "雲林縣",
+          price: "NT$ 45 萬",
+          views: "1,204",
+          createTime: "2026-07-02",
+          approvedTime: "2026-07-05",
+          followUp: {
+            sentCount: 2,
+            lastSentTime: "2026-10-04 10:02",
+            lastAnswer: "still_selling",
+            lastAnswerTime: "2026-10-09 21:15",
+            nextSend: "2026-11-08",
+            paused: false,
+            lastError: "",
+          },
+        },
+        {
+          id: "Tc88hYw2",
+          storeName: "逢甲手搖飲店",
+          status: "approved",
+          listingType: "physical",
+          city: "台中市",
+          price: "面議",
+          views: "3,871",
+          createTime: "2026-03-14",
+          approvedTime: "",
+          followUp: {
+            sentCount: 5,
+            lastSentTime: "2026-10-12 10:01",
+            lastAnswer: null,
+            lastAnswerTime: "",
+            nextSend: "",
+            paused: true,
+            lastError: "",
+          },
+        },
+        {
+          id: "Ks03mBv7",
+          storeName: "鹽埕老宅咖啡廳",
+          status: "sold",
+          listingType: "physical",
+          city: "高雄市",
+          price: "NT$ 60 萬",
+          views: "2,450",
+          createTime: "2026-06-20",
+          approvedTime: "2026-06-21",
+          soldVia: "follow-up-email",
+          soldTime: "2026-10-23 09:40",
+          followUp: {
+            sentCount: 2,
+            lastSentTime: "2026-10-20 10:03",
+            lastAnswer: "sold",
+            lastAnswerTime: "2026-10-23 09:40",
+            nextSend: "",
+            paused: false,
+            lastError: "",
+          },
+          feedback: {
+            soldDuration: "3–6 個月",
+            buyerSource: "透過 Bezold",
+            finalPrice: "NT$ 52 萬",
+            listedPrice: "NT$ 60 萬",
+            satisfaction: 4,
+            comment:
+              "買家是看到 Bezold 的刊登來問的，很快就約看店。希望可以加上預約看店的功能，電話接不完。",
+            createTime: "2026-10-23 09:43",
+          },
+        },
+        {
+          id: "Dg71pQa4",
+          storeName: "好好吃烘焙 IG 帳號",
+          status: "approved",
+          listingType: "digital",
+          city: "社群帳號、電商",
+          price: "NT$ 30–40 萬",
+          views: "642",
+          createTime: "2026-08-11",
+          approvedTime: "2026-08-12",
+          followUp: {
+            sentCount: 0,
+            lastSentTime: "",
+            lastAnswer: null,
+            lastAnswerTime: "",
+            nextSend: "",
+            paused: false,
+            lastError: "no_email",
+          },
+        },
+        {
+          id: "Pt45cNe1",
+          storeName: "新店寵物美容",
+          status: "approved",
+          listingType: "physical",
+          city: "新北市",
+          price: "NT$ 28 萬",
+          views: "318",
+          createTime: "2026-10-01",
+          approvedTime: "2026-10-03",
+          followUp: null,
+          firstSend: "2026-12-02",
+        },
+        {
+          id: "Bq62rTz9",
+          storeName: "板橋早午餐",
+          status: "sold",
+          listingType: "physical",
+          city: "新北市",
+          price: "NT$ 35 萬",
+          views: "1,987",
+          createTime: "2026-05-08",
+          approvedTime: "",
+          soldVia: "my-listings",
+          soldTime: "2026-09-30 18:20",
+          followUp: {
+            sentCount: 1,
+            lastSentTime: "2026-07-08 10:00",
+            lastAnswer: null,
+            lastAnswerTime: "",
+            nextSend: "",
+            paused: false,
+            lastError: "",
+          },
+          feedback: null,
+        },
+      ];
+
+      const STATUS_TAG = {
+        approved: '<span class="tag green">已上架</span>',
+        sold: '<span class="tag">已頂讓</span>',
+      };
+      const TYPE_TAG = {
+        physical: '<span class="tag">實體</span>',
+        digital: '<span class="tag cyan">數位</span>',
+      };
+      const ANSWER_LABEL = {
+        still_selling: "還在頂讓",
+        sold: "已頂讓",
+      };
+
+      let selectedId = "Xk29fLq0";
+
+      const followUpCell = (store) => {
+        const followUp = store.followUp;
+        if (!followUp) return '<span class="dim">—</span>';
+        const tags = [];
+        if (followUp.paused) tags.push('<span class="tag">已停止</span>');
+        if (followUp.lastError === "no_email")
+          tags.push('<span class="tag red">無信箱</span>');
+        const last = followUp.lastSentTime
+          ? `<div class="dim small">最後 ${followUp.lastSentTime.slice(5, 10)}</div>`
+          : "";
+        return `<span>${followUp.sentCount} 封</span> ${tags.join("")}${last}`;
+      };
+
+      const renderRows = () => {
+        document.getElementById("store-rows").innerHTML = ADMIN_STORES.map(
+          (store) => `
+          <tr class="row ${store.id === selectedId ? "selected" : ""}" data-id="${store.id}">
+            <td><b>${escapeHtml(store.storeName)}</b></td>
+            <td>${STATUS_TAG[store.status]}</td>
+            <td class="is-new">${followUpCell(store)}</td>
+            <td>${TYPE_TAG[store.listingType]}</td>
+            <td>${escapeHtml(store.city)}</td>
+            <td class="right">${store.price}</td>
+            <td class="right" style="color:#ff4a31">${store.views}</td>
+            <td class="dim">${store.createTime}</td>
+          </tr>`,
+        ).join("");
+      };
+
+      const stars = (count) =>
+        `<span class="stars">${"★".repeat(count)}<span class="off">${"★".repeat(5 - count)}</span></span> ${count} / 5`;
+
+      const followUpSection = (store) => {
+        const followUp = store.followUp;
+        let body;
+        if (!followUp) {
+          body = `<dl class="desc">
+              <dt>已寄出</dt><dd>0 封</dd>
+              <dt>第一封</dt><dd>${store.firstSend}（上架滿 60 天）</dd>
+            </dl>
+            <div class="switch-row">
+              <div><b>自動寄送追蹤信</b><div class="dim small">關掉後這家店不會再收到追蹤信</div></div>
+              <button class="switch" role="switch" aria-checked="true" data-id="${store.id}"></button>
+            </div>`;
+        } else {
+          const answer = followUp.lastAnswer
+            ? `${ANSWER_LABEL[followUp.lastAnswer]} · ${followUp.lastAnswerTime}`
+            : '<span class="dim">沒有回覆</span>';
+          const rows = [
+            `<dt>已寄出</dt><dd><b>${followUp.sentCount} 封</b></dd>`,
+            `<dt>最後寄出</dt><dd>${followUp.lastSentTime || "—"}</dd>`,
+            `<dt>最後回覆</dt><dd>${answer}</dd>`,
+          ];
+          if (
+            store.status === "approved" &&
+            !followUp.paused &&
+            followUp.nextSend
+          )
+            rows.push(`<dt>下次寄送</dt><dd>${followUp.nextSend}</dd>`);
+          body = `<dl class="desc">${rows.join("")}</dl>`;
+
+          if (store.status === "sold") {
+            body +=
+              store.soldVia === "follow-up-email"
+                ? `<div class="alert info">由追蹤信標記已頂讓 · ${store.soldTime}<br><span class="dim">賣家若回信說不是本人操作，用上方狀態切回「已上架」即可。</span></div>`
+                : `<div class="alert info">賣家在我的刊登管理標記已頂讓 · ${store.soldTime}</div>`;
+          } else {
+            body += `<div class="switch-row">
+                <div><b>自動寄送追蹤信</b><div class="dim small">${followUp.paused ? "已停止，這家店不會再收到追蹤信" : "關掉後這家店不會再收到追蹤信"}</div></div>
+                <button class="switch" role="switch" aria-checked="${!followUp.paused}" data-id="${store.id}"></button>
+              </div>`;
+          }
+          if (followUp.lastError === "no_email")
+            body += `<div class="alert warning">找不到賣家的 email，追蹤信寄不出去。到「使用者」補上信箱後，隔天會自動補寄。</div>`;
+        }
+        return `<div class="section is-new"><h4>追蹤信<span class="new-badge">NEW</span></h4>${body}</div>`;
+      };
+
+      const feedbackSection = (store) => {
+        if (store.status !== "sold") return "";
+        const feedback = store.feedback;
+        const body = feedback
+          ? `<dl class="desc">
+              <dt>花了多久</dt><dd>${feedback.soldDuration}</dd>
+              <dt>買家來源</dt><dd>${feedback.buyerSource}</dd>
+              <dt>成交頂讓金</dt><dd>${feedback.finalPrice} <span class="dim small">（刊登 ${feedback.listedPrice}）</span></dd>
+              <dt>滿意度</dt><dd>${stars(feedback.satisfaction)}</dd>
+              <dt>建議</dt><dd><div class="quote">${escapeHtml(feedback.comment)}</div></dd>
+              <dt>填寫時間</dt><dd class="dim">${feedback.createTime}</dd>
+            </dl>`
+          : '<div class="dim">賣家未填寫</div>';
+        return `<div class="section is-new"><h4>頂讓回饋<span class="new-badge">NEW</span></h4>${body}</div>`;
+      };
+
+      const renderDrawer = () => {
+        const store = ADMIN_STORES.find((item) => item.id === selectedId);
+        const statusOptions = ["待審核", "已上架", "已拒絕", "已頂讓"];
+        const currentLabel = store.status === "sold" ? "已頂讓" : "已上架";
+        document.getElementById("drawer").innerHTML = `
+          <div class="drawer-head"><span class="close">✕</span>${escapeHtml(store.storeName)}</div>
+          <div class="drawer-body">
+            <div class="cover">店面照片</div>
+            <div class="section"><h4>狀態</h4>
+              <div class="segmented">${statusOptions.map((label) => `<span class="${label === currentLabel ? "on" : ""}">${label}</span>`).join("")}</div>
+            </div>
+            <div class="section"><h4>資料</h4>
+              <dl class="desc">
+                <dt>頂讓金</dt><dd>${store.price}</dd>
+                <dt>${store.listingType === "digital" ? "類型" : "城市"}</dt><dd>${escapeHtml(store.city)}</dd>
+                <dt>建立</dt><dd>${store.createTime}</dd>
+                <dt class="is-new" style="outline-offset:0">首次上架<span class="new-badge">NEW</span></dt>
+                <dd>${store.approvedTime || '<span class="dim">— 舊資料，用建立時間計算</span>'}</dd>
+              </dl>
+            </div>
+            ${followUpSection(store)}
+            ${feedbackSection(store)}
+            <div class="section"><h4>店家連結</h4><div class="dim small">（不變）</div></div>
+          </div>
+          <div class="drawer-foot">
+            <button class="btn danger">刪除</button>
+            <span><button class="btn">查看</button> <button class="btn primary">編輯</button></span>
+          </div>`;
+      };
+
+      document
+        .getElementById("store-rows")
+        .addEventListener("click", (event) => {
+          const row = event.target.closest("tr.row");
+          if (!row) return;
+          selectedId = row.dataset.id;
+          renderRows();
+          renderDrawer();
+        });
+
+      document.getElementById("drawer").addEventListener("click", (event) => {
+        const toggle = event.target.closest(".switch");
+        if (!toggle) return;
+        const store = ADMIN_STORES.find(
+          (item) => item.id === toggle.dataset.id,
+        );
+        // * a store never emailed gets a doc on first pause (spec: upsert)
+        store.followUp ??= {
+          sentCount: 0,
+          lastSentTime: "",
+          lastAnswer: null,
+          lastAnswerTime: "",
+          nextSend: "",
+          paused: false,
+          lastError: "",
+        };
+        store.followUp.paused = !store.followUp.paused;
+        renderRows();
+        renderDrawer();
+      });
+
+      document
+        .getElementById("toggle-new")
+        .addEventListener("change", (event) => {
+          document
+            .getElementById("admin")
+            .classList.toggle("hide-new", !event.target.checked);
+        });
+
+      // ─────────────────────── seller pages + feedback form ───────────────────────
+      const DURATION_OPTIONS = [
+        "1 個月內",
+        "1–3 個月",
+        "3–6 個月",
+        "6 個月以上",
+      ];
+      const SOURCE_OPTIONS = [
+        "透過 Bezold",
+        "其他頂讓平台",
+        "親友介紹",
+        "房東或仲介",
+        "其他",
+      ];
+      const STAR_LABELS = [
+        "點星星評分",
+        "很不滿意",
+        "不滿意",
+        "普通",
+        "滿意",
+        "非常滿意",
+      ];
+      const CHECK_URL = "bezold.com.tw/listing-check?t=q9ZxR…";
+
+      // * sub-steps highlight their parent button in the step selector
+      const PARENT_STEP = {
+        "thanks-skip": "thanks",
+        "my-listings-thanks": "my-listings",
+        "my-listings-closed": "my-listings",
+      };
+
+      const siteNav = () => `
+        <div class="site-nav">
+          <span class="site-logo">BEZOLD</span>
+          <span class="links"><span>找店面</span><span>數位資產</span><span>我要頂讓</span><span>頂讓指南</span></span>
+        </div>`;
+
+      const siteFoot = () =>
+        `<div class="site-foot">Bezold 必售！｜台灣店面頂讓媒合平台（頁尾，略）</div>`;
+
+      const storeSummary = () => `
+        <div class="store-card">
+          <div class="thumb"></div>
+          <div>
+            <div class="name">西螺日式拉麵店</div>
+            <div class="meta">雲林縣西螺鎮 · 18 坪 · 頂讓金 NT$ 45 萬<br>上架於 2026/07/05</div>
+          </div>
+        </div>`;
+
+      const pillGroup = (field, options) =>
+        `<div class="pills">${options
+          .map(
+            (option) =>
+              `<button type="button" class="s-pill" data-field="${field}" aria-pressed="false">${option}</button>`,
+          )
+          .join("")}</div>`;
+
+      const feedbackForm = ({ flat }) => `
+        <div class="fb-card ${flat ? "flat" : ""}" data-form>
+          <h2>花一分鐘，跟我們分享這次頂讓經驗</h2>
+          <p class="sub">全部選填，只有 Bezold 團隊看得到。</p>
+          <div class="fb-field">
+            <span class="label">從刊登到頂讓成功，花了多久？</span>
+            ${pillGroup("duration", DURATION_OPTIONS)}
+          </div>
+          <div class="fb-field">
+            <span class="label">買家是從哪裡來的？</span>
+            ${pillGroup("source", SOURCE_OPTIONS)}
+          </div>
+          <div class="fb-field">
+            <label class="label" for="fb-price">實際成交頂讓金</label>
+            <div class="price-input"><span>NT$</span><input id="fb-price" type="number" inputmode="decimal" min="0" placeholder="45" data-input><span>萬</span></div>
+            <div class="hint">刊登價 NT$ 45 萬。不會公開，只用來了解行情。</div>
+          </div>
+          <div class="fb-field">
+            <span class="label">您對 Bezold 的滿意度</span>
+            <div class="star-row">
+              ${[1, 2, 3, 4, 5]
+                .map(
+                  (value) =>
+                    `<button type="button" class="star" data-star="${value}" aria-label="${value} 顆星">★</button>`,
+                )
+                .join("")}
+              <span class="star-label" data-star-label>${STAR_LABELS[0]}</span>
+            </div>
+          </div>
+          <div class="fb-field">
+            <label class="label" for="fb-comment">有什麼建議或想對我們說的？</label>
+            <textarea class="s-textarea" id="fb-comment" maxlength="500" placeholder="例如：買家怎麼找到您、哪裡可以做得更好…" data-input></textarea>
+            <div class="counter"><span data-counter>0</span> / 500</div>
+          </div>
+          <div class="fb-actions">
+            <button type="button" class="s-btn" data-submit disabled>送出</button>
+            <button type="button" class="text-link" data-skip>略過</button>
+          </div>
+        </div>`;
+
+      const SELLER_PAGES = {
+        "confirm-sold": {
+          url: `${CHECK_URL}&answer=sold`,
+          body: () => `
+            <div class="site-eyebrow">刊登狀態確認</div>
+            <h1>「西螺日式拉麵店」<em>已經頂讓了嗎？</em></h1>
+            ${storeSummary()}
+            <div class="warn-box">確認後，刊登會<b>立即</b>改成「已頂讓」，買家不會再看到您的聯絡方式。這個動作無法自行復原。</div>
+            <div class="site-actions">
+              <button type="button" class="s-btn" data-goto="feedback">確認已頂讓</button>
+              <button type="button" class="text-link" data-goto="confirm-still">其實還在頂讓</button>
+            </div>
+            <p class="fine">不用登入。這個連結只能使用一次，30 天內有效。</p>`,
+        },
+        feedback: {
+          url: `${CHECK_URL}&answer=sold`,
+          body: () => `
+            <div class="success-banner"><span>✓</span><span>已將「西螺日式拉麵店」改成已頂讓，恭喜成交！</span></div>
+            ${feedbackForm({ flat: false })}`,
+        },
+        thanks: {
+          url: `${CHECK_URL}&answer=sold`,
+          body: () => `
+            <div class="big-mark">✓</div>
+            <h1>謝謝您的回饋！</h1>
+            <p class="lead">您的分享會幫助下一位想頂讓、想創業的人。祝新的開始一切順利！</p>
+            <div class="site-actions">
+              <button type="button" class="s-btn ghost">回到首頁</button>
+              <button type="button" class="text-link">看看其他頂讓店面</button>
+            </div>`,
+        },
+        "thanks-skip": {
+          url: `${CHECK_URL}&answer=sold`,
+          body: () => `
+            <div class="big-mark">✓</div>
+            <h1>恭喜成交！</h1>
+            <p class="lead">「西螺日式拉麵店」已改成已頂讓，之後不會再收到確認信。祝新的開始一切順利！</p>
+            <div class="site-actions">
+              <button type="button" class="s-btn ghost">回到首頁</button>
+            </div>`,
+        },
+        "confirm-still": {
+          url: `${CHECK_URL}&answer=still_selling`,
+          body: () => `
+            <div class="site-eyebrow">刊登狀態確認</div>
+            <h1>「西螺日式拉麵店」<em>還在頂讓中？</em></h1>
+            ${storeSummary()}
+            <div class="site-actions">
+              <button type="button" class="s-btn sage" data-goto="still-done">確認：還在頂讓</button>
+              <button type="button" class="text-link" data-goto="confirm-sold">其實已經頂讓了</button>
+            </div>
+            <p class="fine">確認後刊登照常顯示，我們 30 天後再跟您確認。不用登入。</p>`,
+        },
+        "still-done": {
+          url: `${CHECK_URL}&answer=still_selling`,
+          body: () => `
+            <div class="big-mark">✓</div>
+            <h1>收到，謝謝！</h1>
+            <p class="lead">「西螺日式拉麵店」會照常刊登，我們 30 天後再跟您確認。</p>
+            <div class="warn-box" style="border-left-color:#2a6f4d">資料有變動嗎？調整頂讓金、月租或照片，能讓買家更快找上門。</div>
+            <div class="site-actions">
+              <button type="button" class="s-btn ghost">到我的刊登管理修改</button>
+            </div>`,
+        },
+        invalid: {
+          url: CHECK_URL,
+          body: () => `
+            <div class="big-mark gray">!</div>
+            <h1>此連結已失效</h1>
+            <p class="lead">連結可能已經使用過、超過 30 天，或刊登狀態已經改變。您可以登入後在「我的刊登管理」查看和更新刊登。</p>
+            <div class="site-actions">
+              <button type="button" class="s-btn">登入後到我的刊登管理</button>
+            </div>
+            <p class="fine">有問題嗎？LINE 客服：bezoldtw</p>`,
+        },
+      };
+
+      const myListingsPage = (overlay) => `
+        <div class="site-main">
+          <div class="site-inner">
+            <h1>我的刊登管理</h1>
+            <div class="ml-list">
+              <div class="ml-card">
+                <div class="thumb"></div>
+                <div class="grow"><b>西螺日式拉麵店</b><div class="dim small">雲林縣西螺鎮 · NT$ 45 萬</div></div>
+                <span class="badge">已頂讓</span>
+              </div>
+              <div class="ml-card">
+                <div class="thumb"></div>
+                <div class="grow"><b>斗六早午餐</b><div class="dim small">雲林縣斗六市 · NT$ 25 萬</div></div>
+                <span class="badge green">上架中</span>
+              </div>
+            </div>
+            <p class="fine">（彈窗後面是 /my-listings。賣家剛在第一張卡片按了「已頂讓」→「確認」。）</p>
+          </div>
+        </div>
+        ${overlay}`;
+
+      const renderSeller = () => {
+        const step = state.sellerStep;
+        const browser = document.getElementById("seller-browser");
+        browser.style.width = state.sellerWidth === "375" ? "377px" : "1000px";
+        browser.classList.toggle("narrow", state.sellerWidth === "375");
+
+        document
+          .querySelectorAll('.seg[data-group="sellerStep"] button')
+          .forEach((button) =>
+            button.setAttribute(
+              "aria-pressed",
+              String(button.dataset.value === (PARENT_STEP[step] ?? step)),
+            ),
+          );
+
+        let url;
+        let main;
+        if (step.startsWith("my-listings")) {
+          url = "bezold.com.tw/my-listings";
+          const overlay =
+            step === "my-listings"
+              ? `<div class="overlay"><div class="dialog" role="dialog" aria-label="頂讓回饋">
+                  <button type="button" class="close-x" data-skip aria-label="關閉">✕</button>
+                  <div class="success-banner" style="margin-bottom:20px"><span>✓</span><span>已改成已頂讓，恭喜成交！</span></div>
+                  ${feedbackForm({ flat: true })}
+                </div></div>`
+              : step === "my-listings-thanks"
+                ? `<div class="toast">謝謝您的回饋！</div>`
+                : "";
+          main = myListingsPage(overlay);
+        } else {
+          const page = SELLER_PAGES[step];
+          url = page.url;
+          main = `<div class="site-main"><div class="site-inner">${page.body()}</div></div>`;
+        }
+
+        document.getElementById("seller-url").textContent = url;
+        document.getElementById("seller-site").innerHTML =
+          `${siteNav()}${main}${siteFoot()}`;
+        // * the dialog is taller than the page behind it — stretch the page
+        // * body so the footer stays at the bottom, under the overlay
+        const siteMain = document.querySelector("#seller-site .site-main");
+        siteMain.style.minHeight =
+          step === "my-listings"
+            ? state.sellerWidth === "375"
+              ? "1120px"
+              : "900px"
+            : "";
+      };
+
+      const goToSellerStep = (step) => {
+        state.sellerStep = step;
+        renderSeller();
+        document
+          .getElementById("seller-browser")
+          .scrollIntoView({ block: "start" });
+      };
+
+      // * the submit button wakes up once any field has a value
+      const refreshSubmit = (form) => {
+        const hasValue =
+          form.querySelector('.s-pill[aria-pressed="true"]') ||
+          form.querySelector(".star.on") ||
+          [...form.querySelectorAll("[data-input]")].some(
+            (input) => input.value.trim() !== "",
+          );
+        form.querySelector("[data-submit]").disabled = !hasValue;
+      };
+
+      const sellerSite = document.getElementById("seller-site");
+
+      sellerSite.addEventListener("click", (event) => {
+        const target = event.target;
+        const form = target.closest("[data-form]");
+
+        const goto = target.closest("[data-goto]");
+        if (goto) return goToSellerStep(goto.dataset.goto);
+
+        const pill = target.closest(".s-pill[data-field]");
+        if (pill) {
+          const wasPressed = pill.getAttribute("aria-pressed") === "true";
+          pill.parentElement
+            .querySelectorAll(".s-pill")
+            .forEach((item) => item.setAttribute("aria-pressed", "false"));
+          pill.setAttribute("aria-pressed", String(!wasPressed));
+          return refreshSubmit(form);
+        }
+
+        const star = target.closest(".star");
+        if (star) {
+          const value = Number(star.dataset.star);
+          form
+            .querySelectorAll(".star")
+            .forEach((item) =>
+              item.classList.toggle("on", Number(item.dataset.star) <= value),
+            );
+          form.querySelector("[data-star-label]").textContent =
+            STAR_LABELS[value];
+          return refreshSubmit(form);
+        }
+
+        const inMyListings = state.sellerStep.startsWith("my-listings");
+        if (target.closest("[data-submit]"))
+          return goToSellerStep(inMyListings ? "my-listings-thanks" : "thanks");
+        if (target.closest("[data-skip]"))
+          return goToSellerStep(
+            inMyListings ? "my-listings-closed" : "thanks-skip",
+          );
+      });
+
+      sellerSite.addEventListener("input", (event) => {
+        const form = event.target.closest("[data-form]");
+        if (!form) return;
+        if (event.target.id === "fb-comment")
+          form.querySelector("[data-counter]").textContent =
+            event.target.value.length;
+        refreshSubmit(form);
+      });
+
+      // ─────────────────────── admin 頂讓回饋 page ───────────────────────
+      // * every sold store, whether or not its seller left feedback — the
+      // * denominator for the fill rate
+      const SOLD_STORE_COUNT = 18;
+
+      // * prices in 萬; null = the seller skipped that question
+      const FEEDBACK_ROWS = [
+        {
+          storeId: "Ks03mBv7",
+          storeName: "鹽埕老宅咖啡廳",
+          city: "高雄市",
+          soldVia: "follow-up-email",
+          duration: "3–6 個月",
+          source: "透過 Bezold",
+          finalPrice: 52,
+          listedPrice: 60,
+          satisfaction: 4,
+          comment:
+            "買家是看到 Bezold 的刊登來問的，很快就約看店。希望可以加上預約看店的功能，電話接不完。",
+          createTime: "2026-10-23 09:43",
+        },
+        {
+          storeId: "",
+          storeName: "公館滷味攤",
+          city: "台北市",
+          soldVia: "my-listings",
+          duration: "1 個月內",
+          source: "透過 Bezold",
+          finalPrice: 18,
+          listedPrice: 18,
+          satisfaction: 5,
+          comment: "刊登隔週就有人來看，第二組就談成了，謝謝！",
+          createTime: "2026-10-19 22:10",
+        },
+        {
+          storeId: "",
+          storeName: "竹北美甲工作室",
+          city: "新竹縣",
+          soldVia: "follow-up-email",
+          duration: "1–3 個月",
+          source: "親友介紹",
+          finalPrice: 30,
+          listedPrice: 35,
+          satisfaction: 3,
+          comment: "最後是朋友的朋友接手。平台上問的人不少，但很多只是問問。",
+          createTime: "2026-10-15 13:02",
+        },
+        {
+          storeId: "",
+          storeName: "台南中西區民宿",
+          city: "台南市",
+          soldVia: "follow-up-email",
+          duration: "6 個月以上",
+          source: "其他頂讓平台",
+          finalPrice: null,
+          listedPrice: 120,
+          satisfaction: 2,
+          comment: "希望刊登能有更多曝光，例如置頂或推薦到首頁。",
+          createTime: "2026-10-11 08:55",
+        },
+        {
+          storeId: "",
+          storeName: "好想吃鹹酥雞 FB 粉專",
+          city: "社群帳號",
+          soldVia: "my-listings",
+          duration: "1–3 個月",
+          source: "透過 Bezold",
+          finalPrice: 12,
+          listedPrice: 15,
+          satisfaction: 5,
+          comment: "",
+          createTime: "2026-10-04 17:31",
+        },
+        {
+          storeId: "",
+          storeName: "三重機車行",
+          city: "新北市",
+          soldVia: "follow-up-email",
+          duration: "1–3 個月",
+          source: "房東或仲介",
+          finalPrice: 40,
+          listedPrice: 50,
+          satisfaction: 4,
+          comment: "房東介紹的人接手，但刊登讓我比較知道行情怎麼開價。",
+          createTime: "2026-09-28 11:20",
+        },
+        {
+          storeId: "",
+          storeName: "員林手作甜點",
+          city: "彰化縣",
+          soldVia: "follow-up-email",
+          duration: null,
+          source: "透過 Bezold",
+          finalPrice: null,
+          listedPrice: 22,
+          satisfaction: null,
+          comment: "",
+          createTime: "2026-09-20 20:48",
+        },
+      ];
+
+      const FEEDBACK_DURATIONS = [
+        "1 個月內",
+        "1–3 個月",
+        "3–6 個月",
+        "6 個月以上",
+      ];
+      const FEEDBACK_SOURCES = [
+        "透過 Bezold",
+        "其他頂讓平台",
+        "親友介紹",
+        "房東或仲介",
+        "其他",
+      ];
+      const SOLD_VIA_TAG = {
+        "follow-up-email": '<span class="tag blue">追蹤信</span>',
+        "my-listings": '<span class="tag">我的刊登</span>',
+      };
+
+      let expandedFeedback = null;
+
+      const average = (values) =>
+        values.reduce((sum, value) => sum + value, 0) / values.length;
+
+      const percent = (part, whole) =>
+        whole ? `${Math.round((part / whole) * 100)}%` : "—";
+
+      const distribution = (title, options, field) => {
+        const answered = FEEDBACK_ROWS.filter((row) => row[field]);
+        const max = Math.max(
+          ...options.map(
+            (option) => answered.filter((row) => row[field] === option).length,
+          ),
+          1,
+        );
+        const unanswered = FEEDBACK_ROWS.length - answered.length;
+        const bar = (label, count, muted) => `
+          <div class="bar-row">
+            <span>${label}</span>
+            <div class="bar-track"><div class="bar-fill ${muted ? "muted" : ""}" style="width:${(count / max) * 100}%"></div></div>
+            <span class="bar-count">${count} 則</span>
+          </div>`;
+        return `<div class="stat-card"><div class="stat-title">${title}</div>
+          ${options.map((option) => bar(option, answered.filter((row) => row[field] === option).length, false)).join("")}
+          ${unanswered ? bar("未填", unanswered, true) : ""}
+        </div>`;
+      };
+
+      const priceCell = (row) => {
+        if (row.finalPrice == null)
+          return `<span class="dim">未填</span><div class="dim small">刊登 NT$ ${row.listedPrice} 萬</div>`;
+        return `NT$ ${row.finalPrice} 萬<div class="dim small">刊登 NT$ ${row.listedPrice} 萬 · ${percent(row.finalPrice, row.listedPrice)}</div>`;
+      };
+
+      const satisfactionCell = (value) =>
+        value == null
+          ? '<span class="dim">未填</span>'
+          : `<span class="stars">${"★".repeat(value)}<span class="off">${"★".repeat(5 - value)}</span></span>`;
+
+      const renderFeedbackPage = () => {
+        const rows = FEEDBACK_ROWS;
+        const withSource = rows.filter((row) => row.source);
+        const viaBezold = withSource.filter(
+          (row) => row.source === "透過 Bezold",
+        ).length;
+        const rated = rows.filter((row) => row.satisfaction != null);
+        const priced = rows.filter((row) => row.finalPrice != null);
+
+        const tableRows = rows
+          .map((row, index) => {
+            const main = `
+              <tr class="row ${expandedFeedback === index ? "selected" : ""}" data-feedback="${index}">
+                <td><b>${escapeHtml(row.storeName)}</b><div class="dim small">${escapeHtml(row.city)}</div></td>
+                <td>${SOLD_VIA_TAG[row.soldVia]}</td>
+                <td>${row.duration ?? '<span class="dim">未填</span>'}</td>
+                <td>${row.source ?? '<span class="dim">未填</span>'}</td>
+                <td class="right">${priceCell(row)}</td>
+                <td>${satisfactionCell(row.satisfaction)}</td>
+                <td class="comment-cell">${row.comment ? escapeHtml(row.comment) : '<span class="dim">—</span>'}</td>
+                <td class="dim">${row.createTime}</td>
+              </tr>`;
+            if (expandedFeedback !== index) return main;
+            const storeLink = row.storeId
+              ? `<span class="link" data-open-store="${row.storeId}">在商店列表打開這家店 →</span>`
+              : `<span class="dim">（示意資料，商店列表裡沒有這家店）</span>`;
+            return `${main}
+              <tr class="expand-row"><td colspan="8">
+                <b>建議：</b>${row.comment ? escapeHtml(row.comment) : '<span class="dim">賣家沒有留言</span>'}
+                <div style="margin-top:6px">${storeLink}</div>
+              </td></tr>`;
+          })
+          .join("");
+
+        document.getElementById("admin-feedback").innerHTML = `
+          <div class="fbp-head">
+            <h2>頂讓回饋<span class="new-badge">NEW</span></h2>
+            <span style="display:flex;gap:8px;flex-wrap:wrap">
+              <span class="fake-input" style="color:var(--ant-text)">買家來源：全部 ▾</span>
+              <span class="fake-input" style="color:var(--ant-text)">標記方式：全部 ▾</span>
+              <span class="fake-input">Created from → to</span>
+            </span>
+          </div>
+          <div class="fbp-stats">
+            <div class="stat-card">
+              <div class="stat-title">回饋數</div>
+              <div class="stat-value">${rows.length}<small>/ ${SOLD_STORE_COUNT} 家已頂讓</small></div>
+              <div class="stat-sub">填寫率 ${percent(rows.length, SOLD_STORE_COUNT)}</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-title">透過 Bezold 成交</div>
+              <div class="stat-value">${percent(viaBezold, withSource.length)}</div>
+              <div class="stat-sub">${viaBezold} / ${withSource.length} 則有回答買家來源</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-title">平均滿意度</div>
+              <div class="stat-value">${average(rated.map((row) => row.satisfaction)).toFixed(1)}<small>/ 5</small></div>
+              <div class="stat-sub">${rated.length} 則有評分</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-title">成交價 ÷ 刊登價</div>
+              <div class="stat-value">${Math.round(average(priced.map((row) => row.finalPrice / row.listedPrice)) * 100)}%</div>
+              <div class="stat-sub">平均，${priced.length} 則有填成交價</div>
+            </div>
+          </div>
+          <div class="fbp-dist">
+            ${distribution("從刊登到頂讓成功花了多久", FEEDBACK_DURATIONS, "duration")}
+            ${distribution("買家從哪裡來", FEEDBACK_SOURCES, "source")}
+          </div>
+          <div style="overflow-x:auto">
+            <table class="ant">
+              <thead><tr>
+                <th>店名</th><th>標記方式</th><th>花了多久</th><th>買家來源</th>
+                <th class="right">成交頂讓金</th><th>滿意度</th><th>建議</th><th>填寫時間</th>
+              </tr></thead>
+              <tbody>${tableRows}</tbody>
+            </table>
+          </div>
+          <p class="note small" style="margin-top:12px">標記方式：「追蹤信」= 賣家從追蹤信的連結按已頂讓；「我的刊登」= 賣家登入後在 /my-listings 自己按。依填寫時間由新到舊排序。</p>`;
+      };
+
+      const showAdminView = (view) => {
+        document
+          .querySelectorAll(".sider [data-view]")
+          .forEach((item) =>
+            item.classList.toggle("on", item.dataset.view === view),
+          );
+        document.getElementById("admin-stores").hidden = view !== "stores";
+        document.getElementById("admin-feedback").hidden = view !== "feedback";
+        if (view === "feedback") renderFeedbackPage();
+      };
+
+      document.querySelector(".sider").addEventListener("click", (event) => {
+        const item = event.target.closest("[data-view]");
+        if (item) showAdminView(item.dataset.view);
+      });
+
+      document
+        .getElementById("admin-feedback")
+        .addEventListener("click", (event) => {
+          const openStore = event.target.closest("[data-open-store]");
+          if (openStore) {
+            selectedId = openStore.dataset.openStore;
+            showAdminView("stores");
+            renderRows();
+            renderDrawer();
+            return;
+          }
+          const row = event.target.closest("tr[data-feedback]");
+          if (!row) return;
+          const index = Number(row.dataset.feedback);
+          expandedFeedback = expandedFeedback === index ? null : index;
+          renderFeedbackPage();
+        });
+
+      renderFollowUp();
+      renderRows();
+      renderDrawer();
+    </script>
+  </body>
+</html>

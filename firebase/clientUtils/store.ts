@@ -13,6 +13,7 @@ import {
 } from "firebase/firestore";
 import { db } from "@/firebase/client";
 
+import { STORE_STATUS } from "@/types";
 import type { Store, StoreDoc, StoreStatus } from "@/types";
 import { COLLECTIONS } from "@/firebase/constants";
 
@@ -38,6 +39,11 @@ const storeConverter = {
       id: storeSnaphot.id,
       createTime: storeData?.createTime.toDate(),
       updateTime: storeData?.updateTime.toDate(),
+      // * only when present — an undefined key would break a later updateDoc
+      ...(storeData?.approvedTime && {
+        approvedTime: storeData.approvedTime.toDate(),
+      }),
+      ...(storeData?.soldTime && { soldTime: storeData.soldTime.toDate() }),
     } as Store;
   },
 };
@@ -96,6 +102,23 @@ export const updateStoreStatus = async (
 ) => {
   const docRef = doc(db, COLLECTION, storeId);
   await updateDoc(docRef, { status, updateTime: serverTimestamp() });
+};
+
+// * admin status change. The first approval also records approvedTime, which
+// * the follow-up email counts from; re-approving keeps the original. Returns
+// * whether approvedTime was stamped.
+export const updateStoreStatusAsAdmin = async (
+  store: Pick<Store, "id" | "approvedTime">,
+  status: StoreStatus,
+) => {
+  const stampApproval = status === STORE_STATUS.APPROVED && !store.approvedTime;
+  const docRef = doc(db, COLLECTION, store.id);
+  await updateDoc(docRef, {
+    status,
+    updateTime: serverTimestamp(),
+    ...(stampApproval && { approvedTime: serverTimestamp() }),
+  });
+  return stampApproval;
 };
 
 export const getStoresByUserId = async (userId: string) => {

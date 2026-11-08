@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { getStores } from "@/firebase/clientUtils";
-import { updateStoreStatus } from "@/firebase/clientUtils";
+import { updateStoreStatusAsAdmin } from "@/firebase/clientUtils";
 import {
   Space,
   Table,
@@ -38,7 +38,7 @@ import {
   type ListingFilter,
 } from "@/constant/adminStore";
 import { authedFetch } from "@/lib/authedFetch";
-import { useAdminAuth, useStoreAnalytics } from "@/hooks";
+import { useAdminAuth, useFollowUps, useStoreAnalytics } from "@/hooks";
 import { cn } from "@/lib/utils";
 import {
   CONTACT_GATE_TRACKING_START,
@@ -49,6 +49,7 @@ import ClickRate, { clickRateOf } from "../analytics/_components/ClickRate";
 import StoreDetailDrawer, {
   StoreStatusControls,
 } from "../_components/StoreDetailDrawer";
+import { FollowUpCell, FollowUpSection } from "../_components/FollowUpInfo";
 
 type StatusFilter = StoreStatus | "all";
 
@@ -96,6 +97,28 @@ export default function List() {
   const [dateRange, setDateRange] = useState<
     [Dayjs | null, Dayjs | null] | null
   >(null);
+
+  const {
+    loaded: followUpsLoaded,
+    followUpOf,
+    setPaused: setFollowUpPaused,
+  } = useFollowUps();
+  const [pausing, setPausing] = useState(false);
+
+  const handleFollowUpPausedChange = async (
+    storeId: string,
+    paused: boolean,
+  ) => {
+    setPausing(true);
+    try {
+      await setFollowUpPaused(storeId, paused);
+      messageApi.success(paused ? "已停止寄送追蹤信" : "已恢復寄送追蹤信");
+    } catch {
+      messageApi.error("更新失敗，請稍後再試");
+    } finally {
+      setPausing(false);
+    }
+  };
 
   // Only the all-time counts are shown here; any range returns them.
   const {
@@ -157,16 +180,23 @@ export default function List() {
     fetchStores();
   }, []);
 
-  // updateStoreStatus also stamps updateTime server-side; mirror it locally so
-  // the 更新 column reflects the change without a refetch.
+  // updateStoreStatusAsAdmin also stamps updateTime (and approvedTime on a first
+  // approval) server-side; mirror them locally so the list and drawer reflect
+  // the change without a refetch.
   const applyStatus = (storeIds: string[], status: StoreStatus) => {
     const now = new Date();
     setStores((previous) =>
-      previous.map((store) =>
-        storeIds.includes(store.id)
-          ? { ...store, status, updateTime: now }
-          : store,
-      ),
+      previous.map((store) => {
+        if (!storeIds.includes(store.id)) return store;
+        const firstApproval =
+          status === STORE_STATUS.APPROVED && !store.approvedTime;
+        return {
+          ...store,
+          status,
+          updateTime: now,
+          ...(firstApproval && { approvedTime: now }),
+        };
+      }),
     );
     // A store turned into a draft leaves this list, so its drawer goes too.
     if (status === STORE_STATUS.DRAFT) {
@@ -176,10 +206,15 @@ export default function List() {
     }
   };
 
+  // * the status helper needs the store's approvedTime; fall back to the bare
+  // * id (stamps approvedTime) if the store somehow isn't loaded
+  const storeById = (storeId: string) =>
+    stores.find((store) => store.id === storeId) ?? { id: storeId };
+
   const handleStatusChange = async (storeId: string, status: StoreStatus) => {
     setUpdating(storeId);
     try {
-      await updateStoreStatus(storeId, status);
+      await updateStoreStatusAsAdmin(storeById(storeId), status);
       applyStatus([storeId], status);
       messageApi.success(`已更新為「${STATUS_LABEL[status]}」`);
     } catch {
@@ -192,7 +227,9 @@ export default function List() {
   const handleBulkStatusChange = async (status: StoreStatus) => {
     setBulkUpdating(true);
     const results = await Promise.allSettled(
-      selectedIds.map((storeId) => updateStoreStatus(storeId, status)),
+      selectedIds.map((storeId) =>
+        updateStoreStatusAsAdmin(storeById(storeId), status),
+      ),
     );
     const succeededIds = selectedIds.filter(
       (_, index) => results[index].status === "fulfilled",
@@ -367,6 +404,24 @@ export default function List() {
           </Tag>
         );
       },
+    },
+    {
+      title: (
+        <Tooltip title="追蹤信（上架滿 60 天起每 30 天寄一次）已寄出幾封">
+          <span className="whitespace-nowrap">追蹤信</span>
+        </Tooltip>
+      ),
+      key: "followUp",
+      showSorterTooltip: false,
+      sorter: (left, right) =>
+        followUpOf(left.id).sentCount - followUpOf(right.id).sentCount,
+      render: (_, store) => (
+        <FollowUpCell
+          store={store}
+          followUp={followUpOf(store.id)}
+          loaded={followUpsLoaded}
+        />
+      ),
     },
     {
       title: "類型",
@@ -632,6 +687,19 @@ export default function List() {
               statusUpdating={updating === activeStoreId}
               onStatusChange={handleStatusChange}
               onConvertToDraft={(store) => confirmConvertToDraft([store.id])}
+            />
+          )
+        }
+        followUpSection={
+          activeStore &&
+          followUpsLoaded && (
+            <FollowUpSection
+              store={activeStore}
+              followUp={followUpOf(activeStore.id)}
+              toggling={pausing}
+              onPausedChange={(paused) =>
+                handleFollowUpPausedChange(activeStore.id, paused)
+              }
             />
           )
         }

@@ -14,6 +14,8 @@ export default function robots(): MetadataRoute.Robots {
         "/login",
         "/signup",
         "/verify-email",
+        // * one-time token links from the follow-up email
+        "/listing-check",
       ],
     },
     sitemap: `${BASE_URL}/sitemap.xml`,

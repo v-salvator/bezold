@@ -15,19 +15,33 @@ import { pickRelatedStores } from "@/utils/relatedStores";
 
 const COLLECTION = COLLECTIONS.STORE;
 
+// * follow-up Timestamps → Date, only when present. A raw Timestamp can't be
+// * passed from a server component to a client component.
+const followUpDates = (storeData: FirebaseFirestore.DocumentData) => ({
+  ...(storeData.approvedTime && {
+    approvedTime: storeData.approvedTime.toDate(),
+  }),
+  ...(storeData.soldTime && { soldTime: storeData.soldTime.toDate() }),
+});
+
 // * shared shape mapping — Firestore Timestamps → Date, doc id folded in.
+// * Raw doc: images stay Storage paths, userInfo is not joined.
+export const mapStoreDoc = (
+  doc: FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>,
+): Store => {
+  const storeData = doc.data()!;
+  return {
+    id: doc.id,
+    ...storeData,
+    createTime: storeData.createTime.toDate(),
+    updateTime: storeData.updateTime.toDate(),
+    ...followUpDates(storeData),
+  } as Store;
+};
+
 const mapDocsToStores = (
   snapshot: FirebaseFirestore.QuerySnapshot<FirebaseFirestore.DocumentData>,
-): Store[] =>
-  snapshot.docs.map((doc) => {
-    const storeData = doc.data();
-    return {
-      id: doc.id,
-      ...storeData,
-      createTime: storeData.createTime.toDate(),
-      updateTime: storeData.updateTime.toDate(),
-    } as Store;
-  });
+): Store[] => snapshot.docs.map(mapStoreDoc);
 
 // * physical lists skip digital assets in memory — `where("listingType", "!=",
 // * "digital")` would also drop every legacy doc that has no listingType.
@@ -182,6 +196,7 @@ export const getStoreById = async (storeId: string) => {
       ...storeData,
       createTime: storeData!.createTime.toDate(),
       updateTime: storeData!.updateTime.toDate(),
+      ...followUpDates(storeData!),
       images: images,
       userInfo: userData,
     } as Store;

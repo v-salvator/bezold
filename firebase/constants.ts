@@ -7,4 +7,14 @@ export const COLLECTIONS = {
     process.env.NEXT_PUBLIC_ENV_VERSION === "dev"
       ? "mockInquiry"
       : "prodInquiry",
+  // * listing follow-up email state, one doc per store — Admin SDK only
+  FOLLOW_UP:
+    process.env.NEXT_PUBLIC_ENV_VERSION === "dev"
+      ? "mockFollowUp"
+      : "prodFollowUp",
+  // * 頂讓回饋 after a store is marked sold, one doc per store — Admin SDK only
+  SOLD_FEEDBACK:
+    process.env.NEXT_PUBLIC_ENV_VERSION === "dev"
+      ? "mockSoldFeedback"
+      : "prodSoldFeedback",
 };

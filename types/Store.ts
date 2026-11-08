@@ -3,6 +3,7 @@ import type { Timestamp } from "firebase/firestore";
 import { StoreTag } from "@/types/StoreTags";
 import { StoreStatus } from "@/types/StoreStatus";
 import type { DigitalAssetType, ListingType } from "@/types/DigitalAsset";
+import type { SoldVia } from "@/types/SoldFeedback";
 
 export type EquipmentStatus = "all" | "none" | "partial";
 
@@ -36,6 +37,10 @@ export interface Store {
   priceMax?: number; // * range upper bound; `price` is the lower bound
   assetUrl?: string; // * admin-only — blanked by omitSellerContact
   verificationImages?: string[]; // * admin/owner-only Storage paths — blanked by omitSellerContact
+  // * ── listing follow-up (admin/server-written) ──
+  approvedTime?: Date; // * first approval; absent on stores approved before it existed
+  soldTime?: Date; // * set when the seller confirms sold from the follow-up email
+  soldVia?: SoldVia;
 }
 
 // * types in firestore doc
@@ -67,4 +72,7 @@ export interface StoreDoc {
   priceMax?: number; // * range upper bound; `price` is the lower bound
   assetUrl?: string; // * admin-only — blanked by omitSellerContact
   verificationImages?: string[]; // * admin/owner-only Storage paths — blanked by omitSellerContact
+  approvedTime?: Timestamp;
+  soldTime?: Timestamp;
+  soldVia?: SoldVia;
 }

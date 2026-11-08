@@ -14,6 +14,12 @@ with `send_page_view: false` so gtag doesn't also send one on load. In the GA4
 console, keep Enhanced measurement → Page views → "Page changes based on browser
 history events" **off**, or every client-side navigation is counted twice.
 
+**`/listing-check` is never tracked.** Its URL carries the one-time `?t=`
+token from the listing follow-up email, and gtag attaches the full page URL to
+every hit. So `getAnalyticsClient()` returns `null` on that path: no page view,
+no custom events, and gtag never loads there. Seller answers are recorded in
+Firestore (`*FollowUp`) and shown in admin instead.
+
 **Never name an event parameter `source`, `medium`, `campaign`, `term` or
 `content`.** GA4 reads those as traffic-source fields, so an event carrying
 them rewrites the session's source / medium — until 2026-11 the buyer club
