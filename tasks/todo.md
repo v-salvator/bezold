@@ -206,10 +206,12 @@ _Done. The dialog portals into the site root so it keeps the `--hand` font, and 
 
 **Acceptance criteria:**
 
-- [ ] `GET /api/admin/sold-feedback/[storeId]` (`verifyAdminToken`).
-- [ ] Drawer shows the five answers with labels, the listed price and %, stars, comment, time, or 「賣家未填寫」, for sold stores only.
+- [x] `GET /api/admin/sold-feedback/[storeId]` (`verifyAdminToken`).
+- [x] Drawer shows the five answers with labels, the listed price and %, stars, comment, time, or 「賣家未填寫」, for sold stores only.
 
 **Verification:** dev: sold mock store with and without feedback, compared with the prototype.
+_Done. The ratio is `priceRatioPercent` (unit-tested; null for 面議 / 免頂讓金). `SoldFeedbackDetails` is shared with the Sold Feedback page. Checked on dev: a sold store with feedback shows its answers, a sold store without shows 賣家未填寫, and an approved store has no section._
+
 **Dependencies:** 8
 **Files:** `app/api/admin/sold-feedback/[storeId]/route.ts`, `firebase/serverUtils/soldFeedback.ts`, `app/admin/store/_components/StoreDetailDrawer.tsx`
 **Scope:** S

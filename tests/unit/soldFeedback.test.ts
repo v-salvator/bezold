@@ -1,6 +1,9 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { parseSoldFeedback } from "../../utils/soldFeedback.ts";
+import {
+  parseSoldFeedback,
+  priceRatioPercent,
+} from "../../utils/soldFeedback.ts";
 
 describe("parseSoldFeedback", () => {
   it("accepts a fully filled form and converts 萬 to NT$", () => {
@@ -91,5 +94,32 @@ describe("parseSoldFeedback", () => {
       ok: false,
       error: "invalid_field",
     });
+  });
+});
+
+describe("priceRatioPercent", () => {
+  it("is the final price as a whole percent of the listed price", () => {
+    assert.equal(
+      priceRatioPercent({ finalPrice: 900_000, listedPrice: 1_000_000 }),
+      90,
+    );
+    assert.equal(
+      priceRatioPercent({ finalPrice: 520_000, listedPrice: 600_000 }),
+      87,
+    );
+  });
+
+  it("is null when the seller skipped the price", () => {
+    assert.equal(
+      priceRatioPercent({ finalPrice: null, listedPrice: 600_000 }),
+      null,
+    );
+  });
+
+  it("is null for 面議 / 免頂讓金 listings (listed at 0)", () => {
+    assert.equal(
+      priceRatioPercent({ finalPrice: 300_000, listedPrice: 0 }),
+      null,
+    );
   });
 });

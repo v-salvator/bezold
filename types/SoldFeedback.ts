@@ -45,3 +45,11 @@ export interface SoldFeedbackDoc {
   comment: string; // * "" or ≤ 500 chars
   createTime: Timestamp;
 }
+
+// * what the admin APIs send — createTime in epoch ms
+export interface SoldFeedbackSummary extends Omit<
+  SoldFeedbackDoc,
+  "createTime"
+> {
+  createTime: number;
+}

@@ -120,3 +120,16 @@ export const parseSoldFeedback = (body: unknown): ParsedSoldFeedback => {
     ? { ok: true, fields }
     : { ok: false, error: "empty_feedback" };
 };
+
+// * 成交價 ÷ 刊登價 as a whole percent; null without a final price or when the
+// * listing had no price (面議 / 免頂讓金)
+export const priceRatioPercent = ({
+  finalPrice,
+  listedPrice,
+}: {
+  finalPrice: number | null;
+  listedPrice: number;
+}) =>
+  finalPrice === null || listedPrice <= 0
+    ? null
+    : Math.round((finalPrice / listedPrice) * 100);

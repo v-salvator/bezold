@@ -1,7 +1,12 @@
 import { Timestamp } from "firebase-admin/firestore";
 import { db } from "@/firebase/server";
 import { COLLECTIONS } from "@/firebase/constants";
-import type { SoldFeedbackDoc, SoldVia, Store } from "@/types";
+import type {
+  SoldFeedbackDoc,
+  SoldFeedbackSummary,
+  SoldVia,
+  Store,
+} from "@/types";
 import type { SoldFeedbackFields } from "@/utils/soldFeedback";
 
 // * gRPC code DocumentReference.create() throws when the doc exists
@@ -38,4 +43,16 @@ export const createSoldFeedback = async ({
     }
     throw error;
   }
+};
+
+const toSummary = (
+  snapshot: FirebaseFirestore.DocumentSnapshot,
+): SoldFeedbackSummary => {
+  const feedback = snapshot.data() as SoldFeedbackDoc;
+  return { ...feedback, createTime: feedback.createTime.toMillis() };
+};
+
+export const getSoldFeedback = async (storeId: string) => {
+  const snapshot = await soldFeedback().doc(storeId).get();
+  return snapshot.exists ? toSummary(snapshot) : null;
 };

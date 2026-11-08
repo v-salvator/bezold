@@ -50,6 +50,7 @@ import StoreDetailDrawer, {
   StoreStatusControls,
 } from "../_components/StoreDetailDrawer";
 import { FollowUpCell, FollowUpSection } from "../_components/FollowUpInfo";
+import { SoldFeedbackSection } from "../_components/SoldFeedbackInfo";
 
 type StatusFilter = StoreStatus | "all";
 
@@ -701,6 +702,11 @@ export default function List() {
                 handleFollowUpPausedChange(activeStore.id, paused)
               }
             />
+          )
+        }
+        feedbackSection={
+          activeStore?.status === STORE_STATUS.SOLD && (
+            <SoldFeedbackSection storeId={activeStore.id} />
           )
         }
         onClose={() => setActiveStoreId(null)}
