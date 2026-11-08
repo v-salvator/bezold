@@ -133,3 +133,80 @@ export const priceRatioPercent = ({
   finalPrice === null || listedPrice <= 0
     ? null
     : Math.round((finalPrice / listedPrice) * 100);
+
+type SummaryInput = {
+  soldDuration: SoldDuration | null;
+  buyerSource: BuyerSource | null;
+  finalPrice: number | null;
+  listedPrice: number;
+  satisfaction: Satisfaction | null;
+};
+
+const percentOf = (part: number, whole: number) =>
+  whole > 0 ? Math.round((part / whole) * 100) : null;
+
+const averageOf = (values: number[]) =>
+  values.length > 0
+    ? values.reduce((sum, value) => sum + value, 0) / values.length
+    : null;
+
+const countBy = <Key extends string>(
+  keys: Record<string, Key>,
+  values: (Key | null)[],
+) =>
+  Object.fromEntries(
+    Object.values(keys).map((key) => [
+      key,
+      values.filter((value) => value === key).length,
+    ]),
+  ) as Record<Key, number>;
+
+// * the Sold Feedback page's stat cards and bars. Each average only counts
+// * the feedback that answered that question.
+export const summarizeSoldFeedback = (
+  feedback: SummaryInput[],
+  soldStoreCount: number,
+) => {
+  const withSource = feedback.filter((item) => item.buyerSource !== null);
+  const viaBezold = withSource.filter(
+    (item) => item.buyerSource === BUYER_SOURCE.BEZOLD,
+  ).length;
+  const ratings = feedback
+    .map((item) => item.satisfaction)
+    .filter((value): value is Satisfaction => value !== null);
+  const ratios = feedback
+    .map(priceRatioPercent)
+    .filter((value): value is number => value !== null);
+  const averageRating = averageOf(ratings);
+  const averageRatio = averageOf(ratios);
+
+  return {
+    count: feedback.length,
+    fillRatePercent: percentOf(feedback.length, soldStoreCount),
+    viaBezold: {
+      count: viaBezold,
+      answered: withSource.length,
+      percent: percentOf(viaBezold, withSource.length),
+    },
+    satisfaction: {
+      average:
+        averageRating === null ? null : Math.round(averageRating * 10) / 10,
+      answered: ratings.length,
+    },
+    priceRatio: {
+      averagePercent: averageRatio === null ? null : Math.round(averageRatio),
+      answered: ratios.length,
+    },
+    durations: countBy(
+      SOLD_DURATION,
+      feedback.map((item) => item.soldDuration),
+    ),
+    durationUnanswered: feedback.filter((item) => item.soldDuration === null)
+      .length,
+    sources: countBy(
+      BUYER_SOURCE,
+      feedback.map((item) => item.buyerSource),
+    ),
+    sourceUnanswered: feedback.length - withSource.length,
+  };
+};

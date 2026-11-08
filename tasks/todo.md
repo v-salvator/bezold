@@ -220,11 +220,13 @@ _Done. The ratio is `priceRatioPercent` (unit-tested; null for 面議 / 免頂�
 
 **Acceptance criteria:**
 
-- [ ] `GET /api/admin/sold-feedback` → all feedback, newest first, plus `soldStoreCount`.
-- [ ] `app/admin/store/feedback/page.tsx`: 4 stat cards, 2 bar charts with 未填, table with expandable rows linking to `/admin/store/list?store={id}`, client-side filters (買家來源, 標記方式, date range). 面議/免頂讓金 show no ratio.
-- [ ] `components/AdminSidebar.tsx`: 「Sold Feedback」 under Store Management. Store List opens the drawer from `?store=`.
+- [x] `GET /api/admin/sold-feedback` → all feedback, newest first, plus `soldStoreCount`.
+- [x] `app/admin/store/feedback/page.tsx`: 4 stat cards, 2 bar charts with 未填, table with expandable rows linking to `/admin/store/list?store={id}`, client-side filters (買家來源, 標記方式, date range). 面議/免頂讓金 show no ratio.
+- [x] `components/AdminSidebar.tsx`: 「Sold Feedback」 under Store Management. Store List opens the drawer from `?store=`.
 
 **Verification:** dev with ~6 seeded feedback docs: the numbers match a hand count, filters narrow the table and stats, and the row link opens the right drawer.
+_Done. Stats come from `summarizeSoldFeedback` (unit-tested; each average counts only feedback that answered that question). The sold-store count uses a Firestore `count()` aggregation. Checked on dev with 4 seeded docs plus 1 real one: every card and bar matched a hand count. The 買家來源 filter recalculates the cards. Expanding a row and following its link opens the right drawer in Store List. The table uses a fixed `scroll.x` like the other admin tables, because `max-content` let long comments widen the whole layout._
+
 **Dependencies:** 11
 **Files:** `app/api/admin/sold-feedback/route.ts`, `firebase/serverUtils/soldFeedback.ts`, `app/admin/store/feedback/page.tsx`, `components/AdminSidebar.tsx`, `app/admin/store/list/page.tsx`
 **Scope:** M

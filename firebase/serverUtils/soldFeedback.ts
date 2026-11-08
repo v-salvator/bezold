@@ -1,6 +1,7 @@
 import { Timestamp } from "firebase-admin/firestore";
 import { db } from "@/firebase/server";
 import { COLLECTIONS } from "@/firebase/constants";
+import { STORE_STATUS } from "@/types";
 import type {
   SoldFeedbackDoc,
   SoldFeedbackSummary,
@@ -55,4 +56,21 @@ const toSummary = (
 export const getSoldFeedback = async (storeId: string) => {
   const snapshot = await soldFeedback().doc(storeId).get();
   return snapshot.exists ? toSummary(snapshot) : null;
+};
+
+// * every 頂讓回饋, newest first, plus how many stores are sold (the fill-rate
+// * denominator). A few hundred docs at most — read them all.
+export const listSoldFeedback = async () => {
+  const [feedbackSnapshot, soldCount] = await Promise.all([
+    soldFeedback().orderBy("createTime", "desc").get(),
+    db
+      .collection(COLLECTIONS.STORE)
+      .where("status", "==", STORE_STATUS.SOLD)
+      .count()
+      .get(),
+  ]);
+  return {
+    feedback: feedbackSnapshot.docs.map(toSummary),
+    soldStoreCount: soldCount.data().count,
+  };
 };

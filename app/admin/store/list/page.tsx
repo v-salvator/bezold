@@ -181,6 +181,19 @@ export default function List() {
     fetchStores();
   }, []);
 
+  // * /admin/store/list?store={id} (linked from Sold Feedback) opens that
+  // * store's drawer once the list has loaded
+  useEffect(() => {
+    if (loading) return;
+    const linkedStoreId = new URLSearchParams(window.location.search).get(
+      "store",
+    );
+    if (linkedStoreId && stores.some((store) => store.id === linkedStoreId)) {
+      setActiveStoreId(linkedStoreId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
+
   // updateStoreStatusAsAdmin also stamps updateTime (and approvedTime on a first
   // approval) server-side; mirror them locally so the list and drawer reflect
   // the change without a refetch.

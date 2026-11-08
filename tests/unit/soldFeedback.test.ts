@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   parseSoldFeedback,
   priceRatioPercent,
+  summarizeSoldFeedback,
 } from "../../utils/soldFeedback.ts";
 
 describe("parseSoldFeedback", () => {
@@ -121,5 +122,71 @@ describe("priceRatioPercent", () => {
       priceRatioPercent({ finalPrice: 300_000, listedPrice: 0 }),
       null,
     );
+  });
+});
+
+describe("summarizeSoldFeedback", () => {
+  const feedback = (overrides: Record<string, unknown>) => ({
+    soldDuration: null,
+    buyerSource: null,
+    finalPrice: null,
+    listedPrice: 500_000,
+    satisfaction: null,
+    ...overrides,
+  });
+  const rows = [
+    feedback({
+      soldDuration: "1_to_3m",
+      buyerSource: "bezold",
+      satisfaction: 5,
+      finalPrice: 450_000,
+    }),
+    feedback({
+      soldDuration: "1_to_3m",
+      buyerSource: "referral",
+      satisfaction: 3,
+    }),
+    feedback({
+      soldDuration: "under_1m",
+      buyerSource: "bezold",
+      finalPrice: 400_000,
+    }),
+    feedback({ satisfaction: 4, finalPrice: 300_000, listedPrice: 0 }),
+  ] as Parameters<typeof summarizeSoldFeedback>[0];
+
+  const summary = summarizeSoldFeedback(rows, 10);
+
+  it("counts feedback against every sold store", () => {
+    assert.equal(summary.count, 4);
+    assert.equal(summary.fillRatePercent, 40);
+  });
+
+  it("measures the Bezold share among answers that named a buyer source", () => {
+    assert.deepEqual(summary.viaBezold, { count: 2, answered: 3, percent: 67 });
+  });
+
+  it("averages satisfaction over the rated feedback only", () => {
+    assert.deepEqual(summary.satisfaction, { average: 4, answered: 3 });
+  });
+
+  it("averages 成交價 ÷ 刊登價 only where both prices exist", () => {
+    assert.deepEqual(summary.priceRatio, { averagePercent: 85, answered: 2 });
+  });
+
+  it("counts each duration and source answer, plus the unanswered", () => {
+    assert.equal(summary.durations["1_to_3m"], 2);
+    assert.equal(summary.durations.under_1m, 1);
+    assert.equal(summary.durations.over_6m, 0);
+    assert.equal(summary.durationUnanswered, 1);
+    assert.equal(summary.sources.bezold, 2);
+    assert.equal(summary.sourceUnanswered, 1);
+  });
+
+  it("reports nothing to average for an empty list", () => {
+    const empty = summarizeSoldFeedback([], 0);
+    assert.equal(empty.fillRatePercent, null);
+    assert.equal(empty.viaBezold.percent, null);
+    assert.equal(empty.satisfaction.average, null);
+    assert.equal(empty.priceRatio.averagePercent, null);
   });
 });
