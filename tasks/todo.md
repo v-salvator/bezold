@@ -199,8 +199,8 @@ _Done. The dialog portals into the site root so it keeps the `--hand` font, and 
 
 ### Checkpoint C
 
-- [ ] Both seller paths save feedback once. Skip saves nothing. Replay → 409.
-- [ ] `test:unit`, `test:rules`, build pass
+- [x] Both seller paths save feedback once. Skip saves nothing. Replay → 409.
+- [x] `test:unit`, `test:rules`, build pass
 
 ### Task 11: Admin drawer 頂讓回饋 section
 
@@ -233,7 +233,7 @@ _Done. Stats come from `summarizeSoldFeedback` (unit-tested; each average counts
 
 ### Checkpoint D — PR 2
 
-- [ ] Full SPEC Testing Strategy passes, including feedback
+- [x] Full SPEC Testing Strategy passes, including feedback
 - [ ] Screenshots: form (both paths), drawer section, Sold Feedback page
 - [ ] **The user reviews → push → PR 2**
 
