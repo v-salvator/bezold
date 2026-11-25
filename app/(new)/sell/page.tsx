@@ -14,8 +14,9 @@ import { isDigitalAssetsLaunched } from "@/utils/digitalAsset";
 import styles from "./page.module.css";
 
 export const metadata: Metadata = pageMetadata({
-  title: "免費刊登頂讓店面",
-  description: "在 Bezold 頂讓必售 免費刊登您的頂讓店面，快速找到合適買家。",
+  title: "刊登頂讓店面｜頂出店面找接手人，成交不抽成",
+  description:
+    "想頂出店面？在 Bezold 刊登你的店，買家直接聯絡你，沒有仲介，成交永久不抽成。3 分鐘填完，審核後上架。",
   path: "/sell",
 });
 
@@ -37,10 +38,10 @@ export default function SellPage({
       <SiteNav activeLink="我要頂出" />
       <main id="sell-form" className={styles.main}>
         <h1 className={styles.heading}>
-          限時<strong>免費刊登</strong>
+          刊登你的店，<strong>找到接手人</strong>
         </h1>
         <p className={styles.subheading}>
-          填寫以下資料，審核後即可上架。完全免費，沒有中間人。
+          填寫以下資料，審核後即可上架。買家直接聯絡你，沒有中間人。
         </p>
         <EmailVerifiedGate
           source="sell_gate"

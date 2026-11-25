@@ -28,8 +28,6 @@ const steps = [
 ];
 
 const fees = [
-  "開站慶 · 早鳥 2026/12/1 前完全免費刊登。",
-  "12/1 起預計開始收取刊登費，金額確認後另行公告，早鳥用戶會優先通知。",
   "瀏覽永久免費，買賣雙方聯絡永久免費。",
   "成交永久不抽成，平台不作為中間人，不介入你和買家的談判。",
   "修改店況、更新照片或下架，都不收任何費用。",
@@ -66,7 +64,7 @@ export default function SellGuide({ faqItems }: { faqItems: FaqItem[] }) {
         <SectionTitle
           num="02"
           title="費用說明"
-          sub="— 早鳥免費，永久不抽成 —"
+          sub="— 買賣直接談，成交永久不抽成 —"
         />
         <ul className={styles.list}>
           {fees.map((fee) => (

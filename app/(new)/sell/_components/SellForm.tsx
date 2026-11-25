@@ -328,7 +328,7 @@ export default function SellForm({
             取消
           </Button>
           <Button type="submit" variant="mus" disabled={submitting}>
-            {submitting ? "提交中..." : "免費刊登"}
+            {submitting ? "提交中..." : "送出刊登"}
           </Button>
         </div>
       </form>

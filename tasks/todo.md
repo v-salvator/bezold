@@ -72,14 +72,14 @@ npx eslint --no-eslintrc -c .eslintrc.json app components utils lib constant fir
 
 **Acceptance criteria:**
 
-- [ ] The rendered `<title>` ends with exactly one 「｜頂讓網 Bezold」, and description and og:description match the spec
-- [ ] One `<h1>` = 刊登你的店，找到接手人. `<strong>` keeps the current accent style
-- [ ] `SellGuide` has no 12/1 or fee lines, and its list still renders without an empty bullet
+- [x] The rendered `<title>` ends with exactly one 「｜頂讓網 Bezold」, and description and og:description match the spec
+- [x] One `<h1>` = 刊登你的店，找到接手人. `<strong>` keeps the current accent style
+- [x] `SellGuide` has no 12/1 or fee lines, and its list still renders without an empty bullet
 
 **Verification:**
 
-- [ ] `curl -s localhost:3000/sell` → title, meta and h1. The page redirects signed-out users client-side, but the head and H1 are in the server HTML
-- [ ] Screenshot of the heading and guide (use script-blocking per CLAUDE.md)
+- [x] `curl -s localhost:3000/sell` → title, meta and h1. The page redirects signed-out users client-side, but the head and H1 are in the server HTML
+- [x] Screenshot of the heading and guide (use script-blocking per CLAUDE.md)
 
 **Dependencies:** None
 

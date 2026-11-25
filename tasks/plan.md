@@ -23,7 +23,7 @@ Remove every "listing is free / 12/1 / 早鳥" claim from the site and replace i
 
 - [x] Task 1: Home description with a live count, plus root `SITE_DESCRIPTION` and llms.txt
 - [x] Task 2: Home hero H1 with 頂讓, plus hero free-copy removal
-- [ ] Task 3: `/sell` metadata, H1, subheading, guide lines and submit label
+- [x] Task 3: `/sell` metadata, H1, subheading, guide lines and submit label
 
 ### Checkpoint A: after Tasks 1–3
 
