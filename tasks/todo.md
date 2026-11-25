@@ -162,14 +162,14 @@ npx eslint --no-eslintrc -c .eslintrc.json app components utils lib constant fir
 
 **Acceptance criteria:**
 
-- [ ] `/faq` and `/sell` FAQPage JSON-LD contain no 12/1, 早鳥 or 免費刊登
-- [ ] The nav button reads 「+ 刊登店面」 and fits the nav at 375 px without wrapping
-- [ ] `/about`, the footer and `/store-guide` match the spec
+- [x] `/faq` and `/sell` FAQPage JSON-LD contain no 12/1, 早鳥 or 免費刊登
+- [x] The nav button reads 「+ 刊登店面」 and fits the nav at 375 px without wrapping
+- [x] `/about`, the footer and `/store-guide` match the spec
 
 **Verification:**
 
-- [ ] `curl` `/faq`, `/about`, `/store-guide` and grep for `12/1|早鳥|免費刊登` → 0
-- [ ] Screenshot of the nav at 375 px
+- [x] `curl` `/faq`, `/about`, `/store-guide` and grep for `12/1|早鳥|免費刊登` → 0
+- [x] Screenshot of the nav at 375 px
 
 **Dependencies:** None
 

@@ -85,8 +85,7 @@ export default function AboutPage() {
             </p>
             <p>
               <b>費用</b>
-              ：開站慶早鳥 2026/12/1
-              前完全免費刊登；瀏覽與買賣雙方聯絡永久免費；成交永久不抽成。
+              ：瀏覽與買賣雙方聯絡永久免費；成交永久不抽成。
             </p>
           </LegalProse>
         </Section>

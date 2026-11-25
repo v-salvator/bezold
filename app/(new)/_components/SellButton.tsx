@@ -18,7 +18,7 @@ export default function SellButton() {
 
   return (
     <Button variant="mus" className="px-2 py-1 text-xs" onClick={handleClick}>
-      + 限時免費刊登
+      + 刊登店面
     </Button>
   );
 }
