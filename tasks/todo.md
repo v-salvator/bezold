@@ -219,8 +219,8 @@ npx eslint --no-eslintrc -c .eslintrc.json app components utils lib constant fir
 
 ## Checkpoint B: complete
 
-- [ ] The sweep grep returns 0 hits
-- [ ] Build and lint pass. No console errors on `/`, `/sell`, `/faq`, `/about`, `/store-guide`, `/my-listings`, `/digital-assets`
+- [x] The sweep grep returns 0 hits
+- [x] Build and lint pass. No console errors on `/`, `/sell`, `/faq`, `/about`, `/store-guide`, `/my-listings`, `/digital-assets`
 - [ ] Before/after screenshots via the `before-and-after` skill (main worktree on :3001, branch on :3000): hero, banner, HowItWorks/WhyUs/SellerCta, `/sell` heading, nav at 375 px
 - [ ] The user reviews → push → PR (links #125, `SPEC.md` → `listing-copy`) → merge and deploy **by 11/30**
 - [ ] Post-deploy (user): GSC re-indexing for `/` and `/sell`

@@ -27,7 +27,7 @@ Remove every "listing is free / 12/1 / 早鳥" claim from the site and replace i
 
 ### Checkpoint A: after Tasks 1–3
 
-- [ ] Build and lint pass. Rendered `/` and `/sell` head tags and H1s match the spec
+- [x] Build and lint pass. Rendered `/` and `/sell` head tags and H1s match the spec
 - [ ] The user reviews → local commits stay. If time runs short, these alone could ship before 11/30
 
 ### Phase 2: Site-wide sweep
@@ -39,8 +39,8 @@ Remove every "listing is free / 12/1 / 早鳥" claim from the site and replace i
 
 ### Checkpoint B: complete
 
-- [ ] The sweep grep returns 0 hits (see todo.md)
-- [ ] Build and lint pass, and the dev server shows no console errors on `/`, `/sell`, `/faq`, `/about`, `/store-guide`, `/my-listings`, `/digital-assets`
+- [x] The sweep grep returns 0 hits (see todo.md)
+- [x] Build and lint pass, and the dev server shows no console errors on `/`, `/sell`, `/faq`, `/about`, `/store-guide`, `/my-listings`, `/digital-assets`
 - [ ] Before/after screenshots (main on :3001 vs branch on :3000) in the PR
 - [ ] The user reviews → push → PR → merge and deploy by 11/30 → user requests re-indexing in GSC for `/` and `/sell`
 
