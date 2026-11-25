@@ -28,7 +28,7 @@ const STATIC_ROUTES: MetadataRoute.Sitemap = [
   route("/", "daily", 1),
   route("/store-list", "daily", 0.9),
   route("/digital-assets", "daily", 0.8),
-  route("/sell", "weekly", 0.8),
+  // * /sell is left out on purpose — it's noindexed (signed-in sellers only)
   route("/faq", "monthly", 0.5),
   route("/store-guide", "monthly", 0.5),
   route("/policy/editor-pick", "monthly", 0.5),
