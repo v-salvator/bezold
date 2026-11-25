@@ -107,14 +107,14 @@ npx eslint --no-eslintrc -c .eslintrc.json app components utils lib constant fir
 
 **Acceptance criteria:**
 
-- [ ] With one message: no interval, no slide-out, no dots. The message is static and clickable
-- [ ] With 2 or more messages (temporarily re-add one locally to test), the rotation behaves exactly as before
-- [ ] Both the pre-launch and post-launch digital-asset variants still render correctly
+- [x] With one message: no interval, no slide-out, no dots. The message is static and clickable
+- [x] With 2 or more messages (temporarily re-add one locally to test), the rotation behaves exactly as before
+- [x] Both the pre-launch and post-launch digital-asset variants still render correctly
 
 **Verification:**
 
-- [ ] Dev server: watch the banner for more than 10 s at desktop and 375 px. No movement, no console errors
-- [ ] Screenshot of the banner at desktop and 375 px
+- [x] Dev server: watch the banner for more than 10 s at desktop and 375 px. No movement, no console errors
+- [x] Screenshot of the banner at desktop and 375 px
 
 **Dependencies:** None
 
