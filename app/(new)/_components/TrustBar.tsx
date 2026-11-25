@@ -17,9 +17,9 @@ export default function TrustBar() {
         </div>
         <div className={styles.item}>
           <b>
-            0<small className={styles.unit}> 元</small>
+            5<small className={styles.unit}> 分鐘</small>
           </b>
-          <span>早鳥刊登費 (12/1 前)</span>
+          <span>填完上架</span>
         </div>
         <div className={styles.item}>
           <b>0%</b>

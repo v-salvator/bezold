@@ -33,7 +33,7 @@ Remove every "listing is free / 12/1 / 早鳥" claim from the site and replace i
 ### Phase 2: Site-wide sweep
 
 - [x] Task 4: Launch banner: remove the early-bird slide and make the rotator safe with one message
-- [ ] Task 5: Home sections (SellerCta, HowItWorks, WhyUs, home Faq, TrustBar)
+- [x] Task 5: Home sections (SellerCta, HowItWorks, WhyUs, home Faq, TrustBar)
 - [ ] Task 6: Shared FAQ, /about, nav button, footer, guide seller steps
 - [ ] Task 7: Remaining CTAs (store-example, my-listings, digital assets, blog Cta)
 

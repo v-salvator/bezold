@@ -133,14 +133,14 @@ npx eslint --no-eslintrc -c .eslintrc.json app components utils lib constant fir
 
 **Acceptance criteria:**
 
-- [ ] All strings match the spec table. SellerCta's stat shows **0 仲介**, and the 「不抽成交抽成」 typo is fixed
-- [ ] The home FAQPage JSON-LD fee answer has no listing-fee or free-listing sentence
-- [ ] SellerCta's 3-stat row keeps its layout at desktop and 375 px
+- [x] All strings match the spec table. SellerCta's stat shows **0 仲介**, and the 「不抽成交抽成」 typo is fixed
+- [x] The home FAQPage JSON-LD fee answer has no listing-fee or free-listing sentence
+- [x] SellerCta's 3-stat row keeps its layout at desktop and 375 px
 
 **Verification:**
 
-- [ ] `curl -s localhost:3000/ | grep -c '12/1\|早鳥'` → 0
-- [ ] Screenshots of HowItWorks, WhyUs and SellerCta at desktop and 375 px
+- [x] `curl -s localhost:3000/ | grep -c '12/1\|早鳥'` → 0
+- [x] Screenshots of HowItWorks, WhyUs and SellerCta at desktop and 375 px
 
 **Dependencies:** None
 
