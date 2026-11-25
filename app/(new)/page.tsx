@@ -24,7 +24,10 @@ import {
   getEmergencyStores,
   getSoldStores,
   getDigitalAssets,
+  countListedPhysicalStores,
 } from "@/firebase/serverUtils/store";
+import { BASE_OPEN_GRAPH, SITE_TITLE } from "@/constant/seo";
+import { homeDescription } from "@/utils/seo";
 import { STORE_STATUS } from "@/types";
 import { SOCIAL_LINKS } from "@/constant/socials";
 import { CONTACT_EMAIL } from "@/constant/contact";
@@ -32,16 +35,26 @@ import { isDigitalAssetsLaunched } from "@/utils/digitalAsset";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: {
-    absolute: "頂讓網｜全台店面頂讓平台 - Bezold 頂讓必售",
-  },
-  description:
-    "頂讓網 Bezold — 全台店面頂讓平台。買家直接接手已有客群、設備、營運的店面；賣家把心血交給合適的人。店面頂讓、生意頂讓真實刊登，2026/12/1 前免費刊登，永久不抽成。",
-  alternates: {
-    canonical: "/",
-  },
-};
+// * the description's listing count refreshes with the page's revalidate
+export async function generateMetadata(): Promise<Metadata> {
+  const description = homeDescription(await countListedPhysicalStores());
+  return {
+    title: {
+      absolute: SITE_TITLE,
+    },
+    description,
+    alternates: {
+      canonical: "/",
+    },
+    // * Next replaces the root openGraph, so start from the shared base
+    openGraph: {
+      ...BASE_OPEN_GRAPH,
+      title: SITE_TITLE,
+      description,
+      url: "/",
+    },
+  };
+}
 
 export default async function NewHomePage() {
   // * re-checked on every revalidate, so 04 switches within a minute of launch

@@ -39,6 +39,13 @@ export const pageMetadata = ({
   },
 });
 
+// * the home description carries the live listing count; without one (count
+// * failed or nothing listed) it drops the number clause — never 「0 間」
+export const homeDescription = (listedCount: number | null) =>
+  listedCount
+    ? `頂讓網 Bezold：全台店面頂讓平台，${listedCount} 間真實刊登，可依縣市、行業找店。買家直接聯絡賣家，沒有仲介，成交永久不抽成。`
+    : "頂讓網 Bezold：全台店面頂讓平台，可依縣市、行業找店。買家直接聯絡賣家，沒有仲介，成交永久不抽成。";
+
 // * flatten line breaks and cap the length for <meta name="description">
 export const toMetaDescription = (text: string, maxLength = 120) =>
   truncateText(text.replace(/\s+/g, " ").trim(), maxLength);

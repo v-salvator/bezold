@@ -21,7 +21,7 @@ Remove every "listing is free / 12/1 / 早鳥" claim from the site and replace i
 
 ### Phase 1: SEO surfaces from the issue (highest value, deadline-critical)
 
-- [ ] Task 1: Home description with a live count, plus root `SITE_DESCRIPTION` and llms.txt
+- [x] Task 1: Home description with a live count, plus root `SITE_DESCRIPTION` and llms.txt
 - [ ] Task 2: Home hero H1 with 頂讓, plus hero free-copy removal
 - [ ] Task 3: `/sell` metadata, H1, subheading, guide lines and submit label
 

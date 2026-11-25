@@ -17,15 +17,15 @@ npx eslint --no-eslintrc -c .eslintrc.json app components utils lib constant fir
 
 **Acceptance criteria:**
 
-- [ ] `countListedPhysicalStores()` returns `count(status in [approved, sold]) − count(listingType == digital, status in [approved, sold])`, or `null` on error (logged)
-- [ ] `/` renders the spec description with a real number, og:description is identical, and the title and canonical are unchanged. With `null` it renders the no-number variant
-- [ ] `SITE_DESCRIPTION` and `/llms.txt` match the spec, with no 12/1 or 免費刊登
+- [x] `countListedPhysicalStores()` returns `count(status in [approved, sold]) − count(listingType == digital, status in [approved, sold])`, or `null` on error (logged)
+- [x] `/` renders the spec description with a real number, og:description is identical, and the title and canonical are unchanged. With `null` it renders the no-number variant
+- [x] `SITE_DESCRIPTION` and `/llms.txt` match the spec, with no 12/1 or 免費刊登
 
 **Verification:**
 
-- [ ] `curl -s localhost:3000/ | grep -o '<meta name="description"[^>]*>\|<meta property="og:description"[^>]*>'` shows the new copy and N
-- [ ] Spot-check N against the admin store list (approved + sold, physical) on mock data
-- [ ] `curl -s localhost:3000/llms.txt | head -5`
+- [x] `curl -s localhost:3000/ | grep -o '<meta name="description"[^>]*>\|<meta property="og:description"[^>]*>'` shows the new copy and N
+- [x] Spot-check N against the admin store list (approved + sold, physical) on mock data
+- [x] `curl -s localhost:3000/llms.txt | head -5`
 
 **Dependencies:** None
 
