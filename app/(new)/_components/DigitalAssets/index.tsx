@@ -9,7 +9,7 @@ import { digitalAssetsLaunchLabels } from "@/utils/digitalAsset";
 import styles from "./DigitalAssets.module.css";
 
 const teaserPoints = (launchDate: string) => [
-  "賣家免費刊登，匿名、公開頁面不顯示賣家資料",
+  "賣家刊登，匿名、公開頁面不顯示賣家資料",
   "每筆刊登都經 Bezold 核對營收截圖",
   `現在搶先刊登，${launchDate} 上線當天一起曝光`,
 ];

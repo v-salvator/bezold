@@ -57,10 +57,6 @@
   color: var(--ink-2);
   margin: 0 0 12px;
 }
-.subAccent {
-  color: var(--accent);
-  font-weight: 700;
-}
 .chips {
   list-style: none;
   margin: 0;

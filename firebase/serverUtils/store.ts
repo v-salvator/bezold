@@ -261,6 +261,28 @@ export const getSoldStores = async () => {
   return resolveStoreImages(soldStores, { coverOnly: true });
 };
 
+// * physical stores that are live or sold — the home description's
+// * 「N 間真實刊登」. Two count() aggregations instead of reading every doc:
+// * legacy docs have no listingType, so physical = all − digital. The digital
+// * count shares getDigitalAssets' listingType + status index.
+export const countListedPhysicalStores = async (): Promise<number | null> => {
+  const listedStatuses = [STORE_STATUS.APPROVED, STORE_STATUS.SOLD];
+  try {
+    const listedRef = db
+      .collection(COLLECTION)
+      .where("status", "in", listedStatuses);
+    const [allSnapshot, digitalSnapshot] = await Promise.all([
+      listedRef.count().get(),
+      listedRef.where("listingType", "==", LISTING_TYPE.DIGITAL).count().get(),
+    ]);
+    return allSnapshot.data().count - digitalSnapshot.data().count;
+  } catch (error) {
+    // * callers fall back to copy without a number, never a 500
+    console.error("countListedPhysicalStores failed", error);
+    return null;
+  }
+};
+
 interface GetDigitalAssetsOptions {
   statuses: StoreStatus[];
   limit?: number;

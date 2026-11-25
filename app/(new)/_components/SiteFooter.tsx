@@ -118,7 +118,7 @@ export default function SiteFooter() {
         <h2>頂出</h2>
         <ul>
           <li>
-            <a href="/sell">早鳥免費刊登</a>
+            <a href="/sell">刊登店面</a>
           </li>
           <li>
             <a href="/store-example">刊登範例</a>

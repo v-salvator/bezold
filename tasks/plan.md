@@ -1,91 +1,60 @@
-# Implementation Plan: Listing follow-up email + sold feedback
+# Implementation Plan: `listing-copy` (issue #125 items 2 + 3)
 
-Spec: [`SPEC.md`](../SPEC.md) · Tasks: [`tasks/todo.md`](todo.md) · Design: [`docs/listing-follow-up-prototype.html`](../docs/listing-follow-up-prototype.html)
+Spec: [`SPEC.md`](../SPEC.md) → Module `listing-copy` · Tasks: [`tasks/todo.md`](todo.md)
+
+**Deadline: live in production by 2026-11-30.** One PR, one local commit per task, and the user reviews before push.
 
 ## Overview
 
-A daily Vercel Cron job emails sellers whose listing has been approved for 60+ days (then every 30 days), through Brevo. The email links to `/listing-check`, a no-login page where the seller confirms 「還在頂讓」 or 「已頂讓」. Confirming sold flips the store to `sold` and shows an optional 頂讓回饋 form. The same form opens as a dialog after 已頂讓 on `/my-listings`. Admins see follow-up counts and a pause switch in Store List, and all feedback on a new Sold Feedback page.
-
-Two PRs, 12 tasks. PR 1 is the follow-up email loop (tasks 1–7). PR 2 is sold feedback (tasks 8–12). Nothing emails real sellers until the user switches it on after PR 2 (see Launch).
+Remove every "listing is free / 12/1 / 早鳥" claim from the site and replace it with neutral copy that is true before and after 12/1. While doing that, ship the new home description (with a live listing count) and home H1 with 頂讓, and retarget `/sell`'s title, description and H1 at 頂出店面 / 刊登頂讓店面. The copy for every string is fixed in the spec's tables. This plan is about order, mechanics and verification.
 
 ## Architecture decisions
 
-- **Kill switch + dry run.** The cron does nothing unless `FOLLOW_UP_ENABLED=true`. `?dryRun=1` returns the due list (store ids, names, recipient domains only) without sending or writing. This lets PR 1 merge and deploy with no risk, and gives a safe first look at prod. _(Added to SPEC env table.)_
-- **Pure logic is alias-free.** `tests/unit` runs `node --test` on `.ts` with relative imports. `utils/followUp.ts`, `utils/soldFeedback.ts`, `lib/followUp/token.ts` and `lib/followUp/emailTemplates.ts` import only relative paths and `node:crypto`, never `@/…`, like the modules the existing tests cover.
-- **Timestamps → Date in every mapper.** Store mappers convert only `createTime` / `updateTime` today. Any other Timestamp field would reach client components as a Firestore object and break serialization. `approvedTime` and `soldTime` get added to `storeConverter` (client) and the server mappers in `firebase/serverUtils/store.ts` (`mapDocsToStores`, `getStoreById`) in task 1.
-- **`approvedTime` is stamped wherever an admin produces an approved store.** That's Store List (single and bulk status change) and the admin create form (`createStoreWithSeller(status)` can create it approved). Drafts only go back to `pending`, so they're untouched. It's written only when absent.
-- **No rules or index deploy.** The new collections fall under the existing catch-all deny. `approvedTime` is written by admins (unrestricted), the rest by the Admin SDK. The token lookup is a single-field equality query with an automatic index. Rules **tests** are still added.
-- **One shared form component** (`app/(new)/_components/SoldFeedbackForm/`) for `/listing-check` and the `/my-listings` dialog. One API route with two auth modes (token or member ID token).
-- **Header PNG** (`public/email/bezold-email-header.png`, @2x) is cropped with `sharp` from the current logo `public/bezold-avatar-v2.png` (not the outdated `bezold-removebg-rect.png`). It's shown to the user for approval before it's saved (standing preference).
-
-## Dependency graph
-
-```
-types + collections + approvedTime + mappers (1)
-   ├── due logic + token (2) ──┐
-   ├── email templates + Brevo (3) ──┐
-   │                            │    │
-   ├── /listing-check read states (4)│
-   │        └── answer API + actions (5) ── needs 3 (confirmation email)
-   │                 └── cron + kill switch + dry run (6) ── needs 2, 3
-   └── admin follow-up API + column + drawer switch (7) ── needs 1
-                    ═══ PR 1 ═══
-   parse + feedback API, token path (8) ── needs 5
-        └── form component + /listing-check inline (9)
-               └── /my-listings dialog + member path (10)
-   admin drawer feedback (11) ── needs 8
-        └── Sold Feedback page + sidebar (12)
-                    ═══ PR 2 ═══
-```
+- **Home metadata becomes `generateMetadata`.** It runs under the page's existing `revalidate = 60`, so the count refreshes at most once a minute per region. Title and canonical stay identical.
+- **Listing count = two Firestore `count()` aggregations**, not a document read. `count(status in [approved, sold])` minus `count(listingType == digital, status in [approved, sold])`. Each costs 1 read per 1,000 docs. Physical stores can't be counted directly because legacy docs have no `listingType` (see `physicalOnly` in `firebase/serverUtils/store.ts`). The digital count uses the same `listingType` + `status` filters as `getDigitalAssets`, which already has a composite index, so no new index is expected. If either count throws, log it and return `null`. The page then uses the description without the number clause and never shows `0 間`.
+- **og description is set explicitly** on `/` and `/sell` (`pageMetadata` already does this for `/sell`). The site emits no `twitter:*` tags today, and Twitter/X falls back to `og:*`. The spec's "twitter:description" requirement is met through og, and no twitter block is added.
+- **Launch banner keeps the rotator.** Removing the early-bird slide leaves one message. The rotator's interval would then "rotate" index 0 → 0, set `leavingIndex = 0` and animate the only message out. Guard it: with fewer than 2 messages, start no interval and render no dots. This is the riskiest change, so it goes early.
+- **`TrustBar` isn't mounted** (`{/* <TrustBar /> */}` in `page.tsx`). Its early-bird stat still changes so the sweep grep comes back clean, but there's nothing to screenshot.
+- **FAQ text and JSX stay in one place.** `Faq.tsx` and `faqData.tsx` keep the plain `text` field (it feeds FAQPage JSON-LD on `/`, `/faq` and `/sell`) and the rendered JSX in sync.
 
 ## Task list
 
-### PR 1 — follow-up email loop
+### Phase 1: SEO surfaces from the issue (highest value, deadline-critical)
 
-- [ ] 1. Types, collections, `approvedTime` stamping, mapper fixes, rules tests
-- [ ] 2. Due logic + recipient + token (pure) with unit tests
-- [ ] 3. Email templates + Brevo client + header PNG
-- [ ] 4. `/listing-check` page: read-only states
-- [ ] 5. Answer API + confirm actions + confirmation email
+- [x] Task 1: Home description with a live count, plus root `SITE_DESCRIPTION` and llms.txt
+- [x] Task 2: Home hero H1 with 頂讓, plus hero free-copy removal
+- [x] Task 3: `/sell` metadata, H1, subheading, guide lines and submit label
 
-**Checkpoint A** (after 5): a hand-seeded mock follow-up doc + token can be answered both ways on the dev server. `test:unit`, `test:rules`, build pass.
+### Checkpoint A: after Tasks 1–3
 
-- [ ] 6. Cron route, kill switch, dry run, `vercel.json`
-- [ ] 7. Admin: follow-up API, 追蹤信 column, drawer section + pause switch
+- [x] Build and lint pass. Rendered `/` and `/sell` head tags and H1s match the spec
+- [ ] The user reviews → local commits stay. If time runs short, these alone could ship before 11/30
 
-**Checkpoint B / PR 1** (after 7): full dev loop per SPEC → Testing Strategy (backdate → cron → email in the test inbox → answer → admin shows it → pause → cron skips). Gmail web + iOS Mail check. Before/after screenshots (admin list + drawer). The user reviews → push → PR.
+### Phase 2: Site-wide sweep
 
-### PR 2 — sold feedback
+- [x] Task 4: Launch banner: remove the early-bird slide and make the rotator safe with one message
+- [x] Task 5: Home sections (SellerCta, HowItWorks, WhyUs, home Faq, TrustBar)
+- [x] Task 6: Shared FAQ, /about, nav button, footer, guide seller steps
+- [x] Task 7: Remaining CTAs (store-example, my-listings, digital assets, blog Cta)
 
-- [ ] 8. `parseSoldFeedback` + `POST /api/sold-feedback` (token path) + server utils
-- [ ] 9. `SoldFeedbackForm` + inline on `/listing-check`
-- [ ] 10. `/my-listings` dialog + member-auth path
+### Checkpoint B: complete
 
-**Checkpoint C** (after 10): both seller paths save feedback once. Skip saves nothing. Replay → 409.
-
-- [ ] 11. Admin drawer 頂讓回饋 section
-- [ ] 12. Sold Feedback admin page + sidebar item
-
-**Checkpoint D / PR 2** (after 12): admin page numbers match the seeded feedback. Screenshots. The user reviews → push → PR.
-
-### Launch (the user does these, with Claude's help)
-
-1. Add Vercel env: `BREVO_API_KEY`, `CRON_SECRET`, `FOLLOW_UP_MAX_PER_RUN=20`, `FOLLOW_UP_ENABLED` (leave `false`).
-2. Run the prod dry run (`curl -H "Authorization: Bearer …" https://www.bezold.com.tw/api/cron/listing-follow-up?dryRun=1`). Claude summarizes how many stores are due and how many lack an email.
-3. Set `FOLLOW_UP_ENABLED=true`. After a quiet launch week, remove `FOLLOW_UP_MAX_PER_RUN` (back to 100).
+- [x] The sweep grep returns 0 hits (see todo.md)
+- [x] Build and lint pass, and the dev server shows no console errors on `/`, `/sell`, `/faq`, `/about`, `/store-guide`, `/my-listings`, `/digital-assets`
+- [ ] Before/after screenshots (main on :3001 vs branch on :3000) in the PR
+- [ ] The user reviews → push → PR → merge and deploy by 11/30 → user requests re-indexing in GSC for `/` and `/sell`
 
 ## Risks and mitigations
 
-| Risk                                                   | Impact | Mitigation                                                                                                        |
-| ------------------------------------------------------ | ------ | ----------------------------------------------------------------------------------------------------------------- |
-| Dev or a worktree emails a real seller                 | High   | Dev forces `FOLLOW_UP_TEST_RECIPIENT` and refuses without it. Prod needs `FOLLOW_UP_ENABLED=true`. Dry run first. |
-| Launch-day backlog (every store > 60 days due at once) | Med    | `FOLLOW_UP_MAX_PER_RUN=20` for the launch week. Dry run shows the count before enabling.                          |
-| Timestamp fields leak to client components             | Med    | Mapper fix in task 1. `npm run build` + open `/store/[id]` and admin list on a store with `approvedTime`.         |
-| Brevo rejects (sender not verified for API, quota)     | Med    | Task 3 sends one real test mail through the API in dev. Failures write `lastError` and don't count as sent.       |
-| Mail clients mangle the layout (Outlook, dark mode)    | Low    | Table + inline styles only. Check Gmail web + iOS Mail. Outlook is best-effort.                                   |
-| Hobby cron timing / 10 s default limit                 | Low    | `maxDuration = 60`. Sends run with limited concurrency. The 100 cap keeps a run well under a minute.              |
-| Two writers on one token (double click, two tabs)      | Low    | The answer runs in a Firestore transaction that checks `tokenUsed`.                                               |
+| Risk                                                                | Impact                                               | Mitigation                                                                                                                                                                                            |
+| ------------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Miss the 11/30 deadline                                             | High: wrong copy appears in search results from 12/1 | Phase 1 is shippable on its own. Phase 2 is all string edits, about an hour                                                                                                                           |
+| The digital `count()` needs an index that doesn't exist             | Med: the count throws                                | Fallback copy without a number. Try it on dev (mock collections share the index set). If an index is needed, add it to `firestore.indexes.json` for both `mock*` and `prod*`, and the user deploys it |
+| The single-message banner animates out or shows a lone dot          | Med: visible on every page                           | Task 4 guard plus a manual check at desktop and 375 px, with reduced motion on and off                                                                                                                |
+| Copy changes shift layout (SellerCta stats, hero lines)             | Low                                                  | Before/after screenshots at desktop and 375 px                                                                                                                                                        |
+| #121 (acceleration copy) lands first and edits `AccelerationBanner` | Low: merge conflict                                  | Rebase before PR. Only one phrase is removed here                                                                                                                                                     |
+| The dev server hits prod data                                       | Low                                                  | Check `NEXT_PUBLIC_ENV_VERSION=dev` in `.env.development` before `npm run dev`                                                                                                                        |
 
 ## Open questions
 
-None. Resolved 2026-11-08: digital assets included; site is on Vercel with Cron; launch backlog → cap 20 for the launch week; sender → `Bezold 頂讓必售`; header → cropped from `bezold-avatar-v2.png`.
+None. All copy is fixed in `SPEC.md`.

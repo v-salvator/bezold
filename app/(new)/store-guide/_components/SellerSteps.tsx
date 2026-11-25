@@ -9,8 +9,8 @@ const steps: GuideStep[] = [
   },
   {
     number: 2,
-    title: "免費刊登",
-    desc: "5 分鐘填好表單、上傳照片。早鳥 12/1 前 0 元，當天審核上架。",
+    title: "刊登店面",
+    desc: "5 分鐘填好表單、上傳照片，審核後上架。",
   },
   {
     number: 3,

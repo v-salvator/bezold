@@ -29,14 +29,6 @@ const TRANSITION_MS = 450;
 function bannerMessages(launched: boolean): BannerMessage[] {
   const { date, weekday, time } = digitalAssetsLaunchLabels();
   return [
-    {
-      key: "early-bird",
-      tag: "EARLY BIRD",
-      text: "開站慶 · 12/1 前免費刊登",
-      shortText: "12/1 前免費刊登",
-      linkLabel: "了解 →",
-      href: "/sell",
-    },
     launched
       ? {
           key: "digital-assets",
@@ -98,8 +90,11 @@ export default function LaunchBannerRotator({
 
   // * with less motion the banner stays put; the dots still switch it
   const paused = hovered || focused || reduceMotion;
+  // * a lone message must not rotate — 0 → 0 would mark it leaving and
+  // * slide it out
+  const rotates = messages.length > 1;
   useEffect(() => {
-    if (paused) return;
+    if (paused || !rotates) return;
     const timer = setInterval(
       () =>
         setSlide((current) => ({
@@ -109,7 +104,7 @@ export default function LaunchBannerRotator({
       ROTATE_MS,
     );
     return () => clearInterval(timer);
-  }, [paused, messages.length]);
+  }, [paused, rotates, messages.length]);
 
   useEffect(() => {
     if (leavingIndex === null) return;
@@ -171,18 +166,20 @@ export default function LaunchBannerRotator({
         );
       })}
 
-      <div className={styles.dots}>
-        {messages.map((message, index) => (
-          <button
-            key={message.key}
-            type="button"
-            className={cn(styles.dot, index === activeIndex && styles.dotOn)}
-            aria-label={`第 ${index + 1} 則公告`}
-            aria-pressed={index === activeIndex}
-            onClick={() => showMessage(index)}
-          />
-        ))}
-      </div>
+      {rotates && (
+        <div className={styles.dots}>
+          {messages.map((message, index) => (
+            <button
+              key={message.key}
+              type="button"
+              className={cn(styles.dot, index === activeIndex && styles.dotOn)}
+              aria-label={`第 ${index + 1} 則公告`}
+              aria-pressed={index === activeIndex}
+              onClick={() => showMessage(index)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

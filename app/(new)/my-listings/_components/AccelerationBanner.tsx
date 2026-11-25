@@ -20,7 +20,6 @@ export default function AccelerationBanner() {
       <div className={styles.body}>
         <h2 className={styles.heading}>刊登後，想更快被買家看見？</h2>
         <p className={styles.sub}>
-          <span className={styles.subAccent}>免費刊登不變。</span>
           加購頂讓加速包，主動接觸正在找店的潛在買家。
         </p>
         <ul className={styles.chips}>

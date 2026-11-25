@@ -8,7 +8,7 @@
   font-size: 11px;
   letter-spacing: 0.16em;
   color: var(--accent);
-  margin-bottom: 10px;
+  margin: 0 0 10px;
   text-align: center;
 
   animation: fadeInDown 0.4s ease-out both;
@@ -26,6 +26,8 @@
   color: var(--accent);
   text-decoration: underline wavy var(--accent);
   text-underline-offset: 6px;
+  /* * 準備好 never splits when the longer 頂讓店 line wraps */
+  white-space: nowrap;
 }
 .sub {
   font-family: var(--hand);
@@ -38,10 +40,6 @@
   text-wrap: balance;
 
   animation: fadeInUp 0.5s ease-out 0.4s both;
-}
-.subAccent {
-  color: var(--accent);
-  font-weight: 700;
 }
 
 .split {
@@ -278,8 +276,9 @@
 }
 
 @media (max-width: 640px) {
+  /* * 46px fits 找一間準備好 on one 375px line */
   .title {
-    font-size: 56px;
+    font-size: 46px;
   }
   .split {
     grid-template-columns: 1fr;
