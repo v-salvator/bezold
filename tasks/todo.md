@@ -46,14 +46,14 @@ npx eslint --no-eslintrc -c .eslintrc.json app components utils lib constant fir
 
 **Acceptance criteria:**
 
-- [ ] `/` has exactly one `<h1>`, and its text is 找一間準備好的頂讓店開門就營業
-- [ ] No 12/1, 早鳥 or 免費刊登 remains in `HeroSplit` (「免費建立帳號」 stays)
-- [ ] Line 1 still fits on one line at 375 px. If it wraps, adjust the font clamp in `HeroSplit.module.css`
+- [x] `/` has exactly one `<h1>`, and its text is 找一間準備好的頂讓店開門就營業
+- [x] No 12/1, 早鳥 or 免費刊登 remains in `HeroSplit` (「免費建立帳號」 stays)
+- [x] Line 1 still fits on one line at 375 px. If it wraps, adjust the font clamp in `HeroSplit.module.css`
 
 **Verification:**
 
-- [ ] `curl -s localhost:3000/ | grep -c '<h1'` → 1
-- [ ] Screenshot of the hero at desktop and 375 px
+- [x] `curl -s localhost:3000/ | grep -c '<h1'` → 1
+- [x] Screenshot of the hero at desktop and 375 px
 
 **Dependencies:** None
 
