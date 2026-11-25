@@ -13,12 +13,19 @@ import { LISTING_TYPE } from "@/types";
 import { isDigitalAssetsLaunched } from "@/utils/digitalAsset";
 import styles from "./page.module.css";
 
-export const metadata: Metadata = pageMetadata({
-  title: "刊登頂讓店面｜頂出店面找接手人，成交不抽成",
-  description:
-    "想頂出店面？在 Bezold 刊登你的店，買家直接聯絡你，沒有仲介，成交永久不抽成。3 分鐘填完，審核後上架。",
-  path: "/sell",
-});
+export const metadata: Metadata = {
+  ...pageMetadata({
+    title: "刊登頂讓店面｜頂出店面找接手人，成交不抽成",
+    description:
+      "想頂出店面？在 Bezold 刊登你的店，買家直接聯絡你，沒有仲介，成交永久不抽成。3 分鐘填完，審核後上架。",
+    path: "/sell",
+  }),
+  // * signed-in sellers only: signed-out visitors (and Googlebot) are sent to
+  // * /login, which robots.txt blocks, so the page can't be indexed anyway.
+  // * Keep it out of the index — and out of robots.txt, or Google never sees
+  // * this noindex. Also left out of app/sitemap.ts.
+  robots: { index: false, follow: true },
+};
 
 export default function SellPage({
   searchParams,
