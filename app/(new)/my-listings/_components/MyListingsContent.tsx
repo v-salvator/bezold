@@ -55,7 +55,7 @@ export default function MyListingsContent() {
               })
             }
           >
-            立即免費刊登 →
+            立即刊登 →
           </NextLink>
         </div>
       </>

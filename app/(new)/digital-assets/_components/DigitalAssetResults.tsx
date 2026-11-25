@@ -127,7 +127,7 @@ export default function DigitalAssetResults({
             href="/sell?type=digital"
             className={styles.sellCtaBtn}
           >
-            免費刊登數位資產
+            刊登數位資產
           </SellCtaLink>
         </div>
       </div>

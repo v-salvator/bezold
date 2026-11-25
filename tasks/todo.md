@@ -191,14 +191,14 @@ npx eslint --no-eslintrc -c .eslintrc.json app components utils lib constant fir
 
 **Acceptance criteria:**
 
-- [ ] Strings match the spec table
-- [ ] `AccelerationBanner` still reads as a complete sentence after the phrase is removed
-- [ ] **The sweep is clean:** `grep -rnE "12/1|限時免費|免費刊登|早鳥" app components constant content lib utils` → 0 hits
+- [x] Strings match the spec table
+- [x] `AccelerationBanner` still reads as a complete sentence after the phrase is removed
+- [x] **The sweep is clean:** `grep -rnE "12/1|限時免費|免費刊登|早鳥" app components constant content lib utils` → 0 hits
 
 **Verification:**
 
-- [ ] The sweep grep above
-- [ ] `/my-listings` (signed in, mock seller) and `/digital-assets` render without console errors
+- [x] The sweep grep above
+- [x] `/my-listings` (signed in, mock seller) and `/digital-assets` render without console errors
 
 **Dependencies:** None
 

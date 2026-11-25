@@ -12,7 +12,7 @@ import styles from "./DigitalAssetsTeaser.module.css";
 // * no amounts here — the fee is explained on each listing's page
 const STEPS = [
   {
-    title: "賣家免費刊登",
+    title: "賣家刊登",
     body: "填寫資產資料、資產連結，上傳後台營收或數據截圖。刊登不收任何費用。",
   },
   {

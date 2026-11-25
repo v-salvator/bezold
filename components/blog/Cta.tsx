@@ -6,7 +6,7 @@ import styles from "./Cta.module.css";
  */
 export default function Cta({
   title = "準備好開始了嗎？",
-  text = "在 Bezold 瀏覽正在頂讓的店面，或免費刊登你的店。",
+  text = "在 Bezold 瀏覽正在頂讓的店面，或刊登你的店。",
 }: {
   title?: string;
   text?: string;
